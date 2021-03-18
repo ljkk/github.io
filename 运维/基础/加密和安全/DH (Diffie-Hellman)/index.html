@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}};
+  </script>
+<meta name="description" content="RSA 既可以用于密钥交换,又可以用于数字签名；ECC 这边就分得比较清楚了：ECDHE 用于密钥交换，ECDSA 用于数字签名。 ECDHE密钥交换使用的是 DH（Diffie-Hellman）算法。 Deffie-Hellman(简称 DH) 密钥交换是最早的密钥交换算法之一，它使得通信的双方能在非安全的信道中安全的交换密钥，用于加密后续的通信消息。 Whitfield Diffie 和 Ma">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DH (Diffie-Hellman)">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/DH%20(Diffie-Hellman)/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="RSA 既可以用于密钥交换,又可以用于数字签名；ECC 这边就分得比较清楚了：ECDHE 用于密钥交换，ECDSA 用于数字签名。 ECDHE密钥交换使用的是 DH（Diffie-Hellman）算法。 Deffie-Hellman(简称 DH) 密钥交换是最早的密钥交换算法之一，它使得通信的双方能在非安全的信道中安全的交换密钥，用于加密后续的通信消息。 Whitfield Diffie 和 Ma">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1599657043148.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1599659538959.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1599723360793.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1599723599841.png">
+<meta property="article:published_time" content="2020-12-09T15:03:13.000Z">
+<meta property="article:modified_time" content="2021-03-18T15:58:11.381Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="dh">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.lujinkai.cn/blog/ljk/1599657043148.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/DH%20(Diffie-Hellman)/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>DH (Diffie-Hellman) | LJKのBlog</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">LJKのBlog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HD%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">HD的实现机制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#openssl-%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">openssl 实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSHv2%E5%8D%8F%E8%AE%AE%E4%B8%AD%E7%9A%84DH"><span class="nav-number">3.</span> <span class="nav-text">SSHv2协议中的DH</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TLS1-2%E5%8D%8F%E8%AE%AE%E4%B8%AD%E7%9A%84DH"><span class="nav-number">4.</span> <span class="nav-text">TLS1.2协议中的DH</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">211</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/DH%20(Diffie-Hellman)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DH (Diffie-Hellman)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:03:13" itemprop="dateCreated datePublished" datetime="2020-12-09T23:03:13+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">加密和安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>RSA 既可以用于密钥交换,又可以用于数字签名；ECC 这边就分得比较清楚了：ECDHE 用于密钥交换，ECDSA 用于数字签名。</p>
+<p>ECDHE密钥交换使用的是 DH（Diffie-Hellman）算法。</p>
+<p>Deffie-Hellman(简称 DH) 密钥交换是最早的密钥交换算法之一，它使得通信的双方能在非安全的信道中安全的交换密钥，用于加密后续的通信消息。 Whitfield Diffie 和 Martin Hellman 于 1976 提出该算法，之后被应用于安全领域，比如 Https 协议的 TSL(Transport Layer Security)以 DH 算法作为密钥交换算法。</p>
+<p>session key 是主密钥，HTTPS建立连接时使用 SSL/TLS 来交换 session key，后续的传输数据使用的是对称加密，对称加密的密钥就是通过session key生成的。</p>
+<p>前面我们说过，session key 需要使用非对称加密的方式来传送，非对称加密算法常用的是RSA，RSA会把一方生成的session key用公钥加密后再发送给对方，可是，万一私钥泄露了，那session key也就泄露了。所以SSL/TLS使用另一种非对称加密算法来传送session key，这种算法就是<strong>HD</strong>，RSA是“传送”，而HD描述为“交换”更准确一些。</p>
+<h2 id="HD的实现机制："><a href="#HD的实现机制：" class="headerlink" title="HD的实现机制："></a>HD的实现机制：</h2><p>假设A、B通信</p>
+<ol>
+<li> A、B相互通信一次，确定两个参数：整数g 和 大素数p，这个过程叫做“协商”</li>
+<li> A生成隐私数据a，a &lt; p，计算得出 g<sup>a</sup> mod p，发送给B</li>
+<li> B生成隐私数据b，b &lt; p，计算得出 g<sup>b</sup> mod p，发送给A</li>
+<li> A计算 [(g<sup>b</sup> mod p)^a] %p，得到的结果是预备主密钥session key</li>
+<li> B计算 [(g<sup>a</sup> mod p)^b] %p，得到的结果是预备主密钥session key</li>
+</ol>
+<p>[(g<sup>b</sup> mod p)^a] %p =  [(g<sup>a</sup> mod p)^b] %p = g<sup>ab</sup> mod p，证明过程略，总之A、B生成的session key是相同的。</p>
+<p>通信过程不加密，就是说 g、p、g<sup>a</sup> mod p、g<sup>b</sup> mod p 都是公开的，只有公开的这个四个数据，没有a、b就算不出来g<sup>ab</sup> mod p，这样就做到了session key由通信双方各自生成，不经过网络传递。</p>
+<p>可以抽象的认为：A的私钥是a，公钥是g<sup>a</sup> mod p；B的私钥是b，公钥是g<sup>b</sup> mod p，g<sup>ab</sup> mod p 是预备主密钥session key，最终用于加密的密钥是会话密钥，通过session key 和 H 派生出来，具体参看下面的 <strong>SSHv2协议中的DH</strong></p>
+<h2 id="openssl-实现"><a href="#openssl-实现" class="headerlink" title="openssl 实现"></a>openssl 实现</h2><p>使用生成因子（generator，即整数g，2或者5，默认是2）2和随机的1024-bit的素数（大素数p）产生D0ffie-Hellman参数，输出保存到参数文件dh.param：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> dhparam -out dh.param -2 <span class="token number">1024</span>
+Generating DH parameters, <span class="token number">1024</span> bit long safe prime, generator <span class="token number">2</span>
+This is going to take a long <span class="token function">time</span>
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>++*++*++*++*++*
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$cat</span> dh.param 
+-----BEGIN DH PARAMETERS-----
+MIGHAoGBAIHnVCwnbBAsIz43ylC5jSXdvbEysPNhe51MiYhjOYiIphx3eKgKOf9h
+w47mAlaL9pFTsgtCfwq0gPOOABufWZY3cO0Xqwazfv84LFOH5BcH8M3trGyAc4C5
+0kDJ3A2L5pmlVDYXrBhikCtfEMgixqbbMkCpqmKvk1YHvRfSarejAgEC
+-----END DH PARAMETERS-----</code></pre>
+
+<p>从dh.param中读取Diffie-Hell参数，以C代码的形式输出到stdout：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> dhparam -in dh.param -noout -C
+static DH *get_dh1024<span class="token punctuation">(</span>void<span class="token punctuation">)</span>
+<span class="token punctuation">&#123;</span>
+    static unsigned char dhp_1024<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+        0x81, 0xE7, 0x54, 0x2C, 0x27, 0x6C, 0x10, 0x2C, 0x23, 0x3E,
+        0x37, 0xCA, 0x50, 0xB9, 0x8D, 0x25, 0xDD, 0xBD, 0xB1, 0x32,
+        0xB0, 0xF3, 0x61, 0x7B, 0x9D, 0x4C, 0x89, 0x88, 0x63, 0x39,
+        0x88, 0x88, 0xA6, 0x1C, 0x77, 0x78, 0xA8, 0x0A, 0x39, 0xFF,
+        0x61, 0xC3, 0x8E, 0xE6, 0x02, 0x56, 0x8B, 0xF6, 0x91, 0x53,
+        0xB2, 0x0B, 0x42, 0x7F, 0x0A, 0xB4, 0x80, 0xF3, 0x8E, 0x00,
+        0x1B, 0x9F, 0x59, 0x96, 0x37, 0x70, 0xED, 0x17, 0xAB, 0x06,
+        0xB3, 0x7E, 0xFF, 0x38, 0x2C, 0x53, 0x87, 0xE4, 0x17, 0x07,
+        0xF0, 0xCD, 0xED, 0xAC, 0x6C, 0x80, 0x73, 0x80, 0xB9, 0xD2,
+        0x40, 0xC9, 0xDC, 0x0D, 0x8B, 0xE6, 0x99, 0xA5, 0x54, 0x36,
+        0x17, 0xAC, 0x18, 0x62, 0x90, 0x2B, 0x5F, 0x10, 0xC8, 0x22,
+        0xC6, 0xA6, 0xDB, 0x32, 0x40, 0xA9, 0xAA, 0x62, 0xAF, 0x93,
+        0x56, 0x07, 0xBD, 0x17, 0xD2, 0x6A, 0xB7, 0xA3
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+    static unsigned char dhg_1024<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+        0x02
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+    DH *dh <span class="token operator">=</span> DH_new<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    BIGNUM *p, *g<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>dh <span class="token operator">==</span> NULL<span class="token punctuation">)</span>
+        <span class="token builtin class-name">return</span> NULL<span class="token punctuation">;</span>
+    p <span class="token operator">=</span> BN_bin2bn<span class="token punctuation">(</span>dhp_1024, sizeof<span class="token punctuation">(</span>dhp_1024<span class="token punctuation">)</span>, NULL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    g <span class="token operator">=</span> BN_bin2bn<span class="token punctuation">(</span>dhg_1024, sizeof<span class="token punctuation">(</span>dhg_1024<span class="token punctuation">)</span>, NULL<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>p <span class="token operator">==</span> NULL <span class="token operator">||</span> g <span class="token operator">==</span> NULL
+            <span class="token operator">||</span> <span class="token operator">!</span>DH_set0_pqg<span class="token punctuation">(</span>dh, p, NULL, g<span class="token punctuation">))</span> <span class="token punctuation">&#123;</span>
+        DH_free<span class="token punctuation">(</span>dh<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        BN_free<span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        BN_free<span class="token punctuation">(</span>g<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token builtin class-name">return</span> NULL<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token builtin class-name">return</span> dh<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+
+
+<h2 id="SSHv2协议中的DH"><a href="#SSHv2协议中的DH" class="headerlink" title="SSHv2协议中的DH"></a><a target="_blank" rel="noopener" href="https://wenku.baidu.com/view/2563a7af53d380eb6294dd88d0d233d4b14e3f96.html#">SSHv2协议中的DH</a></h2><ol>
+<li>Client发送e值给Server：</li>
+</ol>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1599657043148.png"></p>
+<p>SSHv2中DH的 p 和 g 固定，没有协商阶段</p>
+<p>e = g<sup>a</sup> mod p</p>
+<ol start="2">
+<li>Server发送自身公钥、f、s 给Client</li>
+</ol>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1599659538959.png"></p>
+<p>f = g<sup>b</sup> mod p</p>
+<p>H = hash(V_C||V_S||I_C||I_S||K_S||e||f||K)</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>string</td>
+<td>V_C</td>
+<td>客户端的初始报文（版本信息：SSH-2.0-xxx，不含结尾的CR和LF）</td>
+</tr>
+<tr>
+<td>string</td>
+<td>V_S</td>
+<td>服务器的初始报文</td>
+</tr>
+<tr>
+<td>string</td>
+<td>I_C</td>
+<td>客户端 SSH_MSG_KEX_INIT的有效载荷（不含开头的数据长度值）</td>
+</tr>
+<tr>
+<td>string</td>
+<td>I_S</td>
+<td>服务器的同上</td>
+</tr>
+<tr>
+<td>string</td>
+<td>K_S</td>
+<td>主机秘钥（dh gex reply（33)过程服务器发送host key (RSA公钥)）</td>
+</tr>
+<tr>
+<td>mpint</td>
+<td>e</td>
+<td>客户端DH公钥</td>
+</tr>
+<tr>
+<td>mpint</td>
+<td>f</td>
+<td>服务器DH公钥</td>
+</tr>
+<tr>
+<td>mpint</td>
+<td>K</td>
+<td>共同DH计算结果</td>
+</tr>
+</tbody></table>
+<p>s 是用Server私钥对H加密后的结果</p>
+<ol start="3">
+<li>Client 根据<del>/.ssh/known_hosts文件，匹配Server公钥，如果</del>/.ssh/known_hosts文件中没有Server公钥，说明是第一次建立连接，需要用户手动允许保存Server公钥</li>
+<li>Client 计算预备主密钥session key、同样的方式计算H。使用Server公钥解密s，解密得出的H和自己算出的H如果一样，则向Server发送 NEW KEYS，标志着密钥交换成功</li>
+<li>自此，Client和Server交换了 预备主密钥K 和 H值，通过前面协商的算法中的 <strong>密钥派生算法</strong> 导出各个业务的密钥：加密、MAC、IV，同时把 H 作为会话ID（session ID）</li>
+</ol>
+<h2 id="TLS1-2协议中的DH"><a href="#TLS1-2协议中的DH" class="headerlink" title="TLS1.2协议中的DH"></a>TLS1.2协议中的DH</h2><ol>
+<li>Client 和 Server 相互协商版本号 和 各种算法，并互相发送随机数 和 session ID</li>
+</ol>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1599723360793.png"></p>
+<ol start="2">
+<li>Server发送数字证书给Client</li>
+<li>Server发送Pubkey值给Client，数字签名用来确保Pubkey的合法完整</li>
+</ol>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1599723599841.png"></p>
+<p>TLS1.2中DH的 p 和 g 固定，没有协商阶段</p>
+<p>Pubkey = g<sup>b</sup> mod p</p>
+<ol start="4">
+<li>Client校验证书的合法性；Client计算出预备主密钥session key；Client发送Pubkey值给Server</li>
+</ol>
+<p>Pubkey = g<sup>a</sup> mod p</p>
+<ol start="5">
+<li><p>Server计算出预备主密钥 session key；Server发送 New Session Ticket、Change Cipher Spec、Encrypted Handshake Message给Client：</p>
+<ol>
+<li><p>Encrypted Handshake Message：使用密钥加密的信息，目的一个是告诉服务端整个握手过程收到了什么数据，发送了什么数据，保证中间没人篡改报文，二是确认密钥的正确性，如果这个报文加解密校验成功，那么对称密钥就是正确的</p>
+</li>
+<li><p>Change Cipher Spec：编码改变通知，告知客户端，服务端已经切换到选定的加密套件（Cipher Suite），表示随后的信息都将用双方商定的加密方法和密钥发送。</p>
+</li>
+<li><p>New Session Ticket：这里有必要比较一下session ticket和session ID这两个角色：</p>
+<p>如果出于某种原因，对话中断，就需要建立SSL连接，Client在client hello阶段携带之前的session ID，服务端确认session ID存在，双方就不再进行握手阶段剩余的步骤，而直接用已有的对话密钥进行加密通信，提高了重连的效率。</p>
+<p>可是，session ID往往只保留在一台服务器上（session ID的存储及复用共享需要使用redis或memcache来实现），假如轮询到集群中其它服务器，无法识别该session id，就无法恢复对话，session ticket就是为了解决这个问题而诞生的，目前只有Firefox和Chrome浏览器支持。客户端不再发送session ID，而是发送一个服务器在上一次对话中发送过来的session ticket。这个session ticket是加密的，只有服务器才能解密，其中包括本次对话的主要信息，比如对话密钥和加密方法。当服务器收到session ticket以后，解密后就不必重新生成对话密钥了。</p>
+</li>
+</ol>
+</li>
+<li><p>自此Client和Server都有了三个值：Client 随机数、Server 随机数、session key。这三个值可以计算出会话密钥，后面的通信使用会话密钥加密。</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+      
+
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee</div>
+  <button onclick="document.querySelector('.post-reward').classList.toggle('active');">
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/dh/" rel="tag"><i class="fa fa-tag"></i> dh</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" rel="prev" title="加密和安全">
+                  <i class="fa fa-chevron-left"></i> 加密和安全
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/DSA/" rel="next" title="DSA">
+                  DSA <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.5/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.15.0/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

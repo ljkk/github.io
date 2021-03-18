@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}};
+  </script>
+<meta name="description" content="概述功能nginx的功能主要有两个：web服务器和反向代理  html、图片、js、css等静态资源的服务器 http&#x2F;https协议的反向代理 结合FastCGI&#x2F;uWSGI&#x2F;SCGI等协议反向代理动态资源请求 tcp&#x2F;udp协议的请求转发（反向代理） imap4&#x2F;pop3协议的反向代理  基础特性 模块化设计，较好的扩展性 高可靠性 支持热部署：不停机的更新配置文件，升级版本，更换日志文件 低">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx架构和安装">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Nginx/Nginx%E6%9E%B6%E6%9E%84%E5%92%8C%E5%AE%89%E8%A3%85/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="概述功能nginx的功能主要有两个：web服务器和反向代理  html、图片、js、css等静态资源的服务器 http&#x2F;https协议的反向代理 结合FastCGI&#x2F;uWSGI&#x2F;SCGI等协议反向代理动态资源请求 tcp&#x2F;udp协议的请求转发（反向代理） imap4&#x2F;pop3协议的反向代理  基础特性 模块化设计，较好的扩展性 高可靠性 支持热部署：不停机的更新配置文件，升级版本，更换日志文件 低">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608735025958.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608735716495.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608736685344.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608736700127.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608737297753.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608739985770.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608809383655.png">
+<meta property="article:published_time" content="2020-12-25T06:48:10.000Z">
+<meta property="article:modified_time" content="2021-03-18T15:58:11.376Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.lujinkai.cn/blog/ljk/1608735025958.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Nginx/Nginx%E6%9E%B6%E6%9E%84%E5%92%8C%E5%AE%89%E8%A3%85/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Nginx架构和安装 | LJKのBlog</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">LJKのBlog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD"><span class="nav-number">1.1.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">基础特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#web%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">1.3.</span> <span class="nav-text">web相关的功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1"><span class="nav-number">2.1.</span> <span class="nav-text">进程间通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B"><span class="nav-number">2.2.</span> <span class="nav-text">http连接建立</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B"><span class="nav-number">2.3.</span> <span class="nav-text">http处理过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97"><span class="nav-number">3.</span> <span class="nav-text">模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">4.</span> <span class="nav-text">安装</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">211</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Nginx/Nginx%E6%9E%B6%E6%9E%84%E5%92%8C%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Nginx架构和安装
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-25 14:48:10" itemprop="dateCreated datePublished" datetime="2020-12-25T14:48:10+08:00">2020-12-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Nginx/" itemprop="url" rel="index"><span itemprop="name">Nginx</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><h3 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h3><p>nginx的功能主要有两个：web服务器和反向代理</p>
+<ul>
+<li>html、图片、js、css等静态资源的服务器</li>
+<li>http/https协议的反向代理</li>
+<li>结合FastCGI/uWSGI/SCGI等协议反向代理动态资源请求</li>
+<li>tcp/udp协议的请求转发（反向代理）</li>
+<li>imap4/pop3协议的反向代理</li>
+</ul>
+<h3 id="基础特性"><a href="#基础特性" class="headerlink" title="基础特性"></a>基础特性</h3><ul>
+<li>模块化设计，较好的扩展性</li>
+<li>高可靠性</li>
+<li>支持热部署：不停机的更新配置文件，升级版本，更换日志文件</li>
+<li>低内存消耗：1000个keep-alive连接模式下的非活动连接，仅需2.5m内存</li>
+<li>event-driven、aio、mmap、sendfile</li>
+</ul>
+<h3 id="web相关的功能"><a href="#web相关的功能" class="headerlink" title="web相关的功能"></a>web相关的功能</h3><ul>
+<li>虚拟主机（server）</li>
+<li>支持keep-alive和管道连接（利用一个连接做多次请求）</li>
+<li>访问日志（支持基于日志缓冲提高性能）</li>
+<li>url rewrite</li>
+<li>路径别名</li>
+<li>基于ip及用户的访问控制</li>
+<li>支持速率限制及并发数限制</li>
+<li>重新配置和在线升级而无须终端客户的工作进程</li>
+</ul>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img data-src="https://img.lujinkai.cn/blog/ljk/1608735025958.png"></p>
+<p>nginx是多进程，一个master主进程和若干worker工作进程组成</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608735716495.png"></p>
+<p>master进程的功能：</p>
+<ol>
+<li>对外接口，接收外部的操作（信号）</li>
+<li>对内转发，根据外部的操作的不同，通过信号管理worker</li>
+<li>监控worker进程的运行状态，worker进程异常终止后，自动重启worker进程</li>
+<li>读取nginx配置文件，并验证其有效性和正确性</li>
+<li>建立、绑定和关闭socket连接</li>
+<li>按照配置生成、管理和结束工作进程</li>
+<li>不中断服务，实现平滑升级（升级失败进行回滚处理）、重启服务并应用新的配置</li>
+<li>开启日志文件，获取文件描述符</li>
+<li>编译和处理per脚本</li>
+</ol>
+<p>worker进程的功能：</p>
+<ol>
+<li>所有worker进程都是平等的</li>
+<li>实际处理网络请求，将请求依次送入各个功能模块进行处理</li>
+<li>I/O调用，获取响应数据</li>
+<li>与后端服务器通信，接受后端处理器的处理结果</li>
+<li>缓存数据，访问缓存索引，查询和调用缓存数据</li>
+<li>发送请求结果，响应客户的请求</li>
+</ol>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608736685344.png"></p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608736700127.png"></p>
+<h3 id="进程间通信"><a href="#进程间通信" class="headerlink" title="进程间通信"></a>进程间通信</h3><p>master与worker通信：worker进程是由master进程生成，主进程在启动之后，建立一个主进程指向工作进程的单向通道，master进程通过信号机制和与外界通信，当接受到需要处理的信号时，就通过管道向相关的进程发送正确的指令，每个worker进程都有能力捕捉管道中的可读事件，当管道中有可读事件时，worker进程就会从管道中读取并解析指令，然后才去相应的执行动作，这样就完成了主进程与子进程的交互</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608737297753.png"></p>
+<p>worker进程之间通信：worker进程之间只要能够取得彼此的信息，建立管道即可通信，但是由于worker进程之间是完全隔离的，因此一个进程想要知道另外一个进程的状态信息，就只能通过master进程来实现。</p>
+<p>master进程在生成worker进程之后，会把新进程的ID以及针对该进程建立的管道句柄传递给其他worker进程，这样能实现通过master进程进行通信</p>
+<h3 id="http连接建立"><a href="#http连接建立" class="headerlink" title="http连接建立"></a>http连接建立</h3><ol>
+<li>nginx启动，master进程加载配置文件</li>
+<li>master进程初始化监听的socket</li>
+<li>master进程fork出多个worker进程</li>
+<li>worker进程，<strong>竞争新的连接</strong>，获胜方通过三次握手，建立socket连接，开始处理请求</li>
+</ol>
+<h3 id="http处理过程"><a href="#http处理过程" class="headerlink" title="http处理过程"></a>http处理过程</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1608739985770.png"></p>
+<h2 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h2><p>nginx高度模块化</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608809383655.png"></p>
+<ul>
+<li>核心模块：正常运行必不可少，提供错误日志记录、配置文件解析、事件驱动机制、进程管理等核心功能</li>
+<li>标准http模块：提供http协议解析相关的功能，比如：端口配置、网页编码设置、http响应头设置等</li>
+<li>可选http模块：主要用于扩展标准的http功能，让nginx可以处理一些特殊的服务，比如：flash多媒体传输、解析GeoIP请求、网络传输压缩、安全协议SSL支持等</li>
+<li>邮件服务服务：主要用于支持nginx的邮件服务，包括对pop3协议、IMAP协议和SMTP协议的支持</li>
+<li>stream服务模块：实现反向代理功能，包括TCP协议代理</li>
+<li>第三方面模块：为了扩展nginx服务器应用，完成开发者自定义功能，比如：json支持、lua支持等</li>
+</ul>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>推荐编译安装，可以自定义功能</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看编译参数</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># nginx -V</span>
+nginx version: nginx/1.15.7
+built by gcc <span class="token number">4.8</span>.5 <span class="token number">20150623</span> <span class="token punctuation">(</span>Red Hat <span class="token number">4.8</span>.5-28<span class="token punctuation">)</span> <span class="token punctuation">(</span>GCC<span class="token punctuation">)</span> 
+built with OpenSSL <span class="token number">1.0</span>.2p  <span class="token number">14</span> Aug <span class="token number">2018</span>
+TLS SNI support enabled
+configure arguments: --prefix<span class="token operator">=</span>/usr/local/nginx --user<span class="token operator">=</span>www --group<span class="token operator">=</span>www --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl<span class="token operator">=</span><span class="token punctuation">..</span>/openssl-1.0.2p --with-pcre<span class="token operator">=</span><span class="token punctuation">..</span>/pcre-8.42 --with-pcre-jit --with-ld-opt<span class="token operator">=</span>-ljemalloc</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动前，可以检查配置文件nginx.conf的合法性</span>
+<span class="token punctuation">[</span>root@4710419222 vhost<span class="token punctuation">]</span><span class="token comment"># /usr/local/nginx/sbin/nginx -t       </span>
+nginx: the configuration <span class="token function">file</span> /usr/local/nginx/conf/nginx.conf syntax is ok
+nginx: configuration <span class="token function">file</span> /usr/local/nginx/conf/nginx.conf <span class="token builtin class-name">test</span> is successful</code></pre>
+
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/IO模型和零拷贝/" rel="bookmark">I/O模型和零拷贝</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/Nginx Rewrite 相关功能/" rel="bookmark">Nginx Rewrite 相关功能</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/Nginx核心配置/" rel="bookmark">Nginx核心配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/Nginx高级配置/" rel="bookmark">Nginx高级配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/系统参数优化/" rel="bookmark">系统参数优化</a></div>
+    </li>
+  </ul>
+
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee</div>
+  <button onclick="document.querySelector('.post-reward').classList.toggle('active');">
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/nginx/" rel="tag"><i class="fa fa-tag"></i> nginx</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Nginx/IO%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9B%B6%E6%8B%B7%E8%B4%9D/" rel="prev" title="I/O模型和零拷贝">
+                  <i class="fa fa-chevron-left"></i> I/O模型和零拷贝
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Nginx/Nginx%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE/" rel="next" title="Nginx核心配置">
+                  Nginx核心配置 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.5/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.15.0/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

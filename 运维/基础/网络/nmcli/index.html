@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}};
+  </script>
+<meta name="description" content="通常的linux发行版对于网络的配置方法一般会同时支持network.service和NetworkManager.service（简称NM）。默认情况下，这2个服务都有开启，而且功能上是平行的，可以通过任意一个来配置网络，正常的情况下通过NM来配置网络后它会自动把配置同步到network.service的配置中。 nmcli是NetworkManager的命令行工具， 该命令可以完成网卡上所有的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nmcli">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/nmcli/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="通常的linux发行版对于网络的配置方法一般会同时支持network.service和NetworkManager.service（简称NM）。默认情况下，这2个服务都有开启，而且功能上是平行的，可以通过任意一个来配置网络，正常的情况下通过NM来配置网络后它会自动把配置同步到network.service的配置中。 nmcli是NetworkManager的命令行工具， 该命令可以完成网卡上所有的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T14:41:20.000Z">
+<meta property="article:modified_time" content="2021-03-18T15:58:11.384Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="nmcli">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/nmcli/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>nmcli | LJKのBlog</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">LJKのBlog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#device"><span class="nav-number">1.</span> <span class="nav-text">device</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#connection"><span class="nav-number">2.</span> <span class="nav-text">connection</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ubuntu-%E4%BD%BF%E7%94%A8nmcli"><span class="nav-number"></span> <span class="nav-text">ubuntu 使用nmcli</span></a></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">211</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/nmcli/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nmcli
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:41:20" itemprop="dateCreated datePublished" datetime="2020-12-09T22:41:20+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>通常的linux发行版对于网络的配置方法一般会同时支持network.service和NetworkManager.service（简称NM）。默认情况下，这2个服务都有开启，而且功能上是平行的，可以通过任意一个来配置网络，正常的情况下通过NM来配置网络后它会自动把配置同步到network.service的配置中。</p>
+<p>nmcli是NetworkManager的命令行工具， 该命令可以完成网卡上所有的配置工作，绝大部分可以写入配置文件，永久生效 。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nmcli <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> OBJECT <span class="token punctuation">&#123;</span> COMMAND <span class="token operator">|</span> <span class="token builtin class-name">help</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<p>OPTIONS</p>
+<ul>
+<li>-t[erse]                 # terse output 简洁的输出</li>
+<li>-p[retty]                 # pretty output 漂亮的输出</li>
+<li>-m[ode] tabular|multiline                 # output mode  输出模式</li>
+<li>-f[ields] &lt;field1,field2,…&gt;|all|common  # specify fields to output 指定要输出的字段</li>
+<li>-e[scape] yes|no                          # escape columns separators in values 在值中转义列分隔符</li>
+<li>-n[ocheck]                                # 不要检查nmcli和NetworkManager版本</li>
+<li>-a[sk]                                    # 要求缺少参数</li>
+<li>-w[ait] <seconds>                         # 设置超时等待整理操作</li>
+</ul>
+<p>OBJECT</p>
+<ul>
+<li>g[eneral]      显示NM状态和权限；获取和更改系统主机名、NetworkManager logging level and domains</li>
+<li>n[etworking]    查询NM网络状态，启用和禁用网络</li>
+<li>r[adio]         无线网相关</li>
+<li>c[onnection]    NM的连接</li>
+<li>d[evice]        显示和管理网络接口</li>
+<li>a[gent]         Run nmcli as a NetworkManager secret agent, or polkit agent.</li>
+<li>m[onitor]       观察NM活动，监视连接状态、设备或连接配置文件的更改</li>
+</ul>
+<p><strong>最常用的是 device 和 connection</strong>，主要是connection。</p>
+<h3 id="device"><a href="#device" class="headerlink" title="device"></a>device</h3><p> <strong>设备</strong>，可理解为实际存在的网卡（包括物理网卡和虚拟网卡）。可以简写为nmcli d </p>
+<p> 在NM里，有2个层级：<strong>连接（connection）和设备（device），通常NM的管理是以连接为单位的，就像你的手机可以记住多个wifi连接，但一个时刻只能连接一个wifi。一个网卡可以关联多个连接，但是一个网卡只能有一个连接处于活跃状态，通过 <code>nmcli connetion up</code>切换连接。</strong> </p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看网卡状态</span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli device </span>
+DEVICE  TYPE      STATE      CONNECTION
+ens33   ethernet  connected  ens33
+ens37   ethernet  connected  ens37
+lo      loopback  unmanaged  --</code></pre>
+
+<h3 id="connection"><a href="#connection" class="headerlink" title="connection"></a>connection</h3><p> <strong>连接</strong>，可理解为配置文件，相当于ifcfg-ethX。可以简写为<code>nmcli c</code>。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 修改网卡名，注意修改的是NAME不是DEVICE</span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection modify ens33 con-name 'ens33 name'  </span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection </span>
+NAME        UUID                                  TYPE      DEVICE 
+ens33 name  c96bc909-188e-ec64-3a96-6a90982b08ad  ethernet  ens33  
+ens37       4a5516a4-dfa4-24af-b1c4-e843e312e2fd  ethernet  ens37 
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection modify ens33\ name con-name ens33  </span>
+<span class="token comment"># 修改网卡地址，只修改文件不生效，修改之前先使用 ipv4.method manual 将BOOTPROTO=dhcp改成BOOTPROTO=none</span>
+<span class="token comment"># 否则不能修改，只能添加或删除</span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection modify ens33 ipv4.addresses 10.0.0.8/24</span>
+<span class="token comment"># 使修改网卡地址生效</span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection reload </span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection up ens33</span>
+<span class="token comment"># 给网卡添加地址</span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection modify ens33 +ipv4.addresses 11.0.0.7/24</span>
+<span class="token comment"># 从网卡删除地址</span>
+<span class="token punctuation">[</span>root@centos7 network-scripts<span class="token punctuation">]</span><span class="token comment">#nmcli connection modify ens33 -ipv4.addresses 11.0.0.7/24 </span></code></pre>
+
+<h2 id="ubuntu-使用nmcli"><a href="#ubuntu-使用nmcli" class="headerlink" title="ubuntu 使用nmcli"></a>ubuntu 使用nmcli</h2><p>ubuntu默认情况下，无法使用nmcli</p>
+<ol>
+<li><p>修改 <code>etc/netplan/*.yaml</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@u2:~<span class="token comment"># vim /etc/netplan/00-installer-config.yaml</span>
+network:
+  version: <span class="token number">2</span>
+  renderer: NetworkManager	<span class="token comment"># 注意此行</span></code></pre></li>
+<li><p><code>/etc/NetworkManager/NetworkManager.conf</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@u2:~<span class="token comment"># vim /etc/NetworkManager/NetworkManager.conf</span>
+<span class="token punctuation">[</span>main<span class="token punctuation">]</span>
+<span class="token assign-left variable">plugins</span><span class="token operator">=</span>ifupdown,keyfile
+
+<span class="token punctuation">[</span>ifupdown<span class="token punctuation">]</span>
+<span class="token assign-left variable">managed</span><span class="token operator">=</span>flase
+
+<span class="token punctuation">[</span>device<span class="token punctuation">]</span>
+wifi.scan-rand-mac-address<span class="token operator">=</span>no</code></pre></li>
+<li><p>应用配置</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@u2:~<span class="token comment"># netplan apply</span></code></pre></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+      
+
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee</div>
+  <button onclick="document.querySelector('.post-reward').classList.toggle('active');">
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/nmcli/" rel="tag"><i class="fa fa-tag"></i> nmcli</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E8%B7%AF%E7%94%B1%E5%99%A8/" rel="prev" title="路由器">
+                  <i class="fa fa-chevron-left"></i> 路由器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/" rel="next" title="进程、系统性能和计划任务">
+                  进程、系统性能和计划任务 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.5/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.15.0/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

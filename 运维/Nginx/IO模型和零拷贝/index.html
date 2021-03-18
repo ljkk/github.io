@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}};
+  </script>
+<meta name="description" content="Apacheprefork 模型 worker 模型 event 模型属于事件驱动模型（epoll），它和worker模式很像，最大的区别在于，它解决了keepalive场景下，长期被占用的线程的资源浪费问题 优点：单线程响应多请求，占据更少的内存，高并发下表现更优秀，会有一个专门的线程来管理keep-alive类型的线程，当有真实请求过来的时候，将请求传递给服务线程，执行完毕后，又允许它释放 缺">
+<meta property="og:type" content="article">
+<meta property="og:title" content="I&#x2F;O模型和零拷贝">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Nginx/IO%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9B%B6%E6%8B%B7%E8%B4%9D/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="Apacheprefork 模型 worker 模型 event 模型属于事件驱动模型（epoll），它和worker模式很像，最大的区别在于，它解决了keepalive场景下，长期被占用的线程的资源浪费问题 优点：单线程响应多请求，占据更少的内存，高并发下表现更优秀，会有一个专门的线程来管理keep-alive类型的线程，当有真实请求过来的时候，将请求传递给服务线程，执行完毕后，又允许它释放 缺">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608694875696.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608694898568.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608694925033.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608695895698.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608732500948.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608732628857.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608734260353.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608734466702.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608734509830.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1608734518868.png">
+<meta property="article:published_time" content="2020-12-25T06:45:19.000Z">
+<meta property="article:modified_time" content="2021-03-18T15:58:11.376Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.lujinkai.cn/blog/ljk/1608694875696.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Nginx/IO%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9B%B6%E6%8B%B7%E8%B4%9D/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>I/O模型和零拷贝 | LJKのBlog</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">LJKのBlog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache"><span class="nav-number">1.</span> <span class="nav-text">Apache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#prefork-%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.1.</span> <span class="nav-text">prefork 模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#worker-%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">worker 模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#event-%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">event 模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF-I-O"><span class="nav-number">2.</span> <span class="nav-text">服务端 I&#x2F;O</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98I-O"><span class="nav-number">2.1.</span> <span class="nav-text">磁盘I&#x2F;O</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9CI-O"><span class="nav-number">2.2.</span> <span class="nav-text">网络I&#x2F;O</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#I-O%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">I&#x2F;O模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E"><span class="nav-number">3.1.</span> <span class="nav-text">阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="nav-number">3.2.</span> <span class="nav-text">非阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8"><span class="nav-number">3.3.</span> <span class="nav-text">多路复用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#select%E3%80%81poll%E3%80%81epoll"><span class="nav-number">3.3.1.</span> <span class="nav-text">select、poll、epoll</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%A9%B1%E5%8A%A8"><span class="nav-number">3.4.</span> <span class="nav-text">信号驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5"><span class="nav-number">3.5.</span> <span class="nav-text">异步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B6%E6%8B%B7%E8%B4%9D"><span class="nav-number">4.</span> <span class="nav-text">零拷贝</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MMAP-Memory-Mapping"><span class="nav-number">4.1.</span> <span class="nav-text">MMAP ( Memory Mapping )</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SENDFILE"><span class="nav-number">4.2.</span> <span class="nav-text">SENDFILE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA-%E8%BE%85%E5%8A%A9%E7%9A%84-SENDFILE"><span class="nav-number">4.3.</span> <span class="nav-text">DMA 辅助的 SENDFILE</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">211</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Nginx/IO%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9B%B6%E6%8B%B7%E8%B4%9D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          I/O模型和零拷贝
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-25 14:45:19" itemprop="dateCreated datePublished" datetime="2020-12-25T14:45:19+08:00">2020-12-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Nginx/" itemprop="url" rel="index"><span itemprop="name">Nginx</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Apache"><a href="#Apache" class="headerlink" title="Apache"></a>Apache</h2><h3 id="prefork-模型"><a href="#prefork-模型" class="headerlink" title="prefork 模型"></a>prefork 模型</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1608694875696.png"></p>
+<h3 id="worker-模型"><a href="#worker-模型" class="headerlink" title="worker 模型"></a>worker 模型</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1608694898568.png"></p>
+<h3 id="event-模型"><a href="#event-模型" class="headerlink" title="event 模型"></a>event 模型</h3><p>属于事件驱动模型（epoll），它和worker模式很像，最大的区别在于，它解决了keepalive场景下，长期被占用的线程的资源浪费问题</p>
+<p>优点：单线程响应多请求，占据更少的内存，高并发下表现更优秀，会有一个专门的线程来管理keep-alive类型的线程，当有真实请求过来的时候，将请求传递给服务线程，执行完毕后，又允许它释放</p>
+<p>缺点：没有线程安全控制</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608694925033.png"></p>
+<h2 id="服务端-I-O"><a href="#服务端-I-O" class="headerlink" title="服务端 I/O"></a>服务端 I/O</h2><p>IOPS：每秒的输入输出量(或读写次数)，是衡量磁盘性能的主要指标之一</p>
+<p>一次完整的I/O是用户空间的进程数据与内核空间的内核数据的报文的完整交换，但是由于内核空间与用户空间是严格隔离的，所以其数据交换过程中不能由用户空间的进程直接调用内核空间的内核数据，而是需要经历一次从内核空间中的内存数据copy到用户空间的进程内存中，所有简单的I/O就是把数据从内核空间中的内存数据复制到用户空间中进程的内存中</p>
+<p>Linux的I/O：</p>
+<ul>
+<li>磁盘I/O</li>
+<li>网络I/O：一切皆文件，本质为对socket文件的读写</li>
+</ul>
+<h3 id="磁盘I-O"><a href="#磁盘I-O" class="headerlink" title="磁盘I/O"></a>磁盘I/O</h3><p>磁盘I/O是进程向内核发起系统调用，请求磁盘上的某个资源，然后内核通过相应的驱动程序将目标文件加载到内核的内存空间，加载完成后把数据从内核内存在复制给进程内存，如果是比较大的数据也需要等到时间</p>
+<pre class="language-none"><code class="language-none">机械磁盘的寻道时间、旋转延迟和数据传输时间：
+寻道时间：是指磁头移动到正确的磁道上所花费的时间，寻道时间越短则I&#x2F;O处理就越快，目前磁盘的寻道时间一般在3-15毫秒左右。
+
+旋转延迟：是指将磁盘片旋转到数据所在的扇区到磁头下面所花费的时间，旋转延迟取决于磁盘的转速，通常使用磁盘旋转一周所需要时间的1&#x2F;2之一表示，比如7200转的磁盘平均训传延迟大约为60*1000&#x2F;7200&#x2F;2&#x3D;4.17毫秒，公式的意思为 （每分钟60秒*1000毫秒每秒&#x2F;7200转每分&#x2F;2），如果是15000转的则为60*1000&#x2F;15000&#x2F;2&#x3D;2毫秒。
+
+数据传输时间：指的是读取到数据后传输数据的时间，主要取决于传输速率，这个值等于数据大小除以传输速率，目前的磁盘接口每秒的传输速度可以达到600MB，因此可以忽略不计。
+
+常见的机械磁盘平均寻道时间值：
+7200转&#x2F;分的磁盘平均物理寻道时间：9毫秒
+10000转&#x2F;分的磁盘平均物理寻道时间：6毫秒
+15000转&#x2F;分的磁盘平均物理寻道时间：4毫秒
+
+常见磁盘的平均延迟时间：
+7200转的机械盘平均延迟：60*1000&#x2F;7200&#x2F;2 &#x3D; 4.17ms
+10000转的机械盘平均延迟：60*1000&#x2F;10000&#x2F;2 &#x3D; 3ms
+15000转的机械盘平均延迟：60*1000&#x2F;15000&#x2F;2 &#x3D; 2ms
+
+每秒最大IOPS的计算方法：
+7200转的磁盘IOPS计算方式：1000毫秒&#x2F;(9毫秒的寻道时间+4.17毫秒的平均旋转延迟时间)&#x3D;1000&#x2F;13.13&#x3D;75.9 IOPS
+10000转的磁盘的IOPS计算方式：1000毫秒&#x2F;(6毫秒的寻道时间+3毫秒的平均旋转延迟时间)&#x3D;1000&#x2F;9&#x3D;111IOPS
+15000转的磁盘的IOPS计算方式：15000毫秒&#x2F;(4毫秒的寻道时间+2毫秒的平均旋转延迟时间)&#x3D;1000&#x2F;6&#x3D;166.6 IOPS</code></pre>
+
+<h3 id="网络I-O"><a href="#网络I-O" class="headerlink" title="网络I/O"></a>网络I/O</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1608695895698.png"></p>
+<p>1-3：客户端与服务器建立连接发出请求，服务器接受请求</p>
+<p>4：服务器接收完请求，在用户空间处理客户端的请求，直到构建响应完成</p>
+<p>5-7：服务器将已构建好的响应再通过内核空间的网络 I/O 发还给客户端</p>
+<p>磁盘和网络，每次I/O，都要经历两个阶段：</p>
+<ol>
+<li>将数据从文件加载到内核空间（缓冲区），等待数据准备完成，时间较长</li>
+<li>将数据从内核空间（缓冲区）复制到用户空间的进程的内存中，时间较短</li>
+</ol>
+<h2 id="I-O模型"><a href="#I-O模型" class="headerlink" title="I/O模型"></a>I/O模型</h2><p>五种I/O模型：<strong>阻塞、非阻塞、多路复用、信号驱动、异步</strong></p>
+<p>同步/异步 关注的是消息通知机制，同步需要调用者主动询问事情是否处理完成，异步则是被调用者通过状态、通知或回调机制主动通知调用者运行状态</p>
+<p>阻塞/非阻塞 关注的是调用者在等待结果返回之前所处的状态，可以处理其他事情就是非阻塞</p>
+<h3 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h3><p>最简单的I/O模型，用户线程在内核进行IO操作时阻塞，每个连接需要独立的进程/线程单独处理，当并发请求量大时为了维护程序，内存、线程切换开销较大，apache 的preforck使用的是这种模式。</p>
+<pre class="language-none"><code class="language-none">同步阻塞：程序向内核发送I&#x2F;O请求后一直等待内核响应，如果内核处理请求的IO操作不能立即返回,则进程将一直等待并不再接受新的请求，并由进程轮训查看I&#x2F;O是否完成，完成后进程将I&#x2F;O结果返回给Client，在IO没有返回期间进程不能接受其他客户的请求，而且是有进程自己去查看I&#x2F;O是否完成，这种方式简单，但是比较慢，用的比较少。
+
+异步阻塞：程序进程向内核发送IO调用后，不用等待内核响应，可以继续接受其他请求，内核收到进程请求后进行的IO如果不能立即返回，就由内核等待结果，直到IO完成后内核再通知进程，apache event是此模式</code></pre>
+
+<h3 id="非阻塞"><a href="#非阻塞" class="headerlink" title="非阻塞"></a>非阻塞</h3><p>程序向内核发送请I/O求后一直等待内核响应，如果内核处理请求的IO操作不能立即返回IO结果，进程将不再等待，而且继续处理其他请求，但是仍然需要进程隔一段时间就要查看内核I/O是否完成。</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608732500948.png"></p>
+<p>上图可知，在设置连接为非阻塞时，当应用进程系统调用 recvfrom 没有数据返回时，内核会立即返回一个 EWOULDBLOCK 错误，而不会一直阻塞到数据准备好。如上图在第四次调用时有一个数据报准备好了，所以这时数据会被复制到 应用进程缓冲区 ，于是 recvfrom 成功返回数据</p>
+<p>当一个应用进程这样循环调用 recvfrom 时，称之为轮询 polling 。这么做往往会耗费大量CPU时间，实际使用很少</p>
+<h3 id="多路复用"><a href="#多路复用" class="headerlink" title="多路复用"></a>多路复用</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1608732628857.png"></p>
+<p>多路复用就是进程复用的意思，一个进程可以同时处理多个网络连接的IO，它的基本原理就是select/poll/epoll这个function会不断的轮询所负责的所有socket，当某个socket有数据到达了，就通知用户进程。</p>
+<p>当用户进程调用了select/poll/epoll，那么整个进程会被block，而同时，kernel会“监视”所有select负责的socket，当任何一个socket中的数据准备好了，select/poll/epoll就会返回。这个时候用户进程再调用read操作，将数据从kernel拷贝到用户进程。</p>
+<p>apache的prefork模型使用的是select，worker模型是poll。</p>
+<p>缺点：当连接数较少时效率相比多线程+阻塞 I/O 模型效率较低，可能延迟更大，因为单个连接处理需要 2 次系统调用，占用时间会有增加</p>
+<p>IO多路复用适用如下场合：</p>
+<ul>
+<li>当客户端处理多个描述符时（一般是交互式输入和网络套接口），必须使用I/O复用</li>
+<li>当一个客户端同时处理多个套接字时，此情况可能的但很少出现</li>
+<li>当一个服务器既要处理监听套接字，又要处理已连接套接字，一般也要用到I/O复用</li>
+<li>当一个服务器即要处理TCP，又要处理UDP，一般要使用I/O复用</li>
+<li>当一个服务器要处理多个服务或多个协议，一般要使用I/O复用</li>
+</ul>
+<h4 id="select、poll、epoll"><a href="#select、poll、epoll" class="headerlink" title="select、poll、epoll"></a>select、poll、epoll</h4><p>nginx支持在不同的操作系统实现不同的事件驱动模型，主要有以下实现方式：</p>
+<p><strong>select</strong>：最大并发限制1024，是最早期的事件驱动模型，Linux和Windows都支持</p>
+<p><strong>poll</strong>：select的升级版，本质上和select没有区别，取消了1024的最大并发限制，在编译nginx的时候可以使用–with-poll_module和–without-poll_module这两个指定是否编译</p>
+<p><strong>epoll</strong>：nginx支持的最高性能的事件驱动库之一，没有最大并发连接的限制：能打开的FD的上限远大于1024(1G的内存能监听约10万个端口)，具体查看<code>/proc/sys/fs/file-max</code>，此值和系统内存大小相关。非轮询的方式，不会随着FD数目的增加而效率下降;只有活跃可用的FD才会调用callback函数，即epoll最大的优点就在于它只管理“活跃”的连接，而跟连接总数无关</p>
+<p>kqueue：略…</p>
+<p>/dev/poll：略…</p>
+<p>eventport：略…</p>
+<p>Iocp：略…</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608734260353.png"></p>
+<h3 id="信号驱动"><a href="#信号驱动" class="headerlink" title="信号驱动"></a>信号驱动</h3><p>不需要轮训，而是让内核在数据就绪时，发送信号通知</p>
+<p>缺点：信号 I/O 在大量 IO 操作时可能会因为信号队列溢出导致没法通知</p>
+<h3 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h3><p>异步IO与信号驱动IO最主要的区别是信号驱动IO是由内核通知应用程序何时可以进行IO操作，而异步IO则是由内核告诉用户线程IO操作何时完成。信号驱动IO当内核通知触发信号处理程序时，信号处理程序还需要阻塞在从内核空间缓冲区拷贝数据到用户空间缓冲区这个阶段，而异步IO直接是在第二个阶段完成后，内核直接通知用户线程可以进行后续操作了</p>
+<p>缺点：要实现真正的异步 I/O，操作系统需要做大量的工作。目前 Windows 下通过 IOCP 实现了真正的异步 I/O，在 Linux 系统下，Linux 2.6才引入，目前 AIO 并不完善，因此在 Linux 下实现高并发网络编程时以 IO 复用模型模式+多线程任务的架构基本可以满足需求</p>
+<p>Linux提供了AIO库函数实现异步，但是用的很少。目前有很多开源的异步IO库，例如libevent、libev、libuv</p>
+<h2 id="零拷贝"><a href="#零拷贝" class="headerlink" title="零拷贝"></a>零拷贝</h2><p>通过尽量避免拷贝操作来缓解 CPU 的压力。零拷贝并没有真正做到“0”拷贝，它更多是一种思想，很多的零拷贝技术都是基于这个思想去做的优化</p>
+<h3 id="MMAP-Memory-Mapping"><a href="#MMAP-Memory-Mapping" class="headerlink" title="MMAP ( Memory Mapping )"></a>MMAP ( Memory Mapping )</h3><p>内存映射，用户空间的内存映射到内核空间</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608734466702.png"></p>
+<h3 id="SENDFILE"><a href="#SENDFILE" class="headerlink" title="SENDFILE"></a>SENDFILE</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1608734509830.png"></p>
+<h3 id="DMA-辅助的-SENDFILE"><a href="#DMA-辅助的-SENDFILE" class="headerlink" title="DMA 辅助的 SENDFILE"></a>DMA 辅助的 SENDFILE</h3><p>需要硬件支持</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1608734518868.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/Nginx Rewrite 相关功能/" rel="bookmark">Nginx Rewrite 相关功能</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/Nginx架构和安装/" rel="bookmark">Nginx架构和安装</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/Nginx核心配置/" rel="bookmark">Nginx核心配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/Nginx高级配置/" rel="bookmark">Nginx高级配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Nginx/系统参数优化/" rel="bookmark">系统参数优化</a></div>
+    </li>
+  </ul>
+
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee</div>
+  <button onclick="document.querySelector('.post-reward').classList.toggle('active');">
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/nginx/" rel="tag"><i class="fa fa-tag"></i> nginx</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/hexo/Windows%E4%B8%8B%E7%BB%99%E7%9B%AE%E5%BD%95%E8%AE%BE%E7%BD%AE%E8%BD%AF%E8%BF%9E%E6%8E%A5/" rel="prev" title="Windows下给目录设置软连接">
+                  <i class="fa fa-chevron-left"></i> Windows下给目录设置软连接
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Nginx/Nginx%E6%9E%B6%E6%9E%84%E5%92%8C%E5%AE%89%E8%A3%85/" rel="next" title="Nginx架构和安装">
+                  Nginx架构和安装 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.5/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.15.0/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
