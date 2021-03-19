@@ -188,7 +188,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">233</span>
+          <span class="site-state-item-count">235</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -199,7 +199,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">211</span>
+        <span class="site-state-item-count">213</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -234,6 +234,484 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%B0%8F%E8%80%8C%E5%B7%A7%E7%9A%84zval/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/PHP/%E6%BA%90%E7%A0%81/%E5%B0%8F%E8%80%8C%E5%B7%A7%E7%9A%84zval/" class="post-title-link" itemprop="url">小而巧的zval</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:09:57" itemprop="dateCreated datePublished" datetime="2020-12-09T13:09:57+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>zval是一个结构体，其中包含三个联合体(共同体)：value、u1、u2；vaule8字节，u1和u2都是4个字节，正好8字节对其，所以zval的大小是16字节。</p>
+<p>zval用16字节可以表示PHP中的任意一个变量。</p>
+<p>如何表示的呢?</p>
+<p>line84 <code>typedef struct _zval_struct     zval;</code> 为_zval_struct 这个结构体定义别名为 zval, ctrl + ] 跳转到line121查看_zval_struct:</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zval_struct</span> <span class="token punctuation">&#123;</span>
+    zend_value        value<span class="token punctuation">;</span>            <span class="token comment">/* value */</span>
+    <span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">ZEND_ENDIAN_LOHI_4</span><span class="token punctuation">(</span>
+                zend_uchar    type<span class="token punctuation">,</span>         <span class="token comment">/* active type */</span> <span class="token comment">// unsigned char 占用一个字节，v这个结构体中有四个，所以v占用4个字节</span>
+                zend_uchar    type_flags<span class="token punctuation">,</span>
+                zend_uchar    const_flags<span class="token punctuation">,</span>
+                zend_uchar    reserved<span class="token punctuation">)</span>     <span class="token comment">/* call info for EX(This) */</span>
+        <span class="token punctuation">&#125;</span> v<span class="token punctuation">;</span>
+        <span class="token class-name">uint32_t</span> type_info<span class="token punctuation">;</span>   <span class="token comment">// unsigned int 占用4个字节</span>
+    <span class="token punctuation">&#125;</span> u1<span class="token punctuation">;</span> <span class="token comment">// v四个字节, type_info也是四个字节，所以u1占用4个字节</span>
+    <span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">uint32_t</span>     next<span class="token punctuation">;</span>                 <span class="token comment">/* hash collision chain */</span>
+        <span class="token class-name">uint32_t</span>     cache_slot<span class="token punctuation">;</span>           <span class="token comment">/* literal cache slot */</span>
+        <span class="token class-name">uint32_t</span>     lineno<span class="token punctuation">;</span>               <span class="token comment">/* line number (for ast nodes) */</span>
+        <span class="token class-name">uint32_t</span>     num_args<span class="token punctuation">;</span>             <span class="token comment">/* arguments number for EX(This) */</span>
+        <span class="token class-name">uint32_t</span>     fe_pos<span class="token punctuation">;</span>               <span class="token comment">/* foreach position */</span>
+        <span class="token class-name">uint32_t</span>     fe_iter_idx<span class="token punctuation">;</span>          <span class="token comment">/* foreach iterator index */</span>
+        <span class="token class-name">uint32_t</span>     access_flags<span class="token punctuation">;</span>         <span class="token comment">/* class constant access flags */</span>
+        <span class="token class-name">uint32_t</span>     property_guard<span class="token punctuation">;</span>       <span class="token comment">/* single property guard */</span>
+        <span class="token class-name">uint32_t</span>     extra<span class="token punctuation">;</span>                <span class="token comment">/* not further specified */</span>
+    <span class="token punctuation">&#125;</span> u2<span class="token punctuation">;</span> <span class="token comment">// 所有的值都是 unsigned int 所以u2占用4个字节</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>然后定位zend_value, ctrl+]跳转:</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">union</span> _zend_value <span class="token punctuation">&#123;</span>
+    zend_long         lval<span class="token punctuation">;</span>             <span class="token comment">/* long value  64位 8字节*/</span>
+    <span class="token keyword">double</span>            dval<span class="token punctuation">;</span>             <span class="token comment">/* double value  64位 8字节*/</span>
+    zend_refcounted  <span class="token operator">*</span>counted<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>
+    zend_string      <span class="token operator">*</span>str<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>
+    zend_array       <span class="token operator">*</span>arr<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>
+    zend_object      <span class="token operator">*</span>obj<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>
+    zend_resource    <span class="token operator">*</span>res<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>
+    zend_reference   <span class="token operator">*</span>ref<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>
+    zend_ast_ref     <span class="token operator">*</span>ast<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>				<span class="token comment">/*  */</span>
+    zval             <span class="token operator">*</span>zv<span class="token punctuation">;</span> 				<span class="token comment">/*  */</span>
+    <span class="token keyword">void</span>             <span class="token operator">*</span>ptr<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>				<span class="token comment">/*  */</span>
+    zend_class_entry <span class="token operator">*</span>ce<span class="token punctuation">;</span> 				<span class="token comment">/*  */</span>
+    zend_function    <span class="token operator">*</span>func<span class="token punctuation">;</span>				<span class="token comment">/*  */</span>
+    <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+        <span class="token class-name">uint32_t</span> w1<span class="token punctuation">;</span>
+        <span class="token class-name">uint32_t</span> w2<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> ww<span class="token punctuation">;</span>				<span class="token comment">/* 显然4字节 */</span>
+<span class="token punctuation">&#125;</span> zend_value<span class="token punctuation">;</span></code></pre>
+
+<p>接下来我们详细说明一下zval的结构: 显然, 它是一个结构体,包含三个值, 其类型都是联合体。</p>
+<p>先看value的这个联合体zend_value, 包含14个值, 经过tags的ctrl+]跳转,我们发现:</p>
+<ol>
+<li><p>zend_long是int64_t的别名, 而int64_t又是__int64的别名(关于__int64可以查看笔记: 备忘/bit B(byte) KB.md)。</p>
+</li>
+<li><p>zend_refcounted是_zend_refcounted的别名，而_zend_refcounted是一个结构体，其中只有一个值gc，gc是zend_refcounted_h类型的数据，而zend_refcounted_h是一个结构体：</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_refcounted_h</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">uint32_t</span>         refcount<span class="token punctuation">;</span>          <span class="token comment">/* reference counter 32-bit */</span>
+    <span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">ZEND_ENDIAN_LOHI_3</span><span class="token punctuation">(</span>
+                zend_uchar    type<span class="token punctuation">,</span>
+                zend_uchar    flags<span class="token punctuation">,</span>    <span class="token comment">/* used for strings &amp; objects */</span>
+                <span class="token class-name">uint16_t</span>      gc_info<span class="token punctuation">)</span>  <span class="token comment">/* keeps GC root number (or 0) and color */</span>
+        <span class="token punctuation">&#125;</span> v<span class="token punctuation">;</span>
+        <span class="token class-name">uint32_t</span> type_info<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> u<span class="token punctuation">;</span> 
+<span class="token punctuation">&#125;</span> zend_refcounted_h<span class="token punctuation">;</span></code></pre>
+
+<p>uint32_t是unsigned int的别名。refcount表示。。。，u这个联合体中包含一个结构体v和一个32位正整型type_info。</p>
+<p>zend_uchar是unsigned char的别名。</p>
+<p>。。。未完待续</p>
+</li>
+<li><p>str是指针，zend_string是_zend_string的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zend_string</span> <span class="token punctuation">&#123;</span>
+    zend_refcounted_h gc<span class="token punctuation">;</span>
+    zend_ulong        h<span class="token punctuation">;</span>                <span class="token comment">/* hash value */</span>
+    <span class="token class-name">size_t</span>            len<span class="token punctuation">;</span>
+    <span class="token keyword">char</span>              val<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>gc和垃圾回收有关。zend_ulong是uint32_t的别名，表示hash值，防止冲突。</p>
+<p>关于size_t：</p>
+<p> size_t是一些C/C++标准在stddef.h中定义的。这个类型足以用来表示对象的大小。size_t的真实类型与操作系统有关。</p>
+<p>在32位架构中被普遍定义为：typedef  unsigned int size_t;</p>
+<p>而在64位架构中被定义为：typedef  unsigned long size_t;</p>
+<p><strong>为什么有时候不用int，而是用size_type或者size_t:</strong> 与int固定四个字节不同有所不同,size_t的取值range是目标平台下最大可能的数组尺寸,一些平台下size_t的范围小于int的正数范围,又或者大于unsigned int. 使用Int既有可能浪费，又有可能范围不够大。</p>
+<p>len用来储存字符串的长度。</p>
+<p>val是一个柔性数组，用来储存字符串。</p>
+</li>
+<li><p>arr是指针，zend_array是_zend_array的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zend_array</span> <span class="token punctuation">&#123;</span>
+    zend_refcounted_h gc<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+            <span class="token function">ZEND_ENDIAN_LOHI_4</span><span class="token punctuation">(</span>
+                zend_uchar    flags<span class="token punctuation">,</span>
+                zend_uchar    nApplyCount<span class="token punctuation">,</span>
+                zend_uchar    nIteratorsCount<span class="token punctuation">,</span>
+                zend_uchar    consistency<span class="token punctuation">)</span>
+        <span class="token punctuation">&#125;</span> v<span class="token punctuation">;</span>
+        <span class="token class-name">uint32_t</span> flags<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> u<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span>          nTableMask<span class="token punctuation">;</span>
+    Bucket           <span class="token operator">*</span>arData<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span>          nNumUsed<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span>          nNumOfElements<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span>          nTableSize<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span>          nInternalPointer<span class="token punctuation">;</span>
+    zend_long         nNextFreeElement<span class="token punctuation">;</span>
+    <span class="token class-name">dtor_func_t</span>       pDestructor<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>gc与垃圾回收有关。</p>
+<p>联合体v。。。</p>
+<p>。。。未完待续</p>
+</li>
+<li><p>obj是指针，zend_object是_zend_object的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zend_object</span> <span class="token punctuation">&#123;</span>
+    zend_refcounted_h gc<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span>          handle<span class="token punctuation">;</span> <span class="token comment">// TODO: may be removed ???</span>
+    zend_class_entry <span class="token operator">*</span>ce<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> zend_object_handlers <span class="token operator">*</span>handlers<span class="token punctuation">;</span>
+    HashTable        <span class="token operator">*</span>properties<span class="token punctuation">;</span>
+    zval              properties_table<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>。。。未完待续</p>
+</li>
+<li><p>res是指针，zend_resource是_zend_resource的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zend_resource</span> <span class="token punctuation">&#123;</span>
+    zend_refcounted_h gc<span class="token punctuation">;</span>
+    <span class="token keyword">int</span>               handle<span class="token punctuation">;</span> <span class="token comment">// TODO: may be removed ???</span>
+    <span class="token keyword">int</span>               type<span class="token punctuation">;</span>
+    <span class="token keyword">void</span>             <span class="token operator">*</span>ptr<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>。。。未完待续</p>
+</li>
+<li><p>ref是指针，zend_reference是_zend_reference的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zend_reference</span> <span class="token punctuation">&#123;</span>
+    zend_refcounted_h gc<span class="token punctuation">;</span>
+    zval              val<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>。。。未完待续</p>
+</li>
+<li><p>ast是指针，zend_ast_ref是_zend_ast_ref的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zend_ast_ref</span> <span class="token punctuation">&#123;</span>
+    zend_refcounted_h gc<span class="token punctuation">;</span>
+    zend_ast         <span class="token operator">*</span>ast<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>zend_ast是_zend_ast的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token class-name">uint16_t</span> zend_ast_kind<span class="token punctuation">;</span> 
+<span class="token keyword">typedef</span> <span class="token class-name">uint16_t</span> zend_ast_attr<span class="token punctuation">;</span> 
+
+<span class="token keyword">struct</span> <span class="token class-name">_zend_ast</span> <span class="token punctuation">&#123;</span>
+    zend_ast_kind kind<span class="token punctuation">;</span> <span class="token comment">/* Type of the node (ZEND_AST_* enum constant) */</span>
+    zend_ast_attr attr<span class="token punctuation">;</span> <span class="token comment">/* Additional attribute, use depending on node type */</span>
+    <span class="token class-name">uint32_t</span> lineno<span class="token punctuation">;</span>    <span class="token comment">/* Line number */</span>
+    zend_ast <span class="token operator">*</span>child<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">/* Array of children (using struct hack) */</span> 
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>。。。未完待续</p>
+</li>
+<li><p>zv是指针</p>
+<p>。。。未完待续</p>
+</li>
+<li><p>ptr是指针</p>
+<p>。。。未完待续</p>
+</li>
+<li><p>ce是指针，zend_class_entry是_zend_class_entry的别名</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">_zend_class_entry</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">char</span> type<span class="token punctuation">;</span>
+    zend_string <span class="token operator">*</span>name<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">_zend_class_entry</span> <span class="token operator">*</span>parent<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> refcount<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span> ce_flags<span class="token punctuation">;</span>
+
+    <span class="token keyword">int</span> default_properties_count<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> default_static_members_count<span class="token punctuation">;</span>
+    zval <span class="token operator">*</span>default_properties_table<span class="token punctuation">;</span>
+    zval <span class="token operator">*</span>default_static_members_table<span class="token punctuation">;</span>
+    zval <span class="token operator">*</span>static_members_table<span class="token punctuation">;</span>
+    HashTable function_table<span class="token punctuation">;</span>
+    HashTable properties_info<span class="token punctuation">;</span>
+    HashTable constants_table<span class="token punctuation">;</span>
+
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>constructor<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>destructor<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>clone<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__get<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__set<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__unset<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__isset<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__call<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__callstatic<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__tostring<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>__debugInfo<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>serialize_func<span class="token punctuation">;</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>unserialize_func<span class="token punctuation">;</span>
+
+    zend_class_iterator_funcs iterator_funcs<span class="token punctuation">;</span>
+
+    <span class="token comment">/* handlers */</span>
+    zend_object<span class="token operator">*</span> <span class="token punctuation">(</span><span class="token operator">*</span>create_object<span class="token punctuation">)</span><span class="token punctuation">(</span>zend_class_entry <span class="token operator">*</span>class_type<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    zend_object_iterator <span class="token operator">*</span><span class="token punctuation">(</span><span class="token operator">*</span>get_iterator<span class="token punctuation">)</span><span class="token punctuation">(</span>zend_class_entry <span class="token operator">*</span>ce<span class="token punctuation">,</span> zval <span class="token operator">*</span>object<span class="token punctuation">,</span> <span class="token keyword">int</span> by_ref<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> <span class="token punctuation">(</span><span class="token operator">*</span>interface_gets_implemented<span class="token punctuation">)</span><span class="token punctuation">(</span>zend_class_entry <span class="token operator">*</span>iface<span class="token punctuation">,</span> zend_class_entry <span class="token operator">*</span>class_type<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">/* a class implements this interface */</span>
+    <span class="token keyword">union</span> _zend_function <span class="token operator">*</span><span class="token punctuation">(</span><span class="token operator">*</span>get_static_method<span class="token punctuation">)</span><span class="token punctuation">(</span>zend_class_entry <span class="token operator">*</span>ce<span class="token punctuation">,</span> zend_string<span class="token operator">*</span> method<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">/* serializer callbacks */</span>
+    <span class="token keyword">int</span> <span class="token punctuation">(</span><span class="token operator">*</span>serialize<span class="token punctuation">)</span><span class="token punctuation">(</span>zval <span class="token operator">*</span>object<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">char</span> <span class="token operator">*</span><span class="token operator">*</span>buffer<span class="token punctuation">,</span> <span class="token class-name">size_t</span> <span class="token operator">*</span>buf_len<span class="token punctuation">,</span> zend_serialize_data <span class="token operator">*</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> <span class="token punctuation">(</span><span class="token operator">*</span>unserialize<span class="token punctuation">)</span><span class="token punctuation">(</span>zval <span class="token operator">*</span>object<span class="token punctuation">,</span> zend_class_entry <span class="token operator">*</span>ce<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">unsigned</span> <span class="token keyword">char</span> <span class="token operator">*</span>buf<span class="token punctuation">,</span> <span class="token class-name">size_t</span> buf_len<span class="token punctuation">,</span> zend_unserialize_data <span class="token operator">*</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token class-name">uint32_t</span> num_interfaces<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span> num_traits<span class="token punctuation">;</span>
+    zend_class_entry <span class="token operator">*</span><span class="token operator">*</span>interfaces<span class="token punctuation">;</span>
+
+    zend_class_entry <span class="token operator">*</span><span class="token operator">*</span>traits<span class="token punctuation">;</span>
+    zend_trait_alias <span class="token operator">*</span><span class="token operator">*</span>trait_aliases<span class="token punctuation">;</span>
+    zend_trait_precedence <span class="token operator">*</span><span class="token operator">*</span>trait_precedences<span class="token punctuation">;</span>
+
+    <span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+            zend_string <span class="token operator">*</span>filename<span class="token punctuation">;</span>
+            <span class="token class-name">uint32_t</span> line_start<span class="token punctuation">;</span>
+            <span class="token class-name">uint32_t</span> line_end<span class="token punctuation">;</span>
+            zend_string <span class="token operator">*</span>doc_comment<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> user<span class="token punctuation">;</span>
+        <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_function_entry</span> <span class="token operator">*</span>builtin_functions<span class="token punctuation">;</span>
+            <span class="token keyword">struct</span> <span class="token class-name">_zend_module_entry</span> <span class="token operator">*</span>module<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span> internal<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> info<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>。。。未完待续</p>
+</li>
+<li><p>func是指针</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">union</span> _zend_function <span class="token punctuation">&#123;</span>
+    zend_uchar type<span class="token punctuation">;</span>    <span class="token comment">/* MUST be the first element of this struct! */</span>
+    <span class="token class-name">uint32_t</span>   quick_arg_flags<span class="token punctuation">;</span>
+
+    <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+        zend_uchar type<span class="token punctuation">;</span>  <span class="token comment">/* never used */</span>
+        zend_uchar arg_flags<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">/* bitset of arg_info.pass_by_reference */</span>
+        <span class="token class-name">uint32_t</span> fn_flags<span class="token punctuation">;</span>
+        zend_string <span class="token operator">*</span>function_name<span class="token punctuation">;</span>
+        zend_class_entry <span class="token operator">*</span>scope<span class="token punctuation">;</span>
+        <span class="token keyword">union</span> _zend_function <span class="token operator">*</span>prototype<span class="token punctuation">;</span>
+        <span class="token class-name">uint32_t</span> num_args<span class="token punctuation">;</span>
+        <span class="token class-name">uint32_t</span> required_num_args<span class="token punctuation">;</span>
+        zend_arg_info <span class="token operator">*</span>arg_info<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> common<span class="token punctuation">;</span>
+    
+    zend_op_array op_array<span class="token punctuation">;</span>
+    zend_internal_function internal_function<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>。。。未完待续</p>
+</li>
+<li><p>ww结构体</p>
+</li>
+</ol>
+<p>综上可以看出，value中存储的是变量内容，接下来我们看两个联合体u1和u2。</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">ZEND_ENDIAN_LOHI_4</span><span class="token punctuation">(</span>
+            zend_uchar    type<span class="token punctuation">,</span>         <span class="token comment">/* active type */</span>
+            zend_uchar    type_flags<span class="token punctuation">,</span>
+            zend_uchar    const_flags<span class="token punctuation">,</span>
+            zend_uchar    reserved<span class="token punctuation">)</span>     <span class="token comment">/* call info for EX(This) */</span>
+    <span class="token punctuation">&#125;</span> v<span class="token punctuation">;</span>
+    <span class="token class-name">uint32_t</span> type_info<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> u1<span class="token punctuation">;</span></code></pre>
+
+<p>u1中有一个结构体v和一个32位整型type_info,这个type_info的作用就是获取v的值。这么写是一个小技巧。</p>
+<p>zend_uchar是unsigned char的别名，type这个值表示不同的变量类型，有：</p>
+<p>#define IS_UNDEF                    0<br>#define IS_NULL                     1<br>#define IS_FALSE                    2<br>#define IS_TRUE                     3<br>#define IS_LONG                     4<br>#define IS_DOUBLE                   5<br>#define IS_STRING                   6<br>#define IS_ARRAY                    7<br>#define IS_OBJECT                   8<br>#define IS_RESOURCE                 9<br>#define IS_REFERENCE                10</p>
+<p>以上，整型就是 IS_LONG。</p>
+<p>。。。未完待续</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+    <span class="token class-name">uint32_t</span>     next<span class="token punctuation">;</span>                 <span class="token comment">/* hash collision chain */</span>
+    <span class="token class-name">uint32_t</span>     cache_slot<span class="token punctuation">;</span>           <span class="token comment">/* literal cache slot */</span>
+    <span class="token class-name">uint32_t</span>     lineno<span class="token punctuation">;</span>               <span class="token comment">/* line number (for ast nodes) */</span>
+    <span class="token class-name">uint32_t</span>     num_args<span class="token punctuation">;</span>             <span class="token comment">/* arguments number for EX(This) */</span>
+    <span class="token class-name">uint32_t</span>     fe_pos<span class="token punctuation">;</span>               <span class="token comment">/* foreach position */</span>
+    <span class="token class-name">uint32_t</span>     fe_iter_idx<span class="token punctuation">;</span>          <span class="token comment">/* foreach iterator index */</span>
+    <span class="token class-name">uint32_t</span>     access_flags<span class="token punctuation">;</span>         <span class="token comment">/* class constant access flags */</span>
+    <span class="token class-name">uint32_t</span>     property_guard<span class="token punctuation">;</span>       <span class="token comment">/* single property guard */</span>
+    <span class="token class-name">uint32_t</span>     extra<span class="token punctuation">;</span>                <span class="token comment">/* not further specified */</span>
+<span class="token punctuation">&#125;</span> u2<span class="token punctuation">;</span></code></pre>
+
+<p>u2中的next用来解决数组中的冲突。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%A6%82%E4%BD%95%E4%B8%80%E7%9C%BC%E5%B0%B1%E7%9C%8B%E5%87%BA%E5%86%85%E5%AD%98%E5%A4%9A%E5%A4%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/PHP/%E6%BA%90%E7%A0%81/%E5%A6%82%E4%BD%95%E4%B8%80%E7%9C%BC%E5%B0%B1%E7%9C%8B%E5%87%BA%E5%86%85%E5%AD%98%E5%A4%9A%E5%A4%A7/" class="post-title-link" itemprop="url">如何一眼就看出内存多大</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:08:06" itemprop="dateCreated datePublished" datetime="2020-12-09T13:08:06+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="通过内存地址快速知道内存大小"><a href="#通过内存地址快速知道内存大小" class="headerlink" title="通过内存地址快速知道内存大小"></a>通过内存地址快速知道内存大小</h2><p>通过内存管理申请一个内存地址，这个内存地址属于 small 或 large 或 huge内存，那如何判断呢？</p>
+<p>page 4KB</p>
+<p>chunk 2MB</p>
+<p>small 小于等于3KB的内存。</p>
+<p>large 大于3KB且小于等于（2MB-4KB）的内存，可以对应整数倍的page。</p>
+<p>huge 大于2MB-4KB的内存，可以对应整数倍的chunk。</p>
+<p>如果是0x8打头，</p>
+<p>如果是0xc打头的，看两段</p>
+<p>0x4 打头的是large内存。</p>
+<p>如果一个内存是2M的整数倍，一定是huge内存。</p>
+<p>2MB=2×1024*1024=2×2^10×2^10=2×2^20</p>
+<p>16=2^4</p>
+<p>(2×2^20) / 2^4</p>
+<p>最终得到2MB的16进制是 200000</p>
+<p>所以看到0x…00000这种后面是5个0的，然后看一看倒数第六位能否被2整除，就一定是huge内存。</p>
+<p>例如：0x7ffff5e00000，它属于 huge内存。</p>
+<p>如果一个内存地址不是2MB的整数倍，那我们根据地址，去掉偏移，找到一个chunk，另外我们也可以知道，它属于哪个page（偏移除以4K）。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -2592,380 +3070,6 @@ npm i -S    &#x2F;&#x2F; 项目（运行时、发布到生产环境时）依赖�
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225693847.png"></p>
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225587562.png"></p>
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225585341.png"></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/JavaScript/js%E5%9F%BA%E7%A1%80%E9%9D%A2%E8%AF%95%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%89%8D%E7%AB%AF/JavaScript/js%E5%9F%BA%E7%A1%80%E9%9D%A2%E8%AF%95%E9%A2%98/" class="post-title-link" itemprop="url">js基础面试题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-06 11:30:13" itemprop="dateCreated datePublished" datetime="2020-12-06T11:30:13+08:00">2020-12-06</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="基础部分"><a href="#基础部分" class="headerlink" title="基础部分"></a>基础部分</h2><h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><p>五种简单数据类型: undefined, null, boolean, number, string</p>
-<p>一种复杂数据类型: object</p>
-<p>另外按照存储方式分为值类型和引用类型</p>
-<p>有三大引用类型: object, array, function</p>
-<h3 id="typeof返回哪些数据类型"><a href="#typeof返回哪些数据类型" class="headerlink" title="typeof返回哪些数据类型"></a>typeof返回哪些数据类型</h3><p>array, object, null 都返回 object</p>
-<p>function 返回 function</p>
-<h3 id="例举-3-种强制类型转换-和-2种隐试类型转换"><a href="#例举-3-种强制类型转换-和-2种隐试类型转换" class="headerlink" title="例举 3 种强制类型转换 和 2种隐试类型转换"></a>例举 3 种强制类型转换 和 2种隐试类型转换</h3><p>强制: parseInt(), parseFloat(), Number()</p>
-<p>隐式: == 等等</p>
-<h3 id="split-和-join-的区别"><a href="#split-和-join-的区别" class="headerlink" title="split() 和 join() 的区别"></a>split() 和 join() 的区别</h3><p>前者是将字符串切割成数组的形式, 后者是将数组转换成字符串</p>
-<h3 id="pop-push-unshift-shift"><a href="#pop-push-unshift-shift" class="headerlink" title="pop() push() unshift() shift()"></a>pop() push() unshift() shift()</h3><p>pop() 尾部删除, push() 尾部添加</p>
-<p>shift() 头部添加, unshift() 头部添加</p>
-<h3 id="事件绑定-和-普通事件-有什么区别"><a href="#事件绑定-和-普通事件-有什么区别" class="headerlink" title="事件绑定 和 普通事件 有什么区别"></a>事件绑定 和 普通事件 有什么区别</h3><p>普通添加事件, 最下面的事件会覆盖上面的, 而事件绑定(addEventListener)就不会</p>
-<h3 id="事件冒泡-和-捕获"><a href="#事件冒泡-和-捕获" class="headerlink" title="事件冒泡 和 捕获"></a>事件冒泡 和 捕获</h3><p>事件的三个阶段: 捕获, 目标, 冒泡</p>
-<p>addEventListener 的第三个参数 默认false 冒泡阶段触发, true 捕获阶段触发</p>
-<p>冒泡阶段触发就是先触发内部元素的事件</p>
-<p>捕获阶段触发就是先触发外部元素的事件</p>
-<h3 id="call-和-apply-以及-bind-的区别"><a href="#call-和-apply-以及-bind-的区别" class="headerlink" title="call 和 apply  以及 bind() 的区别"></a>call 和 apply  以及 bind() 的区别</h3><p>call() 和 apply() 是在执行函数的时候调用, 临时改变函数内部的this指向. 两者的唯一区别就是call传入参数列表, apply传入参数数组.</p>
-<p>bind() 是创建新函数, 在创建函数的时候调用. 例如: f = fn.bind(xx) 把fn函数内部的this指向xx对象, 然后就生成可新函数f, 以后无论怎么调用函数f, 他里面的this都是指向xx</p>
-<h3 id="es6-class"><a href="#es6-class" class="headerlink" title="es6 class"></a>es6 class</h3><h4 id="严格模式"><a href="#严格模式" class="headerlink" title="严格模式"></a>严格模式</h4><p>如果没有指定this, 则 this 值就将为 undefined</p>
-<h4 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h4><p>constructor方法是一个特殊的方法, 这种方法用于创建和初始化一个由class创建的对象, 一个类只能有一个名为 “constructor” 的特殊方法.</p>
-<h4 id="原型方法"><a href="#原型方法" class="headerlink" title="原型方法"></a>原型方法</h4><p>和PHP类一样, 只是没有function关键字</p>
-<h4 id="静态方法"><a href="#静态方法" class="headerlink" title="静态方法"></a>静态方法</h4><p>static 关键字用来定义一个类的静态方法. 调用静态方法不需要实例化类, 但不能通过实例化一个实例调用静方法. 静态方法通常用于为一个应用程序创建工具函数.</p>
-<h4 id="extends"><a href="#extends" class="headerlink" title="extends"></a>extends</h4><p>如果子类中存在构造函数, 则需要在使用 this 之前需要先调用 super()</p>
-<h4 id="super-关键字"><a href="#super-关键字" class="headerlink" title="super 关键字"></a>super 关键字</h4><p>super 这个关键字, 既可以当作函数调用, 也可以当做对象使用, 这两种情况下, 它的用法完全不同.</p>
-<ol>
-<li><code>super</code>作为函数调用时，代表父类的构造函数。ES6 要求，子类的构造函数必须执行一次<code>super</code>函数。注意，<code>super</code>虽然代表了父类<code>A</code>的构造函数，但是返回的是子类<code>B</code>的实例，即<code>super</code>内部的<code>this</code>指的是<code>B</code>的实例，因此<code>super()</code>在这里相当于<code>A.prototype.constructor.call(this)</code>。作为函数时，<code>super()</code>只能用在子类的构造函数之中，用在其他地方就会报错。</li>
-<li><code>super</code>作为对象时，在普通方法中，指向父类的原型对象；在静态方法中，指向父类。</li>
-</ol>
-<h3 id="es5-和-es6-的继承"><a href="#es5-和-es6-的继承" class="headerlink" title="es5 和 es6 的继承"></a>es5 和 es6 的继承</h3><h4 id="es5"><a href="#es5" class="headerlink" title="es5"></a>es5</h4><ol>
-<li><p>借用构造函数, 缺点: 无法继承原型链上的属性和方法.</p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token comment">//子构造函数</span>
-<span class="token keyword">function</span> <span class="token function">Sub</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token function">Super</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span>
-<span class="token punctuation">&#125;</span></code></pre></li>
-<li><p>原型链继承: </p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token class-name">子构造函数</span><span class="token punctuation">.</span>prototype <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">父构造函数</span><span class="token punctuation">(</span><span class="token punctuation">)</span>		<span class="token comment">//实现继承</span>
-<span class="token class-name">子构造函数</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>constructor <span class="token operator">=</span> 子构造函数		<span class="token comment">//添加 constructor</span></code></pre>
-
-<p>缺点: 不能给父构造函数传参, </p>
-</li>
-<li><p>组合继承: 借用构造函数 + 原型链继承</p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token comment">//子构造函数</span>
-<span class="token keyword">function</span> <span class="token function">Sub</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token function">Super</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span>	<span class="token comment">//第一次调用</span>
-<span class="token punctuation">&#125;</span>
-<span class="token class-name">Sub</span><span class="token punctuation">.</span>prototype <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Super</span><span class="token punctuation">(</span><span class="token punctuation">)</span>		<span class="token comment">//第二次调用</span>
-<span class="token class-name">Sub</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>constructor <span class="token operator">=</span> Sub</code></pre>
-
-<p>缺点: 无论什么情况, 都会调用两次超类型构造函数, 一次是在创建子类型原型的时候, 一次是在子类型构造函数的内部</p>
-</li>
-<li><p>寄生式继承 : 创建一个仅仅用于封装过程的函数, 然后在内部以某种方式增强对象, 最后返回对象</p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">object</span><span class="token punctuation">(</span><span class="token parameter">o</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token keyword">function</span> <span class="token constant">F</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-    <span class="token class-name">F</span><span class="token punctuation">.</span>prototype <span class="token operator">=</span> o<span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">F</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-<span class="token keyword">function</span> <span class="token function">createSubObj</span><span class="token punctuation">(</span><span class="token parameter">original</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token keyword">var</span> clone <span class="token operator">=</span> <span class="token function">object</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>	<span class="token comment">//object() 是ES5前Object.create()的非规范化实现</span>
-    <span class="token keyword">return</span> clone
-<span class="token punctuation">&#125;</span></code></pre></li>
-<li><p>寄生组合式继承</p>
-<pre class="language-js" data-language="js"><code class="language-js">   <span class="token comment">//Object.create 创建一个新对象, 使用现有的对象来提供创建的对象的 __proto__</span>
-<span class="token keyword">function</span> <span class="token function">inheritPrototype</span><span class="token punctuation">(</span><span class="token parameter">Super<span class="token punctuation">,</span>Sub</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
-   	<span class="token keyword">var</span> superProtoClone <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token class-name">Super</span><span class="token punctuation">.</span>prototype<span class="token punctuation">)</span>  <span class="token comment">//创建一个空的新对象, 指定其 __proto__</span>
-   	<span class="token class-name">Sub</span><span class="token punctuation">.</span>prototype <span class="token operator">=</span> superProtoClone		<span class="token comment">//修改子构造函数的prototype</span>
-   	<span class="token class-name">Sub</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>constructor <span class="token operator">=</span> Sub		<span class="token comment">//修改子构造函数的prototype.constructor</span>
-   <span class="token punctuation">&#125;</span>
-   <span class="token keyword">function</span> <span class="token function">Super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
-   	<span class="token keyword">this</span><span class="token punctuation">.</span>property <span class="token operator">=</span> <span class="token string">'Super Property'</span>
-   	<span class="token keyword">this</span><span class="token punctuation">.</span>xx <span class="token operator">=</span> <span class="token string">'xxx'</span>
-   <span class="token punctuation">&#125;</span>
-   <span class="token keyword">function</span> <span class="token function">Sub</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
-   	<span class="token function">Super</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span>
-   	<span class="token keyword">this</span><span class="token punctuation">.</span>property <span class="token operator">=</span> <span class="token string">'Sub Property'</span>
-   <span class="token punctuation">&#125;</span>
-   <span class="token function">inheritPrototype</span><span class="token punctuation">(</span>Super<span class="token punctuation">,</span>Sub<span class="token punctuation">)</span>
-   <span class="token keyword">var</span> sub <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Sub</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-   console<span class="token punctuation">.</span><span class="token function">dir</span><span class="token punctuation">(</span>sub<span class="token punctuation">)</span></code></pre></li>
-</ol>
-<h4 id="es6"><a href="#es6" class="headerlink" title="es6"></a>es6</h4><p>es6 的继承主要是 class 的继承</p>
-<p>基本用法: class 通过 extends 关键字实现继承, 这比es5的通过修改原型链实现继承, 要清晰和方便的多</p>
-<h3 id="有哪些内置的构造函数"><a href="#有哪些内置的构造函数" class="headerlink" title="有哪些内置的构造函数"></a>有哪些内置的构造函数</h3><ol>
-<li>Object()</li>
-<li>Function()</li>
-<li>Array()</li>
-<li>RegExp()</li>
-<li>Number()</li>
-<li>String()</li>
-<li>Boolean()</li>
-<li>Date()</li>
-<li>Error()</li>
-</ol>
-<h3 id="常用的内置对象有哪些-并列举该对象的常用方法"><a href="#常用的内置对象有哪些-并列举该对象的常用方法" class="headerlink" title="常用的内置对象有哪些, 并列举该对象的常用方法"></a>常用的内置对象有哪些, 并列举该对象的常用方法</h3><h3 id="DOM节点的增删改查"><a href="#DOM节点的增删改查" class="headerlink" title="DOM节点的增删改查"></a>DOM节点的增删改查</h3><h3 id="手写一个闭包"><a href="#手写一个闭包" class="headerlink" title="手写一个闭包"></a>手写一个闭包</h3><p>希望在访问不同作用域中的变量, 就需要使用闭包</p>
-<p>闭包的作用, 就是保存自己私有的变量, 通过提供的接口(方法)给外部使用, 但外部不能直接访问该变量</p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token comment">//希望在另一个作用域访问, 访问fn中的name这个局部变量</span>
-<span class="token keyword">function</span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token keyword">var</span> name <span class="token operator">=</span> <span class="token string">'zs'</span>
-    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
-        <span class="token keyword">return</span> name
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span>    
-<span class="token keyword">var</span> f <span class="token operator">=</span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">var</span> n <span class="token operator">=</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code></pre>
-
-<h3 id="变量提升"><a href="#变量提升" class="headerlink" title="变量提升"></a>变量提升</h3><p>仅提升, 不初始化</p>
-<h3 id="代码实现数组排序并去重"><a href="#代码实现数组排序并去重" class="headerlink" title="代码实现数组排序并去重"></a>代码实现数组排序并去重</h3><p>简单方法 :</p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token parameter">arr</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-	arr<span class="token punctuation">.</span><span class="token function">sort</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">a<span class="token punctuation">,</span> b</span><span class="token punctuation">)</span> <span class="token operator">=></span> a <span class="token operator">-</span> b<span class="token punctuation">)</span>
-	<span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span><span class="token punctuation">]</span>
-<span class="token punctuation">&#125;</span>
-<span class="token keyword">var</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">]</span>
-<span class="token function">fn</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span></code></pre>
-
-<p>冒泡 + 双重遍历去重 : </p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token parameter">arr</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-	<span class="token keyword">let</span> length <span class="token operator">=</span> arr<span class="token punctuation">.</span>length<span class="token punctuation">,</span> i<span class="token punctuation">,</span> j<span class="token punctuation">,</span> k<span class="token punctuation">,</span>l
-	<span class="token comment">//冒泡排序</span>
-	<span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">&lt;</span> length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-		<span class="token keyword">for</span> <span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> length <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-			<span class="token keyword">if</span><span class="token punctuation">(</span>arr<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">&lt;</span> arr<span class="token punctuation">[</span>j<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-				<span class="token punctuation">[</span>arr<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">,</span> arr<span class="token punctuation">[</span>j<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span>arr<span class="token punctuation">[</span>j<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> arr<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-			<span class="token punctuation">&#125;</span>
-		<span class="token punctuation">&#125;</span>
-	<span class="token punctuation">&#125;</span>
-    <span class="token comment">//双重遍历去重, 外循环从 0 到 length, 内循环从 k+1 到 length, 将重复的值去掉</span>
-	<span class="token keyword">for</span><span class="token punctuation">(</span>k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> k <span class="token operator">&lt;</span> arr<span class="token punctuation">.</span>length<span class="token punctuation">;</span> k<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-		<span class="token keyword">let</span> c <span class="token operator">=</span> arr<span class="token punctuation">[</span>k<span class="token punctuation">]</span>
-		<span class="token keyword">for</span><span class="token punctuation">(</span>l <span class="token operator">=</span> k <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span> l <span class="token operator">&lt;</span> arr<span class="token punctuation">.</span>length<span class="token punctuation">;</span> l<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-			<span class="token keyword">if</span><span class="token punctuation">(</span>arr<span class="token punctuation">[</span>l<span class="token punctuation">]</span> <span class="token operator">==</span> c<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-				arr<span class="token punctuation">.</span><span class="token function">splice</span><span class="token punctuation">(</span>l<span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span>
-				l<span class="token operator">--</span>					<span class="token comment">// splice后, 数组长度减一, 所以要 l--</span>
-			<span class="token punctuation">&#125;</span>
-		<span class="token punctuation">&#125;</span>
-	<span class="token punctuation">&#125;</span>
-	<span class="token keyword">return</span> arr
-<span class="token punctuation">&#125;</span>
-
-<span class="token keyword">var</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">]</span>
-<span class="token function">fn</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span></code></pre>
-
-<h3 id="合并两个有序数组并排序"><a href="#合并两个有序数组并排序" class="headerlink" title="合并两个有序数组并排序"></a>合并两个有序数组并排序</h3><p>要求不能直接合并排序，要通过循环插入的方式合并排序</p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">var</span> a1 <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span><span class="token number">1000</span><span class="token punctuation">]</span>
-<span class="token keyword">var</span> a2 <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">2000</span><span class="token punctuation">]</span>
-
-<span class="token keyword">var</span> i <span class="token operator">=</span> a1<span class="token punctuation">.</span>length
-<span class="token keyword">while</span> <span class="token punctuation">(</span>i<span class="token operator">--</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token keyword">var</span> j <span class="token operator">=</span> a2<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>j <span class="token operator">===</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token keyword">break</span>
-    <span class="token punctuation">&#125;</span>
-    <span class="token keyword">var</span> a2v <span class="token operator">=</span> a2<span class="token punctuation">[</span>j<span class="token punctuation">]</span>
-    a2v <span class="token operator">>=</span> a1<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> a1<span class="token punctuation">.</span><span class="token function">splice</span><span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> a2<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> i<span class="token operator">++</span>
-<span class="token punctuation">&#125;</span>
-a1 <span class="token operator">=</span> a2<span class="token punctuation">.</span><span class="token function">concat</span><span class="token punctuation">(</span>a1<span class="token punctuation">)</span>
-console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>a1<span class="token punctuation">)</span></code></pre>
-
-<h2 id="实际工作部分"><a href="#实际工作部分" class="headerlink" title="实际工作部分"></a>实际工作部分</h2><h3 id="出一套适应不同分辨率-不同终端的前端方案实现方案是什么"><a href="#出一套适应不同分辨率-不同终端的前端方案实现方案是什么" class="headerlink" title="出一套适应不同分辨率, 不同终端的前端方案实现方案是什么"></a>出一套适应不同分辨率, 不同终端的前端方案实现方案是什么</h3><ol>
-<li>流式布局, 就是百分比布局.</li>
-<li>响应式布局</li>
-<li>rem布局, rem只相对 html 根元素的 font-size , 所以将 html 的font-size设置为 100px</li>
-</ol>
-<h3 id="如何实现跨域"><a href="#如何实现跨域" class="headerlink" title="如何实现跨域"></a>如何实现跨域</h3><ol>
-<li><p>JSONP 已淘汰</p>
-</li>
-<li><p>CORS</p>
-</li>
-<li><p>服务器跨域</p>
-</li>
-<li><p>postmessage    html5中新增的方法</p>
-</li>
-</ol>
-<h3 id="对象和类"><a href="#对象和类" class="headerlink" title="对象和类"></a>对象和类</h3><p>在 js 中没有类, 所以在 js 中所谓的 类 就是构造函数, 对象是由构造函数创建</p>
-<h3 id="JS的垃圾回收机制"><a href="#JS的垃圾回收机制" class="headerlink" title="JS的垃圾回收机制"></a>JS的垃圾回收机制</h3><p>如果一个对象不再被引用就会被 GC 回收, 如果两个对象互相引用, 而不再被第三者引用, 那么这两个互相引用的对象也会被回收</p>
-<h3 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h3><h3 id="捕获异常"><a href="#捕获异常" class="headerlink" title="捕获异常"></a>捕获异常</h3><h3 id="H5有哪些新特性"><a href="#H5有哪些新特性" class="headerlink" title="H5有哪些新特性"></a>H5有哪些新特性</h3><ol>
-<li>拖拽释放</li>
-<li>语义化更好的内容标签</li>
-<li>音频视频</li>
-<li>画布</li>
-<li>地理</li>
-<li>本地离线缓存</li>
-<li>sessionStorage</li>
-<li>表单控件</li>
-<li>新的技术</li>
-</ol>
-<h3 id="如何实现浏览器多个标签之间的通信"><a href="#如何实现浏览器多个标签之间的通信" class="headerlink" title="如何实现浏览器多个标签之间的通信"></a>如何实现浏览器多个标签之间的通信</h3><p>调用 localstorage, cookies 等本地存储方式</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/JavaScript/js%E7%9A%84%E5%8E%9F%E5%9E%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%89%8D%E7%AB%AF/JavaScript/js%E7%9A%84%E5%8E%9F%E5%9E%8B/" class="post-title-link" itemprop="url">js的原型</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-06 11:23:37" itemprop="dateCreated datePublished" datetime="2020-12-06T11:23:37+08:00">2020-12-06</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>原型分为 隐式原型(__proto__) 和 显式原型(prototype)    </p>
-<p>隐式原型，所有的对象都有</p>
-<p>显示原型，只有函数才有</p>
-<p>每个对象都有一个__proto__属性，指向创建该对象的函数的prototype</p>
-<p>所以，当找不到自身的属性或方法的时候，就去自己的__proto__里找，如果还是找不到，就再往下一层__proto__去找，一层一层找寻的这个路线就是原型链，就是这么简单</p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607224837551.png" alt="js的原型.png"></p>
-<p>显式原型( prototype )：所有的显示原型中都有constructor和__proto__这两个属性</p>
-<p>constructor是一个函数，指向自身</p>
-<p>至于__proto__，因为显示原型prototype是个对象，所以这个__proto__指向<strong>Object</strong>的prototype，这个<strong>Object</strong>就是女娲</p>
-<p>隐式原型( __proto__ ) :  JavaScript不希望开发者用到这个属性，有的低版本浏览器甚至不支持这个属性，所有你在VS2012这么智能的编辑器中，都不会有__proto__的智能提示，不用管他，直接写出来就行了。</p>
-<p><strong>总结：</strong></p>
-<ol>
-<li><p>Object的prototype里除了constructor指向自身外，剩下的都是系统自带的对象的最最最基本的几个属性(方法)，是所有的”对象”都有的几个属性。奇怪的是没有__proto__，你要是打印Object.prototype.__proto__，得到的是null，也对，这里就没必要有__proto__了，因为到原型链的尽头了</p>
-</li>
-<li><p>Object的__proto__指向Function的prototype，因为Object是构造函数</p>
-</li>
-<li><p>Function的prototype里: constructor指向自身，还有一些系统自带的最最基本的几个属性(方法)，是所有的函数都有的几个属性。最后，__proto__指向Object的prototype，因为prototype也是对象。</p>
-</li>
-</ol>
-<p>其实所有的prototype中的__proto__都指向Object.prototype</p>
-<p>Function是被自身创建的，所以__proto__指向自己的prototype</p>
-<p>对象.constructor 就是创建它的构造函数</p>
 
       
     </div>

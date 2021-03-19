@@ -188,7 +188,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">233</span>
+          <span class="site-state-item-count">235</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -199,7 +199,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">211</span>
+        <span class="site-state-item-count">213</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -234,6 +234,718 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/DNS/%E5%AE%9E%E9%AA%8C1%EF%BC%9ADNS%E6%AD%A3%E5%90%91%E6%9C%8D%E5%8A%A1%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/DNS/%E5%AE%9E%E9%AA%8C1%EF%BC%9ADNS%E6%AD%A3%E5%90%91%E6%9C%8D%E5%8A%A1%E5%99%A8/" class="post-title-link" itemprop="url">实验1：DNS正向服务器</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-04 15:25:15" itemprop="dateCreated datePublished" datetime="2021-02-04T15:25:15+08:00">2021-02-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/DNS/" itemprop="url" rel="index"><span itemprop="name">DNS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="实验目的"><a href="#实验目的" class="headerlink" title="实验目的"></a>实验目的</h2><p>搭建DNS正向主服务器，实现web服务器基于FQDN的访问</p>
+<h2 id="环境要求"><a href="#环境要求" class="headerlink" title="环境要求"></a>环境要求</h2><p>需要三台主机<br>DNS服务端：10.0.0.175<br>web服务器：10.0.0.8<br>DNS客户端：10.0.0.57</p>
+<h2 id="提前准备"><a href="#提前准备" class="headerlink" title="提前准备"></a>提前准备</h2><p>关闭SElinux<br>关闭防火墙<br>时间同步</p>
+<h2 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h2><h3 id="1-在DNS服务端安装bind"><a href="#1-在DNS服务端安装bind" class="headerlink" title="1. 在DNS服务端安装bind"></a>1. 在DNS服务端安装bind</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> -y <span class="token function">install</span> <span class="token builtin class-name">bind</span></code></pre>
+
+<h3 id="2-修改bind-配置文件"><a href="#2-修改bind-配置文件" class="headerlink" title="2. 修改bind 配置文件"></a>2. 修改bind 配置文件</h3><p>修改配置文件 /etc/named.conf</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token comment">#注释掉下面两行</span>
+// listen-on port <span class="token number">53</span> <span class="token punctuation">&#123;</span> <span class="token number">127.0</span>.0.1<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+// allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<p>修改配置文件 vim /etc/named.rfc1912.zones</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#加上下面内容, IN 可以省略</span>
+zone <span class="token string">"magedu.local"</span> IN <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
+    <span class="token function">file</span> <span class="token string">"magedu.local.zone"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<h3 id="3-DNS区域数据库文件"><a href="#3-DNS区域数据库文件" class="headerlink" title="3. DNS区域数据库文件"></a>3. DNS区域数据库文件</h3><p>在主目录（默认是/var/named/）下新建 DNS区域数据库文件 magedu.local.zone</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#如果没有加-p选项，需要修改所有者或权限。chgrp named magedu.local.zone</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /var/named/
+<span class="token punctuation">[</span>root@centos8 named<span class="token punctuation">]</span><span class="token variable">$cp</span> -p named.localhost magedu.local.zone
+<span class="token punctuation">[</span>root@centos8 named<span class="token punctuation">]</span><span class="token variable">$ll</span>
+total <span class="token number">32</span>
+drwxrwx--- <span class="token number">2</span> named named <span class="token number">4096</span> Sep <span class="token number">17</span> <span class="token number">22</span>:55 data
+drwxrwx--- <span class="token number">2</span> named named <span class="token number">4096</span> Sep <span class="token number">17</span> <span class="token number">21</span>:49 dynamic
+-rw-r----- <span class="token number">1</span> root  named  <span class="token number">152</span> Jul  <span class="token number">7</span> <span class="token number">22</span>:14 magedu.local.zone
+-rw-r----- <span class="token number">1</span> root  named <span class="token number">2253</span> Jul  <span class="token number">7</span> <span class="token number">22</span>:14 named.ca
+-rw-r----- <span class="token number">1</span> root  named  <span class="token number">152</span> Jul  <span class="token number">7</span> <span class="token number">22</span>:14 named.empty
+-rw-r----- <span class="token number">1</span> root  named  <span class="token number">152</span> Jul  <span class="token number">7</span> <span class="token number">22</span>:14 named.localhost
+-rw-r----- <span class="token number">1</span> root  named  <span class="token number">168</span> Jul  <span class="token number">7</span> <span class="token number">22</span>:14 named.loopback
+drwxrwx--- <span class="token number">2</span> named named <span class="token number">4096</span> Jul  <span class="token number">7</span> <span class="token number">22</span>:14 slaves
+<span class="token punctuation">[</span>root@centos8 named<span class="token punctuation">]</span><span class="token variable">$vim</span> magedu.local.zone 
+<span class="token comment"># 修改magedu.local.zone为以下内容：</span>
+<span class="token variable">$TTL</span> 1D
+@ 	IN 	SOA 	master 	admin.magedu.org. <span class="token punctuation">(</span>		<span class="token punctuation">;</span>master 会自动补全 master.magedu.local
+									<span class="token number">0</span> <span class="token punctuation">;</span> serial
+									1D <span class="token punctuation">;</span> refresh
+									1H <span class="token punctuation">;</span> retry
+									1W <span class="token punctuation">;</span> expire
+									3H <span class="token punctuation">)</span> <span class="token punctuation">;</span> minimum
+		NS 		master
+master 	A 		<span class="token number">10.0</span>.0.175
+www 	A 		<span class="token number">10.0</span>.0.8</code></pre>
+
+<h3 id="4-检查配置文件和数据库文件格式，并启动服务"><a href="#4-检查配置文件和数据库文件格式，并启动服务" class="headerlink" title="4. 检查配置文件和数据库文件格式，并启动服务"></a>4. 检查配置文件和数据库文件格式，并启动服务</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 named<span class="token punctuation">]</span><span class="token variable">$named</span>-checkconf
+<span class="token punctuation">[</span>root@centos8 named<span class="token punctuation">]</span><span class="token variable">$named</span>-checkzone magedu.local.zone /var/named/magedu.local.zone 
+zone magedu.local.zone/IN: loaded serial <span class="token number">0</span>
+OK
+<span class="token comment"># systemctl start named 第一次启动服务</span>
+<span class="token comment"># rndc reload 不是第一次启动服务</span>
+<span class="token punctuation">[</span>root@centos8 named<span class="token punctuation">]</span><span class="token variable">$rndc</span> reload
+server reload successful</code></pre>
+
+<h3 id="5-实现WEB服务"><a href="#5-实现WEB服务" class="headerlink" title="5. 实现WEB服务"></a>5. 实现WEB服务</h3><p>在web服务器10.0.0.8执行以下命令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">'www.magedu.local'</span> <span class="token operator">></span> /var/www/html/index.html</code></pre>
+
+<h3 id="6-在客户端实现测试"><a href="#6-在客户端实现测试" class="headerlink" title="6. 在客户端实现测试"></a>6. 在客户端实现测试</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加DNS从服务器ip到/etc/resolv.conf</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$cat</span> /etc/resolv.conf 
+<span class="token comment"># Generated by NetworkManager</span>
+search magedu.org
+nameserver <span class="token number">10.0</span>.0.175
+
+<span class="token comment"># dig</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$dig</span> www.magedu.local
+
+<span class="token punctuation">;</span> <span class="token operator">&lt;&lt;</span><span class="token operator">>></span> DiG <span class="token number">9.11</span>.4-P2-RedHat-9.11.4-16.P2.el7_8.6 <span class="token operator">&lt;&lt;</span><span class="token operator">>></span> www.magedu.local
+<span class="token punctuation">;</span><span class="token punctuation">;</span> global options: +cmd
+<span class="token punctuation">;</span><span class="token punctuation">;</span> Got answer:
+<span class="token punctuation">;</span><span class="token punctuation">;</span> WARNING: .local is reserved <span class="token keyword">for</span> Multicast DNS
+<span class="token punctuation">;</span><span class="token punctuation">;</span> You are currently testing what happens when an mDNS query is leaked to DNS
+<span class="token punctuation">;</span><span class="token punctuation">;</span> -<span class="token operator">>></span>HEADER<span class="token operator">&lt;&lt;-</span> opcode: QUERY, status: NOERROR, id: <span class="token number">48252</span>
+<span class="token punctuation">;</span><span class="token punctuation">;</span> flags: qr aa rd ra<span class="token punctuation">;</span> QUERY: <span class="token number">1</span>, ANSWER: <span class="token number">1</span>, AUTHORITY: <span class="token number">1</span>, ADDITIONAL: <span class="token number">2</span>
+
+<span class="token punctuation">;</span><span class="token punctuation">;</span> OPT PSEUDOSECTION:
+<span class="token punctuation">;</span> EDNS: version: <span class="token number">0</span>, flags:<span class="token punctuation">;</span> udp: <span class="token number">4096</span>
+<span class="token punctuation">;</span><span class="token punctuation">;</span> QUESTION SECTION:
+<span class="token punctuation">;</span>www.magedu.local.              IN      A
+
+<span class="token punctuation">;</span><span class="token punctuation">;</span> ANSWER SECTION:
+www.magedu.local.       <span class="token number">86400</span>   IN      A       <span class="token number">10.0</span>.0.8
+
+<span class="token punctuation">;</span><span class="token punctuation">;</span> AUTHORITY SECTION:
+magedu.local.           <span class="token number">86400</span>   IN      NS      master.magedu.local.
+
+<span class="token punctuation">;</span><span class="token punctuation">;</span> ADDITIONAL SECTION:
+master.magedu.local.    <span class="token number">86400</span>   IN      A       <span class="token number">10.0</span>.0.175
+
+<span class="token punctuation">;</span><span class="token punctuation">;</span> Query time: <span class="token number">1</span> msec
+<span class="token punctuation">;</span><span class="token punctuation">;</span> SERVER: <span class="token number">10.0</span>.0.175<span class="token comment">#53(10.0.0.175)</span>
+<span class="token punctuation">;</span><span class="token punctuation">;</span> WHEN: Thu Sep <span class="token number">17</span> <span class="token number">19</span>:11:55 CST <span class="token number">2020</span>
+<span class="token punctuation">;</span><span class="token punctuation">;</span> MSG SIZE  rcvd: <span class="token number">98</span>
+
+<span class="token comment"># 能ping通</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$ping</span> www.magedu.local
+PING www.magedu.local <span class="token punctuation">(</span><span class="token number">10.0</span>.0.8<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">10.0</span>.0.8 <span class="token punctuation">(</span><span class="token number">10.0</span>.0.8<span class="token punctuation">)</span>: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.549</span> ms
+<span class="token number">64</span> bytes from <span class="token number">10.0</span>.0.8 <span class="token punctuation">(</span><span class="token number">10.0</span>.0.8<span class="token punctuation">)</span>: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.664</span> ms
+<span class="token number">64</span> bytes from <span class="token number">10.0</span>.0.8 <span class="token punctuation">(</span><span class="token number">10.0</span>.0.8<span class="token punctuation">)</span>: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">3</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.838</span> ms
+^C
+--- www.magedu.local <span class="token function">ping</span> statistics ---
+<span class="token number">3</span> packets transmitted, <span class="token number">3</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 2003ms
+rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token number">0.549</span>/0.683/0.838/0.122 ms
+
+<span class="token comment"># 能访问</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$curl</span> www.magedu.local
+www.magedu.local</code></pre>
+
+<p>查看web服务器查的http访问记录：</p>
+<pre class="language-none"><code class="language-none">[root@centos8 httpd]$cat &#x2F;dev&#x2F;null &gt; access_log 
+[root@centos8 httpd]$tail -f access_log 
+10.0.0.57 - - [17&#x2F;Sep&#x2F;2020:07:47:55 -0400] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 17 &quot;-&quot; &quot;curl&#x2F;7.29.0&quot;</code></pre>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/DNS/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9FDNS%E6%9C%8D%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/DNS/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9FDNS%E6%9C%8D%E5%8A%A1/" class="post-title-link" itemprop="url">域名系统DNS服务</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-04 15:21:56" itemprop="dateCreated datePublished" datetime="2021-02-04T15:21:56+08:00">2021-02-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/DNS/" itemprop="url" rel="index"><span itemprop="name">DNS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="DNS相关概念和技术"><a href="#DNS相关概念和技术" class="headerlink" title="DNS相关概念和技术"></a>DNS相关概念和技术</h2><img data-src="https://img.lujinkai.cn/blog/ljk/1600324177530.png" style="zoom:80%;" />
+
+<img data-src="https://img.lujinkai.cn/blog/ljk/1600307364243.png" style="zoom:80%;" />
+
+<h3 id="DNS查询类型"><a href="#DNS查询类型" class="headerlink" title="DNS查询类型"></a>DNS查询类型</h3><ul>
+<li>递归查询：一般客户机和本地DNS服务器之间属于递归查询。如果本地DNS服务器本身不能解析，则本地DNS服务器向其他DNS服务器发起发出查询请求。</li>
+<li>迭代查询：一般情况下(有例外)本地的DNS服务器向其它DNS服务器的查询属于迭代查询。如果其他DNS服务器也不能解析，则本地DNS服务器再向下一个DNS服务器发出查询请求。</li>
+</ul>
+<h3 id="名称服务器"><a href="#名称服务器" class="headerlink" title="名称服务器"></a>名称服务器</h3><p>Name Server：域内负责解析本域内的名称的DNS服务器</p>
+<h3 id="完整的查询请求经过的流程"><a href="#完整的查询请求经过的流程" class="headerlink" title="完整的查询请求经过的流程"></a>完整的查询请求经过的流程</h3><pre class="language-tex" data-language="tex"><code class="language-tex">Client --&gt;hosts文件 --&gt; Client DNS Service Local Cache --&gt; DNS Server (递归) --&gt; DNS Server Cache --&gt;DNS iteration(迭代) --&gt; 根--&gt; 顶级域名DNS--&gt;二级域名DNS…</code></pre>
+
+<h3 id="DNS服务器类型"><a href="#DNS服务器类型" class="headerlink" title="DNS服务器类型"></a>DNS服务器类型</h3><ul>
+<li><p>主DNS服务器</p>
+<p>管理和维护所负责解析的域内解析库的服务器</p>
+</li>
+<li><p>从DNS服务器</p>
+<p>从主服务器或从服务器“复制”（区域传输）解析库副本。</p>
+<ul>
+<li>序列号：解析库版本号，主服务器解析库变化时，其序列递增</li>
+<li>刷新时间间隔：从服务器从主服务器请求同步解析的时间间隔</li>
+<li>重试时间间隔：从服务器请求同步失败时，再次尝试时间间隔</li>
+<li>过期时长：从服务器联系不到主服务器时，多久后停止服务</li>
+<li>通知机制：主服务器解析库发生变化时，会主动通知从服务器</li>
+</ul>
+</li>
+<li><p>缓存DNS服务器（转发器）</p>
+</li>
+</ul>
+<h3 id="区域传输"><a href="#区域传输" class="headerlink" title="区域传输"></a>区域传输</h3><ul>
+<li>完全传输：传送整个解析库</li>
+<li>增量传输：传递解析库变化的那部分内容</li>
+</ul>
+<h3 id="解析类型"><a href="#解析类型" class="headerlink" title="解析类型"></a>解析类型</h3><ul>
+<li>FQDN（ Fully Qualified Domain Name） –&gt; IP：正向解析</li>
+<li>IP –&gt; FQDN：反向解析</li>
+</ul>
+<p>注意：正反向解析是两个不同的名称空间，是两棵不同的解析树</p>
+<h3 id="负责本地域名的正向和反向解析库"><a href="#负责本地域名的正向和反向解析库" class="headerlink" title="负责本地域名的正向和反向解析库"></a>负责本地域名的正向和反向解析库</h3><ul>
+<li>正向区域</li>
+<li>反向区域</li>
+</ul>
+<h3 id="解析答案"><a href="#解析答案" class="headerlink" title="解析答案"></a>解析答案</h3><ul>
+<li>肯定答案：存在对应的查询结果</li>
+<li>否定答案：请求的条目不存在等原因导致无法返回结果</li>
+<li>权威答案：直接由存有此查询结果的DNS服务器（权威服务器）返回的答案</li>
+<li>非权威答案：由其它非权威服务器返回的查询答案</li>
+</ul>
+<h3 id="资源记录定义格式"><a href="#资源记录定义格式" class="headerlink" title="资源记录定义格式"></a>资源记录定义格式</h3><pre class="language-ini" data-language="ini"><code class="language-ini">name [TTL] IN rr_type value</code></pre>
+
+<ul>
+<li>name：zone的名称，是一个FQDN，通常使用@来表示；zone的名称可以定义变量$ORIGIN来表示，优先继承$ORIGIN</li>
+<li>TTL：可从全局继承</li>
+<li>IN：表示记录类型属于Internet类别</li>
+<li>rr_type：resource record 资源记录</li>
+<li>value：根据资源记录类型的不同，value也不同</li>
+</ul>
+<p>同一个名字可以通过多条记录定义多个不同的值；此时DNS服务器会以轮询方式响应</p>
+<p>同一个值也可能有多个不同的定义名字；通过多个不同的名字指向同一个值进行定义；此仅表示通过多个不同的名字可以找到同一个主机</p>
+<h3 id="各种资源记录"><a href="#各种资源记录" class="headerlink" title="各种资源记录"></a>各种资源记录</h3><p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_26711103/article/details/82873550">https://blog.csdn.net/qq_26711103/article/details/82873550</a></p>
+<p>区域解析库：由众多资源记录RR（Resource Record）组成</p>
+<h4 id="SOA"><a href="#SOA" class="headerlink" title="SOA"></a>SOA</h4><p>Start Of Authority：起始授权记录，一个区域解析库有且仅能有一个SOA记录，必须位于解析库的第一条记录</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">;</span> zone <span class="token function">file</span> fragment <span class="token keyword">for</span> mytest.cn
+    <span class="token punctuation">;</span><span class="token variable">$TTL</span> <span class="token number">600</span>
+    <span class="token variable">$ORIGIN</span> mytest.cn.
+    <span class="token punctuation">;</span> SOA record
+    <span class="token punctuation">;</span> owner-name ttl class rr      name-server      email-addr  <span class="token punctuation">(</span>sn ref ret ex min<span class="token punctuation">)</span>
+    @                 IN   SOA     ns1.mytest.cn.   root.mytest.cn. <span class="token punctuation">(</span>
+                                                                    <span class="token number">0</span>	<span class="token punctuation">;</span> serial
+                                                                    1D	<span class="token punctuation">;</span> refresh
+                                                                    1H	<span class="token punctuation">;</span> retry
+                                                                    1W	<span class="token punctuation">;</span> expire
+                                                                    3H <span class="token punctuation">)</span>	<span class="token punctuation">;</span> minimum
+
+<span class="token comment"># M：分钟；H：小时；D：天；W：周</span></code></pre>
+
+<ul>
+<li>owner-name：当前域的名称，通常用 @ 来表示，优先继承$ORIGIN</li>
+<li>value：可以设置多个值，本例中设置了三个值，依次为：<ol>
+<li><p>name-server：当前域的主DNS服务器的FQDN，形式为xxx.ower-name，ower-name可以省略，例如这里<code>ns1.mytest.cn.</code>还可以写成<code>ns1</code>，下面得配合一条A记录把它解析成ip</p>
+</li>
+<li><p>email-addr：负责此区域的人员的电子邮件地址，因为@在这里有特殊意义，所以用.替代。所以上面的<code>root.mytest.cn.</code>实际上是<code>root.mytest@cn.</code></p>
+</li>
+<li><p>主从服务区域传输相关定义</p>
+<ol>
+<li>serial<br>序列号 – Serial，每次变更区域内容时数值+1，以通知slave同步数据。值范围1 ~ 4294967295，最大增量 2147483647</li>
+<li>refresh<br>更新频率 – Refresh，slave主动向master更新。建议 1200 ~ 43200 秒</li>
+<li>retry<br>重试时间 – Retry，当slave同步数据失败，多少时间内会再次重试同步。典型值为180（3分钟）至900（15分钟）或更高。</li>
+<li>expire<br>失效时间(Expire)，一直尝试的失败时间，持续到这个设定值，指示区域数据不再具有权威性。建议 1209600 ~ 2419200 秒 (2-4 weeks)</li>
+<li>minimum<br>bind9开始将此值重新定义为负缓存时间。任何解析器都可以缓存 NAME ERROR = NXDOMAIN 结果的时间。允许的最大值是 3 hours (10800 seconds). </li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="NS"><a href="#NS" class="headerlink" title="NS"></a>NS</h4><p>Name Server，专用于标明当前区域的DNS服务器，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name [TTL] IN rr_type value</span>
+<span class="token comment"># name: 当前区域的名字</span>
+<span class="token comment"># value: 当前区域的某DNS服务器的名字，例如ns.magedu.org</span>
+magedu.org.   IN  NS  ns1.magedu.org.
+magedu.org.   IN  NS  ns2.magedu.org.</code></pre>
+
+<p>注意：</p>
+<ol>
+<li>相邻的两个资源记录的name相同时，后续的可省略</li>
+<li>对NS记录而言，任何一个ns记录后面的服务器名字，都应该在后续有一个A记录</li>
+<li>一个区域可以有多个NS记录</li>
+</ol>
+<h4 id="MX"><a href="#MX" class="headerlink" title="MX"></a>MX</h4><p>Mail eXchanger，邮件交换器，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name [TTL] IN rr_type value</span>
+<span class="token comment"># name: 当前区域的名字</span>
+<span class="token comment"># value: 当前区域的某邮件服务器(smtp服务器)的主机名</span>
+magedu.org.   IN  MX  10  mx1.magedu.org.
+              IN  MX  20  mx2.magedu.org.
+mx1               A 10.0.0.100
+mx2               A 10.0.0.200</code></pre>
+
+<p>注意：</p>
+<ol>
+<li> 一个区域内，MX记录可有多个；但每个记录的value之前应该有一个数字(0-99)，表示此服务器的优先级；数字越小优先级越高</li>
+<li> 对MX记录而言，任何一个MX记录后面的服务器名字，都应该在后续有一个A记录</li>
+</ol>
+<h4 id="A"><a href="#A" class="headerlink" title="A"></a>A</h4><p>internet Address，作用：FQDN –&gt; IP，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: 某主机的FQDN，例如：www.magedu.org.</span>
+<span class="token comment"># value: 主机名对应主机的IP地址</span>
+<span class="token comment"># 避免用户写错名称时给错误答案，可通过泛域名解析进行解析至某特定地址</span>
+www.magedu.org.         IN  A   1.1.1.1
+www.magedu.org.         IN  A   2.2.2.2
+mx1.magedu.org.         IN  A   3.3.3.3
+mx2.magedu.org.         IN  A   4.4.4.4
+$GENERATE 1-254 HOST$   IN  A   1.2.3.$
+*.magedu.org.           IN  A   5.5.5.5
+magedu.org.             IN  A   6.6.6.6</code></pre>
+
+<h4 id="AAAA"><a href="#AAAA" class="headerlink" title="AAAA"></a>AAAA</h4><p>FQDN –&gt; IPv6</p>
+<pre class="language-none"><code class="language-none">name: FQDN
+value: IPv6</code></pre>
+
+<h4 id="PTR"><a href="#PTR" class="headerlink" title="PTR"></a>PTR</h4><p>PoinTeR，IP –&gt; FQDN，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: IP，有特定格式，把IP地址反过来写，1.2.3.4，要写作4.3.2.1；而有特定后缀：in-addr.arpa.，所以完整写法为：4.3.2.1.in-addr.arpa.</span>
+<span class="token comment"># value: FQDN</span>
+4.3.2.1.in-addr.arpa. 	IN 	PTR 	www.magedu.org.
+<span class="token comment"># 网络地址及后缀可省略；主机地址依然需要反着写，如1.2.3为网络地址，可简写成：</span>
+4 						IN 	PTR 	www.magedu.org.</code></pre>
+
+<h4 id="CNAME"><a href="#CNAME" class="headerlink" title="CNAME"></a>CNAME</h4><p> Canonical Name，别名记录，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: 别名的FQDN</span>
+<span class="token comment"># value: 真正名字的FQDN</span>
+www.magedu.org. IN CNAME websrv.magedu.org.</code></pre>
+
+<h4 id="TXT"><a href="#TXT" class="headerlink" title="TXT"></a>TXT</h4><p>对域名进行标识和说明的一种方式，一般做验证记录时会使用此项，如：SPF（反垃圾邮件）记录，https验证等。范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini">_dnsauth TXT 2012011200000051qgs69bwoh4h6nht4n1h0lr038x</code></pre>
+
+<h3 id="子域授权"><a href="#子域授权" class="headerlink" title="子域授权"></a>子域授权</h3><p>每个域的名称服务器，都是通过其上级名称服务器在解析进行授权。</p>
+<p>glue record：粘合记录，父域授权子域的记录。</p>
+<p>范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini">.com. IN NS ns1.com.
+.com. IN NS ns2.com.
+ns1.com. IN A 2.2.2.1
+ns2.com. IN A 2.2.2.</code></pre>
+
+<h3 id="互联网域名"><a href="#互联网域名" class="headerlink" title="互联网域名"></a>互联网域名</h3><p>注册，备案，解析。。。</p>
+<h2 id="DNS软件bind"><a href="#DNS软件bind" class="headerlink" title="DNS软件bind"></a>DNS软件bind</h2><p>DNS服务器软件：bind、powerdns、dnsmasq、unbound、coredns</p>
+<h3 id="bind相关程序包"><a href="#bind相关程序包" class="headerlink" title="bind相关程序包"></a>bind相关程序包</h3><ul>
+<li>bind：服务端</li>
+<li>bind-libs：相关库</li>
+<li>bind-utils：客户端</li>
+<li>bind-chroot：安全包，默认将dns相关文件放至/var/named/chroot</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#dnf -y install bind bind-utils</span></code></pre>
+
+<h3 id="bind相关文件"><a href="#bind相关文件" class="headerlink" title="bind相关文件"></a>bind相关文件</h3><ul>
+<li>bind主程序：/usr/sbin/named。bind的主程序是named，不同名，有点小奇怪</li>
+<li>服务脚本和Unit名称：/etc/rc.d/init.d/named、/usr/lib/systemd/system/named.service</li>
+<li>主配置文件：/etc/named.conf、etc/named.rfc1912.zones、/etc/rndc.key</li>
+<li>管理工具：/usr/sbin/rndc：remote name domain controller，默认与bind安装在同一主机，且只能通过127.0.0.1连接name进程，提供辅助性的管理功能，953/tcp</li>
+<li>解析库文件：/var/named/ZONE_NAME.ZONE<ul>
+<li>一台物理服务器可同时为多个区域提供解析</li>
+<li>必须要有根区域文件：named.ca</li>
+<li>应该有两个（如果是ipv6，则更多）实现localhost和本地回环地址的解析库</li>
+</ul>
+</li>
+</ul>
+<h3 id="主配置文件"><a href="#主配置文件" class="headerlink" title="主配置文件"></a>主配置文件</h3><ul>
+<li><p>全局配置：options {}</p>
+</li>
+<li><p>日志子系统配置：logging {}</p>
+</li>
+<li><p>区域配置：本机能够为哪些zone进行解析，就要被定义哪些zone</p>
+<pre class="language-none"><code class="language-none">zone “ZONE_NAME” IN &#123;&#125;</code></pre></li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>任何服务器程序如果期望能够通过网络被其他主机访问，至少应该监听在一个能与外部主机通信的IP地址上</li>
+<li>缓存名称服务器配置：监听外部地址即可</li>
+<li>dnssec：建议关闭dnssc，设为no</li>
+</ul>
+<h2 id="实现DNS服务器"><a href="#实现DNS服务器" class="headerlink" title="实现DNS服务器"></a>实现DNS服务器</h2><h3 id="主DNS服务器配置"><a href="#主DNS服务器配置" class="headerlink" title="主DNS服务器配置"></a>主DNS服务器配置</h3><h4 id="1-定义区域"><a href="#1-定义区域" class="headerlink" title="1. 定义区域"></a>1. 定义区域</h4><p>主DNS服务器配置文件：/etc/named.conf，示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#注释掉下面两行</span>
+// listen-on port <span class="token number">53</span> <span class="token punctuation">&#123;</span> <span class="token number">127.0</span>.0.1<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+// allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 添加区域</span>
+zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
+	<span class="token builtin class-name">type</span> <span class="token punctuation">&#123;</span>master<span class="token operator">|</span> slave <span class="token operator">|</span> hint <span class="token operator">|</span> forward<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+	<span class="token function">file</span> <span class="token string">"ZONE_NAME.zone"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<ul>
+<li>listen-on port：监听的地址和端口。注释掉和将<code>127.0.0.1;</code>修改为<code>localhost;</code>效果是一样的，设置<code>127.0.0.1</code>则只会监听地址127.0.0.1，而注释掉或者设置为localhost则监听所有本机地址</li>
+<li>allow-query：允许谁向此DNS进行查询。注释掉和修改<code>localhost;</code>为<code>any;</code>效果是一样的，设置<code>localhost</code>则允许本机的ip地址列表</li>
+</ul>
+<h4 id="2-定义区域解析库文件"><a href="#2-定义区域解析库文件" class="headerlink" title="2. 定义区域解析库文件"></a>2. 定义区域解析库文件</h4><p>默认位置：/var/named/目录下；</p>
+<p>内容包括两部分：宏定义 和 资源记录，范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$TTL</span> <span class="token number">86400</span>
+<span class="token variable">$ORIGIN</span> magedu.org.
+@ 		IN 	SOA 	ns1.magedu.org. 	admin.magedu.org <span class="token punctuation">(</span>
+														<span class="token number">2015042201</span>
+														1H
+														5M
+														7D
+														1D <span class="token punctuation">)</span>
+		IN 	NS	 	ns1
+		IN 	NS	 	ns2
+		IN 	MX	 	<span class="token number">10</span> 					mx1
+		IN 	MX	 	<span class="token number">20</span> 					mx2
+ns1 	IN 	A 		<span class="token number">172.16</span>.100.11
+ns2 	IN 	A 		<span class="token number">172.16</span>.100.12
+mx1 	IN 	A 		<span class="token number">172.16</span>.100.13
+mx2 	IN 	A 		<span class="token number">172.16</span>.100.14
+websrv 	IN 	A 		<span class="token number">172.16</span>.100.11
+websrv 	IN 	A 		<span class="token number">172.16</span>.100.12
+www 	IN 	CNAME 	websrv</code></pre>
+
+<h4 id="3-主配置文件语法检查"><a href="#3-主配置文件语法检查" class="headerlink" title="3. 主配置文件语法检查"></a>3. 主配置文件语法检查</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$named</span>-checkconf</code></pre>
+
+<h4 id="4-主配置文件语法检查"><a href="#4-主配置文件语法检查" class="headerlink" title="4. 主配置文件语法检查"></a>4. 主配置文件语法检查</h4><pre class="language-bash" data-language="bash"><code class="language-bash">named-checkzone <span class="token punctuation">[</span>options<span class="token punctuation">]</span> zonename filename</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$named</span>-checkzone <span class="token string">"magedu.org"</span> /var/named/magedu.org.zone</code></pre>
+
+<h4 id="5-配置生效"><a href="#5-配置生效" class="headerlink" title="5. 配置生效"></a>5. 配置生效</h4><p>三种方式：</p>
+<ul>
+<li><code>rndc reload</code></li>
+<li><code>systemctl reload named</code></li>
+<li><code>service named reload</code></li>
+</ul>
+<h4 id="测试和管理工具"><a href="#测试和管理工具" class="headerlink" title="测试和管理工具"></a>测试和管理工具</h4><h5 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h5><p>dig只用于测试dns系统，不会查询hosts文件进行解析</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">dig</span> <span class="token punctuation">[</span>-t type<span class="token punctuation">]</span> name <span class="token punctuation">[</span>@SERVER<span class="token punctuation">]</span> <span class="token punctuation">[</span>query options<span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li><p>-t：要查询的资源记录类型。默认A，除了AAAA、NS这一类，还可以是 axfr（全区域传输） 和 ixfr（增量区域传输）。</p>
+</li>
+<li><p>query options：</p>
+<p>+[no]trace：跟踪解析过程 : <code>dig +trace magedu.org</code><br>+[no]recurse：进行递归解析</p>
+</li>
+</ul>
+<h5 id="host"><a href="#host" class="headerlink" title="host"></a>host</h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">host</span> <span class="token punctuation">[</span>-t type<span class="token punctuation">]</span> name <span class="token punctuation">[</span>SERVER<span class="token punctuation">]</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">host</span> -t NS magedu.org <span class="token number">172.16</span>.0.1
+<span class="token function">host</span> -t soa magedu.org
+<span class="token function">host</span> -t mx magedu.org
+<span class="token function">host</span> -t axfr magedu.org
+<span class="token function">host</span> <span class="token number">1.2</span>.3.4</code></pre>
+
+<h5 id="nslookup"><a href="#nslookup" class="headerlink" title="nslookup"></a>nslookup</h5><p>nslookup 可以支持交互和非交互式两种方式执行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">nslookup</span> <span class="token punctuation">[</span>-option<span class="token punctuation">]</span> <span class="token punctuation">[</span>name <span class="token operator">|</span> -<span class="token punctuation">]</span> <span class="token punctuation">[</span>server<span class="token punctuation">]</span></code></pre>
+
+<p>交互模式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nslookup<span class="token operator">></span>
+	server IP: 指明使用哪个DNS server进行查询
+	<span class="token builtin class-name">set</span> <span class="token assign-left variable">q</span><span class="token operator">=</span>RR_TYPE: 指明查询的资源记录类型
+	NAME: 要查询的名称</code></pre>
+
+<h5 id="rndc"><a href="#rndc" class="headerlink" title="rndc"></a>rndc</h5><p>利用rndc工具可以实现管理DNS功能，rndc 监听端口: 953/tcp</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">rndc COMMAND</code></pre>
+<ul>
+<li>status: 查看状态</li>
+<li>reload: 重载主配置文件和区域解析库文件</li>
+<li>reload zonename: 重载区域解析库文件</li>
+<li>retransfer zonename: 手动启动区域传送，而不管序列号是否增加</li>
+<li>notify zonename: 重新对区域传送发通知</li>
+<li>reconfig: 重载主配置文件</li>
+<li>querylog: 开启或关闭查询日志文件/var/log/message</li>
+<li>trace: 递增debug一个级别</li>
+<li>trace LEVEL: 指定使用的级别</li>
+<li>notrace：将调试级别设置为 0</li>
+<li>flush：清空DNS服务器的所有缓存记录</li>
+</ul>
+<h4 id="实战案例：实现DNS正向服务器"><a href="#实战案例：实现DNS正向服务器" class="headerlink" title="实战案例：实现DNS正向服务器"></a><a href="%E5%AE%9E%E9%AA%8C1%EF%BC%9ADNS%E6%AD%A3%E5%90%91%E6%9C%8D%E5%8A%A1%E5%99%A8.md">实战案例：实现DNS正向服务器</a></h4><h4 id="允许动态更新"><a href="#允许动态更新" class="headerlink" title="允许动态更新"></a>允许动态更新</h4><p>动态更新：可以通过远程更新区域数据库的资源记录，例如添加删除解析记录</p>
+<p>实现动态更新，需要在指定的zone语句块中添加以下指令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Allow-update <span class="token punctuation">&#123;</span>any<span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="实现反向解析区域"><a href="#实现反向解析区域" class="headerlink" title="实现反向解析区域"></a>实现反向解析区域</h2><h2 id="实现从服务器"><a href="#实现从服务器" class="headerlink" title="实现从服务器"></a>实现从服务器</h2><p>只有一台主DNS服务器，存在单点失败的问题，可以建立主DNS服务器的备份服务器，即从服务器来实现DNS服务的容错机制。从服务器可以自动和主服务器进行单向的数据同步，从而和主DNS服务器一样，也可以对外提供查询服务，但从服务器不提供数据更新服务。</p>
+<h3 id="DNS从服务器"><a href="#DNS从服务器" class="headerlink" title="DNS从服务器"></a>DNS从服务器</h3><ol>
+<li>应该为一台独立的名称服务器</li>
+<li>主服务器的区域解析库文件中必须有一条NS记录指向从服务器</li>
+<li>从服务器只需要定义区域，而无须提供解析库文件；解析库文件应该放置于/var/named/slaves/目录中</li>
+<li>主服务器得允许从服务器作区域传送</li>
+<li>主从服务器时间应该同步，可通过ntp进行</li>
+<li>bind程序的版本应该保持一致；否则，应该从高，主低</li>
+</ol>
+<h3 id="定义从区域"><a href="#定义从区域" class="headerlink" title="定义从区域"></a>定义从区域</h3><p>格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">type</span> slave<span class="token punctuation">;</span>
+    masters <span class="token punctuation">&#123;</span> MASTER_IP<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+    <span class="token function">file</span> <span class="token string">"slaves/ZONE_NAME.zone"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<h3 id="实战案例：实现DNS从服务器"><a href="#实战案例：实现DNS从服务器" class="headerlink" title="实战案例：实现DNS从服务器"></a><a href="%E5%AE%9E%E9%AA%8C2%EF%BC%9ADNS%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8.md">实战案例：实现DNS从服务器</a></h3><h2 id="实现子域"><a href="#实现子域" class="headerlink" title="实现子域"></a>实现子域</h2><p>将子域委派给其他主机管理，实现分布DNS数据库</p>
+<p>正向解析DNS区域子域方法，很简单，只需要配置两条资源记录，一条NS，一条A，范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">shanghai.magedu.local. 	      IN  NS  ns1.shanghai.magedu.local.
+shanghai.magedu.local. 	      IN  NS  ns2.shanghai.magedu.local.
+zhengzhou.magedu.local.       IN  NS  ns1.zhengzhou.magedu.local.
+zhengzhou.magedu.local.       IN  NS  ns2.zhengzhou.magedu.local.
+ns1.shanghai.magedu.local.    IN  A   <span class="token number">1.1</span>.1.1
+ns2.shanghai.magedu.local.    IN  A   <span class="token number">1.1</span>.1.2
+ns1.zhengzhou.magedu.local.   IN  A   <span class="token number">1.1</span>.1.3
+ns2.zhengzhou.magedu.local.   IN  A   <span class="token number">1.1</span>.1.4</code></pre>
+
+<h3 id="范例：实现DNS父域和子域服务"><a href="#范例：实现DNS父域和子域服务" class="headerlink" title="范例：实现DNS父域和子域服务"></a><a href="%E5%AE%9E%E9%AA%8C3%EF%BC%9ADNS%E5%AD%90%E5%9F%9F%E6%9C%8D%E5%8A%A1%E5%99%A8.md">范例：实现DNS父域和子域服务</a></h3><h2 id="实现DNS转发（缓存）服务器"><a href="#实现DNS转发（缓存）服务器" class="headerlink" title="实现DNS转发（缓存）服务器"></a>实现DNS转发（缓存）服务器</h2><p>利用DNS转发，可以将用户的DNS请求，转发至指定的DNS服务器，而非默认的根DNS服务器，并将指定服务器查询的返回结果进行缓存，提高效率</p>
+<p>注意：被转发的服务器需要能够为请求者做递归，否则转发请求不予执行</p>
+<p>转发方式有两种：全局转发 和 特定区域转发</p>
+<p>全局转发：对非本机所负责解析区域的请求，全转发给指定的服务器</p>
+<p>特定区域转发：仅转发对特定的区域的请求，比全局转发优先级高</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 无论全局转发还是特定区域转发，都需要关闭dnssec功能</span>
+options <span class="token punctuation">&#123;</span>
+    dnssec-enable no<span class="token punctuation">;</span>
+    dnssec-validation no<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 全局转发</span>
+options <span class="token punctuation">&#123;</span>
+    forward first<span class="token operator">|</span>only<span class="token punctuation">;</span>
+    forwarders <span class="token punctuation">&#123;</span> <span class="token function">ip</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 特定区域转发</span>
+zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
+<span class="token builtin class-name">type</span> forward<span class="token punctuation">;</span>
+forward first<span class="token operator">|</span>only<span class="token punctuation">;</span>
+forwarders <span class="token punctuation">&#123;</span> <span class="token function">ip</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<ul>
+<li>first：先转发至指定DNS服务器，如果无法解析查询请求，则本服务器再去根服务器查询</li>
+<li>only：先转发至指定DNS服务器，如果无法解析查询请求，则本服务器将不再去根服务器查询</li>
+</ul>
+<p>[实战案例：实现DNS forward（缓存）服务器](实验4：DNS forward（缓存）服务器.md)</p>
+<h2 id="智能DNS"><a href="#智能DNS" class="headerlink" title="智能DNS"></a>智能DNS</h2><h3 id="智能DNS相关技术"><a href="#智能DNS相关技术" class="headerlink" title="智能DNS相关技术"></a>智能DNS相关技术</h3><h4 id="ACL"><a href="#ACL" class="headerlink" title="ACL"></a>ACL</h4><p>ACL：把一个或多个地址归并为一个集合，并通过一个统一的名称调用，简单说就是对发起dns解析请求的客户端的ip进行分类，通常会根据省市地区进行分类</p>
+<p>注意：只能先定义后使用；因此需要定义在options前面</p>
+<p>格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">acl acl_name <span class="token punctuation">&#123;</span>
+	<span class="token comment"># 可以是具体ip，也可以网段</span>
+    <span class="token function">ip</span><span class="token punctuation">;</span>
+    net/prelen<span class="token punctuation">;</span>
+    <span class="token punctuation">..</span>.
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">..</span>.
+options <span class="token punctuation">&#123;</span><span class="token punctuation">..</span>.<span class="token punctuation">&#125;</span></code></pre>
+
+<p>bind 内置4个 acl：none、any、localhost、localnet</p>
+<ul>
+<li>none：没有一个主机</li>
+<li>any：任意主机</li>
+<li>localhost：本机</li>
+<li>localnet：本机的IP同掩码运算后得到的网络地址</li>
+</ul>
+<h4 id="访问控制指令"><a href="#访问控制指令" class="headerlink" title="访问控制指令"></a>访问控制指令</h4><ul>
+<li>allow-query {}： 允许查询的主机；白名单</li>
+<li>allow-transfer {}：允许区域传送的主机；白名单</li>
+<li>allow-recursion {}: 允许递归的主机,建议全局使用</li>
+<li>allow-update {}: 允许更新区域数据库中的内容</li>
+</ul>
+<p>{}中填入的就是acl，范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>		<span class="token comment"># 只处理来自本机的dns解析请求</span></code></pre>
+
+<h4 id="view"><a href="#view" class="headerlink" title="view"></a>view</h4><p>视图，将ACL和区域数据库实现对应关系，以实现智能DNS</p>
+<p>view格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 一个bind服务器可定义多个view，每个view只能匹配一个acl</span>
+<span class="token comment"># 客户端请求到达时，自上而下检查view中的acl</span>
+<span class="token comment"># 当请求者的ip能被acl匹配到，则使用所在view中的zone数据库，处理其dns解析请求</span>
+view VIEW_NAME <span class="token punctuation">&#123;</span>
+	match-clients <span class="token punctuation">&#123;</span> acl_name<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>	<span class="token comment"># match-clients 只能匹配一个acl</span>
+	zone <span class="token string">"ZONE_NAME"</span> <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
+		<span class="token function">file</span> <span class="token string">"ZONE_FILE"</span><span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+	include <span class="token string">"/etc/named.rfc1912.zones"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 来自上海的ip，则匹配到对应的zone数据库</span>
+view VIEW_NAME <span class="token punctuation">&#123;</span>
+	match-clients <span class="token punctuation">&#123;</span> shanghainet<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>		<span class="token comment"># shanghainet是已经定义的acl</span>
+	zone <span class="token string">"magedu.local"</span> <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
+		<span class="token function">file</span> <span class="token string">"magedu.local.zone.sh"</span><span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+	include <span class="token string">"/etc/named.rfc1912.zones"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<ul>
+<li>ACL定义在options之前，view定义在options之后</li>
+<li>一旦启用了view，所有的zone都只能定义在view中</li>
+<li>仅在允许递归请求的客户端所在view中定义根区域</li>
+</ul>
+<h4 id="实战案例：利用view实现智能DNS"><a href="#实战案例：利用view实现智能DNS" class="headerlink" title="实战案例：利用view实现智能DNS"></a><a href="%E5%AE%9E%E9%AA%8C5%EF%BC%9A%E5%88%A9%E7%94%A8view%E5%AE%9E%E7%8E%B0%E6%99%BA%E8%83%BDDNS.md">实战案例：利用view实现智能DNS</a></h4><h3 id="借助智能DNS实现的技术"><a href="#借助智能DNS实现的技术" class="headerlink" title="借助智能DNS实现的技术"></a>借助智能DNS实现的技术</h3><h4 id="GSLB"><a href="#GSLB" class="headerlink" title="GSLB"></a>GSLB</h4><p>Global Server Load Balance 全局负载均衡</p>
+<p>GSLB是对服务器和链路进行综合判断来决定由哪个地点的服务器来提供服务，实现异地服务器群服务质量的保证</p>
+<p>GSLB主要的目的是在整个网络范围内将用户的请求定向到最近的节点（或者区域）</p>
+<p>GSLB分为基于DNS实现、基于重定向实现、基于路由协议实现，其中最通用的是基于DNS解析方式</p>
+<h4 id="CDN"><a href="#CDN" class="headerlink" title="CDN"></a>CDN</h4><ol>
+<li><p>用户向浏览器输入<a target="_blank" rel="noopener" href="http://www.a.com这个域名,浏览器第一次发现本地没有dns缓存,则向网站的dns服务器请求/">www.a.com这个域名，浏览器第一次发现本地没有dns缓存，则向网站的DNS服务器请求</a></p>
+</li>
+<li><p>网站的DNS域名解析器设置了CNAME，指向了<a target="_blank" rel="noopener" href="http://www.a.tbcdn.com,请求指向了cdn网络中的智能dns负载均衡系统/">www.a.tbcdn.com,请求指向了CDN网络中的智能DNS负载均衡系统</a></p>
+</li>
+<li><p>智能DNS负载均衡系统解析域名，把对用户响应速度最快的IP节点返回给用户；</p>
+</li>
+<li><p>用户向该IP节点（CDN服务器）发出请求</p>
+</li>
+<li><p>由于是第一次访问，CDN服务器会通过Cache内部专用DNS解析得到此域名的原web站点IP，向原站点服务器发起请求，并在CDN服务器上缓存内容</p>
+</li>
+<li><p>请求结果发给用户</p>
+</li>
+</ol>
+<h2 id="DNS排错"><a href="#DNS排错" class="headerlink" title="DNS排错"></a>DNS排错</h2><pre class="language-bash" data-language="bash"><code class="language-bash">SERVFAIL:The nameserver encountered a problem <span class="token keyword">while</span> processing the query.
+<span class="token comment"># 可使用dig +trace排错，可能是网络和防火墙导致</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">NXDOMAIN：The queried name does not exist <span class="token keyword">in</span> the zone.
+<span class="token comment"># 可能是CNAME对应的A记录不存在导致</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">REFUSED：The nameserver refused the client's DNS request due to policy restrictions.
+<span class="token comment"># 可能是DNS策略导致</span></code></pre>
+
+<h2 id="实战案例"><a href="#实战案例" class="headerlink" title="实战案例"></a><a href="%E7%BB%BC%E5%90%88%E5%AE%9E%E9%AA%8C.md">实战案例</a></h2><p>综合案例：实现inertnet的DNS服务架构</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -3183,7 +3895,7 @@ drwxr-xr-x <span class="token number">3</span> root root      <span class="token
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-20 01:28:58" itemprop="dateModified" datetime="2021-03-20T01:28:58+08:00">2021-03-20</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -3275,14 +3987,22 @@ kubectl expose rc streamer --port<span class="token operator">=</span><span clas
 kubectl expose rs nginx --port<span class="token operator">=</span><span class="token number">80</span> --target-port<span class="token operator">=</span><span class="token number">8000</span>
 kubectl expose deployment nginx --port<span class="token operator">=</span><span class="token number">80</span> --target-port<span class="token operator">=</span><span class="token number">8000</span></code></pre>
 
-<h4 id="set"><a href="#set" class="headerlink" title="set"></a>set</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">set</span> SUBCOMMAND <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+<h4 id="set-★★★"><a href="#set-★★★" class="headerlink" title="set ★★★"></a>set ★★★</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">set</span> SUBCOMMAND <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 SUBCOMMAND:
-  <span class="token function">env</span>            Update environment variables on a pod template
-  image          Update image of a pod template
+  <span class="token function">env</span>		<span class="token comment"># 更新环境变量，对应deployment的`spec.template.spec.containers.env`</span>
+  image     <span class="token comment"># 更新镜像</span>
   resources      Update resource requests/limits on objects with pod templates
   selector       Set the selector on a resource
   serviceaccount Update ServiceAccount of a resource</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">set</span> image <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> TYPE NAME<span class="token punctuation">)</span> <span class="token assign-left variable">CONTAINER_NAME_1</span><span class="token operator">=</span>CONTAINER_IMAGE_1 <span class="token punctuation">..</span>. <span class="token assign-left variable">CONTAINER_NAME_N</span><span class="token operator">=</span>CONTAINER_IMAGE_N <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例</span>
+kubectl <span class="token builtin class-name">set</span> image deployment/nginx <span class="token assign-left variable">busybox</span><span class="token operator">=</span>busybox <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1
+kubectl <span class="token builtin class-name">set</span> image deployments,rc <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 --all
+kubectl <span class="token builtin class-name">set</span> image daemonset abc *<span class="token operator">=</span>nginx:1.9.1
+kubectl <span class="token builtin class-name">set</span> image -f path/to/file.yaml <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 --local -o yaml</code></pre>
 
 <h4 id="edit"><a href="#edit" class="headerlink" title="edit"></a>edit</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl edit <span class="token punctuation">(</span>RESOURCE/NAME <span class="token operator">|</span> -f FILENAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
@@ -3316,23 +4036,42 @@ kubectl delete pod foo --now
 kubectl delete pod foo --force
 kubectl delete pods --all</code></pre>
 
-<h3 id="部署命令"><a href="#部署命令" class="headerlink" title="部署命令"></a>部署命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">rollout       管理资源的升级和回滚
+<h3 id="部署命令"><a href="#部署命令" class="headerlink" title="部署命令"></a>部署命令</h3><p>参考：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment">回滚 Deployment</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">rollout       管理资源的升级和回滚
 scale         弹性伸缩Pod数量
 autoscale     自动设置运行的pod数量（水平自动伸缩）</code></pre>
 
-<h4 id="rollout"><a href="#rollout" class="headerlink" title="rollout"></a>rollout</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout SUBCOMMAND <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+<h4 id="rollout-★★★"><a href="#rollout-★★★" class="headerlink" title="rollout ★★★"></a>rollout ★★★</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout SUBCOMMAND <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 SUBCOMMAND:
-  <span class="token function">history</span>     View rollout <span class="token function">history</span>
+  <span class="token function">history</span>     查看指定资源的操作记录
   pause       暂停升级
   restart     Restart a resource
   resume      继续升级
   status      Show the status of the rollout
-  undo        升级回滚
+  undo        升级回滚</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout <span class="token function">history</span> <span class="token punctuation">(</span>TYPE NAME <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 <span class="token comment"># 示例：</span>
-kubectl rollout undo deployment/abc
-kubectl rollout status daemonset/foo</code></pre>
+kubectl rollout <span class="token function">history</span> deployment/abc
+deployments <span class="token string">"nginx-deployment"</span>
+EVISION    CHANGE-CAUSE
+<span class="token number">1</span>           kubectl apply --filename<span class="token operator">=</span>nginx-deployment.yaml --record<span class="token operator">=</span>true
+<span class="token number">2</span>           kubectl <span class="token builtin class-name">set</span> image deployment/abc <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 --record<span class="token operator">=</span>true
+<span class="token number">3</span>           kubectl <span class="token builtin class-name">set</span> image deployment/abc <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.91 --record<span class="token operator">=</span>true
+
+kubectl rollout <span class="token function">history</span> daemonset/abc --revision<span class="token operator">=</span><span class="token number">3</span>		<span class="token comment"># 指定版本</span>
+
+kubectl rollout <span class="token function">history</span> deployment.v1.apps/nginx-deployment
+kubectl rollout <span class="token function">history</span> deployment.v1.apps/nginx-deployment --revision<span class="token operator">=</span><span class="token number">2</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout undo <span class="token punctuation">(</span>TYPE NAME <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl rollout undo deployment/abc		<span class="token comment"># 回滚到上个版本</span>
+kubectl rollout undo daemonset/abc --to-revision<span class="token operator">=</span><span class="token number">3</span>	<span class="token comment"># 回滚到指定版本</span>
+kubectl rollout undo --dry-run<span class="token operator">=</span>server deployment/abc</code></pre>
 
 <h4 id="scale"><a href="#scale" class="headerlink" title="scale"></a>scale</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl scale <span class="token punctuation">[</span>--resource-version<span class="token operator">=</span>version<span class="token punctuation">]</span> <span class="token punctuation">[</span>--current-replicas<span class="token operator">=</span>count<span class="token punctuation">]</span> --replicas<span class="token operator">=</span>COUNT <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> <span class="token operator">&lt;</span>TYPE<span class="token operator">></span> <span class="token operator">&lt;</span>NAME<span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
@@ -3352,12 +4091,12 @@ kubectl autoscale rc foo --max<span class="token operator">=</span><span class="
 <h3 id="集群管理命令"><a href="#集群管理命令" class="headerlink" title="集群管理命令"></a>集群管理命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">certificate   Modify certificate resources.
 cluster-info  集群信息
 <span class="token function">top</span>           集群资源 <span class="token punctuation">(</span>CPU/Memory/Storage<span class="token punctuation">)</span> 使用情况
-cordon        警戒线，标记node不被调度
-uncordon      取消警戒标记为cordon的node
+cordon        警戒线，标记node不被调度，即不参加pod调度
+uncordon      取消警戒标记为cordon的node，即参加pod调度
 drain         驱逐node上的pod，用于node下线等场景
 taint         给node标记污点</code></pre>
 
-<h3 id="故障处理和调试命令"><a href="#故障处理和调试命令" class="headerlink" title="故障处理和调试命令"></a>故障处理和调试命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">describe      显示资源或资源组的详细信息
+<h4 id="cordon"><a href="#cordon" class="headerlink" title="cordon"></a>cordon</h4><h4 id="uncordon"><a href="#uncordon" class="headerlink" title="uncordon"></a>uncordon</h4><h3 id="故障处理和调试命令"><a href="#故障处理和调试命令" class="headerlink" title="故障处理和调试命令"></a>故障处理和调试命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">describe      显示资源或资源组的详细信息
 logs          打印pod中容器的日志（标准输出的日志）
 attach        Attach to a running container
 <span class="token builtin class-name">exec</span>          和docker的exec实现一样的功能，只是更加智能，不用考虑容器在哪个节点上
@@ -4240,7 +4979,7 @@ Available Commands:
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-20 01:28:58" itemprop="dateModified" datetime="2021-03-20T01:28:58+08:00">2021-03-20</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -4266,53 +5005,14 @@ Available Commands:
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><strong>资源的作用域，两种级别：</strong></p>
-<ol>
-<li>全局级别，或者说集群级别：整个k8s</li>
-<li>命名空间级别：各种namespace，和php一样，也是为了避免重名</li>
-</ol>
-<p><strong>资源的分类：</strong></p>
-<ol>
-<li><p>工作负载型资源（workload）</p>
-<ol>
-<li>Pod：stateful：有状态；stateless：无状态</li>
-<li>Deployment：最著名的无状态应用编排工具，支持应用的自动扩容、缩荣、滚动更新、金丝雀发布等</li>
-<li>DaemonSet：编排无状态的系统应用</li>
-<li>StatefulSet：编排有状态应用，遗憾的是，没什么意义</li>
-<li>Operator：StatefulSet的下一代</li>
-<li>Job、Cronjob：作业和周期性作业</li>
-</ol>
-</li>
-<li><p>服务发现和负载均衡</p>
-<ol>
-<li>Service</li>
-<li>Ingress</li>
-</ol>
-</li>
-<li><p>配置和存储</p>
-<ol>
-<li>ConfigMap/Secret</li>
-<li>PVC/PV</li>
-<li>Downward API</li>
-<li>role, rolebinding</li>
-</ol>
-</li>
-<li><p>集群级别资源</p>
-<ol>
-<li>namespace</li>
-<li>node</li>
-<li>clusterrole</li>
-</ol>
-</li>
-<li><p>元数据类型</p>
-<ol>
-<li>LimitRange</li>
-<li>…</li>
-</ol>
-</li>
-<li><p>…</p>
-</li>
-</ol>
+          <h2 id="Namespace"><a href="#Namespace" class="headerlink" title="Namespace"></a>Namespace</h2><p>并非所有对象都在名字空间中，大多数 kubernetes 资源（例如 Pod、Service、deployment等）都位于某些Namespace中。 但是Namespace资源本身并不在Namespace中。而且底层资源，例如 Node 和persistentVolumes 不属于任何名字空间</p>
+<p>查看哪些资源在Namespace中，哪些不在Namespace中：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 位于名字空间中的资源</span>
+kubectl api-resources --namespaced<span class="token operator">=</span>true
+
+<span class="token comment"># 不在名字空间中的资源</span>
+kubectl api-resources --namespaced<span class="token operator">=</span>false</code></pre>
+
 <h2 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h2><p>以应用（Pod）为中心：</p>
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1613959187857.png"></p>
 <ul>
@@ -4328,14 +5028,8 @@ Available Commands:
 <p><strong>pause</strong> 是pod的基础设施容器，这个容器的作用是给pod内部容器提供可被加入和共享的net、ipc、uts、namespace，同时我们向一个pod附加volume时，也是附加在pause之上，从而可以被共享给一个pod内的多个容器</p>
 <h3 id="Pod的生命周期"><a href="#Pod的生命周期" class="headerlink" title="Pod的生命周期"></a>Pod的生命周期</h3><p>初始化容器、启动前操作、就绪探针、存活探针、删除pod操作</p>
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1615741115662.png"></p>
-<h2 id="livenessProbe和readinessProbe"><a href="#livenessProbe和readinessProbe" class="headerlink" title="livenessProbe和readinessProbe"></a>livenessProbe和readinessProbe</h2><ul>
-<li><p>livenessProbe：存活探针</p>
-<p>检测应用是否发生故障，检测失败重启pod</p>
-</li>
-<li><p>readinessProbe：就绪探针</p>
-<p>检测pod启动之后应用是否就绪，是否可以提供服务，检测成功，pod才开始接收流量</p>
-</li>
-</ul>
+<h4 id="livenessProb"><a href="#livenessProb" class="headerlink" title="livenessProb"></a>livenessProb</h4><p>存活探针，检测应用是否发生故障，检测失败重启pod</p>
+<h4 id="readinessProbe"><a href="#readinessProbe" class="headerlink" title="readinessProbe"></a>readinessProbe</h4><p>就绪探针，检测pod启动之后应用是否就绪，是否可以提供服务，检测成功，pod才开始接收流量</p>
 <h2 id="控制器（controller）"><a href="#控制器（controller）" class="headerlink" title="控制器（controller）"></a>控制器（controller）</h2><p>控制器有数十种，最常用的是 deployment：无状态应用编排工具</p>
 <table>
 <thead>
@@ -4413,12 +5107,11 @@ Available Commands:
 <pre class="language-none"><code class="language-none">PV：PersistentVolume，持久卷
 PVC：PersistentVolumeClaim，持久卷申领</code></pre>
 
-
-
+<p>PV / PV 用于有状态的服务，例如 MySQL、zookeeper，nfs 用于无状态的服务，例如 nginx、tomcat</p>
 <h2 id="Statefulset-gt-Operator"><a href="#Statefulset-gt-Operator" class="headerlink" title="Statefulset -&gt; Operator"></a>Statefulset -&gt; Operator</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/statefulset/">https://kubernetes.io/zh/docs/concepts/workloads/controllers/statefulset/</a></p>
 <p>deployment 是无状态应用编排工具，而 statefulset 是有状态应用编排工具</p>
 <p>statefulset 本质上是Deployment的一种变体，为了解决有状态服务的问题，statefulset 管理的Pod拥有固定的Pod名称，主机名，启停顺序，在statefulset 中，Pod 名字称为网络标识(hostname)，还必须要用到共享存储</p>
-<p>在 deployment 中，与之对应的服务是 service，而在 statefulset 中与之对应的是 headless service，即无头服务，与 service 的区别就是它没有 Cluster IP，解析它的名称时将返回该 headless service 对应的全部 Pod 的Endpoint列表</p>
+<p>在 deployment 中，与之对应的服务是 service，而在 statefulset 中与之对应的是 <strong>headless service</strong>，即无头服务，与 service 的区别就是它没有 Cluster IP，解析它的名称时将返回该 headless service 对应的全部 Pod 的Endpoint列表</p>
 <p>StatefulSet 特点：</p>
 <ul>
 <li>给每个pdo分配固定且唯一的网络标识符</li>
@@ -6304,548 +6997,6 @@ README-secret.md
 README-secret.md
 <span class="token operator">!</span>README*.md</code></pre>
 
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/docker%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E8%BF%90%E7%BB%B4/Docker/docker%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/" class="post-title-link" itemprop="url">docker容器管理</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-01-08 11:27:26" itemprop="dateCreated datePublished" datetime="2021-01-08T11:27:26+08:00">2021-01-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="容器生命周期"><a href="#容器生命周期" class="headerlink" title="容器生命周期"></a>容器生命周期</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1605789687110.png"></p>
-<h3 id="容器管理docker-container"><a href="#容器管理docker-container" class="headerlink" title="容器管理docker container"></a>容器管理<code>docker container</code></h3><h4 id="启动容器-run"><a href="#启动容器-run" class="headerlink" title="启动容器 run"></a>启动容器 run</h4><p>每次run，都会启动一个新的容器</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker run [选项] [镜像名] [shell命令] [参数]</span>
-docker container run <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> <span class="token punctuation">[</span>ARG<span class="token punctuation">..</span>.<span class="token punctuation">]</span></code></pre>
-
-<p>COMMAND：一次性运行容器中命令</p>
-<p>OPTIONS：</p>
-<ul>
-<li>-i：Keep STDIN open even if not attached，通常和-t一起使用</li>
-<li>-t：分配pseudo-TTY,通常和-i一起使用,注意对应的容器必须运行shell才支持进入</li>
-<li>-d：后台运行容器，并返回容器ID，默认前台运行</li>
-<li>–name string：启动容器时会自动随机字符作为容器名，–name指定容器名称</li>
-<li>-h string：设置虚拟机内的hostname</li>
-<li>–rm：退出后立即删除容器，一次性运行，用于测试</li>
-<li>-p(小写) list：暴露指定端口映射，为避免宿主机端口冲突，要做好端口规划</li>
-<li>-P(大写)：暴露所有端口，随机，默认从32768开始</li>
-<li>port：查看端口映</li>
-<li>–dns list：Set custom DNS servers</li>
-<li>–entrypoint string：Overwrite the default ENTRYPOINT of the image</li>
-<li>–restart policy：</li>
-<li>–privileged：赋予虚拟机内的root真正的root权限，有权限宿主机，没有特殊需求不要使用</li>
-<li>-e=[]：传递环境变量</li>
-<li>–env-file=[]：传递环境变量，文件</li>
-<li>–restart string：容器的重启策略，面向生产环境的启动策略<ul>
-<li>no：默认策略，容器退出时不重启容器</li>
-<li>on-failure：容器非正常退出时（退出状态非0），才会重启容器</li>
-<li>on-failure:3：容器非正常退出时重启容器，最多重启3次</li>
-<li>always：容器退出时总是重启容器，设置为always，则启动docker服务的时候会自动启动容器</li>
-<li>unless-stopped：容器退出时总是重启容器，但是不考虑在docker守护进程启动时就已经停止了的容器</li>
-</ul>
-</li>
-<li>-v：<a href="./docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86/">数据卷相关</a></li>
-</ul>
-<p><strong>注意：容器启动后，如果容器内没有前台运行的进程，将自动退出停止</strong></p>
-<p>退出容器：exit 容器停止；ctrl+p+q 容器不停止</p>
-<h4 id="查看容器信息-ls、top、stats、inspect"><a href="#查看容器信息-ls、top、stats、inspect" class="headerlink" title="查看容器信息 ls、top、stats、inspect"></a>查看容器信息 ls、top、stats、inspect</h4><ul>
-<li>查看当前存在的容器</li>
-</ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker <span class="token function">ps</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
-docker container <span class="token function">ls</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
-
-选项:
--a, --all 查看所所有容器，包括退出状态的容器（默认只显示处于运行状态的容器）
--q, --quiet Only display numeric IDs
--s, --size 显示容器大小
--f, --filter 过滤，例如 <span class="token variable"><span class="token variable">`</span>-f <span class="token assign-left variable">status</span><span class="token operator">=</span>exited<span class="token variable">`</span></span>
--l, --latest 显示最新创建的容器
--n, --last int Show n last created containers <span class="token punctuation">(</span>includes all states<span class="token punctuation">)</span><span class="token punctuation">(</span>default -1<span class="token punctuation">)</span></code></pre>
-
-<ul>
-<li>查看容器内的进程</li>
-</ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker container <span class="token function">top</span> CONTAINER <span class="token punctuation">[</span>ps OPTIONS<span class="token punctuation">]</span></code></pre>
-
-<ul>
-<li>查看容器资源使用情况</li>
-</ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container stats --help</span>
-Usage:	docker container stats <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -a, --all             Show all containers <span class="token punctuation">(</span>default shows just running<span class="token punctuation">)</span>
-  --format string   	Pretty-print images using a Go template
-  --no-stream       	Disable streaming stats and only pull the first result
-  --no-trunc        	Do not truncate output</code></pre>
-
-<ul>
-<li>查看容器的详细信息</li>
-</ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container inspect --help</span>
-Usage:	docker container inspect <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -f, --format string   Format the output using the given Go template
-  -s, --size            Display total <span class="token function">file</span> sizes</code></pre>
-
-<p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker inspect <span class="token number">9997</span>
-docker inspect -f <span class="token string">"&#123;&#123;.Metadata&#125;&#125;"</span> test:v1.0		<span class="token comment"># 选择性查看</span>
-docker inspect -f <span class="token string">"&#123;&#123;.Created&#125;&#125;"</span> c1</code></pre>
-
-<h4 id="删除容器-rm"><a href="#删除容器-rm" class="headerlink" title="删除容器 rm"></a>删除容器 rm</h4><p>rm 删除容器，即使处于运行状态也被强制删除</p>
-<p>prune 删除容器，只删除停止的容器</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container rm --help</span>
-Usage:	docker container <span class="token function">rm</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -f, --force     Force the removal of a running container <span class="token punctuation">(</span>uses SIGKILL<span class="token punctuation">)</span>
-  -l, --link      Remove the specified <span class="token function">link</span>
-  -v, --volumes   同时删除数据卷</code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container prune --help</span>
-Usage:	docker container prune <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
-
-Options:
-  --filter filter   	Provide filter values <span class="token punctuation">(</span>e.g. <span class="token string">'until=&lt;timestamp>'</span><span class="token punctuation">)</span>
-  -f, --force           不提示确认信息</code></pre>
-
-<p>范例：删除指定状态的容器</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker <span class="token function">rm</span> <span class="token variable"><span class="token variable">`</span>docker <span class="token function">ps</span> -qf <span class="token assign-left variable">status</span><span class="token operator">=</span>exited<span class="token variable">`</span></span></code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">alias</span> <span class="token assign-left variable">rmc</span><span class="token operator">=</span><span class="token string">'docker container ls -aq | xargs -n1 docker container rm -f'</span></code></pre>
-
-<h4 id="容器的启动和停止"><a href="#容器的启动和停止" class="headerlink" title="容器的启动和停止"></a>容器的启动和停止</h4><pre class="language-bash" data-language="bash"><code class="language-bash">docker start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>pause<span class="token operator">|</span>unpause 容器ID</code></pre>
-
-<ul>
-<li>start：启动容器，后台启动，并执行默认COMMAND</li>
-<li>stop：关闭容器</li>
-<li>restart：重启容器</li>
-<li>pause：暂停容器中的所有进程</li>
-<li>unpause：恢复容器中的进程</li>
-</ul>
-<h4 id="给正在运行的容器发信号-kill"><a href="#给正在运行的容器发信号-kill" class="headerlink" title="给正在运行的容器发信号 kill"></a>给正在运行的容器发信号 kill</h4><p>默认信号 SIGKILL，即9信号</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container kill --help</span>
-Usage:	docker container <span class="token function">kill</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -s, --signal string   Signal to send to the container <span class="token punctuation">(</span>default <span class="token string">"KILL"</span><span class="token punctuation">)</span></code></pre>
-
-<h4 id="进入正在运行的容器-exec"><a href="#进入正在运行的容器-exec" class="headerlink" title="进入正在运行的容器 exec"></a>进入正在运行的容器 exec</h4><p><code>run -it</code> 是新建容器，并进入，如果要进入正在运行的容器，推荐使用exec，此外 attach 也可以，但是不推荐</p>
-<p>exec 的作用是在运行的容器中执行命令</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container exec --help</span>
-Usage:	docker container <span class="token builtin class-name">exec</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER COMMAND <span class="token punctuation">[</span>ARG<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -d, --detach               Detached mode: run <span class="token builtin class-name">command</span> <span class="token keyword">in</span> the background
-  --detach-keys string   	 Override the key sequence <span class="token keyword">for</span> detaching a container
-  -e, --env list             Set environment variables
-  -i, --interactive          Keep STDIN <span class="token function">open</span> even <span class="token keyword">if</span> not attached
-  --privileged           	 Give extended privileges to the <span class="token builtin class-name">command</span>
-  -t, --tty                  Allocate a pseudo-TTY
-  -u, --user string          Username or <span class="token environment constant">UID</span> <span class="token punctuation">(</span>format: <span class="token operator">&lt;</span>name<span class="token operator">|</span>uid<span class="token operator">></span><span class="token punctuation">[</span>:<span class="token operator">&lt;</span>group<span class="token operator">|</span>gid<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -w, --workdir string       Working directory inside the containe</code></pre>
-
-<p>常见用法：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#常见用法</span>
-docker <span class="token builtin class-name">exec</span> -it 容器ID <span class="token function">sh</span><span class="token operator">|</span><span class="token function">bash</span>	<span class="token comment"># 进入容器，且exit退出但容器不停止</span></code></pre>
-
-<h4 id="暴露端口"><a href="#暴露端口" class="headerlink" title="暴露端口"></a>暴露端口</h4><p>端口映射的本质就是利用NAT技术实现的</p>
-<p>暴露所有端口，随机：大写P</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker container run -P</code></pre>
-
-<p>暴露指定端口：小写p</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker container run -p 
-
-<span class="token comment"># 范例</span>
-docker run -p <span class="token number">80</span> --name nginx-test-port1 nginx	<span class="token comment"># 容器80映射到宿主机随机端口</span>
-docker run -p <span class="token number">81</span>:80 --name nginx-test-port2 nginx	<span class="token comment"># 容器80端口映射到宿主机本地端口81</span>
-docker run -p <span class="token number">10.0</span>.0.100:82:80 --name nginx-test-port3 docker.io/nginx	<span class="token comment"># 指定宿主机ip</span>
-docker run -p <span class="token number">10.0</span>.0.100::80 --name nginx-test-port4 docker.io/nginx
-docker run -p <span class="token number">10.0</span>.0.100:83:80/udp --name nginx-test-port5 docker.io/nginx <span class="token comment">#指定udp，默认tcp</span>
-<span class="token comment"># 一次性映射多个端口+协议</span>
-docker run -p <span class="token number">8080</span>:80/tcp -p <span class="token number">8443</span>:443/tcp -p <span class="token number">53</span>:53/udp --name nginx-test-port6 nginx</code></pre>
-
-<h4 id="查看容器日志-logs"><a href="#查看容器日志-logs" class="headerlink" title="查看容器日志 logs"></a>查看容器日志 logs</h4><p>查看容器中运行的进程在控制台输出的日志信息，如果容器中的进程不在控制台输出日志，那就没办法了，所以这种方法一般不用</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container logs --help</span>
-Usage:	docker container logs <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER
-
-Options:
-  --details        	   Show extra details provided to logs
-  -f, --follow         Follow log output
-  --since string       Show logs since timestamp <span class="token punctuation">(</span>e.g. <span class="token number">2013</span>-01-02T13:23:37<span class="token punctuation">)</span> or relative <span class="token punctuation">(</span>e.g. 42m <span class="token keyword">for</span> <span class="token number">42</span> minutes<span class="token punctuation">)</span>
-  --tail string        Number of lines to show from the end of the logs <span class="token punctuation">(</span>default <span class="token string">"all"</span><span class="token punctuation">)</span>
-  -t, --timestamps     Show timestamps
-  --until string       Show logs before a timestamp <span class="token punctuation">(</span>e.g. <span class="token number">2013</span>-01-02T13:23:37<span class="token punctuation">)</span> or relative <span class="token punctuation">(</span>e.g. 42m <span class="token keyword">for</span> <span class="token number">42</span> minutes<span class="token punctuation">)</span></code></pre>
-
-<h4 id="传递运行命令"><a href="#传递运行命令" class="headerlink" title="传递运行命令"></a>传递运行命令</h4><p>当<code>docker run xxx</code>启动容器，如果xxx容器中没有常驻前台的进程，xxx会认为没什么任务，在启动后马上退出，有的服务支持前台运行，有的不支持，如果服务不支持前台运行，我们可以启动一个常驻前台的进程，阻止容器推出，常用的方式是让容器运行<code>tail -f /etc/hosts</code>命令，注意不要监听频繁更改的文件，避免产生不必要的磁盘IO</p>
-<p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># nginx前台运行，直接后台启动即可</span>
-docker container run -d nginx:1120
-<span class="token comment"># alpine没有常驻前台的进程，以下两种方式均可</span>
-<span class="token comment"># 在容器内执行`/bin/sh`，然后把容器放到宿主机后台，sh是交互式命令，所以也有常驻前台的效果</span>
-docker container run -itd alpine
-docker run -d alpine <span class="token string">'tail -f /etc/hosts'</span></code></pre>
-
-<h4 id="指定容器DNS"><a href="#指定容器DNS" class="headerlink" title="指定容器DNS"></a>指定容器DNS</h4><p>默认采用宿主机的dns地址，可以在run启动容器时指定</p>
-<p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># docker container run -it --dns 1.1.1.1 --dns 8.8.8.8 alpine:1119 </span>
-/ <span class="token comment"># cat /etc/resolv.conf </span>
-search magedu.com
-nameserver <span class="token number">1.1</span>.1.1
-nameserver <span class="token number">8.8</span>.8.8</code></pre>
-
-<h4 id="容器内和宿主机之间复制文件-cp"><a href="#容器内和宿主机之间复制文件-cp" class="headerlink" title="容器内和宿主机之间复制文件 cp"></a>容器内和宿主机之间复制文件 cp</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container cp --help</span>
-Usage:	docker container <span class="token function">cp</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER:SRC_PATH DEST_PATH
-		docker container <span class="token function">cp</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> SRC_PATH CONTAINER:DEST_PATH
-
-Options:
-  -a, --archive       Archive mode <span class="token punctuation">(</span>copy all uid/gid information<span class="token punctuation">)</span>
-  -L, --follow-link   Always follow symbol <span class="token function">link</span> <span class="token keyword">in</span> SRC_PATH</code></pre>
-
-<h4 id="使用systemd控制容器运行"><a href="#使用systemd控制容器运行" class="headerlink" title="使用systemd控制容器运行"></a>使用systemd控制容器运行</h4><p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># /lib/systemd/system/hello.service</span>
-<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
-<span class="token assign-left variable">Description</span><span class="token operator">=</span>Hello World
-<span class="token assign-left variable">After</span><span class="token operator">=</span>docker.service
-<span class="token assign-left variable">Requires</span><span class="token operator">=</span>docker.service
-<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
-<span class="token assign-left variable">TimeoutStartSec</span><span class="token operator">=</span><span class="token number">0</span>
-<span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>-/usr/bin/docker <span class="token function">kill</span> busybox-hello
-<span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>-/usr/bin/docker <span class="token function">rm</span> busybox-hello
-<span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>/usr/bin/docker pull busybox
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/bin/docker run --name busybox-hello busybox /bin/sh -c <span class="token string">"while true; do echo Hello World; sleep 1; done"</span>
-<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/usr/bin/docker <span class="token function">kill</span> busybox-hello
-<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
-<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target</code></pre>
-
-<h4 id="传递环境变量"><a href="#传递环境变量" class="headerlink" title="传递环境变量"></a>传递环境变量</h4><p><code>docker container -e</code> 和 <code>docker container --env-file</code> </p>
-<p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker run <span class="token punctuation">\</span>
-	-d <span class="token punctuation">\</span>
-    --name mysql-test1 <span class="token punctuation">\</span>
-    -v /data/mysql:/var/lib/mysql <span class="token punctuation">\</span>
-    -p <span class="token number">3306</span>:3306 <span class="token punctuation">\</span>
-    -e <span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span> <span class="token punctuation">\</span>
-    -e <span class="token assign-left variable">MYSQL_DATABASE</span><span class="token operator">=</span>wordpress <span class="token punctuation">\</span>
-    -e <span class="token assign-left variable">MYSQL_USER</span><span class="token operator">=</span>wpuser <span class="token punctuation">\</span>
-    -e <span class="token assign-left variable">MYSQL_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span> <span class="token punctuation">\</span>
-    mysql:5.7.30
-
-<span class="token comment"># 或</span>
-docker run <span class="token punctuation">\</span>
-    -d <span class="token punctuation">\</span>
-    --name mysql-test2 <span class="token punctuation">\</span>
-    -v /root/mysql/:/etc/mysql/conf.d <span class="token punctuation">\</span>
-    -v /data/mysql2:/var/lib/mysql <span class="token punctuation">\</span>
-    -p <span class="token number">3307</span>:3306 <span class="token punctuation">\</span>
-    --env-file<span class="token operator">=</span>env.list <span class="token punctuation">\</span>
-    mysql:5.7.30
-    
-<span class="token function">cat</span> env.list
-<span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span>
-<span class="token assign-left variable">MYSQL_DATABASE</span><span class="token operator">=</span>wordpress
-<span class="token assign-left variable">MYSQL_USER</span><span class="token operator">=</span>wpuser
-<span class="token assign-left variable">MYSQL_PASSWORD</span><span class="token operator">=</span>wppass</code></pre>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/docker%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E8%BF%90%E7%BB%B4/Docker/docker%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86/" class="post-title-link" itemprop="url">docker镜像管理</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-01-08 11:27:17" itemprop="dateCreated datePublished" datetime="2021-01-08T11:27:17+08:00">2021-01-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="镜像结构和原理"><a href="#镜像结构和原理" class="headerlink" title="镜像结构和原理"></a>镜像结构和原理</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1605682923317.png"></p>
-<p>镜像就是创建容器的模板，含有启动容器所需要的文件系统及所需要的内容，因此镜像主要用于方便和快速的创建并启动容器</p>
-<p>镜像理由是一层一层的文件系统：Union FS（联合文件系统），可以将几层目录挂载到一起（类似俄罗斯套娃），形成一个虚拟文件系统，虚拟文件系统的目录结构就像普通linux目录结构一样，镜像通过这些文件，再加上宿主机的内核共同构成了一个linux的虚拟环境，每一层文件系统叫做一层layer，联合文件系统可以对每一层文件系统设置三种权限：readonly、readwrite、writeout-able。但是镜像中每一层文件系统都是只读的，构建镜像的时候，从一个最基本的操作系统开始，每个构建提交的操作都相当与做一层的修改，增加了一层文件系统，一层层往上叠加，上层的修改会覆盖底层该位置的可见性，当使用镜像的时候，我们只会看见一个整体，并不知道里面有几层，实际上也不需要知道</p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1605708696833.png"></p>
-<p>一个典型的Linux文件系统由bootfs和rootfs两部分组成</p>
-<p>bootfs（boot file system）主要包含bootloader和kernel，bootloader主要用于引导加载kernel。系统刚启动时会加载bootfs文件系统，kernel加载到内存后，接管系统的控制权，bootfs就会被umount掉</p>
-<p>rootfs（root file system）就是我们看到的/dev、/proc、/bin、/etc等目录和文件，不同的linux发行版本（如ubuntu和centos）主要在rootfs这一层会有所区别</p>
-<p>一般的镜像通常都比较小，镜像直接调用宿主机的内核，镜像中只提供rootfs，也就是只需包括最基本的命令、配置文件和程序库等相关文件就可以了</p>
-<h4 id="容器、镜像和父镜像关系："><a href="#容器、镜像和父镜像关系：" class="headerlink" title="容器、镜像和父镜像关系："></a>容器、镜像和父镜像关系：</h4><p><img data-src="https://img.lujinkai.cn/blog/ljk/1605708732600.png"></p>
-<h3 id="alpine-介绍"><a href="#alpine-介绍" class="headerlink" title="alpine 介绍"></a>alpine 介绍</h3><p>Alpine 操作系统是一个面向安全的轻型 Linux 发行版。它不同于通常 Linux 发行版,Alpine 采用了musl libc 和 busybox 以减小系统的体积和运行时资源消耗，但功能上比 busybox 又完善的多，因此得到开源社区越来越多的青睐。在保持瘦身的同时，Alpine 还提供了自己的包管理工具 apk，可以通过<a target="_blank" rel="noopener" href="https://pkgs.alpinelinux.org/packages">https://pkgs.alpinelinux.org/packages</a> 网站上查询包信息，也可以直接通过 apk 命令直接查询和安装各种软件。</p>
-<p>Alpine 由非商业组织维护的，支持广泛场景的 Linux发行版，它特别为资深/重度Linux用户而优化，关注安全，性能和资源效能。Alpine 镜像可以适用于更多常用场景，并且是一个优秀的可以适用于生产的基础系统/环境。</p>
-<p>Alpine Docker 镜像也继承了 Alpine Linux 发行版的这些优势。相比于其他 Docker 镜像，它的容量非常小，仅仅只有 5 MB 左右(对比 Ubuntu 系列镜像接近 200 MB)，且拥有非常友好的包管理机制。官方镜像来自 docker-alpine 项目。</p>
-<p>目前 Docker 官方已开始推荐使用 Alpine 替代之前的 Ubuntu 做为基础镜像环境。这样会带来多个好处。包括镜像下载速度加快，镜像安全性提高，主机之间的切换更方便，占用更少磁盘空间等。</p>
-<ul>
-<li>Alpine 官网: <a target="_blank" rel="noopener" href="https://www.alpinelinux.org/">https://www.alpinelinux.org/</a></li>
-<li>Alpine 官方仓库: <a target="_blank" rel="noopener" href="https://github.com/alpinelinux">https://github.com/alpinelinux</a></li>
-<li>Alpine 官方镜像: <a target="_blank" rel="noopener" href="https://hub.docker.com/_/alpine/">https://hub.docker.com/_/alpine/</a></li>
-<li>Alpine 官方镜像仓库: <a target="_blank" rel="noopener" href="https://github.com/gliderlabs/docker-alpine">https://github.com/gliderlabs/docker-alpine</a></li>
-<li>Alpine 阿里云的镜像仓库: <a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/alpine/">https://mirrors.aliyun.com/alpine/</a></li>
-</ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#修改源替换成阿里源：将/etc/apk/repositories中的 dl-cdn.alpinelinux.org 改成 mirrors.aliyun.com</span>
-<span class="token function">sed</span> -i <span class="token string">'s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/'</span> /etc/apk/repositories
-<span class="token comment">#更新源</span>
-apk update
-<span class="token comment"># 查找可用软件包</span>
-apk search <span class="token punctuation">[</span>vim<span class="token punctuation">]</span>
-<span class="token comment"># 列出软件信息</span>
-apk info <span class="token punctuation">[</span>vim<span class="token punctuation">]</span>
-<span class="token comment">#安装软件</span>
-apk <span class="token function">add</span> <span class="token function">vim</span>
-<span class="token comment">#删除软件</span>
-apk del openssh openntp <span class="token function">vim</span></code></pre>
-
-<h3 id="搜索镜像"><a href="#搜索镜像" class="headerlink" title="搜索镜像"></a>搜索镜像</h3><ul>
-<li>官方网站进行镜像的搜索：<a target="_blank" rel="noopener" href="http://hub.docker.com/">http://hub.docker.com</a></li>
-<li>执行<code>docker search</code>命令进行搜索</li>
-</ul>
-<p>如果联网下载，一般不会使用命令搜索，而是去官网搜索</p>
-<h3 id="docker镜像加速"><a href="#docker镜像加速" class="headerlink" title="docker镜像加速"></a>docker镜像加速</h3><p>登录阿里云 –&gt; 容器镜像服务 –&gt; 镜像中心 –&gt; 镜像加速器</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mkdir</span> -p /etc/docker
-<span class="token function">sudo</span> <span class="token function">tee</span> /etc/docker/daemon.json <span class="token operator">&lt;&lt;-</span><span class="token string">'EOF'
-&#123;
-  "registry-mirrors": ["https://3417nt4m.mirror.aliyuncs.com"]
-&#125;
-EOF</span>
-<span class="token function">sudo</span> systemctl daemon-reload
-<span class="token function">sudo</span> systemctl restart docker</code></pre>
-
-<h3 id="docker-image"><a href="#docker-image" class="headerlink" title="docker image"></a><code>docker image</code></h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker help image</span>
-Usage:	docker image COMMAND
-
-Commands:
-  build       Build an image from a Dockerfile
-  <span class="token function">history</span>     Show the <span class="token function">history</span> of an image
-  <span class="token function">import</span>      Import the contents from a tarball to create a filesystem image
-  inspect     Display detailed information on one or <span class="token function">more</span> images
-  load        Load an image from a <span class="token function">tar</span> archive or STDIN
-  <span class="token function">ls</span>          List images
-  prune       Remove unused images
-  pull        Pull an image or a repository from a registry
-  push        Push an image or a repository to a registry
-  <span class="token function">rm</span>          Remove one or <span class="token function">more</span> images
-  save        Save one or <span class="token function">more</span> images to a <span class="token function">tar</span> archive <span class="token punctuation">(</span>streamed to STDOUT by default<span class="token punctuation">)</span>
-  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE</code></pre>
-
-<h4 id="下载镜像-pull"><a href="#下载镜像-pull" class="headerlink" title="下载镜像 pull"></a>下载镜像 pull</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker help pull</span>
-docker pull <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> NAME<span class="token punctuation">[</span>:TAG<span class="token operator">|</span>@DIGEST<span class="token punctuation">]</span>
-
-Options:
-  -a, --all-tags                Download all tagged images <span class="token keyword">in</span> the repository
-  --disable-content-trust   	Skip image verification <span class="token punctuation">(</span>default <span class="token boolean">true</span><span class="token punctuation">)</span>
-  --platform string         	Set platform <span class="token keyword">if</span> server is multi-platform capable
-  -q, --quiet                   Suppress verbose output</code></pre>
-
-<ul>
-<li>NAME：镜像名，仓库服务器:端口/项目名称/镜像名称</li>
-<li>:TAG：版本号,如果不指定:TAG,则下载最新版镜像</li>
-</ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@ubuntu1804 ~<span class="token punctuation">]</span><span class="token comment">#docker pull hello-world</span>
-Using default tag: latest		<span class="token comment">#默认下载最新版本</span>
-latest: Pulling from library/hello-world
-1b930d010525: Pull complete		<span class="token comment">#分层下载</span>
-Digest: sha256:9572f7cdcee8591948c2963463447a53466950b3fc15a247fcad1917ca215a2f	<span class="token comment">#摘要</span>
-Status: Downloaded newer image <span class="token keyword">for</span> hello-world:latest
-docker.io/library/hello-world:latest	<span class="token comment">#下载的完整地址</span></code></pre>
-
-<p>下载后的镜像位于：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">/var/lib/docker/overlay2</code></pre>
-
-<h4 id="查看本地镜像-ls"><a href="#查看本地镜像-ls" class="headerlink" title="查看本地镜像 ls"></a>查看本地镜像 ls</h4><pre class="language-bash" data-language="bash"><code class="language-bash">docker image <span class="token function">ls</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token punctuation">[</span>REPOSITORY<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span><span class="token punctuation">]</span>
-
-Options:
-  -a, --all             Show all images <span class="token punctuation">(</span>default hides intermediate images<span class="token punctuation">)</span>
-  --digests         	Show digests
-  -f, --filter filter   Filter output based on conditions provided
-  --format string   	Pretty-print images using a Go template
-  --no-trunc        	Don't truncate output
-  -q, --quiet           Only show numeric IDs</code></pre>
-
-<h4 id="镜像导出-save"><a href="#镜像导出-save" class="headerlink" title="镜像导出 save"></a>镜像导出 save</h4><p>将本地镜像到处为一个文件(tar格式)，然后复制到其他服务器，导入使用</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker help image save</span>
-Usage:	docker image save <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>IMAGE<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -o, --output string   Write to a file, instead of STDOUT</code></pre>
-
-<p>常见用法：以下两种用法等价</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker save -o /path/file.tar IMAGE1 IMAGE2 <span class="token punctuation">..</span>.
-docker save IMAGE1 IMAGE2 <span class="token punctuation">..</span>. <span class="token operator">></span> /path/file.tar</code></pre>
-
-<h4 id="镜像导入-load"><a href="#镜像导入-load" class="headerlink" title="镜像导入 load"></a>镜像导入 load</h4><p>将 <code>docker image save</code> 导出的镜像压缩文件再导入</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker help image load</span>
-
-Usage:	docker image load <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
-
-Options:
-  -i, --input string   Read from <span class="token function">tar</span> archive file, instead of STDIN
-  -q, --quiet          Suppress the load output</code></pre>
-
-<p>常见用法：以下两种用法等价</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker load -i /data/myimages.tar
-docker load <span class="token operator">&lt;</span> /data/myimages.tar</code></pre>
-
-<h4 id="删除镜像-rm"><a href="#删除镜像-rm" class="headerlink" title="删除镜像 rm"></a>删除镜像 rm</h4><p>删除本地镜像</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker help image rm</span>
-Usage:	docker image <span class="token function">rm</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>IMAGE<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Aliases:
-  rm, rmi, remove
-
-Options:
-  -f, --force      Force removal of the image		<span class="token comment"># 强制删除</span>
-  --no-prune   	   Do not delete untagged parents</code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">alias</span> <span class="token assign-left variable">rmi</span><span class="token operator">=</span><span class="token string">'docker image ls -aq | xargs -n1 docker image rm'</span></code></pre>
-
-<h4 id="镜像打标签-tag"><a href="#镜像打标签-tag" class="headerlink" title="镜像打标签 tag"></a>镜像打标签 tag</h4><p>给镜像打标签，类似于起别名，但通常要遵守一定的命名规范，才可以上传到指定的仓库</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">docker image tag SOURCE_IMAGE<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span> TARGET_IMAGE<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span></code></pre>
-
-<p>TARGET_IMAGE[:TAG]格式一般为：<code>仓库主机FQDN或IP[:端口]/项目名(或用户名)/image名字:版本</code></p>
-<p>tag 默认为 latest</p>
-<p>先tag给镜像打标签，然后再save导出镜像，拷贝到其他机器，其他机器可以load导入</p>
 
       
     </div>
