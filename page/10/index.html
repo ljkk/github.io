@@ -188,7 +188,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">235</span>
+          <span class="site-state-item-count">236</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -199,7 +199,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">213</span>
+        <span class="site-state-item-count">214</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -234,6 +234,104 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/Python/%E5%9F%BA%E7%A1%80/with/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/Python/%E5%9F%BA%E7%A1%80/with/" class="post-title-link" itemprop="url">with</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:53:20" itemprop="dateCreated datePublished" datetime="2020-12-09T13:53:20+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Python/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="上下文管理器"><a href="#上下文管理器" class="headerlink" title="上下文管理器"></a>上下文管理器</h2><p><font style="background:#0f0"><strong>任何实现了 <strong>enter</strong>() 和 <strong>exit</strong>() 方法的对象都可称之为上下文管理器</strong></font>, 上下文管理器对象可以使用with关键字, 显然, 文件(file)对象也实现了上下文管理器。</p>
+<p>Python 还提供了一个 contextmanager 的装饰器，更进一步简化了上下文管理器的实现方式。<font color="blue">通过 yield 将函数分割成两部分，yield 之前的语句在 <strong>enter</strong> 方法中执行，yield 之后的语句在 <strong>exit</strong> 方法中执行</font>。紧跟在 yield 后面的值是函数的返回值。</p>
+<pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> contextlib <span class="token keyword">import</span> contextmanager
+
+<span class="token decorator annotation punctuation">@contextmanager</span>
+<span class="token keyword">def</span> <span class="token function">my_open</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> mode<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    f <span class="token operator">=</span> <span class="token builtin">open</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> mode<span class="token punctuation">)</span>
+    <span class="token keyword">yield</span> f
+    f<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
+
+<p>调用:</p>
+<pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">with</span> my_open<span class="token punctuation">(</span><span class="token string">'out.txt'</span><span class="token punctuation">,</span> <span class="token string">'w'</span><span class="token punctuation">)</span> <span class="token keyword">as</span> f<span class="token punctuation">:</span>
+    f<span class="token punctuation">.</span>write<span class="token punctuation">(</span><span class="token string">"hello , the simplest context manager"</span><span class="token punctuation">)</span></code></pre>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Python 提供了 <span style="background-color:#00CC00"><strong>with 语法用于简化资源操作的后续清除操作，是 try/finally 的替代方法，实现原理建立在上下文管理器之上</strong></span>。此外，Python 还提供了一个 contextmanager 装饰器，更进一步简化上下管理器的实现方式。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -2172,108 +2270,6 @@ f <span class="token operator">=</span> Fn<span class="token punctuation">(</spa
 <span class="token number">174</span>     <span class="token keyword">char</span>              val<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>   <span class="token comment">// 柔性数组一定放在结构体的尾部</span>
 <span class="token number">175</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
 
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B_zend_reference/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E6%BA%90%E7%A0%81/%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B_zend_reference/" class="post-title-link" itemprop="url">引用类型_zend_reference</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-09 13:11:23" itemprop="dateCreated datePublished" datetime="2020-12-09T13:11:23+08:00">2020-12-09</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <pre class="language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
-<span class="token variable">$a</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"string"</span><span class="token punctuation">;</span>
-<span class="token variable">$b</span> <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token variable">$a</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token variable">$a</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token variable">$b</span><span class="token punctuation">;</span>
-
-<span class="token variable">$b</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"hello!"</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token variable">$a</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token variable">$b</span><span class="token punctuation">;</span>
-
-<span class="token keyword">unset</span><span class="token punctuation">(</span><span class="token variable">$b</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token variable">$b</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token variable">$a</span><span class="token punctuation">;</span></span></code></pre>
-
-<p>4、5行输出$a和$b都是引用类型，$b引用$a，但是$a也会变成引用类型 zend_reference，$a和$b的zval都指向同一个zend_reference。zend_reference中的zval中的u1.type=6,表示字符串类型, <code>p *z.value.ref.val.value.str.val@6</code>  string</p>
-<p>8、9行$a和$b指向的zend_reference中的zval类型还是字符串,但是打印出来已经都是helle!了</p>
-<p>12行 $b指向的zval显示类型是0,也就是IS_UNDEF</p>
-<p>13行 $a 的zval的type依然是10(引用类型), 打印仍然是hello!</p>
-<p>可以看出, 11行unset($b)的操作,仅仅是把$b的zval中的type由10改成0, 其他的完全不动。</p>
 
       
     </div>
