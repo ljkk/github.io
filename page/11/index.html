@@ -188,7 +188,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">235</span>
+          <span class="site-state-item-count">238</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -199,7 +199,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">213</span>
+        <span class="site-state-item-count">215</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -243,6 +243,226 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%AD%97%E7%AC%A6%E4%B8%B2_zend_string/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/PHP/%E6%BA%90%E7%A0%81/%E5%AD%97%E7%AC%A6%E4%B8%B2_zend_string/" class="post-title-link" itemprop="url">字符串_zend_string</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:13:56" itemprop="dateCreated datePublished" datetime="2020-12-09T13:13:56+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>写时复制: </p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token variable">$a</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'this is string'</span><span class="token punctuation">;</span>
+<span class="token variable">$b</span> <span class="token operator">=</span> <span class="token variable">$a</span><span class="token punctuation">;</span></code></pre>
+
+<p>此时,$a和$b在内存中指向同一地址, 当修改$a或者$b的时候, 才会复制一份, 然后对复制的这份进行修改</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token number">146</span> <span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_refcounted_h</span> <span class="token punctuation">&#123;</span>
+<span class="token number">147</span>     <span class="token class-name">uint32_t</span>         refcount<span class="token punctuation">;</span>          <span class="token comment">/* reference counter 32-bit
+148     php7.1中常量字符串refcount=0，依靠u来标记常量，在7.3中已经改掉了*/</span>
+<span class="token number">149</span>     <span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
+<span class="token number">150</span>         <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+<span class="token number">151</span>             <span class="token function">ZEND_ENDIAN_LOHI_3</span><span class="token punctuation">(</span>
+<span class="token number">152</span>                 zend_uchar    type<span class="token punctuation">,</span>
+<span class="token number">153</span>                 zend_uchar    flags<span class="token punctuation">,</span>    <span class="token comment">/* used for strings &amp; objects
+154                 存储字符串的类型，例如：常量字符串2，变量字符串0 */</span>
+<span class="token number">155</span>                 <span class="token class-name">uint16_t</span>      gc_info<span class="token punctuation">)</span>  <span class="token comment">/* keeps GC root number (or 0) and color */</span>
+<span class="token number">156</span>         <span class="token punctuation">&#125;</span> v<span class="token punctuation">;</span>
+<span class="token number">157</span>         <span class="token class-name">uint32_t</span> type_info<span class="token punctuation">;</span>
+<span class="token number">158</span>     <span class="token punctuation">&#125;</span> u<span class="token punctuation">;</span>
+<span class="token number">159</span> <span class="token punctuation">&#125;</span> zend_refcounted_h<span class="token punctuation">;</span>
+<span class="token number">160</span> 
+<span class="token number">161</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_refcounted</span> <span class="token punctuation">&#123;</span>
+<span class="token number">162</span>     zend_refcounted_h gc<span class="token punctuation">;</span>
+<span class="token number">163</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token number">165</span> <span class="token comment">// 写时复制：对于整型或者其他简单类型的，因为zval 16个字节就可以表示了，所以是直接复制的</span>
+<span class="token number">166</span> <span class="token comment">// 而对于zend_string, `$a = 'string'; $b = $a;` $a和$b的zval指向的是同一个zend_string,用zend_string中的</span>
+<span class="token number">167</span> <span class="token comment">// gc中的refcount进行标记，2，表示这个zeng_string被两个zval引用了，当我们修改$b的时候，就是修改$b指向的zval，</span>
+<span class="token number">168</span> <span class="token comment">// $b指向zval的地址没变，但是zval的内容变了</span>
+<span class="token number">169</span> <span class="token comment">// 同时原先的zend_string的gc也会修改，refcount减1</span>
+<span class="token number">170</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_string</span> <span class="token punctuation">&#123;</span>
+<span class="token number">171</span>     zend_refcounted_h gc<span class="token punctuation">;</span>
+<span class="token number">172</span>     zend_ulong        h<span class="token punctuation">;</span>                <span class="token comment">/* hash value 以空间换时间 */</span>
+<span class="token number">173</span>     <span class="token class-name">size_t</span>            len<span class="token punctuation">;</span>
+<span class="token number">174</span>     <span class="token keyword">char</span>              val<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>   <span class="token comment">// 柔性数组一定放在结构体的尾部</span>
+<span class="token number">175</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B_zend_reference/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/PHP/%E6%BA%90%E7%A0%81/%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B_zend_reference/" class="post-title-link" itemprop="url">引用类型_zend_reference</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:11:23" itemprop="dateCreated datePublished" datetime="2020-12-09T13:11:23+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <pre class="language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token variable">$a</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"string"</span><span class="token punctuation">;</span>
+<span class="token variable">$b</span> <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token variable">$a</span><span class="token punctuation">;</span>
+<span class="token keyword">echo</span> <span class="token variable">$a</span><span class="token punctuation">;</span>
+<span class="token keyword">echo</span> <span class="token variable">$b</span><span class="token punctuation">;</span>
+
+<span class="token variable">$b</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"hello!"</span><span class="token punctuation">;</span>
+<span class="token keyword">echo</span> <span class="token variable">$a</span><span class="token punctuation">;</span>
+<span class="token keyword">echo</span> <span class="token variable">$b</span><span class="token punctuation">;</span>
+
+<span class="token keyword">unset</span><span class="token punctuation">(</span><span class="token variable">$b</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">echo</span> <span class="token variable">$b</span><span class="token punctuation">;</span>
+<span class="token keyword">echo</span> <span class="token variable">$a</span><span class="token punctuation">;</span></span></code></pre>
+
+<p>4、5行输出$a和$b都是引用类型，$b引用$a，但是$a也会变成引用类型 zend_reference，$a和$b的zval都指向同一个zend_reference。zend_reference中的zval中的u1.type=6,表示字符串类型, <code>p *z.value.ref.val.value.str.val@6</code>  string</p>
+<p>8、9行$a和$b指向的zend_reference中的zval类型还是字符串,但是打印出来已经都是helle!了</p>
+<p>12行 $b指向的zval显示类型是0,也就是IS_UNDEF</p>
+<p>13行 $a 的zval的type依然是10(引用类型), 打印仍然是hello!</p>
+<p>可以看出, 11行unset($b)的操作,仅仅是把$b的zval中的type由10改成0, 其他的完全不动。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%B0%8F%E8%80%8C%E5%B7%A7%E7%9A%84zval/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -274,7 +494,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -652,7 +872,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -752,7 +972,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -865,7 +1085,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -992,6 +1212,94 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/LVS/%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E5%92%8C%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/LVS/%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E5%92%8C%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/" class="post-title-link" itemprop="url">正向代理和反向代理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 09:24:12" itemprop="dateCreated datePublished" datetime="2020-12-09T09:24:12+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-22 13:16:00" itemprop="dateModified" datetime="2021-03-22T13:16:00+08:00">2021-03-22</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/LVS/" itemprop="url" rel="index"><span itemprop="name">LVS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>正向代理和反向代理的本质区别是是什么？</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/36412304">https://www.zhihu.com/question/36412304</a></p>
+<p>正向代理：客户机必须指定代理服务器，并将本来要直接发送到Web服务器上的http请求发送到代理服务器中</p>
+<p>反向代理：代理服务器接受Internet上的连接请求，然后将请求转发给内部网络的服务器；并将从服务器上得到的结果返回给Internet上请求连接的客户端，此时代理服务器对外就表现为一个服务器</p>
+<p>正向代理对客户端负责，反向代理对其代理的服务器负责，搭梯子就是典型的正向代理，而LVS、haproxy、nginx等都是反向代理</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/mysql5.7%20datetime%20%E9%BB%98%E8%AE%A4%E5%80%BC%E4%B8%BA'0000-00-00%20000000'%E6%97%A0%E6%B3%95%E5%88%9B%E5%BB%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1023,7 +1331,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1134,7 +1442,7 @@ CREATE TABLE &#96;yx_test&#96; (
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1378,7 +1686,7 @@ ServerAliveCountMax 9		&#x2F;&#x2F; 9次没有响应就断开连接</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1507,7 +1815,7 @@ ServerAliveCountMax 9		&#x2F;&#x2F; 9次没有响应就断开连接</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1742,7 +2050,7 @@ ServerAliveCountMax 9		&#x2F;&#x2F; 9次没有响应就断开连接</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
 
   
@@ -1948,7 +2256,7 @@ router<span class="token punctuation">.</span><span class="token function">post<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2040,7 +2348,7 @@ router<span class="token punctuation">.</span><span class="token function">post<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2122,7 +2430,7 @@ slmgr &#x2F;ato</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2207,7 +2515,7 @@ slmgr &#x2F;ato</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2346,7 +2654,7 @@ Vue<span class="token punctuation">.</span><span class="token function">use</spa
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2470,7 +2778,7 @@ state<span class="token operator">:</span> <span class="token punctuation">&#123
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2589,7 +2897,7 @@ state<span class="token operator">:</span> <span class="token punctuation">&#123
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2693,7 +3001,7 @@ proxyTable: <span class="token punctuation">&#123;</span><span class="token punc
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2804,272 +3112,6 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <p>推荐使用public class fields语法。</p>
 <h2 id="状态提升"><a href="#状态提升" class="headerlink" title="状态提升"></a>状态提升</h2><p>因为state只能影响其及其”下面”的组件，如果想影响到”上面”的组件怎么办? 这就是状态提升, 实际上就是子组件给父组件通信。</p>
 <p>实现方式和vue一样，通俗的来讲都是父组件定义方法, 这个方法一定是要传参的, 然后传递给子组件, 当子组件有数据修改,就通过<code>this.props.event(val)</code>的方式激活父组件来执行方法。vue中是通过<code>this.$emit(event, i)</code>来实现的。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/node/npm%20install%20-g%20-S%20-D%E7%9A%84%E5%8C%BA%E5%88%AB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%89%8D%E7%AB%AF/node/npm%20install%20-g%20-S%20-D%E7%9A%84%E5%8C%BA%E5%88%AB/" class="post-title-link" itemprop="url">npm install -g -S -D的区别</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-06 11:40:22" itemprop="dateCreated datePublished" datetime="2020-12-06T11:40:22+08:00">2020-12-06</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/node/" itemprop="url" rel="index"><span itemprop="name">node</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <pre class="language-sh" data-language="sh"><code class="language-sh">npm install 等价 npm i
---save 等价 -S
---save-dev 等价 -D</code></pre>
-
-<pre class="language-sh" data-language="sh"><code class="language-sh">npm i -D    &#x2F;&#x2F; 工程构建（开发时、“打包”时）依赖 ；例：xxx-cli , less-loader , babel-loader...
-
-npm i -S    &#x2F;&#x2F; 项目（运行时、发布到生产环境时）依赖；例：vue, element, react...</code></pre>
-
-<p>什么时候 用 –save 什么时候用 –save-dev, 这是个规范问题</p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225950474.png" alt="npm install -g -S -D的区别.png"></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/JQuery/jquery%E8%BF%BD%E5%8A%A0%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E6%95%B0%E6%8D%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%89%8D%E7%AB%AF/JQuery/jquery%E8%BF%BD%E5%8A%A0%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E6%95%B0%E6%8D%AE/" class="post-title-link" itemprop="url">jquery追加序列化的数据</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-06 11:37:56" itemprop="dateCreated datePublished" datetime="2020-12-06T11:37:56+08:00">2020-12-06</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/JQuery/" itemprop="url" rel="index"><span itemprop="name">JQuery</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>示例：</p>
-<pre class="language-js" data-language="js"><code class="language-js">$<span class="token punctuation">.</span><span class="token function">param</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span><span class="token string">'data'</span><span class="token operator">:</span>data<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token string">'&amp;'</span><span class="token operator">+</span><span class="token function">$</span><span class="token punctuation">(</span><span class="token string">'form'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">serialize</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/JavaScript/js%E7%9A%84new/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%89%8D%E7%AB%AF/JavaScript/js%E7%9A%84new/" class="post-title-link" itemprop="url">js的new</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-06 11:36:15" itemprop="dateCreated datePublished" datetime="2020-12-06T11:36:15+08:00">2020-12-06</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225594537.png"></p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225603168.png"></p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225591044.png"></p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225693847.png"></p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225587562.png"></p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607225585341.png"></p>
 
       
     </div>

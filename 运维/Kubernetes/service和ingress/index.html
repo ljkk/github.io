@@ -22,12 +22,12 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}};
   </script>
-<meta name="description" content="参考：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;fuyuteng&#x2F;p&#x2F;11598768.html            kubernetes service 原理解析 - 知乎 (zhihu.com) 为什么需要 service在 kubernetes 中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kub">
+<meta name="description" content="service参考：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;fuyuteng&#x2F;p&#x2F;11598768.html            kubernetes service 原理解析 - 知乎 (zhihu.com) 为什么需要 service在 kubernetes 中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="service">
-<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/service/index.html">
+<meta property="og:title" content="service和ingress">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/service%E5%92%8Cingress/index.html">
 <meta property="og:site_name" content="LJKのBlog">
-<meta property="og:description" content="参考：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;fuyuteng&#x2F;p&#x2F;11598768.html            kubernetes service 原理解析 - 知乎 (zhihu.com) 为什么需要 service在 kubernetes 中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kub">
+<meta property="og:description" content="service参考：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;fuyuteng&#x2F;p&#x2F;11598768.html            kubernetes service 原理解析 - 知乎 (zhihu.com) 为什么需要 service在 kubernetes 中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1615448927873.png">
 <meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1615452819548.png">
@@ -36,15 +36,16 @@
 <meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1616166008315.png">
 <meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1616165936617.png">
 <meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1616165748076.png">
+<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1616323318334.png">
 <meta property="article:published_time" content="2021-03-11T03:27:51.000Z">
-<meta property="article:modified_time" content="2021-03-19T17:28:58.633Z">
+<meta property="article:modified_time" content="2021-03-22T05:15:32.071Z">
 <meta property="article:author" content="像方便面一样的男子">
 <meta property="article:tag" content="k8s">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://img.lujinkai.cn/blog/ljk/1615448927873.png">
 
 
-<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/service/">
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/service%E5%92%8Cingress/">
 
 
 <script class="page-configurations">
@@ -56,7 +57,7 @@
     lang   : 'zh-CN'
   };
 </script>
-<title>service | LJKのBlog</title>
+<title>service和ingress | LJKのBlog</title>
   
 
 
@@ -187,7 +188,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-service"><span class="nav-number">1.</span> <span class="nav-text">为什么需要 service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#service-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">service 的工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#service-%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="nav-number">3.</span> <span class="nav-text">service 的负载均衡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#service-%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">service 的类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ClusterIP"><span class="nav-number">4.1.</span> <span class="nav-text">ClusterIP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NodePort"><span class="nav-number">4.2.</span> <span class="nav-text">NodePort</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LoadBalancer"><span class="nav-number">4.3.</span> <span class="nav-text">LoadBalancer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ExternelName"><span class="nav-number">4.4.</span> <span class="nav-text">ExternelName</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ingress"><span class="nav-number">4.5.</span> <span class="nav-text">Ingress</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#service-%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0"><span class="nav-number">5.</span> <span class="nav-text">service 的服务发现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">5.1.</span> <span class="nav-text">环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS"><span class="nav-number">5.2.</span> <span class="nav-text">DNS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#service-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">service 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ClusterIP-%E6%96%B9%E5%BC%8F"><span class="nav-number">6.1.</span> <span class="nav-text">ClusterIP 方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NodePort-%E6%96%B9%E5%BC%8F"><span class="nav-number">6.2.</span> <span class="nav-text">NodePort 方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Headless-service-%E5%B0%B1%E6%98%AF%E6%B2%A1%E6%9C%89-Cluster-IP-%E7%9A%84-service"><span class="nav-number">7.</span> <span class="nav-text">Headless service(就是没有 Cluster IP 的 service )</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#service"><span class="nav-number">1.</span> <span class="nav-text">service</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-service"><span class="nav-number">1.1.</span> <span class="nav-text">为什么需要 service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">service 的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="nav-number">1.3.</span> <span class="nav-text">service 的负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.4.</span> <span class="nav-text">service 的类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ClusterIP"><span class="nav-number">1.4.1.</span> <span class="nav-text">ClusterIP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NodePort"><span class="nav-number">1.4.2.</span> <span class="nav-text">NodePort</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LoadBalancer"><span class="nav-number">1.4.3.</span> <span class="nav-text">LoadBalancer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ExternelName"><span class="nav-number">1.4.4.</span> <span class="nav-text">ExternelName</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0"><span class="nav-number">1.5.</span> <span class="nav-text">service 的服务发现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">1.6.</span> <span class="nav-text">service 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ClusterIP-%E6%96%B9%E5%BC%8F"><span class="nav-number">1.6.1.</span> <span class="nav-text">ClusterIP 方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NodePort-%E6%96%B9%E5%BC%8F"><span class="nav-number">1.6.2.</span> <span class="nav-text">NodePort 方式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Headless-service-%E5%B0%B1%E6%98%AF%E6%B2%A1%E6%9C%89-Cluster-IP-%E7%9A%84-service"><span class="nav-number">1.7.</span> <span class="nav-text">Headless service(就是没有 Cluster IP 的 service )</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ingress"><span class="nav-number">2.</span> <span class="nav-text">Ingress</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%9C%8D%E5%8A%A1%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">其他服务类型</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -202,7 +203,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">235</span>
+          <span class="site-state-item-count">238</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -213,7 +214,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">213</span>
+        <span class="site-state-item-count">215</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -258,7 +259,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/service/">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/service%E5%92%8Cingress/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
@@ -271,7 +272,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          service
+          service和ingress
         </h1>
 
         <div class="post-meta-container">
@@ -289,7 +290,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-20 01:28:58" itemprop="dateModified" datetime="2021-03-20T01:28:58+08:00">2021-03-20</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -315,9 +316,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuyuteng/p/11598768.html">https://www.cnblogs.com/fuyuteng/p/11598768.html</a><br>            <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/111244353">kubernetes service 原理解析 - 知乎 (zhihu.com)</a></p>
-<h2 id="为什么需要-service"><a href="#为什么需要-service" class="headerlink" title="为什么需要 service"></a>为什么需要 service</h2><p>在 kubernetes 中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kubernetes 中负载均衡怎么做，容器漂移后 ip 也会发生变化，如何做服务发现以及会话保持？这就是 service 的作用，service 是一组具有相同 label pod 集合的抽象，集群内外的各个服务可以通过 service 进行互相通信，当创建一个 service 对象时也会对应创建一个 endpoint 对象，endpoint 是用来做容器发现的，service 只是将多个 pod 进行关联，实际的路由转发都是由 kubernetes 中的 kube-proxy 组件来实现，因此，service 必须结合 kube-proxy 使用，kube-proxy 组件可以运行在 kubernetes 集群中的每一个节点上也可以只运行在单独的几个节点上，其会根据 service 和 endpoints 的变动来改变节点上 iptables 或者 ipvs 中保存的路由规则</p>
-<h2 id="service-的工作原理"><a href="#service-的工作原理" class="headerlink" title="service 的工作原理"></a>service 的工作原理</h2><p>service资源基于标签选择器将一组pod定义成一个逻辑组合，并通过自己的ip地址和端口调度代理请求至组内pod的对象之上，它向客户隐藏了真实的、处理用户请求的pod资源，使得客户端的请求看上去像是由service直接处理并进行响应一样</p>
+        <h2 id="service"><a href="#service" class="headerlink" title="service"></a>service</h2><p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuyuteng/p/11598768.html">https://www.cnblogs.com/fuyuteng/p/11598768.html</a><br>            <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/111244353">kubernetes service 原理解析 - 知乎 (zhihu.com)</a></p>
+<h3 id="为什么需要-service"><a href="#为什么需要-service" class="headerlink" title="为什么需要 service"></a>为什么需要 service</h3><p>在 kubernetes 中，当创建带有多个副本的 deployment 时，kubernetes 会创建出多个 pod，此时即一个服务后端有多个容器，那么在 kubernetes 中负载均衡怎么做，容器漂移后 ip 也会发生变化，如何做服务发现以及会话保持？这就是 service 的作用，service 是一组具有相同 label pod 集合的抽象，集群内外的各个服务可以通过 service 进行互相通信，当创建一个 service 对象时也会对应创建一个 endpoint 对象，endpoint 是用来做容器发现的，service 只是将多个 pod 进行关联，实际的路由转发都是由 kubernetes 中的 kube-proxy 组件来实现，因此，service 必须结合 kube-proxy 使用，kube-proxy 组件可以运行在 kubernetes 集群中的每一个节点上也可以只运行在单独的几个节点上，其会根据 service 和 endpoints 的变动来改变节点上 iptables 或者 ipvs 中保存的路由规则</p>
+<h3 id="service-的工作原理"><a href="#service-的工作原理" class="headerlink" title="service 的工作原理"></a>service 的工作原理</h3><p>service资源基于标签选择器将一组pod定义成一个逻辑组合，并通过自己的ip地址和端口调度代理请求至组内pod的对象之上，它向客户隐藏了真实的、处理用户请求的pod资源，使得客户端的请求看上去像是由service直接处理并进行响应一样</p>
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1615448927873.png"></p>
 <p>Service 对象的 IP 地址也称为 Cluster IP，是一种 VIP（虚拟IP），k8s集群内部的VIP</p>
 <p>service网段不能跟机房网络、docker网段、容器网段冲突，否则可能会导致网络不通</p>
@@ -327,7 +328,7 @@
 <p>Endpoints 是一个由IP地址和端口组成的列表，这些IP和端口来自于其 Service 关联的 Pod</p>
 <p>每个节点上的 kube-proxy 组件 watch 各 Service 及其关联的 Endpoints，如果有变动，就会实时更新当前节点上相应的 iptables 或 ipvs 规则，确保 Cluster IP 的流量能调度到 Endpoints</p>
 <p>简单来讲，一个 Service 对象就是一个 Node 上的这些 iptables 和 ipvs 规则</p>
-<h2 id="service-的负载均衡"><a href="#service-的负载均衡" class="headerlink" title="service 的负载均衡"></a>service 的负载均衡</h2><p>pod之间通信，一般不会pod直接访问pod，而是pod先访问service，然后service再到pod</p>
+<h3 id="service-的负载均衡"><a href="#service-的负载均衡" class="headerlink" title="service 的负载均衡"></a>service 的负载均衡</h3><p>pod之间通信，一般不会pod直接访问pod，而是pod先访问service，然后service再到pod</p>
 <p>关于将 Cluster IP 的流量能调度到 Endpoints，有三种方式：userspace代理、iptables代理、ipvs代理</p>
 <ol>
 <li><p><strong>userspace代理</strong></p>
@@ -340,60 +341,63 @@
 <p>和iptables代理模型的区别仅在于，流量的调度功能由ipvs实现，其他功能仍由iptables完成</p>
 <img data-src="https://img.lujinkai.cn/blog/ljk/1615452852108.png" style="zoom:33%;" /></li>
 </ol>
-<h2 id="service-的类型"><a href="#service-的类型" class="headerlink" title="service 的类型"></a>service 的类型</h2><p>service 支持的类型也就是 kubernetes 中服务暴露的方式，默认有四种：ClusterIP、NodePort、LoadBalancer、ExternelName，此外还有 Ingress</p>
-<h3 id="ClusterIP"><a href="#ClusterIP" class="headerlink" title="ClusterIP"></a>ClusterIP</h3><p>kubernetes 集群默认的服务暴露方式，它只能用于集群内部通信，可以被各 pod 访问，其访问方式为：</p>
-<pre class="language-none"><code class="language-none">pod ---&gt; ClusterIP:ServicePort --&gt; (iptables)DNAT --&gt; PodIP:containePort</code></pre>
+<h3 id="service-的类型"><a href="#service-的类型" class="headerlink" title="service 的类型"></a>service 的类型</h3><p>service 支持的类型也就是 kubernetes 中服务暴露的方式，默认有四种：ClusterIP、NodePort、LoadBalancer、ExternelName</p>
+<h4 id="ClusterIP"><a href="#ClusterIP" class="headerlink" title="ClusterIP"></a>ClusterIP</h4><p>kubernetes 集群默认的服务暴露方式，它只能用于集群内部通信，可以被各 pod 访问，其访问方式为：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">pod ---<span class="token operator">></span> ClusterIP:ServicePort --<span class="token operator">></span> <span class="token punctuation">(</span>iptables<span class="token punctuation">)</span>DNAT --<span class="token operator">></span> PodIP:containePort
+
+<span class="token comment"># 集群内pod直接访问service的ip即可</span></code></pre>
 
 <img data-src="https://img.lujinkai.cn/blog/ljk/1616166170835.png" style="zoom: 50%;" />
 
-<h3 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h3><p>如果想要在集群外访问集群内部的服务，可以使用这种类型的 service，NodePort 类型的 service 会在集群内部署了 kube-proxy 的节点打开一个指定的端口，之后所有的流量直接发送到这个端口，然后会被转发到 service 后端真实的服务进行访问。<strong>Nodeport 构建在 ClusterIP 上</strong>，其访问链路如下所示：</p>
-<pre class="language-none"><code class="language-none">client ---&gt; NodeIP:NodePort ---&gt; ClusterIP:ServicePort ---&gt; (iptables)DNAT ---&gt; PodIP:containePort</code></pre>
+<h4 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h4><p>如果想要在集群外访问集群内部的服务，可以使用 NodePort 类型的 service，在集群内部署了 kube-proxy 的节点打开一个指定的端口，将访问node此端口的流量直接发送到这个端口，然后会被转发到 service 后端真实的服务进行访问。<strong>Nodeport 构建在 ClusterIP 上</strong>，其访问链路如下所示：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">client ---<span class="token operator">></span> NodeIP:NodePort ---<span class="token operator">></span> ClusterIP:ServicePort ---<span class="token operator">></span> <span class="token punctuation">(</span>iptables<span class="token punctuation">)</span>DNAT ---<span class="token operator">></span> PodIP:containePort
+
+<span class="token comment"># 外部流量请求先到node，再到service</span>
+<span class="token comment"># 只要安装了kube-proxy的node，都可以处理外部流量，有实力的话可以单独拿出几个node，打上污点，然后负载均衡只会将外部流量转发到这几个node</span></code></pre>
 
 <img data-src="https://img.lujinkai.cn/blog/ljk/1616166008315.png" style="zoom:50%;" />
 
-<h3 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h3><p>LoadBalancer 类型的 service 通常和云厂商的 LB 结合一起使用，用于将集群内部的服务暴露到外网，云厂商的 LoadBalancer 会给用户分配一个 IP，之后通过该 IP 的流量会转发到你的 service 上。</p>
+<h4 id="LoadBalancer"><a href="#LoadBalancer" class="headerlink" title="LoadBalancer"></a>LoadBalancer</h4><p>主要在公有云如阿里云、AWS 上使用，<strong>LoadBalancer 构建在 nodePort 基础之上</strong>，通过公有云服务商提供的负载均衡器将 k8s 集群中的服务暴露到外网，云厂商的 LoadBalancer 会给用户分配一个 IP，之后通过该 IP 的流量会转发到你的 service 上</p>
 <p>LoadBalancer service 类型的结构如下图所示：</p>
 <img data-src="https://img.lujinkai.cn/blog/ljk/1616165936617.png" style="zoom:50%;" />
 
-<h3 id="ExternelName"><a href="#ExternelName" class="headerlink" title="ExternelName"></a>ExternelName</h3><p>通过 CNAME 将 service 与 externalName 的值(比如：<a target="_blank" rel="noopener" href="http://foo.bar.example.com)映射起来,这种方式用的比较少./">http://foo.bar.example.com)映射起来，这种方式用的比较少。</a></p>
-<h3 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h3><p>Ingress 其实不是 service 的一个类型，但是它可以作用于多个 service，被称为 service 的 service，作为集群内部服务的入口，Ingress 作用在七层，可以根据不同的 url，将请求转发到不同的 service 上。</p>
-<p>Ingress 的结构如下图所示：</p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1616165748076.png"></p>
-<h2 id="service-的服务发现"><a href="#service-的服务发现" class="headerlink" title="service 的服务发现"></a>service 的服务发现</h2><p>虽然 service 的 endpoints 解决了容器发现问题，但不提前知道 service 的 Cluster IP，怎么发现 service 服务呢？service 当前支持两种类型的服务发现机制，一种是通过环境变量，另一种是通过 DNS。在这两种方案中，建议使用后者。</p>
-<h3 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h3><p>当一个 pod 创建完成之后，kubelet 会在该 pod 中注册该集群已经创建的所有 service 相关的环境变量，但是需要注意的是，在 service 创建之前的所有 pod 是不会注册该环境变量的，所以在平时使用时，建议通过 DNS 的方式进行 service 之间的服务发现。</p>
-<h3 id="DNS"><a href="#DNS" class="headerlink" title="DNS"></a>DNS</h3><p>可以在集群中部署 CoreDNS 服务(旧版本的 kubernetes 群使用的是 kubeDNS)， 来达到集群内部的 pod 通过DNS 的方式进行集群内部各个服务之间的通讯。</p>
-<p>当前 kubernetes 集群默认使用 CoreDNS 作为默认的 DNS 服务，主要原因是 CoreDNS 是基于 Plugin 的方式进行扩展的，简单，灵活，并且不完全被Kubernetes所捆绑。</p>
-<h2 id="service-的使用"><a href="#service-的使用" class="headerlink" title="service 的使用"></a>service 的使用</h2><h3 id="ClusterIP-方式"><a href="#ClusterIP-方式" class="headerlink" title="ClusterIP 方式"></a>ClusterIP 方式</h3><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<h4 id="ExternelName"><a href="#ExternelName" class="headerlink" title="ExternelName"></a>ExternelName</h4><p>通过 CNAME 将 service 与 externalName 的值(比如：<a target="_blank" rel="noopener" href="http://foo.bar.example.com)映射起来,这种方式用的比较少./">http://foo.bar.example.com)映射起来，这种方式用的比较少。</a></p>
+<h3 id="service-的服务发现"><a href="#service-的服务发现" class="headerlink" title="service 的服务发现"></a>service 的服务发现</h3><p>Pod 与 Service 的 DNS：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/dns-pod-service/">https://kubernetes.io/zh/docs/concepts/services-networking/dns-pod-service/</a></p>
+<p>虽然 service 的 endpoints 解决了容器发现问题，但不提前知道 service 的 Cluster IP，怎么发现 service 服务呢？service 当前支持两种类型的服务发现机制，一种是通过环境变量，另一种是通过 DNS。在这两种方案中，建议使用后者：</p>
+<p>在集群中部署 CoreDNS 服务， 来达到集群内部的 pod 通过DNS 的方式进行集群内部各个服务之间的通讯</p>
+<p>当前 kubernetes 集群默认使用 CoreDNS 作为默认的 DNS 服务，主要原因是 CoreDNS 是基于 Plugin 的方式进行扩展的，简单，灵活，并且不完全被Kubernetes所捆绑</p>
+<h3 id="service-的使用"><a href="#service-的使用" class="headerlink" title="service 的使用"></a>service 的使用</h3><h4 id="ClusterIP-方式"><a href="#ClusterIP-方式" class="headerlink" title="ClusterIP 方式"></a>ClusterIP 方式</h4><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
 <span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
 <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx <span class="token comment">#service的名称，此名称会被DNS解析</span>
 <span class="token key atrule">spec</span><span class="token punctuation">:</span>
   <span class="token key atrule">clusterIP</span><span class="token punctuation">:</span> 10.105.146.177
   <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span>			<span class="token comment"># Service的端口号</span>
-    <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
-    <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">8080</span>	<span class="token comment"># 后端目标进程的端口号或名称，名称需由Pod规范定义</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># Service的端口号</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">8080</span> <span class="token comment"># 后端目标进程的端口号或名称，名称需由Pod规范定义</span>
   <span class="token key atrule">selector</span><span class="token punctuation">:</span>
     <span class="token key atrule">app</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
   <span class="token key atrule">sessionAffinity</span><span class="token punctuation">:</span> None
   <span class="token key atrule">type</span><span class="token punctuation">:</span> ClusterIP</code></pre>
 
-<h3 id="NodePort-方式"><a href="#NodePort-方式" class="headerlink" title="NodePort 方式"></a>NodePort 方式</h3><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<h4 id="NodePort-方式"><a href="#NodePort-方式" class="headerlink" title="NodePort 方式"></a>NodePort 方式</h4><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
 <span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
 <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
   <span class="token key atrule">name</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
 <span class="token key atrule">spec</span><span class="token punctuation">:</span>
   <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30090</span>		<span class="token comment"># 节点端口号，仅适用于NodePort和LoadBalancer类型</span>
-    <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span>
-    <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
-    <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">8080</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30090</span> <span class="token comment"># 节点端口，kube-proxy监听本机此端口，将访问此端口的流量转发到service</span>
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># service端口</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">8080</span> <span class="token comment"># 目标pod端口</span>
   <span class="token key atrule">selector</span><span class="token punctuation">:</span>
     <span class="token key atrule">app</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
   <span class="token key atrule">sessionAffinity</span><span class="token punctuation">:</span> None
   <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort</code></pre>
 
-<h2 id="Headless-service-就是没有-Cluster-IP-的-service"><a href="#Headless-service-就是没有-Cluster-IP-的-service" class="headerlink" title="Headless service(就是没有 Cluster IP 的 service )"></a>Headless service(就是没有 Cluster IP 的 service )</h2><p>当不需要负载均衡以及单独的 ClusterIP 时，可以通过指定 spec.clusterIP 的值为 None 来创建 Headless service，它会给一个集群内部的每个成员提供一个唯一的 DNS 域名来作为每个成员的网络标识，集群内部成员之间使用域名通信。</p>
+<h3 id="Headless-service-就是没有-Cluster-IP-的-service"><a href="#Headless-service-就是没有-Cluster-IP-的-service" class="headerlink" title="Headless service(就是没有 Cluster IP 的 service )"></a>Headless service(就是没有 Cluster IP 的 service )</h3><p>当不需要负载均衡以及单独的 ClusterIP 时，可以通过指定 spec.clusterIP 的值为 None 来创建 Headless service，它会给一个集群内部的每个成员提供一个唯一的 DNS 域名来作为每个成员的网络标识，集群内部成员之间使用域名通信。</p>
+<p>deployment中对应的服务是 service，而statefulset中与之对应的服务就是 headless service</p>
 <pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
 <span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
 <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
@@ -408,12 +412,23 @@
   <span class="token key atrule">selector</span><span class="token punctuation">:</span>
     <span class="token key atrule">app</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx</code></pre>
 
+<h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/ingress/">https://kubernetes.io/zh/docs/concepts/services-networking/ingress/</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/ingress-controllers/">https://kubernetes.io/zh/docs/concepts/services-networking/ingress-controllers/</a></p>
+<p>上面介绍的 ClusterIP 、NodePort 、LoadBalancer 都是基于ip和port做负载均衡，属于四层负载均衡</p>
+<p>Ingress 可以作用于多个 service，被称为 service 的 service，作为<strong>集群内部服务的入口</strong>，Ingress其实就是<strong>七层的反向代理</strong>，可以根据不同的 url，将请求转发到不同的 service 上</p>
+<p>Ingress 的结构如下图所示：</p>
+<img data-src="https://img.lujinkai.cn/blog/ljk/1616165748076.png" style="zoom:67%;" />
 
 
 
+<p>kube-proxy监听node的指定端口，将此端口的流量转发到ingress，然后ingress再转发到不同的service</p>
+<pre class="language-none"><code class="language-none">反正都是实现七层代理，也可以使用deployment创建一组pod，提供nginx服务，实现代替ingress的效果：
 
+kube-proxy监听node的指定端口，将此端口的流量转发到nginx service，然后nginx在转发到不同的service，可以配置service ip，也可以使用服务发现
 
+建议：域名多、流量大，使用nginx；反之使用ingress</code></pre>
 
+<h2 id="其他服务类型"><a href="#其他服务类型" class="headerlink" title="其他服务类型"></a>其他服务类型</h2><p>完全不使用k8s内置的service，而是通过注册中心自动发现pod地址，如果开发有实力，推荐使用这种方式</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1616323318334.png"></p>
 
     </div>
 
@@ -430,13 +445,13 @@
       <div class="popular-posts-title"><a href="/运维/Kubernetes/Pod的状态和探针/" rel="bookmark">Pod的状态和探针</a></div>
     </li>
     <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/运维/Kubernetes/Prometheus/" rel="bookmark">Prometheus</a></div>
+    </li>
+    <li class="popular-posts-item">
       <div class="popular-posts-title"><a href="/运维/Kubernetes/kubectl/" rel="bookmark">kubectl</a></div>
     </li>
     <li class="popular-posts-item">
       <div class="popular-posts-title"><a href="/运维/Kubernetes/业务镜像版本升级及回滚/" rel="bookmark">业务镜像版本升级及回滚</a></div>
-    </li>
-    <li class="popular-posts-item">
-      <div class="popular-posts-title"><a href="/运维/Kubernetes/为什么kubernetes不支持docker了/" rel="bookmark">为什么kubernetes不支持docker了</a></div>
     </li>
   </ul>
 

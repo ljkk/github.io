@@ -30,7 +30,7 @@
 <meta property="og:description" content="资源清单是yml格式，api-server会自动转成json格式 每个API对象都有3大类属性：元数据metadata、规范spec和状态status spec 是期望状态，status是实际状态，如果实际状态和期望状态有出入，控制器（通常是deployment控制器）的控制循环就会监控到差异，然后将需要做出的更改提交到apiserver，调度器scheduler监控到apiserver中有未执行">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-03-14T11:11:42.000Z">
-<meta property="article:modified_time" content="2021-03-19T17:28:58.634Z">
+<meta property="article:modified_time" content="2021-03-22T05:15:32.072Z">
 <meta property="article:author" content="像方便面一样的男子">
 <meta property="article:tag" content="yaml">
 <meta name="twitter:card" content="summary">
@@ -194,7 +194,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">235</span>
+          <span class="site-state-item-count">238</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -205,7 +205,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">213</span>
+        <span class="site-state-item-count">215</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -281,7 +281,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-20 01:28:58" itemprop="dateModified" datetime="2021-03-20T01:28:58+08:00">2021-03-20</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -310,154 +310,104 @@
         <p>资源清单是yml格式，api-server会自动转成json格式</p>
 <p>每个API对象都有3大类属性：元数据metadata、规范spec和状态status</p>
 <p>spec 是期望状态，status是实际状态，如果实际状态和期望状态有出入，控制器（通常是deployment控制器）的控制循环就会监控到差异，然后将需要做出的更改提交到apiserver，调度器scheduler监控到apiserver中有未执行的操作，就会去找适合执行操作的node，然后提交到apiserver，kubelet监控到apiserver中有关于自己节点的操作，就会执行操作，将执行结果返回给apiserver，apiserver再更新实际状态</p>
-<h2 id="deployment"><a href="#deployment" class="headerlink" title="deployment"></a>deployment</h2><pre class="language-bash" data-language="bash"><code class="language-bash">apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name:  my-name
-  labels:
-    name:  my-name
-spec:
-  replicas: <span class="token number">1</span>
-  strategy:
-    rollingUpdate:
-      maxSurge: <span class="token number">1</span>
-      maxUnavailable: <span class="token number">1</span>
-    type: RollingUpdate
-  template:
-    metadata:
-      labels:
-        name:  my-name
-    spec:
-      containers:
-      - image:  ipedrazas/docmock
-        name:  my-name
-        resources:
-          requests:
-            cpu: <span class="token string">"20m"</span>
-            memory: <span class="token string">"55M"</span>
-        livenessProbe:
-          httpGet:
-            path: /_status/healthz
-            port: <span class="token number">5000</span>
-          initialDelaySeconds: <span class="token number">90</span>
-          timeoutSeconds: <span class="token number">10</span>
-        readinessProbe:
-          httpGet:
-            path: /_status/healthz
-            port: <span class="token number">5000</span>
-          initialDelaySeconds: <span class="token number">30</span>
-          timeoutSeconds: <span class="token number">10</span>
-        env:
-        - name:  ENVVARNAME
-          value:  ENVVARVALUE       
-        ports:
-        - containerPort:  <span class="token number">5000</span>
-          name:  my-name
-        volumeMounts:
-        - mountPath: /data
-          name: data
-      volumes:
-        - name: data
-          emptyDir: <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-      restartPolicy: Always
-      imagePullPolicy: Always</code></pre>
+<h2 id="deployment"><a href="#deployment" class="headerlink" title="deployment"></a>deployment</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"></code></pre>
 
-<h2 id="HorizontalPodAutoscaler"><a href="#HorizontalPodAutoscaler" class="headerlink" title="HorizontalPodAutoscaler"></a>HorizontalPodAutoscaler</h2><pre class="language-bash" data-language="bash"><code class="language-bash">apiVersion: autoscaling/v2beta1 <span class="token comment">#定义API版本</span>
-kind: HorizontalPodAutoscaler <span class="token comment">#对象类型</span>
-metadata: <span class="token comment">#定义对象元数据</span>
-  namespace: linux36 <span class="token comment">#创建后隶属的namespace</span>
-  name: linux36-tomcat-app1-podautoscaler <span class="token comment">#对象名称</span>
-  labels: 这样的label标签
-    app: linux36-tomcat-app1 <span class="token comment">#自定义的label名称</span>
-    version: v2beta1 <span class="token comment">#自定义的api版本</span>
-spec: <span class="token comment">#定义对象具体信息</span>
-  scaleTargetRef: <span class="token comment">#定义水平伸缩的目标对象：Deployment、ReplicationController/ReplicaSet</span>
-    apiVersion: apps/v1
-    <span class="token comment">#API版本，HorizontalPodAutoscaler.spec.scaleTargetRef.apiVersion</span>
-    kind: Deployment <span class="token comment">#目标对象类型为deployment</span>
-    name: linux36-tomcat-app1-deployment <span class="token comment">#deployment 的具体名称</span>
-  minReplicas: <span class="token number">2</span> <span class="token comment">#最小pod数</span>
-  maxReplicas: <span class="token number">5</span> <span class="token comment">#最大pod数</span>
-  metrics: <span class="token comment">#调用metrics数据定义</span>
-  - type: Resource <span class="token comment">#类型为资源</span>
-    resource: <span class="token comment">#定义资源</span>
-      name: cpu <span class="token comment">#资源名称为cpu</span>
-      targetAverageUtilization: <span class="token number">80</span> <span class="token comment">#CPU使用率</span>
-- type: Resource <span class="token comment">#类型为资源</span>
-  resource: <span class="token comment">#定义资源</span>
-    name: memory <span class="token comment">#资源名称为memory</span>
-    targetAverageValue: 1024Mi <span class="token comment">#memory使用率</span></code></pre>
+<h2 id="HorizontalPodAutoscaler"><a href="#HorizontalPodAutoscaler" class="headerlink" title="HorizontalPodAutoscaler"></a>HorizontalPodAutoscaler</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">kind</span><span class="token punctuation">:</span> HorizontalPodAutoscaler
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> autoscaling/v2beta1
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> linux42
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> tomcat<span class="token punctuation">-</span>app1<span class="token punctuation">-</span>podautoscaler
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> tomcat<span class="token punctuation">-</span>app1 <span class="token comment">#自定义app标签</span>
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> v2beta1 <span class="token comment">#自定义version标签</span>
+<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># 对象具体信息</span>
+  <span class="token key atrule">scaleTargetRef</span><span class="token punctuation">:</span> <span class="token comment">#定义水平伸缩的目标对象：Deployment、ReplicationController/ReplicaSet</span>
+    <span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment <span class="token comment">#目标对象类型为deployment</span>
+    <span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1 <span class="token comment">#API版本</span>
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> tomcat<span class="token punctuation">-</span>app1<span class="token punctuation">-</span>deployment <span class="token comment">#deployment的名称</span>
+  <span class="token key atrule">minReplicas</span><span class="token punctuation">:</span> <span class="token number">2</span> <span class="token comment">#最小pod数</span>
+  <span class="token key atrule">maxReplicas</span><span class="token punctuation">:</span> <span class="token number">5</span> <span class="token comment">#最大pod数</span>
+  <span class="token key atrule">metrics</span><span class="token punctuation">:</span> <span class="token comment">#需要安装metrics server</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> Resource <span class="token comment"># 类型为资源</span>
+      <span class="token key atrule">resource</span><span class="token punctuation">:</span> <span class="token comment"># 定义资源</span>
+        <span class="token key atrule">name</span><span class="token punctuation">:</span> cpu
+        <span class="token key atrule">targetAverageUtilization</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment">#CPU使用率，超过80%就增加pod</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> Resource
+      <span class="token key atrule">resource</span><span class="token punctuation">:</span>
+        <span class="token key atrule">name</span><span class="token punctuation">:</span> memory
+        <span class="token key atrule">targetAverageValue</span><span class="token punctuation">:</span> 1024Mi <span class="token comment"># 内存使用量，超过1024Mi就增加pod</span></code></pre>
 
 <h2 id="namespace"><a href="#namespace" class="headerlink" title="namespace"></a>namespace</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
 <span class="token key atrule">kind</span><span class="token punctuation">:</span> Namespace
 <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
   <span class="token key atrule">name</span><span class="token punctuation">:</span> test</code></pre>
 
-<h2 id="Nginx-业务yaml文件"><a href="#Nginx-业务yaml文件" class="headerlink" title="Nginx 业务yaml文件"></a>Nginx 业务yaml文件</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment <span class="token comment">#类型，是deployment控制器，kubectl explain Deployment</span>
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> extensions/v1beta1 <span class="token comment">#API版本，# kubectl explain Deployment.apiVersion</span>
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment">#pod的元数据信息，kubectl explain Deployment.metadata</span>
-  <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment">#自定义pod的标签，# kubectl explain Deployment.metadata.labels</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment<span class="token punctuation">-</span>label <span class="token comment">#标签名称为app值为nginx-deployment-label，后面会用到此标签</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment <span class="token comment">#pod的名称</span>
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> test <span class="token comment">#pod的namespace，默认是defaule</span>
-<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment">#定义deployment中容器的详细信息，kubectl explain Deployment.spec</span>
-  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment">#创建出的pod的副本数，即多少个pod，默认值为1</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span> <span class="token comment">#定义标签选择器</span>
-    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span> <span class="token comment">#定义匹配的标签，必须要设置</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment">#匹配的目标标签，</span>
-  <span class="token key atrule">template</span><span class="token punctuation">:</span> <span class="token comment">#定义模板，必须定义，模板是起到描述要创建的pod的作用</span>
-    <span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment">#定义模板元数据</span>
-      <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment">#定义模板label，Deployment.spec.template.metadata.labels</span>
-        <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment">#定义标签，等于Deployment.spec.selector.matchLabels</span>
-  <span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment">#定义pod信息</span>
-    <span class="token key atrule">containers</span><span class="token punctuation">:</span> <span class="token comment">#定义pod中容器列表，可以多个至少一个，pod不能动态增减容器</span>
-      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>container <span class="token comment">#容器名称</span>
-        <span class="token key atrule">image</span><span class="token punctuation">:</span> harbor.magedu.net/test/nginx<span class="token punctuation">-</span>web1<span class="token punctuation">:</span>v1 <span class="token comment">#镜像地址</span>
-        <span class="token comment">#command: ["/apps/tomcat/bin/run_tomcat.sh"] #容器启动执行的命令或脚本</span>
-        <span class="token comment">#imagePullPolicy: IfNotPresent</span>
-        <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> Always <span class="token comment">#拉取镜像策略</span>
-        <span class="token key atrule">ports</span><span class="token punctuation">:</span> <span class="token comment">#定义容器端口列表</span>
-          <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment">#定义一个端口</span>
-            <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP <span class="token comment">#端口协议</span>
-            <span class="token key atrule">name</span><span class="token punctuation">:</span> http <span class="token comment">#端口名称</span>
-          <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">443</span> <span class="token comment">#定义一个端口</span>
-            <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP <span class="token comment">#端口协议</span>
-            <span class="token key atrule">name</span><span class="token punctuation">:</span> https <span class="token comment">#端口名称</span>
-        <span class="token key atrule">env</span><span class="token punctuation">:</span> <span class="token comment">#配置环境变量</span>
-          <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> <span class="token string">"password"</span> <span class="token comment">#变量名称。必须要用引号引起来</span>
-            <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"123456"</span> <span class="token comment">#当前变量的值</span>
-          <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> <span class="token string">"age"</span> <span class="token comment">#另一个变量名称</span>
-            <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"18"</span> <span class="token comment">#另一个变量的值</span>
-        <span class="token key atrule">resources</span><span class="token punctuation">:</span> <span class="token comment">#对资源的请求设置和限制设置</span>
-          <span class="token key atrule">limits</span><span class="token punctuation">:</span> <span class="token comment">#资源限制设置，上限</span>
-            <span class="token key atrule">cpu</span><span class="token punctuation">:</span> <span class="token number">2</span> <span class="token comment">#cpu的限制，单位为core数，可以写0.5或者500m等CPU压缩值</span>
-            <span class="token key atrule">memory</span><span class="token punctuation">:</span> 2Gi <span class="token comment">#内存限制，单位可以为Mib/Gib，将用于docker run --memory参数</span>
-          <span class="token key atrule">requests</span><span class="token punctuation">:</span> <span class="token comment">#资源请求的设置</span>
-            <span class="token key atrule">cpu</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment">#cpu请求数，容器启动的初始可用数量,可以写0.5或者500m等CPU压缩值</span>
-            <span class="token key atrule">memory</span><span class="token punctuation">:</span> 512Mi <span class="token comment">#内存请求大小，容器启动的初始可用数量，用于调度pod时候使用</span>
+<h2 id="Nginx-业务yaml文件"><a href="#Nginx-业务yaml文件" class="headerlink" title="Nginx 业务yaml文件"></a>Nginx 业务yaml文件</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> extensions/v1beta1 <span class="token comment"># API版本</span>
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment"># deployment元数据</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment <span class="token comment"># deployment名称，创建后的pdo名称是这个名称加随机字符串</span>
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> test <span class="token comment"># pod的namespace，默认是default</span>
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment"># 自定义deployment标签</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment<span class="token punctuation">-</span>label
+<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># deployment的详细信息</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment"># 创建出的pod的副本数，即多少个pod，默认值为1</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span> <span class="token comment"># Deployment如何查找要管理的Pods，它必须与pod模板的标签相匹配</span>
+    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span> <span class="token comment"># 定义匹配Pod的标签，pod模板的标签相匹配</span>
+      <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment"># 就是下面的 template.metadata.labels.app</span>
+  <span class="token key atrule">template</span><span class="token punctuation">:</span> <span class="token comment"># 定义模板，必须定义，用于描述要创建的pod</span>
+    <span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment"># pod元数据</span>
+      <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment"># 自定义pod的标签，主要用于service匹配</span>
+        <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment"># 自定义app标签</span>
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># pod详细信息</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span> <span class="token comment"># pod中容器列表，可以多个，至少一个，绝大部分情况是一个，pod不能动态增减容器</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>container <span class="token comment"># 容器名称</span>
+          <span class="token key atrule">image</span><span class="token punctuation">:</span>
+            harbor.magedu.net/test/nginx<span class="token punctuation">-</span>web1<span class="token punctuation">:</span>v1 <span class="token comment"># 镜像地址</span>
+            <span class="token comment"># command: ["/apps/tomcat/bin/run_tomcat.sh"]     # 容器启动执行的命令或脚本</span>
+            <span class="token comment"># imagePullPolicy: IfNotPresent</span>
+          <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> Always <span class="token comment"># 拉取镜像策略</span>
+          <span class="token key atrule">ports</span><span class="token punctuation">:</span> <span class="token comment"># 定义容器端口列表</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http <span class="token comment"># 端口名称</span>
+              <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
+              <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> https <span class="token comment"># 端口名称</span>
+              <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">443</span>
+              <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+          <span class="token key atrule">env</span><span class="token punctuation">:</span> <span class="token comment"># 配置环境变量</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> <span class="token string">"password"</span> <span class="token comment"># 变量名称。必须要用引号引起来</span>
+              <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"123456"</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> <span class="token string">"age"</span>
+              <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"18"</span>
+          <span class="token key atrule">resources</span><span class="token punctuation">:</span> <span class="token comment"># 对资源的请求设置和限制设置</span>
+            <span class="token key atrule">limits</span><span class="token punctuation">:</span> <span class="token comment"># 资源限制设置上限</span>
+              <span class="token key atrule">cpu</span><span class="token punctuation">:</span> <span class="token number">2</span> <span class="token comment"># cpu的限制，单位为core数，可以写0.5或者500m等CPU压缩值</span>
+              <span class="token key atrule">memory</span><span class="token punctuation">:</span> 2Gi <span class="token comment"># 内存限制，单位可以为Mib/Gib，将用于docker run --memory参数</span>
+            <span class="token key atrule">requests</span><span class="token punctuation">:</span> <span class="token comment"># 资源请求的设置</span>
+              <span class="token key atrule">cpu</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment"># cpu请求数，容器启动的初始可用数量,可以写0.5或者500m等CPU压缩值</span>
+              <span class="token key atrule">memory</span><span class="token punctuation">:</span> 512Mi <span class="token comment"># 内存请求大小，容器启动的初始可用数量，用于调度pod时候使用</span>
 <span class="token punctuation">---</span>
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service <span class="token comment">#类型为service</span>
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1 <span class="token comment">#service API版本， service.apiVersion</span>
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment">#定义service元数据，service.metadata</span>
-  <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment">#自定义标签，service.metadata.labels</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx <span class="token comment">#定义service标签的内容</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>spec <span class="token comment">#定义service的名称，此名称会被DNS解析</span>
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> test <span class="token comment">#该service隶属于的namespaces名称，即把service创建到哪个namespace里面</span>
-<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment">#定义service的详细信息，service.spec</span>
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort <span class="token comment">#service的类型，定义服务的访问方式，默认为ClusterIP， service.spec.type</span>
-  <span class="token key atrule">ports</span><span class="token punctuation">:</span> <span class="token comment">#定义访问端口， service.spec.ports</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http <span class="token comment">#定义一个端口名称</span>
-      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment">#service 80端口</span>
-      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP <span class="token comment">#协议类型</span>
-      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment">#目标pod的端口</span>
-      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30001</span> <span class="token comment">#node节点暴露的端口</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> https <span class="token comment">#SSL 端口</span>
-      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">443</span> <span class="token comment">#service 443端口</span>
-      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP <span class="token comment">#端口协议</span>
-      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">443</span> <span class="token comment">#目标pod端口</span>
-      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30043</span> <span class="token comment">#node节点暴露的SSL端口</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span> <span class="token comment">#service的标签选择器，定义要访问的目标pod</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx <span class="token comment">#将流量路到选择的pod上，需等于Deployment.spec.selector.matchLabels</span></code></pre>
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1 <span class="token comment"># API版本</span>
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment"># service元数据</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>spec <span class="token comment"># service的名称，此名称会被DNS解析</span>
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> test <span class="token comment"># 该service隶属于的namespaces名称，即把service创建到哪个namespace里面</span>
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment"># 自定义service标签</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx
+<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># service的详细信息</span>
+  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort <span class="token comment"># service的类型，定义服务的访问方式，默认为ClusterIP</span>
+  <span class="token key atrule">ports</span><span class="token punctuation">:</span> <span class="token comment"># 定义访问端口</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http <span class="token comment"># 定义一个端口名称</span>
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># service 80端口</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP <span class="token comment"># 协议类型</span>
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># 目标pod的端口</span>
+      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30001</span> <span class="token comment"># node节点暴露的端口</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> https
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">443</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">443</span>
+      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30043</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span> <span class="token comment"># service的标签选择器，匹配Pod的标签</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment"># 匹配定义了app标签且值为nginx-selector的Pod</span></code></pre>
 
 
     </div>

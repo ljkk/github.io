@@ -188,7 +188,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">235</span>
+          <span class="site-state-item-count">238</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -199,7 +199,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">213</span>
+        <span class="site-state-item-count">215</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -243,6 +243,592 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/Docker/docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86/" class="post-title-link" itemprop="url">docker数据管理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 11:27:58" itemprop="dateCreated datePublished" datetime="2021-01-08T11:27:58+08:00">2021-01-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img data-src="https://img.lujinkai.cn/blog/ljk/1605928216982.png"></p>
+<p>docker镜像由多个只读层叠加而成，启动容器时，docker会加载只读镜像层并在镜像栈顶部添加一个读写层</p>
+<p>所有的修改都被复制到读写层，保存在diff目录，原理就是“写时复制（COW）”</p>
+<p>但是一旦删除容器，读写层也会被删除，所以为了数据持久化，需要将容器中的数据保存到宿主机的制定目录，方法就是使用数据卷（Data Volume）：直接将宿主机目录挂载到容器的指定目录</p>
+<h2 id="数据卷"><a href="#数据卷" class="headerlink" title="数据卷"></a>数据卷</h2><p>数据卷实际上就是宿主机上的目录或文件，可以直接mount到容器中使用</p>
+<p>实际生产环境中，需要针对不同类型的服务，不同类型的数据存储要求做到相应的规划，最终保证服务的可扩展性、稳定性以及数据的安全性</p>
+<p><strong>使用场景：</strong>数据库、日志、静态web页面、应用配置文件、多容器间目录或文件共享</p>
+<p><strong>数据卷特点：</strong></p>
+<ul>
+<li>可以多容器之间共享</li>
+<li>依赖宿主机目录，宿主机出问题，依赖的容器就会受影响，当宿主机较多时，不方便统一管理</li>
+<li>镜像中的挂载点中包含数据，则在容器初始化时会将数据拷贝到数据卷（匿名和命名）中</li>
+</ul>
+<h3 id="数据卷的使用"><a href="#数据卷的使用" class="headerlink" title="数据卷的使用"></a>数据卷的使用</h3><pre class="language-bash" data-language="bash"><code class="language-bash">docker container run -v <span class="token punctuation">[</span>host-src:<span class="token punctuation">]</span>container-dest<span class="token punctuation">[</span>:<span class="token operator">&lt;</span>options<span class="token operator">></span><span class="token punctuation">]</span>
+
+options：
+ro：容器内对此数据卷只读，代码等文件适合设置为只读
+rw：容器内对此数据卷读写，默认</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将宿主机目录挂载容器目录,两个目录都可自动创建</span>
+-v <span class="token operator">&lt;</span>宿主机绝对路径的目录或文件<span class="token operator">></span>:<span class="token operator">&lt;</span>容器目录或文件<span class="token operator">></span><span class="token punctuation">[</span>:ro<span class="token punctuation">]</span>
+
+<span class="token comment"># 匿名卷，宿主机自动生成/var/lib/docker/volumes/&lt;卷ID>/_data目录，并挂载至容器指定路径</span>
+-v <span class="token operator">&lt;</span>容器内路径<span class="token operator">></span>
+
+<span class="token comment"># 命名卷，宿主机自动生成/var/lib/docker/volumes/&lt;卷名>/_data目录，并挂载至容器指定路径</span>
+-v <span class="token operator">&lt;</span>卷名<span class="token operator">></span>:<span class="token operator">&lt;</span>容器目录路径<span class="token operator">></span></code></pre>
+
+<p><strong>管理卷命令：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker volume --help</span>
+Usage:	docker volume COMMAND
+
+Commands:
+  create      Create a volume
+  inspect     Display detailed information on one or <span class="token function">more</span> volumes
+  <span class="token function">ls</span>          List volumes
+  prune       Remove all unused <span class="token builtin class-name">local</span> volumes
+  <span class="token function">rm</span>          Remove one or <span class="token function">more</span> volumes</code></pre>
+
+<p><strong>关于匿名卷和命名卷：</strong></p>
+<p>命名卷，因为有名字可以指定，在用过一次后,以后挂载容器的时候还可以使用，所以一般需要保存的数据使用命名卷保存。</p>
+<p>匿名卷没有名字，随容器建立而建立，当容器消亡，匿名卷即使还存在，但也失去了意义，因此匿名卷只存放无关紧要的临时数据。</p>
+<p>Dockerfile中指定VOLUME为匿名数据卷，其目的只是为了将某个路径确定为卷。</p>
+<p>数据卷默认可能会保存于 /var/lib/docker/volumes，不过一般不需要、也不应该访问这个位置。</p>
+<p>按照最佳实践的要求，不应该在容器存储层内进行数据写入操作，所有写入应该使用卷。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看数据卷的挂载关系</span>
+docker inspect --format<span class="token operator">=</span><span class="token string">"&#123;&#123;.Mounts&#125;&#125;"</span> <span class="token operator">&lt;</span>容器ID<span class="token operator">></span>
+<span class="token comment"># 删除所有数据卷</span>
+docker volume <span class="token function">rm</span> <span class="token variable"><span class="token variable">`</span>docker volume <span class="token function">ls</span> -q<span class="token variable">`</span></span></code></pre>
+
+<h3 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h3><p>MySQL使用数据卷：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">docker run -d <span class="token punctuation">\</span>
+--name mysql <span class="token punctuation">\</span>
+-p <span class="token number">3306</span>:3306 <span class="token punctuation">\</span>
+-v /data/mysql/:/var/lib/mysql <span class="token punctuation">\</span>
+-e <span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span> mysql:5.7.30</code></pre>
+
+<p>文件数据卷：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">docker run -d <span class="token punctuation">\</span>
+-v /data/bin/catalina.sh:/apps/tomcat/bin/catalina.sh:ro <span class="token punctuation">\</span>
+-v /data/testapp:/data/tomcat/webapps/testapp <span class="token punctuation">\</span>
+-v /data/logs:/apps/tomcat/logs <span class="token punctuation">\</span>
+-p <span class="token number">8080</span>:8080 tomcat-web:app1</code></pre>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/docker%E9%95%9C%E5%83%8F%E5%88%B6%E4%BD%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/Docker/docker%E9%95%9C%E5%83%8F%E5%88%B6%E4%BD%9C/" class="post-title-link" itemprop="url">docker镜像制作</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 11:27:49" itemprop="dateCreated datePublished" datetime="2021-01-08T11:27:49+08:00">2021-01-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>docker 镜像生命周期</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1605854412629.png"></p>
+<p>制作镜像方法：</p>
+<ul>
+<li>手工制作（基于容器）</li>
+<li>自动制作（基于dockerfile），企业通常都是基于dockerfile制作镜像</li>
+</ul>
+<h2 id="手动构建镜像"><a href="#手动构建镜像" class="headerlink" title="手动构建镜像"></a>手动构建镜像</h2><p>将现有容器通过 <code>docker commit</code> 或 <code>docker container commit</code> 手动构建镜像</p>
+<p>根据容器的更改创建新镜像：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container commit --help</span>
+Usage:	docker container commit <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>REPOSITORY<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span><span class="token punctuation">]</span>
+
+Options:
+  -a, --author string    作者 <span class="token punctuation">(</span>e.g., <span class="token string">"John Hannibal Smith &lt;hannibal@a-team.com>"</span><span class="token punctuation">)</span>
+  -c, --change list      使用Dockerfile指令来创建镜像
+  -m, --message string   提交时的说明文字
+  -p, --pause            在commit时，将容器暂停 <span class="token punctuation">(</span>default <span class="token boolean">true</span><span class="token punctuation">)</span></code></pre>
+
+<p>说明：</p>
+<ul>
+<li>制作镜像和容器的状态无关，停止状态也可以制作</li>
+<li>如果没有指定[REPOSITORY[:TAG]],REPOSITORY和TAG都为&lt;none&gt;</li>
+<li>提交的时候标记TAG，后期可以根据TAG标记创建不同版本的镜像以及创建不同版本的容器</li>
+</ul>
+<h3 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h3><ol>
+<li>下载一个官方的基础镜像，例如：centos、ubuntu、alpine</li>
+<li>基于基础镜像启动一个容器，并进入</li>
+<li>在容器里面进行安装服务、修改配置等操作</li>
+<li>提交一个新镜像 <code>docker container commit</code></li>
+<li>基于自己的镜像创建容器并访问、</li>
+</ol>
+<h3 id="案例：基于alpine基础镜像制作nginx镜像"><a href="#案例：基于alpine基础镜像制作nginx镜像" class="headerlink" title="案例：基于alpine基础镜像制作nginx镜像"></a>案例：基于alpine基础镜像制作nginx镜像</h3><ol>
+<li><p>下载最新版alpine基础镜像</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># docker pull alpine</span></code></pre></li>
+<li><p>启动alpine并进入</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># docker container run -it alpine</span>
+/ <span class="token comment"># </span></code></pre></li>
+<li><p>另开一个终端，将shell脚本拷贝到alpine镜像</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~/www/script$ <span class="token function">sudo</span> docker container <span class="token function">ls</span>
+CONTAINER ID  IMAGE   COMMAND    CREATED             STATUS    PORTS    NAMES
+b8de1bdb6c88  alpine  <span class="token string">"/bin/sh"</span>  About a minute ago  Up About a minute  funny_chatelet
+
+lujinkai@Z510:~/www/script$ <span class="token function">sudo</span> docker container <span class="token function">cp</span> -a ./alpine-docker/ b8de:/root</code></pre></li>
+<li><p>回到容器，运行shell脚本</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># docker container run -it alpine</span>
+/ <span class="token comment"># cd </span>
+~ <span class="token comment"># ls</span>
+alpine-docker
+~ <span class="token comment"># cd alpine-docker/</span>
+~/alpine-docker <span class="token comment"># ./install.sh</span>
+<span class="token punctuation">..</span><span class="token punctuation">..</span>
+make<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: Leaving directory <span class="token string">'/root/alpine-docker/src/nginx-1.18.0'</span>
+Nginx installed successfully<span class="token operator">!</span>
+~/alpine-docker <span class="token comment"># exit</span></code></pre></li>
+<li><p>提交镜像</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ <span class="token function">sudo</span> docker container commit <span class="token punctuation">\</span>
+    -a <span class="token string">'lujinkai&lt;root@lujinkai.com>'</span> <span class="token punctuation">\</span>
+    -c <span class="token string">'EXPOSE 80'</span> <span class="token punctuation">\</span>
+    -c <span class="token string">'CMD ["/usr/local/nginx/sbin/nginx"]'</span> <span class="token punctuation">\</span>
+    b8de1bdb6c88 nginx-alpine:v1
+lujinkai@Z510:~$ <span class="token function">sudo</span> <span class="token operator">!</span><span class="token operator">!</span>
+<span class="token function">sudo</span> docker image <span class="token function">ls</span>
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx-alpine        v1                  de56d80c5c8c        <span class="token number">14</span> seconds ago      340MB
+alpine              latest              d6e46aa2470d        <span class="token number">4</span> weeks ago         <span class="token number">5</span>.57MB</code></pre></li>
+<li><p>启动基于新制作镜像的容器</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># docker container run -d -p 80:80 nginx-alpine:v1 </span>
+ebbe778a7fe303e6a5cb840203d95a7b5e2a07208365b71f784ddc8357a664d7
+root@Z510:~<span class="token comment"># curl 127.0.0.1:81</span>
+hello nginx</code></pre>
+
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1605926835392.png"></p>
+</li>
+<li><p>iptables</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># iptables -t nat -nL</span>
+<span class="token punctuation">..</span>.
+Chain DOCKER <span class="token punctuation">(</span><span class="token number">2</span> references<span class="token punctuation">)</span>
+target     prot opt <span class="token builtin class-name">source</span>		destination         
+RETURN     all  --  anywhere	anywhere            
+DNAT       tcp  --  <span class="token number">0.0</span>.0.0/0	<span class="token number">0.0</span>.0.0/0		tcp dpt:81 to:172.17.0.2:80</code></pre></li>
+<li><p>ss</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># ss -ntl</span>
+State	Recv-Q	Send-Q	Local Address:Port	Peer Address:Port	Process          
+<span class="token punctuation">..</span>.
+LISTEN	<span class="token number">0</span>		<span class="token number">4096</span>		*:81					*:*                              
+<span class="token punctuation">..</span>.</code></pre></li>
+<li><p>有需求的话，可以导出镜像：<code>docker image save [OPTIONS] IMAGE </code></p>
+</li>
+</ol>
+<h2 id="自动构建镜像"><a href="#自动构建镜像" class="headerlink" title="自动构建镜像"></a>自动构建镜像</h2><p>利用 DockerFile 文件执行 docker build 自动构建镜像</p>
+<p>个人觉得还是手动的比较方便，然后在容器内无法完成的设置，<code>docker container commit</code>提交的时候设置<code>-c</code>参数即可</p>
+<h3 id="docker-build"><a href="#docker-build" class="headerlink" title="docker build"></a>docker build</h3><p><code>docker build</code> 命令用来基于 dockerfile 构建镜像</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">docker build <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token environment constant">PATH</span> <span class="token operator">|</span> URL <span class="token operator">|</span> -</code></pre>
+
+<ul>
+<li><code>PATH | URL | -</code>    上下文目录，如果设置为 - ，则从标准输入获取dockerfile的内容，什么是上下文目录？举个例子：COPY指令复制文件时，源文件只能在上下文目录</li>
+<li><code>OPTIONS</code><ul>
+<li><code>-f</code>：指定 Dockerfile 文件，默认为上下文目录下的Dockerfile</li>
+<li><code>--force-rm</code>：总是删除中间层容器,创建镜像失败时，删除临时容器</li>
+<li><code>--no-cache</code>：不使用之前构建中创建的缓存</li>
+<li><code>--rm=true</code>：创建镜像成功时，删除临时容器</li>
+<li><code>-c</code>：控制 CPU 使</li>
+<li><code>-m</code>：设置构建内存上限</li>
+<li><code>-q</code>：不显示构建过程的信息</li>
+<li><code>-t</code>：为构建的镜像打上标签</li>
+</ul>
+</li>
+</ul>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">docker build -t nginx:v1 <span class="token builtin class-name">.</span>    <span class="token comment"># 构建一个镜像，命名为 hello，指定上下文目录为当前目录</span></code></pre>
+
+<h4 id="build-构建过程"><a href="#build-构建过程" class="headerlink" title="build 构建过程"></a>build 构建过程</h4><ol>
+<li>从基础镜像运行一个容器</li>
+<li>顺序执行一条指令对容器做出修改</li>
+<li>执行类似 <code>docker commit</code> 的操作提交一个新的镜像层（可以利用中间层镜像创建容器进行调<br>试和排错）</li>
+<li>docker基于刚才提交的镜像运行一个新的容器</li>
+<li>执行 Dockerfile 中的下一条指令，直至所有指令执行完毕</li>
+</ol>
+<h3 id="Dockerfile-文件格式"><a href="#Dockerfile-文件格式" class="headerlink" title="Dockerfile 文件格式"></a>Dockerfile 文件格式</h3><p>Dockerfile 是一个有特定语法格式的文本文件</p>
+<ul>
+<li>每一行以 Dockerfile 的指令开头，指令不区分大小写，但是惯例使用大写</li>
+<li>使用 # 开始作为注释</li>
+<li>每一行只支持一条指令，每条指令可以携带多个参数</li>
+<li>指令按文件的顺序从上至下进行执行</li>
+<li>每个指令的执行会生成一个新的镜像层，为了减少分层和镜像大小，尽可能将多条指令合并成一条指令</li>
+<li>制作镜像一般可能需要反复多次，每次执行 Dockerfile 都按顺序执行，从头开始，已经执行过的指令已经缓存，不需要再执行，如果后续有一行新的指令没执行过，其往后的指令将会重新执行，所以为加速镜像制作，将最常变化的内容放下 Dockerfile 的文件的后面</li>
+</ul>
+<h3 id="Dockerfile-相关指令"><a href="#Dockerfile-相关指令" class="headerlink" title="Dockerfile 相关指令"></a>Dockerfile 相关指令</h3><p><code>docker build</code> 命令基于 dockerfile 构建镜像，<code>docker run</code> 命令基于镜像启动容器</p>
+<p>所以 dockerfile 的指令也分为三类：</p>
+<ul>
+<li>在 <code>docker build</code> 阶段运行</li>
+<li>在 <code>docker run</code> 阶段运行</li>
+<li>在以上两个阶段都运行，这种命令都是“设置”相关的，例如 <code>USER</code> 设置用户、<code>ENV</code> 设置环境变量、<code>WORKDIR</code> 设置工作目录，它们的设置在 build 和 run 两个阶段都生效</li>
+</ul>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1615612988998.png"></p>
+<h4 id="FROM"><a href="#FROM" class="headerlink" title="FROM"></a>FROM</h4><p><code>FORM</code> 指定基础镜像，此指令通常必需放在Dockerfile文件第一个非注释行。后续的指令都是运行于此基准镜像所提供的运行环境</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">FROM <span class="token punctuation">[</span>--platform<span class="token operator">=</span><span class="token operator">&lt;</span>platform<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>image<span class="token operator">></span><span class="token punctuation">[</span>:<span class="token operator">&lt;</span>tag<span class="token operator">></span><span class="token punctuation">]</span></code></pre>
+
+<p><strong>关于scratch 镜像：</strong></p>
+<p>该镜像是一个空的镜像，可以用于构建busybox等超小镜像，可以说是真正的从零开始构建属于自己的镜像该镜像在构建基础镜像（例如debian和busybox）或超最小镜像（仅包含一个二进制文件及其所需内容，例如:hello-world）的上下文中最有用</p>
+<h4 id="LABEL"><a href="#LABEL" class="headerlink" title="LABEL"></a>LABEL</h4><p><code>LABEL</code> 指定镜像元数据，如 镜像作者等</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">LABEL <span class="token operator">&lt;</span>key<span class="token operator">></span><span class="token operator">=</span><span class="token operator">&lt;</span>value<span class="token operator">></span> <span class="token operator">&lt;</span>key<span class="token operator">></span><span class="token operator">=</span><span class="token operator">&lt;</span>value<span class="token operator">></span> <span class="token operator">&lt;</span>key<span class="token operator">></span><span class="token operator">=</span><span class="token operator">&lt;</span>value<span class="token operator">></span> <span class="token punctuation">..</span>.</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">LABEL <span class="token assign-left variable">maintainer</span><span class="token operator">=</span><span class="token string">"lujinkai &lt;root@lujinkai.com>"</span> <span class="token punctuation">\</span>
+    <span class="token assign-left variable">version</span><span class="token operator">=</span><span class="token string">"1.0"</span> <span class="token punctuation">\</span>
+    <span class="token assign-left variable">other</span><span class="token operator">=</span><span class="token string">"value3"</span> <span class="token punctuation">\</span>
+    description: <span class="token string">"some description"</span> <span class="token punctuation">\</span>
+    <span class="token assign-left variable">other</span><span class="token operator">=</span><span class="token string">"value1"</span></code></pre>
+
+<p>注意：MAINTAINER 指令已过时，使用 LABEL 代替</p>
+<h4 id="RUN"><a href="#RUN" class="headerlink" title="RUN"></a>RUN</h4><p><code>RUN</code> 指令用来在 build 阶段需要执行 shell 命令，一定要是继承的镜像所支持的 shell 命令</p>
+<p>注意: <code>RUN</code> 可以写多个，每一个 <code>RUN</code> 指令都会建立一个镜像层，所以尽可能使用 &amp;&amp;  将多条指令合并为一条</p>
+<p>相邻的 <code>RUN</code> 命令相互独立，示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">RUN <span class="token builtin class-name">cd</span> /app
+RUN <span class="token builtin class-name">echo</span> <span class="token string">"hello"</span> <span class="token operator">></span> world.txt		<span class="token comment"># world.txt并不存放在/app内</span></code></pre>
+
+<h4 id="ENV"><a href="#ENV" class="headerlink" title="ENV"></a>ENV</h4><p><code>ENV</code> 定义环境变量和值，会被后续指令通过$KEY或${KEY}进行引用，并在容器运行时保持</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ENV <span class="token operator">&lt;</span>key<span class="token operator"><span class="token file-descriptor important">1</span>></span><span class="token operator">=</span><span class="token operator">&lt;</span>value<span class="token operator"><span class="token file-descriptor important">1</span>></span> <span class="token punctuation">\</span>
+	<span class="token operator">&lt;</span>key<span class="token operator"><span class="token file-descriptor important">2</span>></span><span class="token operator">=</span><span class="token operator">&lt;</span>value<span class="token operator"><span class="token file-descriptor important">2</span>></span> <span class="token punctuation">\</span>
+	<span class="token operator">&lt;</span>key<span class="token operator"><span class="token file-descriptor important">3</span>></span><span class="token operator">=</span><span class="token operator">&lt;</span>value<span class="token operator"><span class="token file-descriptor important">3</span>></span>
+
+<span class="token comment"># 变量支持高级赋值格式</span>
+<span class="token variable">$&#123;key<span class="token operator">:-</span>word&#125;</span>
+<span class="token variable">$&#123;kye<span class="token operator">:+</span>word&#125;</span></code></pre>
+
+<p><code>docker run</code> 运行容器，如果需要修改环境变量，使用 <code> -e</code> 重新定义即可覆盖</p>
+<h4 id="COPY"><a href="#COPY" class="headerlink" title="COPY"></a>COPY</h4><p>复制指令，从上下文目录中复制文件或者目录到容器里指定路径</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">COPY <span class="token punctuation">[</span>--chown<span class="token operator">=</span><span class="token operator">&lt;</span>user<span class="token operator">></span>:<span class="token operator">&lt;</span>group<span class="token operator">></span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token string">"&lt;src>"</span>,<span class="token punctuation">..</span>. <span class="token string">"&lt;dest>"</span><span class="token punctuation">]</span>	<span class="token comment"># 如果路径中有空白字符，加双引号</span></code></pre>
+
+<ul>
+<li><p><code>--chown=&lt;user&gt;:&lt;group&gt;</code>：改变复制到容器内文件的属主和属组，默认保留所有元数据</p>
+</li>
+<li><p><code>&quot;&lt;src&gt;&quot;</code></p>
+<ul>
+<li>支持通配符，通配符规则满足Go的filepath.Match规则</li>
+<li>如果是目录，则其内部文件或子目录会被递归复制，但目录自身不会被复制</li>
+</ul>
+</li>
+<li><p><code>&quot;&lt;dest&gt;&quot;</code></p>
+<ul>
+<li>支持绝对路径 或 WORKDIR 指定的相对路径</li>
+<li>如果不存在，会自动创建，递归创建目录</li>
+<li>如果<code>&quot;&lt;src&gt;&quot;</code>是多个文件，则<code>&quot;&lt;dest&gt;&quot;</code>必须是目录，且以 <code>/</code> 结尾</li>
+</ul>
+</li>
+</ul>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">COPY hom* /mydir/
+COPY hom?.txt /mydir/</code></pre>
+
+<h4 id="ADD"><a href="#ADD" class="headerlink" title="ADD"></a>ADD</h4><p>增强版 <code>COPY</code>，支持自动解压缩，如果只是复制，尽量使用 <code>COPY</code></p>
+<p>支持解压缩（identity、gzip、bzip2、xz），支持解包（tar），支持像解压缩+解包，例如 <code>.tar.gz</code> </p>
+<p>注意：ADD 识别压缩文件，取决于文件内容，不取决于文件后缀，如果一个文本文件直接修改后缀为 <code>.tar.gz</code>，该文件将被简单地复制到目标文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ADD <span class="token punctuation">[</span>--chown<span class="token operator">=</span><span class="token operator">&lt;</span>user<span class="token operator">></span>:<span class="token operator">&lt;</span>group<span class="token operator">></span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token string">"&lt;src>"</span>,<span class="token punctuation">..</span>. <span class="token string">"&lt;dest>"</span><span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li><code>&quot;&lt;src&gt;&quot;</code>：支持URL，下载后的文件权限自动设置为 600，如果下载的是 tar 文件将不会自动展开</li>
+</ul>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ADD <span class="token builtin class-name">test</span> relativeDir/ 		<span class="token comment"># adds "test" to `WORKDIR`/relativeDir/</span>
+ADD <span class="token builtin class-name">test</span> /absoluteDir/ 		<span class="token comment"># adds "test" to /absoluteDir/</span>
+ADD --chown<span class="token operator">=</span><span class="token number">55</span>:mygroup files* /somedir/
+ADD --chown<span class="token operator">=</span>bin files* /somedir/
+ADD --chown<span class="token operator">=</span><span class="token number">1</span> files* /somedir/
+ADD --chown<span class="token operator">=</span><span class="token number">10</span>:11 files* /somedir/
+ADD ubuntu-xenial-core-cloudimg-amd64-root.tar.gz /</code></pre>
+
+<h4 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h4><p><code>CMD</code> 指定启动容器时默认执行的一个命令</p>
+<ul>
+<li>命令运行结束后容器也会停止，所以一般指定持续运行且为前台的命令</li>
+<li>每个 Dockerfile 只能有一条<code>CMD</code> 命令。如指定了多条，只有最后一条被执行</li>
+<li>如果用户启动容器时用 docker run xxx 指定运行的命令，则会覆盖 <code>CMD</code> 指定的命令</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用 exec 执行，推荐方式，第一个参数必须是命令的全路径,此种形式不支持环境变量</span>
+CMD <span class="token punctuation">[</span><span class="token string">"executable"</span>,<span class="token string">"param1"</span>,<span class="token string">"param2"</span><span class="token punctuation">]</span>
+
+<span class="token comment"># 在 /bin/sh 中执行，提供给需要交互的应用；此种形式支持环境变量</span>
+CMD <span class="token builtin class-name">command</span> param1 param2
+
+<span class="token comment"># 提供给 ENTRYPOINT 命令的默认参数</span>
+CMD <span class="token punctuation">[</span><span class="token string">"param1"</span>,<span class="token string">"param2"</span><span class="token punctuation">]</span></code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">CMD <span class="token punctuation">[</span><span class="token string">"nginx"</span>, <span class="token string">"-g"</span>, <span class="token string">"daemon off;"</span><span class="token punctuation">]</span></code></pre>
+
+<h4 id="ENTRYPOINT"><a href="#ENTRYPOINT" class="headerlink" title="ENTRYPOINT"></a>ENTRYPOINT</h4><p>入口点，功能类似于<code>CMD</code>，配置容器启动后执行的命令及参数</p>
+<ul>
+<li><code>ENTRYPOINT</code> 不能被 <code>docker run</code> 提供的参数覆盖，而是以追加的形式作为 <code>ENTRYPOINT</code> 的参数</li>
+<li>每个 Dockerfile 中只能有一个 ENTRYPOINT，当指定多个时，只有最后一个生效</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用 exec 执行</span>
+ENTRYPOINT <span class="token punctuation">[</span><span class="token string">"executable"</span>, <span class="token string">"param1"</span>, <span class="token string">"param2"</span><span class="token punctuation">]</span>
+
+<span class="token comment"># shell中执行</span>
+ENTRYPOINT <span class="token builtin class-name">command</span> param1 param2</code></pre>
+
+<p><code>CMD</code> 和 <code>ENTRYPOINT</code> 都定义了容器运行时的执行命令。如下是它们的一些使用规则：</p>
+<ul>
+<li><code>CMD</code> 和 <code>ENTRYPOINT</code> 在 Dockerfiles 中应该至少应该有一个被定义</li>
+<li>当构建可执行容器时，应该定义 <code>ENTRYPOINT</code> 指令</li>
+<li><code>CMD</code> 要么用于给 <code>ENTRYPOINT</code> 提供默认参数，要么用于在容器中执行一个特定命令</li>
+<li><code>CMD</code> 可以通过容器启动命令 <code>docker run</code> 的参数来替换它</li>
+</ul>
+<h4 id="ARG"><a href="#ARG" class="headerlink" title="ARG"></a>ARG</h4><p><code>ARG</code> 在build 阶段指定变量，和 <code>ENV</code> 不同的是，容器运行时不会存在这些环境变量</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ARG <span class="token operator">&lt;</span>name<span class="token operator">></span><span class="token punctuation">[</span><span class="token operator">=</span><span class="token operator">&lt;</span>default value<span class="token operator">></span><span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li><p>如果和 <code>ENV</code> 同名，<code>ENV</code> 覆盖 <code>ARG</code> 变量</p>
+</li>
+<li><p>可以用 <code>docker build --build-arg &lt;参数名&gt;=&lt;值&gt;</code> 来覆盖</p>
+</li>
+<li><p>在 <code>FROM</code> 之前声明的 <code>ARG</code> 在构建阶段之外，所以它不能在 <code>FROM</code> 之后的任何指令中使用。 要使用在第一个<code>FROM</code> 之前声明的 <code>ARG</code> 的默认值，请在构建阶段内使用没有值的 <code>ARG</code> 指令</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 示例:</span>
+ARG <span class="token assign-left variable">VERSION</span><span class="token operator">=</span>latest
+FROM busybox:<span class="token variable">$VERSION</span>
+ARG VERSION
+RUN <span class="token builtin class-name">echo</span> <span class="token variable">$VERSION</span> <span class="token operator">></span> image_version</code></pre></li>
+</ul>
+<h4 id="VOLUME"><a href="#VOLUME" class="headerlink" title="VOLUME"></a>VOLUME</h4><p>匿名卷，将宿主机上的目录挂载至 <code>VOLUME</code> 指定的容器目录。即使容器后期被删除，此宿主机的目录仍会保留，从而实现容器数据的持久保存</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">VOLUME <span class="token operator">&lt;</span>容器内路径<span class="token operator">></span>
+VOLUME <span class="token punctuation">[</span><span class="token string">"&lt;容器内路径1>"</span>, <span class="token string">"&lt;容器内路径2>"</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li><p><code>VOLUME</code> 实现的是匿名卷，无法指定宿主机路径和容器目录的挂载关系，宿主机目录位于：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/var/lib/docker/volumes/</code></pre></li>
+<li><p>通过<code>docker rm -fv &lt;容器ID&gt;</code> 可以删除容器的同时删除VOLUME指定的卷</p>
+</li>
+<li><p>如果要指定宿主机目录，使用 <code>docker run</code> 的 -v 参数，参考：<a href="./docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86/">docker数据管理</a></p>
+</li>
+</ul>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. dockerfile，生成两个匿名卷</span>
+VOLUME <span class="token punctuation">[</span> <span class="token string">"/testdata"</span>,<span class="token string">"/testdata2"</span> <span class="token punctuation">]</span>
+
+<span class="token comment"># 2. 进入容器，测试</span>
+<span class="token function">cp</span> /etc/issue /testdata/f1.txt
+<span class="token function">cp</span> /etc/issue /testdata2/f2.txt
+
+<span class="token comment"># 3. 查看宿主机目录</span>
+$ tree /var/lib/containers/storage/volumes/
+/var/lib/containers/storage/volumes/
+├── 725f0f67921bdbffbe0aaf9b015d663a6e3ddd24674990d492025dfcf878529b
+│ └── _data
+│ └── f1.txt
+└── fbd13e5253deb375e0dea917df832d2322e96b04ab43bae061584dcdbe7e89f2
+└── _data
+└── f2.txt</code></pre>
+
+<h4 id="EXPOSE"><a href="#EXPOSE" class="headerlink" title="EXPOSE"></a>EXPOSE</h4><h4 id="WORKDIR"><a href="#WORKDIR" class="headerlink" title="WORKDIR"></a>WORKDIR</h4><p>指定工作目录，即后续 <code>RUN</code>、<code>CMD</code>、<code>ENTRYPOINT</code> 指令的相对路径，如该目录不存在，<code>WORKDIR</code> 会自行创建</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">WORKDIR /path/to/workdir</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 两次RUN独立运行,不在同一个目录，</span>
+RUN <span class="token builtin class-name">cd</span> /app
+RUN <span class="token builtin class-name">echo</span> <span class="token string">"hello"</span> <span class="token operator">></span> world.txt
+
+<span class="token comment"># 如果想实现相同目录可以使用WORKDIR</span>
+WORKDIR /app
+RUN <span class="token builtin class-name">echo</span> <span class="token string">"hello"</span> <span class="token operator">></span> world.txt
+
+<span class="token comment"># 可以使用多个 WORKDIR 指令，后续命令如果参数是相对路径，则会基于之前命令指定的路径</span>
+WORKDIR /a
+WORKDIR b
+WORKDIR c
+RUN <span class="token builtin class-name">pwd</span>			<span class="token comment"># /a/b/c</span></code></pre>
+
+<h4 id="ONBUILD"><a href="#ONBUILD" class="headerlink" title="ONBUILD"></a>ONBUILD</h4><p><code>ONBUILD</code> 指令在当前镜像 build 阶段不会执行，会在子镜像 build 阶段执行，即：延迟执行</p>
+<p>使用 ONBUILD 指令的镜像，推荐在标签中注明，例如 ruby:1.9-onbuild</p>
+<h4 id="USER"><a href="#USER" class="headerlink" title="USER"></a>USER</h4><p>指定执行后续指令的用户和用户组，后续的 RUN 也会使用指定用户，默认是 root 身份执行</p>
+<p>这个用户必须是事先建立好的，否则无法切换</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token environment constant">USER</span> <span class="token operator">&lt;</span>user<span class="token operator">></span><span class="token punctuation">[</span>:<span class="token operator">&lt;</span>group<span class="token operator">></span><span class="token punctuation">]</span>
+<span class="token environment constant">USER</span> <span class="token operator">&lt;</span><span class="token environment constant">UID</span><span class="token operator">></span><span class="token punctuation">[</span>:<span class="token operator">&lt;</span>GID<span class="token operator">></span><span class="token punctuation">]</span></code></pre>
+
+<h4 id="HEALTHCHECK"><a href="#HEALTHCHECK" class="headerlink" title="HEALTHCHECK"></a>HEALTHCHECK</h4><p>检查容器的健康性</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">HEALTHCHECK <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> CMD <span class="token operator">&lt;</span>命令<span class="token operator">></span> 	<span class="token comment"># 设置检查容器健康状况的命令</span>
+HEALTHCHECK NONE 	<span class="token comment"># 如果基础镜像有健康检查指令，使用这行可以屏蔽掉其健康检查指令</span>
+
+--interval<span class="token operator">=</span><span class="token operator">&lt;</span>间隔<span class="token operator">></span> <span class="token comment">#两次健康检查的间隔，默认为 30 秒</span>
+--timeout<span class="token operator">=</span><span class="token operator">&lt;</span>时长<span class="token operator">></span>  <span class="token comment">#健康检查命令运行超时时间，如果超过这个时间，本次健康检查就被视为失败，默认 30 秒</span>
+--retries<span class="token operator">=</span><span class="token operator">&lt;</span>次数<span class="token operator">></span>  <span class="token comment">#当连续失败指定次数后，则将容器状态视为 unhealthy，默认3次</span>
+--start-period<span class="token operator">=</span><span class="token operator">&lt;</span>FDURATION<span class="token operator">></span> <span class="token comment">#default: 0s</span></code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">FROM nginx
+RUN <span class="token function">apt-get</span> update <span class="token operator">&amp;&amp;</span> <span class="token function">apt-get</span> <span class="token function">install</span> -y <span class="token function">curl</span> <span class="token operator">&amp;&amp;</span> <span class="token function">rm</span> -rf /var/lib/apt/lists/*
+HEALTHCHECK --interval<span class="token operator">=</span>5s --timeout<span class="token operator">=</span>3s <span class="token punctuation">\</span>
+	CMD <span class="token function">curl</span> -fs http://localhost/ <span class="token operator">||</span> <span class="token builtin class-name">exit</span> <span class="token number">1</span></code></pre>
+
+<h4 id="STOPSIGNAL"><a href="#STOPSIGNAL" class="headerlink" title="STOPSIGNAL"></a>STOPSIGNAL</h4><p>退出容器的信号</p>
+<p><code>STOPSIGNAL</code> 设置将被发送到容器退出的系统调用信号。该信号可以是与内核syscall表中的位置匹配的有效无符号数字（例如9），也可以是SIGNAME格式的信号名称（例如SIGKILL）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">STOPSIGNAL signal</code></pre>
+
+<h4 id="SHELL"><a href="#SHELL" class="headerlink" title="SHELL"></a>SHELL</h4><p>指定shell，<code>SHELL</code>指令可以出现多次。 每个<code>SHELL</code>指令将覆盖所有先前的<code>SHELL</code>指令，并影响所有后续的指令</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token environment constant">SHELL</span> <span class="token punctuation">[</span><span class="token string">"executable"</span>, <span class="token string">"parameters"</span><span class="token punctuation">]</span></code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token environment constant">SHELL</span> <span class="token punctuation">[</span><span class="token string">"powershell"</span>, <span class="token string">"-command"</span><span class="token punctuation">]</span>
+<span class="token environment constant">SHELL</span> <span class="token punctuation">[</span><span class="token string">"cmd"</span>, <span class="token string">"/S"</span>, <span class="token string">"/C"</span><span class="token punctuation">]</span></code></pre>
+
+<h4 id="dockerignore文件"><a href="#dockerignore文件" class="headerlink" title=".dockerignore文件"></a>.dockerignore文件</h4><p>与.gitignore文件类似，生成构建上下文时Docker客户端应忽略的文件和文件夹指定模式</p>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">test/*			<span class="token comment">#排除 test 目录下的所有文件</span>
+md/xttblog.md	<span class="token comment">#排除 md 目录下的 xttblog.md 文件</span>
+xttblog/*.md	<span class="token comment">#排除 xttblog 目录下的所有 .md 的文件</span>
+xttblog?		<span class="token comment">#排除以 xttblog 为前缀的文件和文件夹</span>
+**/*.sql		<span class="token comment">#排除所有目录下的 .sql 文件夹</span>
+
+<span class="token comment">#除了README的md不排外，排除所有md文件，但不排除README-secret.md</span>
+*.md
+<span class="token operator">!</span>README*.md
+README-secret.md
+
+<span class="token comment">#除了所有README的md文件以外的md都排除</span>
+*.md
+README-secret.md
+<span class="token operator">!</span>README*.md</code></pre>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/docker%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -274,7 +860,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -591,7 +1177,7 @@ docker run <span class="token punctuation">\</span>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -816,7 +1402,7 @@ Options:
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-20 01:28:58" itemprop="dateModified" datetime="2021-03-20T01:28:58+08:00">2021-03-20</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1021,7 +1607,7 @@ Labels:
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1151,7 +1737,7 @@ Labels:
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1444,7 +2030,7 @@ lujinkai@u1:~$ <span class="token function">sudo</span> systemctl restart sshd.s
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2483,7 +3069,7 @@ tcp-request connection reject <span class="token keyword">if</span> invalid_src 
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2570,7 +3156,7 @@ tcp-request connection reject <span class="token keyword">if</span> invalid_src 
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2912,7 +3498,7 @@ ports:
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -3047,7 +3633,7 @@ Destination     Gateway         Genmask         Flags 	Metric 	Ref    Use Iface
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -3441,7 +4027,7 @@ fping -g <span class="token number">10.0</span>.0.5 <span class="token number">1
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -3966,7 +4552,7 @@ net.core.netdev_max_backlog <span class="token operator">=</span> <span class="t
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -4130,7 +4716,7 @@ net.core.netdev_max_backlog <span class="token operator">=</span> <span class="t
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -4251,7 +4837,7 @@ mii-tool -v eth0
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -4391,7 +4977,7 @@ log-queries-not-using-indexes</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -4812,7 +5398,7 @@ mysql<span class="token operator">></span>start slave<span class="token punctuat
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -5188,7 +5774,7 @@ total <span class="token number">0</span>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -5974,7 +6560,7 @@ MySQL <span class="token punctuation">[</span>blog<span class="token punctuation
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -6545,287 +7131,6 @@ user_or_role: &#123;
 <li><p>数据操作：<code>SELECT</code>、<code>INSERT</code>、<code>DELETE</code>、<code>UPDATE</code></p>
 </li>
 <li><p>字段级别：<code>SELECT(col1,col2,...)</code>、<code>UPDATE(col1,col2,...)</code>、<code>INSERT(col1,col2,...)</code></p>
-</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/%E8%8C%83%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E8%BF%90%E7%BB%B4/MySQL/%E8%8C%83%E5%BC%8F/" class="post-title-link" itemprop="url">范式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-31 22:58:36" itemprop="dateCreated datePublished" datetime="2020-12-31T22:58:36+08:00">2020-12-31</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>了解范式之前需要先了解依赖的概念：</p>
-<p>完全依赖：如果只有一个主键，其他字段通过主键查询，如果是联合主键，其他字段通过所有主键查询</p>
-<p>部分依赖：只针对联合主键，其他字段仅需要部分主键就能查询</p>
-<p>传递依赖：假如字段B除了可以通过主键查询，也可以通过字段A查询，主键 –&gt; 字段A –&gt; 字段B，这样字段B和主键之间存在传递依赖关系</p>
-<ol>
-<li>第一范式：无重复的列，确保每一列的原子性</li>
-<li>第二范式：基于第一范式，消除部分依赖</li>
-<li>第三范式：基于第二范式，消除传递依赖</li>
-</ol>
-<p>范式的优点是避免数据冗余，节约空间。关于范式，要了解理论。<br>实际生产中，常第二范式和第三范式混用，也不会刻意保持字段的原子性，会根据业务添加冗余字段，这就是“反范式“。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/MySQL%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E8%BF%90%E7%BB%B4/MySQL/MySQL%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">MySQL安装和基本使用</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-31 22:58:27" itemprop="dateCreated datePublished" datetime="2020-12-31T22:58:27+08:00">2020-12-31</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%BF%90%E7%BB%B4/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>安装方式可以选择：</p>
-<ul>
-<li>源码编译：手动指定各种编译参数，生产推荐使用</li>
-<li>二进制：解压并简单配置即可使用</li>
-</ul>
-<h2 id="初始化脚本提高安全性"><a href="#初始化脚本提高安全性" class="headerlink" title="初始化脚本提高安全性"></a>初始化脚本提高安全性</h2><p>mysql_secure_installation</p>
-<ul>
-<li>设置数据库管理员root口令</li>
-<li>禁止root远程登录</li>
-<li>删除anonymous用户帐号</li>
-<li>删除test数据库</li>
-</ul>
-<h2 id="MySQL组成"><a href="#MySQL组成" class="headerlink" title="MySQL组成"></a>MySQL组成</h2><h3 id="1-客户端程序"><a href="#1-客户端程序" class="headerlink" title="1. 客户端程序"></a>1. 客户端程序</h3><ul>
-<li>mysql：交互式CLI工具</li>
-<li>mysqldump：备份工具，基于mysql协议向mysqld发起查询请求，并将查询得到的所有数据转换成insert等写操作语句保存在文本文件中</li>
-<li>mysqladmin：基于mysql协议管理mysqld</li>
-<li>mysqlimport：数据导入工具</li>
-</ul>
-<p>MyISAM存储引擎管理工具：</p>
-<ul>
-<li>myisamchk：检查MyISAM库</li>
-<li>myisampack：打包MyISAM表，只读</li>
-</ul>
-<p><strong>msyql 运行命令类型</strong></p>
-<p>mysql客户端可以运行两种命令：客户端命令和服务端命令</p>
-<ul>
-<li><p>客户端命令：本地执行，每个命令都有完整形式和简写形式</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">mysql<span class="token operator">></span> <span class="token punctuation">\</span>h, <span class="token builtin class-name">help</span>
-mysql<span class="token operator">></span> <span class="token punctuation">\</span>u，use
-mysql<span class="token operator">></span> <span class="token punctuation">\</span>s，status
-mysql<span class="token operator">></span> <span class="token punctuation">\</span><span class="token operator">!</span>，system</code></pre></li>
-<li><p>服务端命令：通过mysql协议发往服务器执行并取回结果，命令末尾都必须使用命令结束符号，默认为分号</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">mysql<span class="token operator">></span>SELECT VERSION<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></li>
-</ul>
-<p><strong>mysql 使用模式</strong></p>
-<p>mysql客户端有两种使用模式：交互模式和脚本模式</p>
-<ul>
-<li><p>交互模式</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># mysql -uUserName -pPassWord</span>
-<span class="token comment"># 或使用 -e 参数</span>
-<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># mysql -uUserName -pPassWord -e "sql command"</span></code></pre></li>
-<li><p>脚本模式</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将sql语句写入文件</span>
-<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># mysql -uUserName -pPassWord &lt; test.sql</span>
-<span class="token comment"># 在交互模式下，使用source也可以调用文件，执行文件中的sql语句</span>
-<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># mysql -uUserName -pPassWord</span>
-MySQL <span class="token punctuation">[</span><span class="token punctuation">(</span>none<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token builtin class-name">source</span> ~/test/test.sql</code></pre></li>
-</ul>
-<p><strong>mysql 命令</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">mysql <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token punctuation">[</span>database<span class="token punctuation">]</span></code></pre>
-
-<p>常用 OPTIONS：</p>
-<ul>
-<li>-A, –no-auto-rehash 禁止补全</li>
-<li>-u, –user= 用户名,默认为root</li>
-<li>-h, –host= 服务器主机,默认为localhost</li>
-<li>-p, –passowrd= 用户密码,建议使用-p,默认为空密码</li>
-<li>-P, –port= 服务器端口</li>
-<li>-S, –socket= 指定连接socket文件路径</li>
-<li>-D, –database= 指定默认数据库</li>
-<li>-C, –compress 启用压缩</li>
-<li>-e “SQL“ 执行SQL命令</li>
-<li>-V, –version 显示版本</li>
-<li>-v –verbose 显示详细信息</li>
-<li>–print-defaults 获取程序默认使用的配置</li>
-</ul>
-<h3 id="2-服务端程序"><a href="#2-服务端程序" class="headerlink" title="2. 服务端程序"></a>2. 服务端程序</h3><ul>
-<li>mysqld_safe：</li>
-<li>mysqld：</li>
-<li>mysqld_multi：多实例，示例：mysqld_multi –example</li>
-</ul>
-<p><strong>服务端配置</strong></p>
-<p>三种配置方式：1. 启动时配置命令行选项； 2. 配置文件；3. set 变量</p>
-<p>配置文件：</p>
-<ul>
-<li>/etc/my.cnf   # 全局配置</li>
-<li>/etc/mysql/my.cnf   # 全局配置</li>
-<li>~/.my.cnf  # 个人配置</li>
-</ul>
-<p>配置文件格式：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token selector">[mysqld]</span>
-<span class="token comment"># parameter = value</span>
-<span class="token comment"># _ 和 - 相同</span>
-<span class="token comment"># ON，TRUE，1意义相同；0，OFF，FALSE意义相同，不区分大小写</span>
-<span class="token selector">[mysqld_safe]</span>
-<span class="token selector">[mysqld_multi]</span>
-<span class="token selector">[mysql]</span>
-<span class="token selector">[mysqldump]</span>
-<span class="token selector">[server]</span>
-<span class="token selector">[client]</span></code></pre>
-
-<p>服务器监听两种socket地址：</p>
-<ul>
-<li><p>ip socket: 监听在tcp的3306端口，支持远程通信 ，侦听3306/tcp端口可以在绑定有一个或全部接口IP上</p>
-</li>
-<li><p>unix sock: 监听在sock文件上，仅支持本机通信, 如：/var/lib/mysql/mysql.sock)</p>
-<p>说明：host为localhost 时自动使用unix sock</p>
-</li>
-</ul>
-<h3 id="3-用户账号"><a href="#3-用户账号" class="headerlink" title="3. 用户账号"></a>3. 用户账号</h3><p>mysql用户账号由两部分组成：username@host</p>
-<ul>
-<li><p>host：支持通配符，% 匹配任意长度任意字符，_ 匹配任意单个字符</p>
-<p>172.16.0.0/255.255.0.0 等于 172.16.%.%</p>
 </li>
 </ul>
 
