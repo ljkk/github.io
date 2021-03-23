@@ -3721,7 +3721,7 @@ nginx: configuration <span class="token function">file</span> /usr/local/nginx/c
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+        <time title="修改时间：2021-03-24 00:37:36" itemprop="dateModified" datetime="2021-03-24T00:37:36+08:00">2021-03-24</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -3747,11 +3747,19 @@ nginx: configuration <span class="token function">file</span> /usr/local/nginx/c
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>使用JWT实现单点登录（完全跨域方案）：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42873937/article/details/82460997">https://blog.csdn.net/weixin_42873937/article/details/82460997</a></p>
-<p>easyswoole/jwt 实现实现的jwt 和网上介绍的jwt有些许的不同, 通过通读源码可以看出。</p>
-<h2 id="生成token-编码"><a href="#生成token-编码" class="headerlink" title="生成token    编码"></a>生成token    编码</h2><p>把传入的数据a、b、c加密得到d，然后把a、b、c、d加密得到最终的字符串token值。</p>
-<h2 id="解析token-解码"><a href="#解析token-解码" class="headerlink" title="解析token    解码"></a>解析token    解码</h2><p>把字符串token值解密得到a、b、c、d，然后把a、b、c加密，判断加密后的值与d是否相等。如果相等则校验初步通过。再进行超时等其他参数校验。</p>
-<p>传入的数据一定不能有隐私信息字段，不能存放保密信息，使用单独的data字段保存用户id、用户名等信息，然后就是一些到到期时间、发行人、用户等jwt默认的字段。</p>
+          <p><a target="_blank" rel="noopener" href="https://www.easyswoole.com/Components/jwt.html">https://www.easyswoole.com/Components/jwt.html</a><br><a target="_blank" rel="noopener" href="https://baijiahao.baidu.com/s?id=1608021814182894637&amp;wfr=spider&amp;for=pc">https://baijiahao.baidu.com/s?id=1608021814182894637&amp;wfr=spider&amp;for=pc</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42873937/article/details/82460997">使用JWT实现单点登录（完全跨域方案）</a></p>
+<p>JWT：JSON Web Token</p>
+<p>JWT 不仅可用于认证，还可用于信息交换。善用 JWT 有助于减少服务器请求数据库的次数</p>
+<h2 id="生成token-编码"><a href="#生成token-编码" class="headerlink" title="生成token    编码"></a>生成token    编码</h2><p>将<font color=red> <u>用户信息</u> + <u>固定数据</u>（加密方式、用户、过期时间等）+ <u>密钥</u> </font> 加密，得到 <font color=red>签名</font>，然后将这四部分数据base64编码，生成一个长字符串，这个长字符串就是token</p>
+<p>注意：</p>
+<ul>
+<li>密钥保存在服务器上，千万不能泄露，可以设置成 项目名称+随机字符串 的格式</li>
+<li>token中的所有信息都是公开的，所以一定不能存放密码等隐私信息</li>
+<li>一旦JWT签发，有效期内将会一直有效，不能取消token或更改token的权限为了减少盗用，JWT的有效期不宜设置太长。对于某些重要操作，用户在使用时应该每次都进行进行身份验证</li>
+<li>为了减少盗用和窃取，JWT不建议使用HTTP协议来传输代码，而是使用加密的HTTPS协议进行传输</li>
+</ul>
+<h2 id="解析token-解码"><a href="#解析token-解码" class="headerlink" title="解析token    解码"></a>解析token    解码</h2><p>base64解码token，得到一堆明文信息和签名，明文信息里有一个字段说明了加密用的算法，将明文信息使用指定的加密方式加密，如果等于签名，则token校验通过，在进行超时等其他参数的校验</p>
+<p>token被截获后，用户数据等信息很容易被篡改，但是因为没有密钥，所以签名无法被篡改，所以只要密钥不泄露，就能保住token的安全性</p>
 
       
     </div>
