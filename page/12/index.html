@@ -188,18 +188,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">238</span>
+          <span class="site-state-item-count">244</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-count">57</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">215</span>
+        <span class="site-state-item-count">213</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -243,6 +243,660 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/Vue/webpack%E9%A1%B9%E7%9B%AE%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%89%8D%E7%AB%AF/Vue/webpack%E9%A1%B9%E7%9B%AE%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">webpack项目打包优化</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-07 18:40:59" itemprop="dateCreated datePublished" datetime="2020-12-07T18:40:59+08:00">2020-12-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/Vue/" itemprop="url" rel="index"><span itemprop="name">Vue</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="externals-方案"><a href="#externals-方案" class="headerlink" title="externals 方案"></a>externals 方案</h2><p>将体积大而且不需要按需加载的包通过<code>CDN</code>的方式加载, 不参与打包, 例如: <code>vue</code>、<code>axios</code>、<code>vue-router</code> , 通过<code>CDN</code>加载的包不能使用<code>Vue.use()</code></p>
+<h3 id="引入资源"><a href="#引入资源" class="headerlink" title="引入资源"></a>引入资源</h3><p>在index.html中通过link和script方法引入所需的js和css</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607337743495.png"></p>
+<h3 id="配置externals"><a href="#配置externals" class="headerlink" title="配置externals"></a>配置externals</h3><p>在 <code>webpack.dev.conf.js</code> 和 <code>webpack.prod.conf.js</code> 的<code>module</code>下均添加<code>externals</code>, 这样<code>webpack</code>编译打包时不处理它, 却可以import引用到它。</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607337762271.png"></p>
+<h2 id="按需加载"><a href="#按需加载" class="headerlink" title="按需加载"></a>按需加载</h2><p>每个包按需加载的方式都不同, 这里以 <code>element-ui</code> 为例, 在<code>main.js</code>主入口文件中给<code>element-ui</code>组件库做按需导入设置，去除没有使用的组件，进一步精简项目的总代码量。<br>参考: <a target="_blank" rel="noopener" href="https://element.eleme.cn/#/zh-CN/component/quickstart">https://element.eleme.cn/#/zh-CN/component/quickstart</a></p>
+<h3 id="安装-babel-plugin-component"><a href="#安装-babel-plugin-component" class="headerlink" title="安装 babel-plugin-component"></a>安装 <code>babel-plugin-component</code></h3><pre class="language-sh" data-language="sh"><code class="language-sh">npm install babel-plugin-component -D</code></pre>
+
+<h3 id="修改-babelrc"><a href="#修改-babelrc" class="headerlink" title="修改 .babelrc "></a>修改 <code>.babelrc </code></h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1607337779527.png"></p>
+<h3 id="按需引入"><a href="#按需引入" class="headerlink" title="按需引入"></a>按需引入</h3><p>完整组件列表和引入方式（完整组件列表以 <a target="_blank" rel="noopener" href="https://github.com/ElemeFE/element/blob/master/components.json">components.json</a> 为准）</p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">import</span> Vue <span class="token keyword">from</span> <span class="token string">'vue'</span>
+<span class="token keyword">import</span> <span class="token punctuation">&#123;</span>
+  Pagination<span class="token punctuation">,</span>
+  Dialog<span class="token punctuation">,</span>
+  Autocomplete<span class="token punctuation">,</span>
+  Dropdown<span class="token punctuation">,</span>
+  DropdownMenu<span class="token punctuation">,</span>
+  DropdownItem<span class="token punctuation">,</span>
+  Menu<span class="token punctuation">,</span>
+  Submenu<span class="token punctuation">,</span>
+  MenuItem<span class="token punctuation">,</span>
+  MenuItemGroup<span class="token punctuation">,</span>
+  Input<span class="token punctuation">,</span>
+  InputNumber<span class="token punctuation">,</span>
+  Radio<span class="token punctuation">,</span>
+  <span class="token comment">// ...</span>
+  Loading<span class="token punctuation">,</span>
+  MessageBox<span class="token punctuation">,</span>
+  Message<span class="token punctuation">,</span>
+  Notification
+<span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">'element-ui'</span>
+
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$<span class="token constant">ELEMENT</span> <span class="token operator">=</span> <span class="token punctuation">&#123;</span> size<span class="token operator">:</span> <span class="token string">'small'</span> <span class="token punctuation">&#125;</span>	<span class="token comment">// element-ui的全局配置</span>
+
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Pagination<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Dialog<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Autocomplete<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Dropdown<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>DropdownMenu<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>DropdownItem<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Menu<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Submenu<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>MenuItem<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>MenuItemGroup<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Input<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>InputNumber<span class="token punctuation">)</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Radio<span class="token punctuation">)</span>
+<span class="token comment">// ...</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Loading<span class="token punctuation">.</span>directive<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$loading <span class="token operator">=</span> Loading<span class="token punctuation">.</span>service<span class="token punctuation">;</span>
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$msgbox <span class="token operator">=</span> MessageBox<span class="token punctuation">;</span>
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$alert <span class="token operator">=</span> MessageBox<span class="token punctuation">.</span>alert<span class="token punctuation">;</span>
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$confirm <span class="token operator">=</span> MessageBox<span class="token punctuation">.</span>confirm<span class="token punctuation">;</span>
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$prompt <span class="token operator">=</span> MessageBox<span class="token punctuation">.</span>prompt<span class="token punctuation">;</span>
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$notify <span class="token operator">=</span> Notification<span class="token punctuation">;</span>
+<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$message <span class="token operator">=</span> Message<span class="token punctuation">;</span></code></pre>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/Vue/vuex/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%89%8D%E7%AB%AF/Vue/vuex/" class="post-title-link" itemprop="url">vuex</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-07 18:39:38" itemprop="dateCreated datePublished" datetime="2020-12-07T18:39:38+08:00">2020-12-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/Vue/" itemprop="url" rel="index"><span itemprop="name">Vue</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><code>Vuex</code>是实现组件之间<strong>数据共享</strong>的一种机制</p>
+<p>父子传值或者兄弟传值，不好管理，而且有些需求实现不了</p>
+<p><code>vuex</code>提供了一种全新的数据共享管理机制, 该模式相比较简单的组件传值更加高端、大气、上档次</p>
+<h2 id="初始化vuex"><a href="#初始化vuex" class="headerlink" title="初始化vuex"></a>初始化vuex</h2><pre class="language-sh" data-language="sh"><code class="language-sh">npm i vuex -S</code></pre>
+
+<h2 id="导入并注册"><a href="#导入并注册" class="headerlink" title="导入并注册"></a>导入并注册</h2><pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">import</span> Vuex <span class="token keyword">from</span> <span class="token string">'vuex'</span>
+Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Vuex<span class="token punctuation">)</span></code></pre>
+
+<h2 id="创建store公共状态对象"><a href="#创建store公共状态对象" class="headerlink" title="创建store公共状态对象"></a>创建store公共状态对象</h2><p>在main.js文件中添加:</p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">const</span> store <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Vuex<span class="token punctuation">.</span>Store</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span>
+<span class="token comment">// state 中存放的，就是全局共享的数据，可以把 state 认为 是组件中的 data</span>
+state<span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+     	count<span class="token operator">:</span> <span class="token number">0</span>
+     <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span></code></pre>
+
+<h2 id="将创建的-store-挂载到-vm-实例上"><a href="#将创建的-store-挂载到-vm-实例上" class="headerlink" title="将创建的 store 挂载到 vm 实例上"></a>将创建的 store 挂载到 vm 实例上</h2><pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">new</span> <span class="token class-name">Vue</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span>
+	el<span class="token operator">:</span> <span class="token string">'#app'</span><span class="token punctuation">,</span>
+    <span class="token function-variable function">render</span><span class="token operator">:</span> <span class="token parameter">c</span> <span class="token operator">=></span> <span class="token function">c</span><span class="token punctuation">(</span>app<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    router<span class="token punctuation">,</span>
+    store  <span class="token comment">// 将 创建的共享状态对象，挂载到 Vue 实例中，这样，所有的组件，就可以直接从 store 中获取 全局的数据了</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span></code></pre>
+
+<h2 id="访问信息"><a href="#访问信息" class="headerlink" title="访问信息"></a>访问信息</h2><pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">this</span><span class="token punctuation">.</span>$store<span class="token punctuation">.</span>state<span class="token punctuation">.</span>xxx</code></pre>
+
+<h2 id="修改信息"><a href="#修改信息" class="headerlink" title="修改信息"></a>修改信息</h2><p>不要直接修改<code>this.$store.state.xxx</code>，容易造成数据混乱</p>
+<h3 id="mutations-方式"><a href="#mutations-方式" class="headerlink" title="mutations 方式"></a>mutations 方式</h3><p>同步</p>
+<pre class="language-js" data-language="js"><code class="language-js">mutations<span class="token operator">:</span><span class="token punctuation">&#123;</span>
+ 	<span class="token comment">// 参数state是固定的，代表vuex本身的state，用以获取共享数据</span>
+	<span class="token function">add</span><span class="token punctuation">(</span><span class="token parameter">state</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+		state<span class="token punctuation">.</span>count<span class="token operator">++</span>
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token operator">...</span>
+<span class="token comment">// 调用</span>
+<span class="token keyword">this</span><span class="token punctuation">.</span>$store<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token string">'add'</span><span class="token punctuation">)</span></code></pre>
+
+<h3 id="actions-方式"><a href="#actions-方式" class="headerlink" title="actions 方式"></a>actions 方式</h3><p>异步</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结:"></a>总结:</h3><p>store中存储的数据,不要放到data中, 而是要放到计算你属性中，因为：</p>
+<p>a. 如果将字符串, 数字这些普通值赋值给data中的属性时,当我们使用双向数据绑定来修改data中的数据时, 原来store中的数据是不会被影响的</p>
+<p>b. vue官方推荐使用mutation的方式来统一修改store中的数据, mutation是需要我们定义的</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/Vue/vue-cli%E6%9E%84%E5%BB%BA%E9%A1%B9%E7%9B%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%89%8D%E7%AB%AF/Vue/vue-cli%E6%9E%84%E5%BB%BA%E9%A1%B9%E7%9B%AE/" class="post-title-link" itemprop="url">vue-cli构建项目</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-07 18:34:39" itemprop="dateCreated datePublished" datetime="2020-12-07T18:34:39+08:00">2020-12-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/Vue/" itemprop="url" rel="index"><span itemprop="name">Vue</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="全局安装脚手架"><a href="#全局安装脚手架" class="headerlink" title="全局安装脚手架"></a>全局安装脚手架</h2><pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token function">npm</span> <span class="token function">install</span> -g vue-cli</code></pre>
+
+<h2 id="初始化项目"><a href="#初始化项目" class="headerlink" title="初始化项目"></a>初始化项目</h2><pre class="language-shell" data-language="shell"><code class="language-shell">vue init webpack my-project</code></pre>
+
+<p><img data-src="http://img.lujinkai.cn/blog/20190911102309.png"></p>
+<p><code>Vue build</code> 选择 <code>Runtime-only</code> 选项<br><code>Use ESLint to lint your code?</code> 这个本应该应该yes, 但是作为个人开发者, 选择no比较方便<br><code>Should we run npm install for you after the project has been created?</code> 选择 <code>No, I will handle that myself</code></p>
+<h2 id="安装依赖包"><a href="#安装依赖包" class="headerlink" title="安装依赖包"></a>安装依赖包</h2><pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token builtin class-name">cd</span> my-project	// 切换到项目根目录下
+<span class="token function">npm</span> <span class="token function">install</span>		// 安装依赖包</code></pre>
+
+<h2 id="给webpack做简单的配置"><a href="#给webpack做简单的配置" class="headerlink" title="给webpack做简单的配置"></a>给<code>webpack</code>做简单的配置</h2><h3 id="默认8080端口-可以选择修改"><a href="#默认8080端口-可以选择修改" class="headerlink" title="默认8080端口, 可以选择修改"></a>默认8080端口, 可以选择修改</h3><p><img data-src="http://img.lujinkai.cn/blog/1568166821268.png" alt="1568166821268"></p>
+<h3 id="修改打包后的js和css为相对路径引入"><a href="#修改打包后的js和css为相对路径引入" class="headerlink" title="修改打包后的js和css为相对路径引入"></a>修改打包后的js和css为相对路径引入</h3><p>build.js下的webpack.prod.conf.js中得output中添加publicPath。</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1577149564119.png"></p>
+<h2 id="新建-prettierrc文件"><a href="#新建-prettierrc文件" class="headerlink" title="新建.prettierrc文件"></a>新建.prettierrc文件</h2><pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+    <span class="token property">"tabWidth"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+    <span class="token property">"semi"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    <span class="token property">"singleQuote"</span><span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="运行项目"><a href="#运行项目" class="headerlink" title="运行项目"></a>运行项目</h2><pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token function">npm</span> run dev</code></pre>
+
+<h2 id="打包项目"><a href="#打包项目" class="headerlink" title="打包项目"></a>打包项目</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">npm</span> run build</code></pre>
+
+<h2 id="安装项目"><a href="#安装项目" class="headerlink" title="安装项目"></a>安装项目</h2><p>开发过程中, 用到的包需要安装</p>
+<pre class="language-shell" data-language="shell"><code class="language-shell"><span class="token function">npm</span> i -D	// 工程构建（开发时、“打包”时）依赖 ；例：xxx-cli , less-loader , babel-loader<span class="token punctuation">..</span>.
+<span class="token function">npm</span> i -S	// 项目（运行时、发布到生产环境时）依赖；例：vue, element-ui, react<span class="token punctuation">..</span>.</code></pre>
+
+<h2 id="常用的需要手动安装的扩展包"><a href="#常用的需要手动安装的扩展包" class="headerlink" title="常用的需要手动安装的扩展包"></a>常用的需要手动安装的扩展包</h2><ul>
+<li><p>less</p>
+<p><code>npm i less-loader less -D</code></p>
+</li>
+<li><p>使<code>jsx</code>支持<code>v-model</code></p>
+<p><code>npm i babel-plugin-jsx-v-model -D</code></p>
+<p>在<code>.babelrc</code>的<code>&quot;plugins&quot;</code>下添加<code>&quot;jsx-v-model&quot; </code></p>
+</li>
+</ul>
+<h2 id="非零开始"><a href="#非零开始" class="headerlink" title="非零开始"></a>非零开始</h2><p>以上1-7是从零开始构建项目, 如果是已有项目拷贝复制, 肯定不能把 <code>node_modules</code> 目录一同复制, 所以我们可以复制除了<code>node_modules</code>以外的所有文件, 然后再执行 <code>npm install</code> 即可</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/Vue/%E6%89%93%E5%8C%85%E5%90%8E%E5%9B%BE%E7%89%87%E7%9A%84%E5%8A%A0%E8%BD%BD%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%89%8D%E7%AB%AF/Vue/%E6%89%93%E5%8C%85%E5%90%8E%E5%9B%BE%E7%89%87%E7%9A%84%E5%8A%A0%E8%BD%BD%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">打包后图片的加载问题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-07 18:01:56" itemprop="dateCreated datePublished" datetime="2020-12-07T18:01:56+08:00">2020-12-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/Vue/" itemprop="url" rel="index"><span itemprop="name">Vue</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>开发模式下，图片加载是没有问题的，但是打包后图片就无法加载了，需要更改打包配置。</p>
+<ol>
+<li><p>修改 build 目录下的utils.js，添加 <code>publicPath: &#39;../../&#39;</code></p>
+<pre class="language-javascript" data-language="javascript"><code class="language-javascript"><span class="token keyword">if</span> <span class="token punctuation">(</span>options<span class="token punctuation">.</span>extract<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> ExtractTextPlugin<span class="token punctuation">.</span><span class="token function">extract</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span>
+        use<span class="token operator">:</span> loaders<span class="token punctuation">,</span>
+        publicPath<span class="token operator">:</span> <span class="token string">'../../'</span><span class="token punctuation">,</span>
+        fallback<span class="token operator">:</span> <span class="token string">'vue-style-loader'</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token string">'vue-style-loader'</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">concat</span><span class="token punctuation">(</span>loaders<span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+<li><p>修改config目录下的index.js, 将assetsPublicPath设置为 <code>&#39;./&#39;</code><br>这个配置修改，只有在打包的时候才修改，开发的时候需要改回来</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">dev: <span class="token punctuation">&#123;</span>
+// Paths
+assetsSubDirectory: <span class="token string">'static'</span>,
+assetsPublicPath: <span class="token string">'./'</span>,
+proxyTable: <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>,
+<span class="token punctuation">..</span>.</code></pre></li>
+</ol>
+<p>注意：index.html中引入的图片是无法加载的，解决办法可以把index.html中引入的图片转成base_64格式的数据再引入。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/react%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%89%8D%E7%AB%AF/React/react%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="post-title-link" itemprop="url">react基础学习</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-06 11:42:02" itemprop="dateCreated datePublished" datetime="2020-12-06T11:42:02+08:00">2020-12-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/" itemprop="url" rel="index"><span itemprop="name">React</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="组件"><a href="#组件" class="headerlink" title="组件"></a>组件</h2><h3 id="函数组件-与-ES6-的-class-组件"><a href="#函数组件-与-ES6-的-class-组件" class="headerlink" title="函数组件 与 ES6 的 class 组件"></a>函数组件 与 <code>ES6 的 class</code> 组件</h3><blockquote>
+<p><strong>注意：</strong> 组件名称必须以大写字母开头。</p>
+<p>React 会将以小写字母开头的组件视为原生 DOM 标签。例如，<code>&lt;div /&gt;</code> 代表 HTML 的 div 标签，而 <code>&lt;Welcome /&gt;</code> 则代表一个组件，并且需在作用域内使用 <code>Welcome</code>。</p>
+<p>你可以在<a target="_blank" rel="noopener" href="https://react.docschina.org/docs/jsx-in-depth.html#user-defined-components-must-be-capitalized">深入 JSX</a>中了解更多关于此规范的原因。</p>
+</blockquote>
+<h3 id="组合组件"><a href="#组合组件" class="headerlink" title="组合组件"></a>组合组件</h3><h2 id="props"><a href="#props" class="headerlink" title="props"></a>props</h2><p>react很灵活, 但是它有一个严格的规定:</p>
+<p><strong>所有 React 组件都必须像纯函数一样保护它们的 props 不被更改。</strong></p>
+<p>注: js和php不一样, php会写时复制, 而js对于数组或者对象永远都是地址引用, 理解下面的代码:</p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">let</span> obj <span class="token operator">=</span> <span class="token punctuation">&#123;</span>a<span class="token operator">:</span> <span class="token string">'this is a'</span><span class="token punctuation">,</span>b<span class="token operator">:</span><span class="token string">'this is b'</span><span class="token punctuation">&#125;</span>
+<span class="token keyword">function</span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token parameter">obj</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	obj<span class="token punctuation">.</span>c <span class="token operator">=</span> <span class="token string">'this is c'</span>
+<span class="token punctuation">&#125;</span>
+<span class="token function">fn</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span>			<span class="token comment">// &#123;a: "this is a", b: "this is b", c: "this is c"&#125;</span></code></pre>
+
+<p>如果一定要修改, 就是用组件自己私有的状态: state</p>
+<h3 id="state"><a href="#state" class="headerlink" title="state"></a>state</h3><p>拥有sate属性的组件就是有状态组件, 没有sate属性的组件就是无状态组件。</p>
+<p>尽管 <code>this.props</code> 和 <code>this.state</code> 是 React 本身设置的，且都拥有特殊的含义，但是其实你可以向 class 中随意添加不参与数据流（比如计时器 ID）的额外字段。</p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token function">componentDidMount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>timerID <span class="token operator">=</span> <span class="token function">setInterval</span><span class="token punctuation">(</span>
+    <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">tick</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token number">1000</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>出于性能考虑，React 可能会把多个 <code>setState()</code> 调用合并成一个调用。</p>
+<p>因为 <code>this.props</code> 和 <code>this.state</code> 可能会异步更新，所以你<strong>不要依赖他们的值来更新</strong>下一个状态。</p>
+<p>例如，此代码可能会无法更新计数器：因为counter的更新依赖了state和props</p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token comment">// Wrong</span>
+<span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">setState</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span>
+  counter<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>state<span class="token punctuation">.</span>counter <span class="token operator">+</span> <span class="token keyword">this</span><span class="token punctuation">.</span>props<span class="token punctuation">.</span>increment<span class="token punctuation">,</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>要解决这个问题，可以让 <code>setState()</code> 接收一个函数而不是一个对象。这个函数用上一个 state 作为第一个参数，将此次更新被应用时的 props 做为第二个参数：</p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token comment">// Correct</span>
+<span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">setState</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">state<span class="token punctuation">,</span> props</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">&#123;</span>
+  counter<span class="token operator">:</span> state<span class="token punctuation">.</span>counter <span class="token operator">+</span> props<span class="token punctuation">.</span>increment
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>通过问自己以下三个问题，你可以逐个检查相应数据是否属于 state：</p>
+<ol>
+<li>该数据是否是由父组件通过 props 传递而来的？如果是，那它应该不是 state。</li>
+<li>该数据是否随时间的推移而保持不变？如果是，那它应该也不是 state。</li>
+<li>你能否根据其他 state 或 props 计算出该数据的值？如果是，那它也不是 state。</li>
+</ol>
+<h3 id="数据是向下流动的"><a href="#数据是向下流动的" class="headerlink" title="数据是向下流动的"></a>数据是向下流动的</h3><p>这通常会被叫做“自上而下”或是“单向”的数据流。任何的 state 总是所属于特定的组件，而且从该 state 派生的任何数据或 UI 只能影响树中“低于”它们的组件。</p>
+<p>如果你把一个以组件构成的树想象成一个 props 的数据瀑布的话，那么每一个组件的 state 就像是在任意一点上给瀑布增加额外的水源，但是它只能向下流动。</p>
+<h2 id="组件的生命周期函数"><a href="#组件的生命周期函数" class="headerlink" title="组件的生命周期函数"></a>组件的生命周期函数</h2><h2 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h2><p>使用 JSX 语法时你需要传入一个函数作为事件处理函数，而不是一个字符串。</p>
+<p><font color=red> html中: onClick=“fn()”</font></p>
+<p><font color=red> jsx中: onClick={fn}</font></p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>
+    <span class="token operator">&lt;</span>button onClick<span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token keyword">this</span><span class="token punctuation">.</span>handleClick<span class="token punctuation">&#125;</span> <span class="token operator">/</span><span class="token operator">></span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token comment">// 如果 this.handleClick 需要传递参数的话</span></code></pre>
+
+<p>你必须谨慎对待 JSX 回调函数中的 <code>this</code>，在 JavaScript 中，class 的方法默认不会<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_objects/Function/bind">绑定</a> <code>this</code>。如果你忘记绑定 <code>this.handleClick</code> 并把它传入了 <code>onClick</code>，当你调用这个函数的时候 <code>this</code> 的值为 <code>undefined</code>。</p>
+<p>当事件函数中需要this时, 我们有两种处理方式:</p>
+<ol>
+<li><p>bind绑定</p>
+</li>
+<li><p>public class fields 语法</p>
+<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">LoggingButton</span> <span class="token keyword">extends</span> <span class="token class-name">React<span class="token punctuation">.</span>Component</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 此语法确保 `handleClick` 内的 `this` 已被绑定。</span>
+  <span class="token comment">// 注意: 这是 *实验性* 语法。</span>
+  <span class="token function-variable function">handleClick</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'this is:'</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+  <span class="token comment">// 注意 handleClick的写法, 如果 handleClick() &#123;&#125; 这么写是不对的</span>
+
+  <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>
+      <span class="token operator">&lt;</span>button onClick<span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token keyword">this</span><span class="token punctuation">.</span>handleClick<span class="token punctuation">&#125;</span><span class="token operator">></span>
+        Click me
+      <span class="token operator">&lt;</span><span class="token operator">/</span>button<span class="token operator">></span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token comment">// 或者 调用的时候使用箭头函数， 那么事件方法在定义的时候就可以写成  handleClick() &#123;&#125; 这种形式</span>
+<span class="token comment">// &lt;button onClick=&#123;()=>this.handleClick()&#125;></span></code></pre></li>
+</ol>
+<p>推荐使用public class fields语法。</p>
+<h2 id="状态提升"><a href="#状态提升" class="headerlink" title="状态提升"></a>状态提升</h2><p>因为state只能影响其及其”下面”的组件，如果想影响到”上面”的组件怎么办? 这就是状态提升, 实际上就是子组件给父组件通信。</p>
+<p>实现方式和vue一样，通俗的来讲都是父组件定义方法, 这个方法一定是要传参的, 然后传递给子组件, 当子组件有数据修改,就通过<code>this.props.event(val)</code>的方式激活父组件来执行方法。vue中是通过<code>this.$emit(event, i)</code>来实现的。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/node/npm%20install%20-g%20-S%20-D%E7%9A%84%E5%8C%BA%E5%88%AB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -274,7 +928,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -367,7 +1021,7 @@ npm i -S    &#x2F;&#x2F; 项目（运行时、发布到生产环境时）依赖�
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -451,7 +1105,7 @@ npm i -S    &#x2F;&#x2F; 项目（运行时、发布到生产环境时）依赖�
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -540,7 +1194,7 @@ npm i -S    &#x2F;&#x2F; 项目（运行时、发布到生产环境时）依赖�
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -809,7 +1463,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -914,7 +1568,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1155,7 +1809,7 @@ hexo clean <span class="token operator">&amp;&amp;</span> hexo s</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1243,7 +1897,7 @@ hexo clean <span class="token operator">&amp;&amp;</span> hexo s</code></pre>
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1588,7 +2242,7 @@ Promise<span class="token punctuation">.</span><span class="token function">race
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1686,7 +2340,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1790,7 +2444,7 @@ str<span class="token punctuation">.</span><span class="token function">split</s
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1888,7 +2542,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1985,7 +2639,7 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-18 23:58:11" itemprop="dateModified" datetime="2021-03-18T23:58:11+08:00">2021-03-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2043,7 +2697,7 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/Sublime-Text3%E7%9B%B8%E5%85%B3/">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/%E7%BC%96%E8%BE%91%E5%99%A8/Sublime-Text3%E7%9B%B8%E5%85%B3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
@@ -2056,7 +2710,7 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%B7%A5%E5%85%B7/Sublime-Text3%E7%9B%B8%E5%85%B3/" class="post-title-link" itemprop="url">Sublime-Text3相关</a>
+          <a href="/%E5%B7%A5%E5%85%B7/%E7%BC%96%E8%BE%91%E5%99%A8/Sublime-Text3%E7%9B%B8%E5%85%B3/" class="post-title-link" itemprop="url">Sublime-Text3相关</a>
         </h2>
 
         <div class="post-meta-container">
@@ -2074,7 +2728,7 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-23 22:43:56" itemprop="dateModified" datetime="2021-03-23T22:43:56+08:00">2021-03-23</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2083,6 +2737,10 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
           <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/%E7%BC%96%E8%BE%91%E5%99%A8/" itemprop="url" rel="index"><span itemprop="name">编辑器</span></a>
         </span>
     </span>
 
@@ -2184,7 +2842,7 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/secureCRT%E7%9B%B8%E5%85%B3/">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/windows/secureCRT%E7%9B%B8%E5%85%B3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
@@ -2197,7 +2855,7 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%B7%A5%E5%85%B7/secureCRT%E7%9B%B8%E5%85%B3/" class="post-title-link" itemprop="url">secureCRT相关</a>
+          <a href="/%E5%B7%A5%E5%85%B7/windows/secureCRT%E7%9B%B8%E5%85%B3/" class="post-title-link" itemprop="url">secureCRT相关</a>
         </h2>
 
         <div class="post-meta-container">
@@ -2215,7 +2873,7 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
+        <time title="修改时间：2021-03-23 22:43:56" itemprop="dateModified" datetime="2021-03-23T22:43:56+08:00">2021-03-23</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2224,6 +2882,10 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
           <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/windows/" itemprop="url" rel="index"><span itemprop="name">windows</span></a>
         </span>
     </span>
 
@@ -2259,276 +2921,8 @@ consloe<span class="token punctuation">.</span><span class="token function">log<
 
 
 
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/PHPStorm%E5%BF%AB%E6%8D%B7%E9%94%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%B7%A5%E5%85%B7/PHPStorm%E5%BF%AB%E6%8D%B7%E9%94%AE/" class="post-title-link" itemprop="url">PHPStorm快捷键</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-05 19:22:08" itemprop="dateCreated datePublished" datetime="2020-12-05T19:22:08+08:00">2020-12-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="ctrl-d"><a href="#ctrl-d" class="headerlink" title="ctrl + d"></a>ctrl + d</h2><p>复制选中块, 或者复制当前行</p>
-<h2 id="ctrl-p"><a href="#ctrl-p" class="headerlink" title="ctrl + p"></a>ctrl + p</h2><p>调出函数的参数列表</p>
-<h2 id="ctrl-shift-backspace"><a href="#ctrl-shift-backspace" class="headerlink" title="ctrl + shift + backspace"></a>ctrl + shift + backspace</h2><p>跳回最后一次修改的地方</p>
-<h2 id="ctrl-alt-l"><a href="#ctrl-alt-l" class="headerlink" title="ctrl + alt + l"></a>ctrl + alt + l</h2><p>格式化代码</p>
-<h2 id="ctrl-e"><a href="#ctrl-e" class="headerlink" title="ctrl + e"></a>ctrl + e</h2><p>显示最近打开的文件列表</p>
-<h2 id="ctrl-j"><a href="#ctrl-j" class="headerlink" title="ctrl + j"></a>ctrl + j</h2><p>提示可用的快捷方式</p>
-<h2 id="alt-up-down"><a href="#alt-up-down" class="headerlink" title="alt + up / down"></a>alt + up / down</h2><p>光标定位上一个或者下一个方法</p>
-<h2 id="ctrl-shift-j"><a href="#ctrl-shift-j" class="headerlink" title="ctrl + shift +j"></a>ctrl + shift +j</h2><p>将下一行代码和当前行合并(去除空格)</p>
-<h2 id="ctrl-shift-v"><a href="#ctrl-shift-v" class="headerlink" title="ctrl + shift + v"></a>ctrl + shift + v</h2><p>显示粘贴板</p>
-<h2 id="ctrl-h"><a href="#ctrl-h" class="headerlink" title="ctrl + h"></a>ctrl + h</h2><p>查看当前类的继承层次</p>
-<h2 id="ctrl-shift-up-down"><a href="#ctrl-shift-up-down" class="headerlink" title="ctrl + shift + up / down"></a>ctrl + shift + up / down</h2><p>上移 / 下移 当前 行 或者是 片段</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/%E4%BF%9D%E5%AD%98%E6%96%87%E4%BB%B6%E5%90%8C%E6%97%B6%E6%A0%BC%E5%BC%8F%E5%8C%96%E4%BB%A3%E7%A0%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%B7%A5%E5%85%B7/%E4%BF%9D%E5%AD%98%E6%96%87%E4%BB%B6%E5%90%8C%E6%97%B6%E6%A0%BC%E5%BC%8F%E5%8C%96%E4%BB%A3%E7%A0%81/" class="post-title-link" itemprop="url">保存文件同时格式化代码</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-05 19:16:55" itemprop="dateCreated datePublished" datetime="2020-12-05T19:16:55+08:00">2020-12-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="vscode"><a href="#vscode" class="headerlink" title="vscode"></a>vscode</h2><p>html, js, php, python等等, 不同文件的格式化规则是不同的, 需要单独配置, 幸运的是, 都是按快捷键shift + alt + f（Ubuntu上 Ctrl+ Shift+I）格式化代码。<br>设置 -&gt; 文本编辑器 -&gt; 正在格式化 -&gt; 勾选<code>Format On Save</code></p>
-<h2 id="sublime-text-3"><a href="#sublime-text-3" class="headerlink" title="sublime text 3"></a>sublime text 3</h2><p>sublime比较麻烦, 我还没有研究明白</p>
-<h2 id="phpstorm-amp-amp-pychamy"><a href="#phpstorm-amp-amp-pychamy" class="headerlink" title="phpstorm &amp;&amp; pychamy"></a>phpstorm &amp;&amp; pychamy</h2><p>录制宏，参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/koobee_1/article/details/85198009">https://blog.csdn.net/koobee_1/article/details/85198009</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/hexo/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%89%8D%E7%AB%AF/hexo/hello-world/" class="post-title-link" itemprop="url">hello-world</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-03-16 09:33:16" itemprop="dateCreated datePublished" datetime="2020-03-16T09:33:16+08:00">2020-03-16</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-22 13:15:32" itemprop="dateModified" datetime="2021-03-22T13:15:32+08:00">2021-03-22</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/hexo/" itemprop="url" rel="index"><span itemprop="name">hexo</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><pre class="language-bash" data-language="bash"><code class="language-bash">$ hexo new <span class="token string">"My New Post"</span></code></pre>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><pre class="language-bash" data-language="bash"><code class="language-bash">$ hexo server</code></pre>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><pre class="language-bash" data-language="bash"><code class="language-bash">$ hexo generate</code></pre>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><pre class="language-bash" data-language="bash"><code class="language-bash">$ hexo deploy</code></pre>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/11/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span>
+    <a class="extend prev" rel="prev" href="/page/11/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/13/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
