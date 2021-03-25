@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="https://img.lujinkai.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}};
+  </script>
+<meta name="description" content="正则表达式字符匹配. 		匹配任意单个字符 [] 		匹配指定范围内的任意单个字符 [^] 	匹配指定范围外的任意单个字符  匹配次数* 匹配前面的字符0次到无数次 ? 匹配前面的字符0次或1次 + 匹配前面的字符至少一次 &amp;#123;n&amp;#125; 匹配前面的字符n次 &amp;#123;m,n&amp;#125; 匹配前面的字符m次到n次 &amp;#123;,n&amp;#125; 匹配前面的字符最多n次 &amp;#123;n,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正则表达式">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="正则表达式字符匹配. 		匹配任意单个字符 [] 		匹配指定范围内的任意单个字符 [^] 	匹配指定范围外的任意单个字符  匹配次数* 匹配前面的字符0次到无数次 ? 匹配前面的字符0次或1次 + 匹配前面的字符至少一次 &amp;#123;n&amp;#125; 匹配前面的字符n次 &amp;#123;m,n&amp;#125; 匹配前面的字符m次到n次 &amp;#123;,n&amp;#125; 匹配前面的字符最多n次 &amp;#123;n,">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T14:17:58.000Z">
+<meta property="article:modified_time" content="2021-03-25T14:36:13.000Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="正则">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>正则表达式 | LJKのBlog</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">LJKのBlog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">正则表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E5%8C%B9%E9%85%8D"><span class="nav-number">1.1.</span> <span class="nav-text">字符匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%B9%E9%85%8D%E6%AC%A1%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">匹配次数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E7%BD%AE%E9%94%9A%E5%AE%9A"><span class="nav-number">1.3.</span> <span class="nav-text">位置锚定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E5%8F%8A%E5%85%B6%E4%BB%96"><span class="nav-number">1.4.</span> <span class="nav-text">分组及其他</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%BB%83%E4%B9%A01"><span class="nav-number">1.5.</span> <span class="nav-text">正则表达式练习1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A02"><span class="nav-number">1.6.</span> <span class="nav-text">练习2</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">245</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">59</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">89</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          正则表达式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:17:58" itemprop="dateCreated datePublished" datetime="2020-12-09T22:17:58+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-25 22:36:13" itemprop="dateModified" datetime="2021-03-25T22:36:13+08:00">2021-03-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">文本处理</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><h2 id="字符匹配"><a href="#字符匹配" class="headerlink" title="字符匹配"></a>字符匹配</h2><pre class="language-none"><code class="language-none">. 		匹配任意单个字符
+[] 		匹配指定范围内的任意单个字符
+[^] 	匹配指定范围外的任意单个字符</code></pre>
+
+<h2 id="匹配次数"><a href="#匹配次数" class="headerlink" title="匹配次数"></a>匹配次数</h2><pre class="language-none"><code class="language-none">* 匹配前面的字符0次到无数次
+? 匹配前面的字符0次或1次
++ 匹配前面的字符至少一次
+&#123;n&#125; 匹配前面的字符n次
+&#123;m,n&#125; 匹配前面的字符m次到n次
+&#123;,n&#125; 匹配前面的字符最多n次
+&#123;n,&#125; 匹配前面的字符至少n次</code></pre>
+
+<h2 id="位置锚定"><a href="#位置锚定" class="headerlink" title="位置锚定"></a>位置锚定</h2><pre class="language-bash" data-language="bash"><code class="language-bash">^ 行首
+$ 行尾
+<span class="token punctuation">\</span><span class="token operator">></span> 或 <span class="token punctuation">\</span>b 词首
+<span class="token punctuation">\</span><span class="token operator">&lt;</span> 或 <span class="token punctuation">\</span>b 词尾
+
+^$ 空行
+^<span class="token punctuation">[</span><span class="token punctuation">[</span>:space:<span class="token punctuation">]</span><span class="token punctuation">]</span>*$ 空白行
+<span class="token punctuation">\</span><span class="token operator">&lt;</span>PATTERN<span class="token punctuation">\</span><span class="token operator">></span> 匹配整个单词
+
+ps：单词是由字母、数字、下划线组成</code></pre>
+
+<h2 id="分组及其他"><a href="#分组及其他" class="headerlink" title="分组及其他"></a>分组及其他</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">(</span><span class="token punctuation">)</span> 分组
+向后引用：<span class="token punctuation">\</span><span class="token number">1</span>,<span class="token punctuation">\</span><span class="token number">2</span><span class="token punctuation">..</span>.
+<span class="token operator">|</span> 或</code></pre>
+
+<h2 id="正则表达式练习1"><a href="#正则表达式练习1" class="headerlink" title="正则表达式练习1"></a>正则表达式练习1</h2><p>1、显示/proc/meminfo文件中以大小s开头的行(要求:使用两种方法)</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -i <span class="token string">'^s'</span> /proc/meminfo
+<span class="token function">grep</span> -E <span class="token string">'^(s|S)'</span> /proc/meminfo</code></pre>
+<p>2、显示/etc/passwd文件中不以/bin/bash结尾的行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -E <span class="token string">'^/bin/bash$'</span> <span class="token function">passwd</span></code></pre>
+<p>3、显示用户rpc默认的shell程序</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">getent <span class="token function">passwd</span> ljk <span class="token operator">|</span> <span class="token function">cut</span> -d: -f8</code></pre>
+<p>4、找出/etc/passwd中的两位或三位数</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -Eo <span class="token string">'\&lt;[0-9]&#123;2,3&#125;\>'</span> <span class="token function">passwd</span></code></pre>
+<p>5、显示CentOS7的/etc/grub2.cfg文件中,至少以一个空白字符开头的且后面有非空白字符的行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -E <span class="token string">'^[[:space:]]+[^[:space:]]+'</span> /etc/grub2.cfg</code></pre>
+<p>6、找出“netstat -tan”命令结果中以LISTEN后跟任意多个空白字符结尾的行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">netstat</span> -tan <span class="token operator">|</span> <span class="token function">grep</span> -E <span class="token string">'LISTEN[[:space:]]+$'</span></code></pre>
+<p>7、显示CentOS7上所有UID小于1000以内的用户名和UID</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> /etc/passwd <span class="token operator">|</span> <span class="token function">cut</span> -d: -f1,3 <span class="token operator">|</span> <span class="token function">grep</span> -E <span class="token string">'\&lt;[0-9]&#123;1,3&#125;\>'</span>
+<span class="token function">cat</span> /etc/passwd <span class="token operator">|</span> <span class="token function">cut</span> -d: -f1,3 <span class="token operator">|</span> <span class="token function">grep</span> -Ev <span class="token string">'\&lt;[0-9]&#123;4,&#125;\>'</span></code></pre>
+<p>8、添加用户bash、testbash、basher、sh、nologin(其shell为/sbin/nologin),找出/etc/passwd用户名和shell同名的行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -E <span class="token string">'^(\&lt;[0-9a-zA-Z_]+\>).*<span class="token entity" title="\1">\1</span>$'</span> /etc/passwd</code></pre>
+<p>9、利用df和grep,取出磁盘各分区利用率,并从大到小排序</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'^/dev/sd'</span> <span class="token operator">|</span> <span class="token function">grep</span> -Eo <span class="token string">'[0-9]&#123;,3&#125;%'</span> <span class="token operator">|</span> <span class="token function">tr</span> -d % <span class="token operator">|</span> <span class="token function">sort</span> -nr
+<span class="token function">df</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'^/dev/sd'</span> <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">" "</span> % <span class="token operator">|</span> <span class="token function">cut</span> -d% -f5 <span class="token operator">|</span> <span class="token function">sort</span> -nr</code></pre>
+
+<h2 id="练习2"><a href="#练习2" class="headerlink" title="练习2"></a>练习2</h2><p>1、显示三个用户root、mage、wang的UID和默认shell<br>2、找出/etc/rc.d/init.d/functions文件中行首为某单词(包括下划线)后面跟一个小括号的行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -E <span class="token string">'^[a-zA-Z0-9_]+\(\)'</span> ./functions</code></pre>
+<p>3、使用egrep取出/etc/rc.d/init.d/functions中其基名</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -E <span class="token string">'^\&lt;[0-9a-zA-Z_]+\>\(\)'</span> ./functions <span class="token operator">|</span> <span class="token function">grep</span> -Eo <span class="token string">'^\&lt;[0-9a-zA-Z_]+\>'</span>
+<span class="token function">grep</span> -E <span class="token string">'^\&lt;[0-9a-zA-Z_]+\>\(\)'</span> ./functions <span class="token operator">|</span> <span class="token function">cut</span> -d <span class="token string">' '</span> -f <span class="token number">1</span> <span class="token operator">|</span> <span class="token function">tr</span> -d <span class="token string">'()'</span></code></pre>
+<p>4、使用egrep取出上面路径的目录名<br>5、统计last命令中以root登录的每个主机IP地址登录次数</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">last <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">' '</span> <span class="token builtin class-name">:</span> <span class="token operator">|</span> <span class="token function">cut</span> -d: -f3 <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span> -c <span class="token operator">|</span> <span class="token function">sort</span> -nr</code></pre>
+<p>6、利用扩展正则表达式分别表示0-9、10-99、100-199、200-249、250-255</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> -E <span class="token string">'\&lt;[0-9]&#123;1&#125;\>'</span> a.log
+<span class="token function">grep</span> -E <span class="token string">'\&lt;[0-9]&#123;2&#125;\>'</span> a.log
+<span class="token function">grep</span> -E <span class="token string">'\&lt;1[0-9]&#123;2&#125;\>'</span> a.log
+<span class="token function">grep</span> -E <span class="token string">'\&lt;2[0-4][0-9]\>'</span> a.log
+<span class="token function">grep</span> -E <span class="token string">'\&lt;25[0-5]\>'</span> a.log</code></pre>
+<p>7、显示ifconfig命令结果中所有IPv4地址</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ifconfig</span> <span class="token operator">|</span> <span class="token function">grep</span> -Eo <span class="token string">'[0-9]&#123;,3&#125;\.[0-9]&#123;,3&#125;\.[0-9]&#123;,3&#125;\.[0-9]&#123;,3&#125;'</span></code></pre>
+<p>8、将此字符串:welcome to magedu linux 中的每个字符去重并排序,重复次数多的排到前面</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">'welcome to magedu linux'</span> <span class="token operator">|</span> <span class="token function">grep</span> -o <span class="token string">'.'</span> <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span> -c <span class="token operator">|</span> <span class="token function">sort</span> -nr</code></pre>
+
+<p>9、精确匹配ip</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+
+    </div>
+
+    
+    
+    
+      
+
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>Buy me a coffee</div>
+  <button onclick="document.querySelector('.post-reward').classList.toggle('active');">
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="http://img.lujinkai.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%AD%A3%E5%88%99/" rel="tag"><i class="fa fa-tag"></i> 正则</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%B8%89%E5%89%91%E5%AE%A2%E4%B9%8Bsed/" rel="prev" title="文本处理三剑客之sed">
+                  <i class="fa fa-chevron-left"></i> 文本处理三剑客之sed
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/ANSI%E8%BD%AC%E4%B9%89%E5%BA%8F%E5%88%97/" rel="next" title="ANSI转义序列">
+                  ANSI转义序列 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.5/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.15.0/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

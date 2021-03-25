@@ -121,6 +121,7 @@
 
 <nav class="site-nav">
   <ul class="main-menu menu">
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
         <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
       <li class="menu-item menu-item-search">
         <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
@@ -188,13 +189,14 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">243</span>
+          <span class="site-state-item-count">245</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">57</span>
+          
+        <span class="site-state-item-count">59</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -234,6 +236,199 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/%E7%90%86%E8%A7%A3session%E5%92%8Ccookie/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/PHP/%E5%9F%BA%E7%A1%80/%E7%90%86%E8%A7%A3session%E5%92%8Ccookie/" class="post-title-link" itemprop="url">理解session和cookie</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:28:41" itemprop="dateCreated datePublished" datetime="2020-12-09T13:28:41+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:18:04" itemprop="dateModified" datetime="2021-03-24T07:18:04+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>session和cookie存在的目的是为了解决http协议的无状态</p>
+<p>PHP的session机制工作过程大致是这样的: 当客户端浏览器向服务器发起一个请求的时候，服务器会检查请求数据包头部中的“Cookie”字段是否包含名称为<strong>PHPSESSID</strong>的变量,</p>
+<p><img data-src="http://img.lujinkai.cn/note/%E7%90%86%E8%A7%A3session%E5%92%8Ccookie1.png" alt="理解session和cookie1.png"></p>
+<p>这个名称可以通过php.ini中的session.name自定义,默认是PHPSESSID,比如 <a target="_blank" rel="noopener" href="https://nba.hupu.com/">https://nba.hupu.com/</a> 貌似就命名为**_HUPUSSOID**</p>
+<p><img data-src="http://img.lujinkai.cn/note/%E7%90%86%E8%A7%A3session%E5%92%8Ccookie3.png" alt="理解session和cookie3.png"></p>
+<p>该变量的值即为sessionid, 即：$_COOKIE[session.name]=sessionid。若不存在，PHP会在session.save_path配置的路径目录下生成一个文件（session.save_path也是PHP的配置文件php.ini中的一个配置项，配置服务器session文件放置的位置），同时生成一个sessionid，这个文件的名称即为“sess_”和sessionid拼凑而成。</p>
+<p><img data-src="http://img.lujinkai.cn/note/%E7%90%86%E8%A7%A3session%E5%92%8Ccookie2.png" alt="理解session和cookie2.png">然后在发送给浏览器的数据包头部中的Set-Cookie字段中指定session的名称和对应的sessionid，浏览器则根据该字段的信息在内存中创建一个Cookie，严格来说叫SessionCookie。下一次浏览器再访问服务器的时候便会在数据包头部的Cookie字段中加入该Cookie。若服务器发现浏览器请求包头部中“Cookie”字段包含了名为session.name的sessionid，就会根据该sessionid到session.save_path指定的路径下找到名称为“sess_”+sessionid的文件，对文件进行读取或写入操作，开始了和客户端之间的会话。</p>
+<p>　　由于SessionCookie是存在于浏览器内存中的，所以当浏览器关闭的时候，原来的SessionCookie也就消失了，下一次访问同一个服务器需要再次创建session文件和Cookie，当然也有一些cookie是存储在客户端硬盘中的，即使关闭了浏览器，下一次打开浏览器访问相同网站的时候还是可以使用这个cookie。当客户端的cookie过期之后，服务器中原来的session文件也就没有用处了。在PHP的配置文件php.ini中，使用配置项“session.gc_maxlifetime”来设置session文件的生存期，超过这个时间期限的文件数据都将被视为垃圾，并由垃圾回收程序处理。垃圾回收程序是在会话初始化时启动的，但并不是每一次都会启动，是有一定概率的，PHP配置文件中使用“session.gc_probability”和“session.gc_divisor”这两个配置项来设置这个概率，计算公式为：session.gc_probability / session.gc_divisor。</p>
+<p>　　以上讲述的是使用Cookie来存储sessionid的方法，这也是PHP默认的存储sessionid的方法。当客户端的Cookie出现问题的时候，如：用户设置浏览器禁用cookie，session就会受到影响了。不过我们可以通过其他方法来存储sessionid，主要有以下三种方法：</p>
+<ol>
+<li><p>设置文件php.ini中的session.use_trans_sid = 1，可以让PHP自动跨页传递sessionid（PHP会自动把sessionid附着在URL末尾）。</p>
+</li>
+<li><p>手动通过URL传值，或通过隐藏表单字段传递sessionid。</p>
+</li>
+<li><p>使用文件、数据库等形式保存sessionid，在跨页过程中手动调用。</p>
+<p>注意，方法一配置session.use_trans_sid=1的同时也要配置session.use_only_cookies=0，否则客户端禁用了Cookie之后即使置session.use_trans_sid=1，session还是无法使用。</p>
+</li>
+</ol>
+<p>在方法2中，第一次调用session_start()函数时，PHP会创建一个session文件并产生一个sessionid，可以通过session_id()函数获得该sessionid，将sessionid拼接在url后面通过get方法传递（这种方法是存在很大的安全问题的），或者将sessionid作为表单的隐藏字段使用post方法传递，然后在下一个页面中可以把传过来的sessionid作为参数传递给PHP的session_id()函数，指定要读写的session文件，然后调用session_start()函数启动session会话，接下来就可以对session文件进行读取操作了。</p>
+<p>　　必须说明的是，PHP的Session机制并不是绝对安全的，攻击者如果能通过一定手段劫持、或者猜测出某个合法用户的sessionid，那么属于这个用户的session数据都将暴露。所以，开发者应该设计一些方案来防御攻击者的攻击，提高Session机制的安全性，下面提供了一种利用请求数据包头部中的一些字段信息来加强Session安全性的方案思路。</p>
+<p>　　将头部字段“User-Agent”和sessionid组合起来加密生成一个token，并且让客户端在后续的请求中携带这个token。为了更加保险，可使用两种不同的数据传递方式来 分别传递sessionid和token，例如，通过cookie传递sessionid，通过get方式传递token。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/$_SERVER['SCRIPT_FILENAME']%E4%B8%8E__FILE__%20%E7%9A%84%E5%8C%BA%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/PHP/%E5%9F%BA%E7%A1%80/$_SERVER%5B'SCRIPT_FILENAME'%5D%E4%B8%8E__FILE__%20%E7%9A%84%E5%8C%BA%E5%88%AB/" class="post-title-link" itemprop="url">$_SERVER['SCRIPT_FILENAME']与__FILE__ 的区别</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:25:45" itemprop="dateCreated datePublished" datetime="2020-12-09T13:25:45+08:00">2020-12-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:17:49" itemprop="dateModified" datetime="2021-03-24T07:17:49+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>二者都表明了本文件的绝对路径，区别在于：</p>
+<p>$_SERVER[‘SCRIPT_FILENAME’]指向当前执行脚本的绝对路径；</p>
+<p>__FILE__指向当前文件的绝对路径；也就是写在哪个文件里就是哪里。</p>
+<p>示例：a.php 中引用了 b.php文件:</p>
+<p>b.php文件中的$_SERVER[‘SCRIPT_FILENAME’]指向 a.php，__FILE__就还是指向 b.php</p>
+<p>总结: 所有的情况都用$_SERVER[‘SCRIPT_FILENAME’]就行了</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -2775,230 +2970,6 @@ router<span class="token punctuation">.</span><span class="token function">post<
 slmgr &#x2F;ato</code></pre>
 
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/CapsLk%E6%98%A0%E5%B0%84Esc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%B7%A5%E5%85%B7/CapsLk%E6%98%A0%E5%B0%84Esc/" class="post-title-link" itemprop="url">CapsLk映射Esc</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-07 21:16:21" itemprop="dateCreated datePublished" datetime="2020-12-07T21:16:21+08:00">2020-12-07</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:14:19" itemprop="dateModified" datetime="2021-03-24T07:14:19+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h2><pre class="language-reg" data-language="reg"><code class="language-reg">Windows Registry Editor Version 5.00
- 
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout]
-&quot;Scancode Map&quot;&#x3D;hex:00,00,00,00,00,00,00,00,02,00,00,00,01,00,3a,00,00,00,00,00</code></pre>
-
-<p>将以上内容复制到reg后缀的文件中, 双击, 然后重启电脑即可</p>
-<h2 id="ubuntu"><a href="#ubuntu" class="headerlink" title="ubuntu"></a>ubuntu</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">'/usr/bin/setxkbmap -option "caps:escape"'</span> <span class="token operator">>></span> ~/.profile</code></pre>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/Vue/webpack%E9%A1%B9%E7%9B%AE%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/%E5%89%8D%E7%AB%AF/Vue/webpack%E9%A1%B9%E7%9B%AE%E6%89%93%E5%8C%85%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">webpack项目打包优化</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-07 18:40:59" itemprop="dateCreated datePublished" datetime="2020-12-07T18:40:59+08:00">2020-12-07</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:16:42" itemprop="dateModified" datetime="2021-03-24T07:16:42+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/Vue/" itemprop="url" rel="index"><span itemprop="name">Vue</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="externals-方案"><a href="#externals-方案" class="headerlink" title="externals 方案"></a>externals 方案</h2><p>将体积大而且不需要按需加载的包通过<code>CDN</code>的方式加载, 不参与打包, 例如: <code>vue</code>、<code>axios</code>、<code>vue-router</code> , 通过<code>CDN</code>加载的包不能使用<code>Vue.use()</code></p>
-<h3 id="引入资源"><a href="#引入资源" class="headerlink" title="引入资源"></a>引入资源</h3><p>在index.html中通过link和script方法引入所需的js和css</p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607337743495.png"></p>
-<h3 id="配置externals"><a href="#配置externals" class="headerlink" title="配置externals"></a>配置externals</h3><p>在 <code>webpack.dev.conf.js</code> 和 <code>webpack.prod.conf.js</code> 的<code>module</code>下均添加<code>externals</code>, 这样<code>webpack</code>编译打包时不处理它, 却可以import引用到它。</p>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1607337762271.png"></p>
-<h2 id="按需加载"><a href="#按需加载" class="headerlink" title="按需加载"></a>按需加载</h2><p>每个包按需加载的方式都不同, 这里以 <code>element-ui</code> 为例, 在<code>main.js</code>主入口文件中给<code>element-ui</code>组件库做按需导入设置，去除没有使用的组件，进一步精简项目的总代码量。<br>参考: <a target="_blank" rel="noopener" href="https://element.eleme.cn/#/zh-CN/component/quickstart">https://element.eleme.cn/#/zh-CN/component/quickstart</a></p>
-<h3 id="安装-babel-plugin-component"><a href="#安装-babel-plugin-component" class="headerlink" title="安装 babel-plugin-component"></a>安装 <code>babel-plugin-component</code></h3><pre class="language-sh" data-language="sh"><code class="language-sh">npm install babel-plugin-component -D</code></pre>
-
-<h3 id="修改-babelrc"><a href="#修改-babelrc" class="headerlink" title="修改 .babelrc "></a>修改 <code>.babelrc </code></h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1607337779527.png"></p>
-<h3 id="按需引入"><a href="#按需引入" class="headerlink" title="按需引入"></a>按需引入</h3><p>完整组件列表和引入方式（完整组件列表以 <a target="_blank" rel="noopener" href="https://github.com/ElemeFE/element/blob/master/components.json">components.json</a> 为准）</p>
-<pre class="language-js" data-language="js"><code class="language-js"><span class="token keyword">import</span> Vue <span class="token keyword">from</span> <span class="token string">'vue'</span>
-<span class="token keyword">import</span> <span class="token punctuation">&#123;</span>
-  Pagination<span class="token punctuation">,</span>
-  Dialog<span class="token punctuation">,</span>
-  Autocomplete<span class="token punctuation">,</span>
-  Dropdown<span class="token punctuation">,</span>
-  DropdownMenu<span class="token punctuation">,</span>
-  DropdownItem<span class="token punctuation">,</span>
-  Menu<span class="token punctuation">,</span>
-  Submenu<span class="token punctuation">,</span>
-  MenuItem<span class="token punctuation">,</span>
-  MenuItemGroup<span class="token punctuation">,</span>
-  Input<span class="token punctuation">,</span>
-  InputNumber<span class="token punctuation">,</span>
-  Radio<span class="token punctuation">,</span>
-  <span class="token comment">// ...</span>
-  Loading<span class="token punctuation">,</span>
-  MessageBox<span class="token punctuation">,</span>
-  Message<span class="token punctuation">,</span>
-  Notification
-<span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">'element-ui'</span>
-
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$<span class="token constant">ELEMENT</span> <span class="token operator">=</span> <span class="token punctuation">&#123;</span> size<span class="token operator">:</span> <span class="token string">'small'</span> <span class="token punctuation">&#125;</span>	<span class="token comment">// element-ui的全局配置</span>
-
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Pagination<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Dialog<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Autocomplete<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Dropdown<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>DropdownMenu<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>DropdownItem<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Menu<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Submenu<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>MenuItem<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>MenuItemGroup<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Input<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>InputNumber<span class="token punctuation">)</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Radio<span class="token punctuation">)</span>
-<span class="token comment">// ...</span>
-Vue<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>Loading<span class="token punctuation">.</span>directive<span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$loading <span class="token operator">=</span> Loading<span class="token punctuation">.</span>service<span class="token punctuation">;</span>
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$msgbox <span class="token operator">=</span> MessageBox<span class="token punctuation">;</span>
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$alert <span class="token operator">=</span> MessageBox<span class="token punctuation">.</span>alert<span class="token punctuation">;</span>
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$confirm <span class="token operator">=</span> MessageBox<span class="token punctuation">.</span>confirm<span class="token punctuation">;</span>
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$prompt <span class="token operator">=</span> MessageBox<span class="token punctuation">.</span>prompt<span class="token punctuation">;</span>
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$notify <span class="token operator">=</span> Notification<span class="token punctuation">;</span>
-<span class="token class-name">Vue</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>$message <span class="token operator">=</span> Message<span class="token punctuation">;</span></code></pre>
       
     </div>
 
