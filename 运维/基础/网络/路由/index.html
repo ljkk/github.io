@@ -29,13 +29,11 @@
 <meta property="og:site_name" content="LJKのBlog">
 <meta property="og:description" content="路由记录了整个网络通讯的路径，路由如果出错，网络肯定不通 路由表主要构成： [root@centos7 network-scripts]#route -n Kernel IP routing table Destination     Gateway         Genmask         Flags 	Metric 	Ref    Use Iface 0.0.0.0         10">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://img.lujinkai.cn/blog/ljk/1598537377784.png">
 <meta property="article:published_time" content="2021-01-01T14:46:38.000Z">
-<meta property="article:modified_time" content="2021-03-25T15:30:14.000Z">
+<meta property="article:modified_time" content="2021-03-26T15:08:42.000Z">
 <meta property="article:author" content="像方便面一样的男子">
 <meta property="article:tag" content="网络">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://img.lujinkai.cn/blog/ljk/1598537377784.png">
 
 
 <link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E8%B7%AF%E7%94%B1/">
@@ -197,7 +195,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">245</span>
+          <span class="site-state-item-count">244</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -285,7 +283,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-25 23:30:14" itemprop="dateModified" datetime="2021-03-25T23:30:14+08:00">2021-03-25</time>
+        <time title="修改时间：2021-03-26 23:08:42" itemprop="dateModified" datetime="2021-03-26T23:08:42+08:00">2021-03-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -324,45 +322,33 @@ Destination     Gateway         Genmask         Flags 	Metric 	Ref    Use Iface
 <span class="token number">10.0</span>.0.0        <span class="token number">0.0</span>.0.0         <span class="token number">255.255</span>.255.0   U     	<span class="token number">100</span>    	<span class="token number">0</span>        <span class="token number">0</span> ens33
 <span class="token number">10.0</span>.0.0        <span class="token number">0.0</span>.0.0         <span class="token number">255.255</span>.255.0   U     	<span class="token number">101</span>    	<span class="token number">0</span>        <span class="token number">0</span> ens37</code></pre>
 
-<ul>
-<li><p><strong>Destination</strong>：目标网络</p>
-<ul>
-<li>可以写具体某一个ip，但一般不这么写</li>
-<li>写一个网段，配合Genmask。例如上图最后一条路由10.0.0.0的子网掩码255.255.255.0，表示前24为是网络ID，那么这条路由的目标地址是10.0.0.1 - 10.0.0.254的所有ip</li>
-<li>0.0.0.0/0 表示所有未知网络，又称为默认路由，优先级最低。即一条请求，其它路由都没有指定它目标地址，那它就走Destination位0.0.0.0的这条路由。我称之为兜底路由。上面的VMware虚拟机的路由表中，10.0.0.2是NAT的网关IP</li>
-</ul>
-<p><img data-src="https://img.lujinkai.cn/blog/ljk/1598537377784.png"></p>
-</li>
-<li><p><strong>Genmask</strong>：目标网络对应的子网掩码</p>
-</li>
-<li><p><strong>Iface</strong>：到达对应网络，应该从当前主机哪个网卡发送出来</p>
-</li>
-<li><p><strong>Gateway</strong>： 网关</p>
-<ul>
-<li>目标网络非直达，gateway是相邻(下一跳)路由器的靠近本机的接口IP地址<ul>
-<li>要和本机在同一网段，不同网段是不能通信的</li>
-<li>要先有一条能到达网关地址的路由，不然会报错<code>SIOCADDRT: Network is unreachable</code></li>
-</ul>
-</li>
-<li>目标网络直达，gateway是0.0.0.0，通过广播通信</li>
-</ul>
-</li>
-<li><p><strong>Metric</strong>：路由开销，值越小，路由记录的优先级最高</p>
-</li>
-</ul>
-<p>总结：网络通讯过程</p>
-<ol>
-<li>查路由</li>
-<li>查对方和我是不是在一个网段</li>
-<li>arp广播</li>
-<li>拿到对方mac</li>
-<li>三次握手</li>
-<li>通信</li>
-</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Destination <span class="token comment"># 目标网络的IP，需要配合Genmask</span>
+Gateway     <span class="token comment"># 网关</span>
+                <span class="token comment"># 目标网络直达，gateway是0.0.0.0，通过广播通信</span>
+                <span class="token comment"># 目标网络非直达，gateway是相邻（下一跳）路由器的靠近本机的接口IP地址</span>
+                    <span class="token comment"># 要和本机在同一网段，不同网段是不能通信的</span>
+                    <span class="token comment"># 要先有一条能到达网关地址的路由</span>
+Genmask     <span class="token comment"># 目标网络的子网掩码</span>
+                <span class="token comment"># 0.0.0.0/0 表示所有未知网络，又称为默认路由，优先级最低，我称之为兜底路由</span>
+                <span class="token comment"># x.x.x.x/32 是主机路由，一般不写这么具体</span>
+Flags       <span class="token comment"># 路由标记</span>
+                <span class="token comment"># U：该路由可以使用</span>
+                <span class="token comment"># G：该路由是到一个网关(路由器). 若没有此标志, 说明目的地址为直接连接的</span>
+                <span class="token comment"># H：该路由是到一个主机，如果没有该标志, 说明该路由是到一个网络</span>
+                <span class="token comment"># D：该路由是有重定向报文创建的</span>
+                <span class="token comment"># M：该路由已被重定向报文修改</span>
+Metric      <span class="token comment"># 路由开销，值越小，路由记录的优先级最高</span>
+Ref         <span class="token comment">#</span>
+Use Iface   <span class="token comment"># 网卡接口</span></code></pre>
+
 <h2 id="配置动态路由"><a href="#配置动态路由" class="headerlink" title="配置动态路由"></a>配置动态路由</h2><p>route命令可以添加路由，可是靠手动一条一条的添加太麻烦了，大型的网络环境中，路由器中的路由不是手动添加的，而是通过路由协议自动生成的。</p>
-<p>路由协议：<br>RIP：Routing Information Protocol，路由信息协议<br>OSPF：Open Shortest Path First，开放式最短路径优先<br>BGP：Border Gateway Protocol，边界网关协议</p>
-<p>大概的过程是这样的，每个路由器向网络中广播，告诉其他路由器自己连接的网段，互通有无。例如pc1要和pc2通信，pc1只要知道gwA能连接pc1，gwA只知道gwB能连接pc1，而gwB只知道gwC能连接pc1，就这样，最后通过gwE才真正连接到pc2。</p>
-<p>不同的协议决定了路由器选择路径的算法不同。RIP很少用，OSPF用于局域网，BGP用于互联网</p>
+<p>路由协议：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">RIP     <span class="token comment"># Routing Information Protocol，路由信息协议</span>
+OSPF    <span class="token comment"># Open Shortest Path First，开放式最短路径优先</span>
+BGP     <span class="token comment"># Border Gateway Protocol，边界网关协议</span></code></pre>
+
+<p>大概的过程：每个路由器向网络中广播，告诉其他路由器自己连接的网段，互通有无。例如pc1要和pc2通信，pc1只要知道gwA能连接pc1，gwA只知道gwB能连接pc1，而gwB只知道gwC能连接pc1，就这样，最后通过gwE才真正连接到pc2</p>
+<p>不同的协议决定了路由器选择路径的算法不同。RIP很少用，<strong>OSPF用于局域网，BGP用于互联网</strong></p>
 
     </div>
 
