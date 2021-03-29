@@ -30,7 +30,7 @@
 <meta property="og:description" content="通常的linux发行版对于网络的配置方法一般会同时支持network.service和NetworkManager.service（简称NM）。默认情况下，这2个服务都有开启，而且功能上是平行的，可以通过任意一个来配置网络，正常的情况下通过NM来配置网络后它会自动把配置同步到network.service的配置中。 nmcli是NetworkManager的命令行工具， 该命令可以完成网卡上所有的">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-12-09T14:41:20.000Z">
-<meta property="article:modified_time" content="2021-03-23T23:52:59.000Z">
+<meta property="article:modified_time" content="2021-03-29T03:23:35.000Z">
 <meta property="article:author" content="像方便面一样的男子">
 <meta property="article:tag" content="网络">
 <meta property="article:tag" content="nmcli">
@@ -196,19 +196,19 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">243</span>
+          <span class="site-state-item-count">242</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">59</span>
+        <span class="site-state-item-count">58</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">89</span>
+        <span class="site-state-item-count">88</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -284,7 +284,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:52:59" itemprop="dateModified" datetime="2021-03-24T07:52:59+08:00">2021-03-24</time>
+        <time title="修改时间：2021-03-29 11:23:35" itemprop="dateModified" datetime="2021-03-29T11:23:35+08:00">2021-03-29</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -318,28 +318,27 @@
 <p>nmcli是NetworkManager的命令行工具， 该命令可以完成网卡上所有的配置工作，绝大部分可以写入配置文件，永久生效 。</p>
 <pre class="language-bash" data-language="bash"><code class="language-bash">nmcli <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> OBJECT <span class="token punctuation">&#123;</span> COMMAND <span class="token operator">|</span> <span class="token builtin class-name">help</span> <span class="token punctuation">&#125;</span></code></pre>
 
-<p>OPTIONS</p>
-<ul>
-<li>-t[erse]                 # terse output 简洁的输出</li>
-<li>-p[retty]                 # pretty output 漂亮的输出</li>
-<li>-m[ode] tabular|multiline                 # output mode  输出模式</li>
-<li>-f[ields] &lt;field1,field2,…&gt;|all|common  # specify fields to output 指定要输出的字段</li>
-<li>-e[scape] yes|no                          # escape columns separators in values 在值中转义列分隔符</li>
-<li>-n[ocheck]                                # 不要检查nmcli和NetworkManager版本</li>
-<li>-a[sk]                                    # 要求缺少参数</li>
-<li>-w[ait] <seconds>                         # 设置超时等待整理操作</li>
-</ul>
+<p>OPTIONS：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">-t                                <span class="token comment"># terse output 简洁的输出</span>
+-p                                <span class="token comment"># pretty output 漂亮的输出</span>
+-m tabular<span class="token operator">|</span>multiline              <span class="token comment"># output mode  输出模式</span>
+-f <span class="token operator">&lt;</span>field1,field2,<span class="token punctuation">..</span>.<span class="token operator">>|</span>all<span class="token operator">|</span>common <span class="token comment"># specify fields to output 指定要输出的字段</span>
+-e <span class="token function">yes</span><span class="token operator">|</span>no                         <span class="token comment"># escape columns separators in values 在值中转义列分隔符</span>
+-n                                <span class="token comment"># 不要检查nmcli和NetworkManager版本</span>
+-a                                <span class="token comment"># 要求缺少参数</span>
+-w <span class="token operator">&lt;</span>seconds<span class="token operator">></span>                      <span class="token comment"># 设置超时等待整理操作</span></code></pre>
+
+
 <p>OBJECT</p>
-<ul>
-<li>g[eneral]      显示NM状态和权限；获取和更改系统主机名、NetworkManager logging level and domains</li>
-<li>n[etworking]    查询NM网络状态，启用和禁用网络</li>
-<li>r[adio]         无线网相关</li>
-<li>c[onnection]    NM的连接</li>
-<li>d[evice]        显示和管理网络接口</li>
-<li>a[gent]         Run nmcli as a NetworkManager secret agent, or polkit agent.</li>
-<li>m[onitor]       观察NM活动，监视连接状态、设备或连接配置文件的更改</li>
-</ul>
-<p><strong>最常用的是 device 和 connection</strong>，主要是connection。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">g<span class="token punctuation">[</span>eneral<span class="token punctuation">]</span>      <span class="token comment"># 显示NM状态和权限；获取和更改系统主机名、NetworkManager logging level and domains</span>
+n<span class="token punctuation">[</span>etworking<span class="token punctuation">]</span>   <span class="token comment"># 查询NM网络状态，启用和禁用网络</span>
+r<span class="token punctuation">[</span>adio<span class="token punctuation">]</span>        <span class="token comment"># 无线网相关</span>
+c<span class="token punctuation">[</span>onnection<span class="token punctuation">]</span>   <span class="token comment"># NM的连接</span>
+d<span class="token punctuation">[</span>evice<span class="token punctuation">]</span>       <span class="token comment"># 显示和管理网络接口</span>
+a<span class="token punctuation">[</span>gent<span class="token punctuation">]</span>        <span class="token comment"># Run nmcli as a NetworkManager secret agent, or polkit agent.</span>
+m<span class="token punctuation">[</span>onitor<span class="token punctuation">]</span>      <span class="token comment"># 观察NM活动，监视连接状态、设备或连接配置文件的更改</span></code></pre>
+
+<p><strong>最常用的是 device 和 connection</strong>，主要是connection</p>
 <h3 id="device"><a href="#device" class="headerlink" title="device"></a>device</h3><p> <strong>设备</strong>，可理解为实际存在的网卡（包括物理网卡和虚拟网卡）。可以简写为nmcli d </p>
 <p> 在NM里，有2个层级：<strong>连接（connection）和设备（device），通常NM的管理是以连接为单位的，就像你的手机可以记住多个wifi连接，但一个时刻只能连接一个wifi。一个网卡可以关联多个连接，但是一个网卡只能有一个连接处于活跃状态，通过 <code>nmcli connetion up</code>切换连接。</strong> </p>
 <pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看网卡状态</span>
