@@ -1388,7 +1388,7 @@ wifi.scan-rand-mac-address<span class="token operator">=</span>no</code></pre></
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-25 23:24:38" itemprop="dateModified" datetime="2021-03-25T23:24:38+08:00">2021-03-25</time>
+        <time title="修改时间：2021-03-30 23:42:30" itemprop="dateModified" datetime="2021-03-30T23:42:30+08:00">2021-03-30</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1611,8 +1611,8 @@ partx -d --nr M-N /dev/DEVICE</code></pre>
 </ul>
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1613137329211.png"></p>
 <p>新硬盘，先fdisk分区，然后mkfs创建文件系统，最后mount挂载</p>
-<p>文件系统是操作系统用于明确存储设备或分区上的文件的方法和数据结构;即在存储设备上组织文件的方法。操作系统中负责管理和存储文件信息的软件结构称为文件管理系统,简称文件系统从系统角度来看,文件系统是对文件存储设备的空间进行组织和分配,负责文件存储并对存入的文件进行保护和检索的系统。具体地说,它负责为用户建立文件,存入、读出、修改、转储文件,控制文件的存取,安全控制,日志,压缩,加密等</p>
-<p>当前系统支持的文件系统</p>
+<p>文件系统是操作系统用于明确存储设备或分区上的文件的方法和数据结构；即在存储设备上组织文件的方法。操作系统中负责管理和存储文件信息的软件结构称为文件管理系统，简称文件系统从系统角度来看，文件系统是对文件存储设备的空间进行组织和分配，负责文件存储并对存入的文件进行保护和检索的系统。具体地说，它负责为用户建立文件，存入、读出、修改、转储文件，控制文件的存取，安全控制，日志，压缩，加密等</p>
+<p>当前系统支持的文件系统：</p>
 <pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/kernel-3.10.0-1127.el7.x86_64 </span></code></pre>
 
 <p>上面显示的不全，我不知道为什么，通过查看内核包可以看到所有支持的文件系统，每个xz压缩包都是对应文件系统的驱动。</p>
@@ -1708,7 +1708,7 @@ Writing inode tables: <span class="token keyword">done</span>
 Creating journal <span class="token punctuation">(</span><span class="token number">8192</span> blocks<span class="token punctuation">)</span>: <span class="token keyword">done</span>
 Writing superblocks and filesystem accounting information: <span class="token keyword">done</span></code></pre>
 
-<p>文件系统把每个分区分成多个块组（block group），每个块组中有很多块，每个块的大小通常为4K，具体块组的组成看下图。超级块（super block）中存储了所有块组的元数据，超级块存储在块组0中，并在其他部分块组有备份；块组描述符表（GDT）是块组描述符的集合，和超级组一样，也是储存块组0中，在其他部分块组中备份；块位图（block bitmap）描述了块的使用情况；节点位图（inode bitmap）描述了节点的使用情况。节点表（inode table）存储节点；数据块（data blocks）存储数据。</p>
+<p>文件系统把每个分区分成多个块组（block group），每个块组中有很多块，每个块的大小通常为4K，具体块组的组成看下图。超级块（super block）中存储了所有块组的元数据，超级块存储在块组0中，并在其他部分块组有备份；块组描述符表（GDT）是块组描述符的集合，和超级组一样，也是储存块组0中，在其他部分块组中备份；块位图（block bitmap）描述了块的使用情况；节点位图（inode bitmap）描述了节点的使用情况。节点表（inode table）存储节点；数据块（data blocks）存储数据</p>
 <p><img data-src="https://img.lujinkai.cn/blog/ljk/1597908144289.png"></p>
 <p><strong>块组描述符</strong><br>Ext3文件系统的每个块组描述符占用32字节，用以描述块组中的位图起始地址、i-节点表起始地址、空闲块数、空闲i-节点数等信息，每个块组都有这样的一个块组描述符，所有的块组描述符集中存放，组成块组描述符表。</p>
 <h3 id="mkfs"><a href="#mkfs" class="headerlink" title="mkfs"></a>mkfs</h3><p>创建文件系统</p>
@@ -1720,7 +1720,7 @@ Writing superblocks and filesystem accounting information: <span class="token ke
 <span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># dumpe2fs /dev/sdb5</span>
 <span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># xfs_info /dev/sda1 </span></code></pre>
 
-<h3 id="fsck、e2fsck、xfs-repair"><a href="#fsck、e2fsck、xfs-repair" class="headerlink" title="fsck、e2fsck、xfs_repair"></a>fsck、e2fsck、xfs_repair</h3><p>tune2fs、dumpe2fs查看分区的ext文件系统信息，Filesystem state标记为 no clean，说明文件系统发生故障。使用e2fsck可以修复。如果是xfs文件系统发生故障，使用xfs_repair修改。fsck通用，不管什么文件系统都可以修复。</p>
+<h3 id="fsck、e2fsck、xfs-repair"><a href="#fsck、e2fsck、xfs-repair" class="headerlink" title="fsck、e2fsck、xfs_repair"></a>fsck、e2fsck、xfs_repair</h3><p>tune2fs、dumpe2fs查看分区的ext文件系统信息，Filesystem state标记为 no clean，说明文件系统发生故障。使用e2fsck可以修复。如果是xfs文件系统发生故障，使用xfs_repair修改。fsck通用，不管什么文件系统都可以修复</p>
 <p>注意：1. 修复之前一定要umount先取消挂载</p>
 <p>​            2. 数据不一定能恢复</p>
 <pre class="language-bash" data-language="bash"><code class="language-bash">fsck.FS_TYPE  /dev/DEVICE
@@ -1963,12 +1963,9 @@ sr0    iso9660  CentOS <span class="token number">7</span> x86_64 <span class="t
 </li>
 </ul>
 <h4 id="4-在卷组上创建逻辑卷"><a href="#4-在卷组上创建逻辑卷" class="headerlink" title="4. 在卷组上创建逻辑卷"></a>4. 在卷组上创建逻辑卷</h4><ul>
-<li><p><code>lvs</code></p>
-</li>
-<li><p><code>lvdisplay</code></p>
-</li>
-<li><p><code>lvcreate</code> 创建逻辑卷</p>
-<ul>
+<li><code>lvs</code></li>
+<li><code>lvdisplay</code></li>
+<li><code>lvcreate</code> 创建逻辑卷<ul>
 <li>n 后面跟逻辑卷名 </li>
 <li>s 创建快照</li>
 <li>l 指定逻辑卷的大小（LE数）<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 卷组vg0分配100个PE给新建逻辑卷lv0，这样lv0的大小就是100个LE</span>
@@ -1980,8 +1977,7 @@ lvcreate -l <span class="token number">100</span>%FREE -n yourlv testvg</code></
 <span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvcreate -L 1G -n lv1 vg0</span></code></pre></li>
 </ul>
 </li>
-<li><p><code>lvremove 逻辑卷</code> 删除逻辑卷</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvs</span>
+<li><code>lvremove 逻辑卷</code> 删除逻辑卷<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvs</span>
   LV   VG  Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
   lv0  vg0 -wi-a-----   <span class="token number">1</span>.56g                                                    
   lv1  vg0 -wi-a-----   <span class="token number">1</span>.00g                                                    
@@ -1996,8 +1992,7 @@ Do you really want to remove active logical volume vg0/lv2? <span class="token p
   LV   VG  Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
   lv0  vg0 -wi-a----- <span class="token number">1</span>.56g                                                    
   lv1  vg0 -wi-a----- <span class="token number">1</span>.00g  </code></pre></li>
-<li><p><code>lvextend</code> 扩展逻辑卷</p>
-<ul>
+<li><code>lvextend</code> 扩展逻辑卷<ul>
 <li>-L [+]kKmMgGtT 没有+表示扩展至指定大小，有+表示增加指定大小</li>
 <li>-l [+]Number[PERCENT]</li>
 <li>-r 如果逻辑卷上已经有文件系统，同步扩展文件系统<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 两步实现：</span>
@@ -2012,19 +2007,22 @@ xfs_growfs MOUNTPOINT			<span class="token comment"># 针对xfs</span>
 lvresize -r -l +100%FREE /dev/VG_NAME/LV_NAME</code></pre></li>
 </ul>
 <pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvextend -r -L +1G /dev/vg0/lv1</span></code></pre></li>
-<li><p><code>lvreduce</code> 缩减逻辑卷，只针对ext文件系统，xfs不支持缩减，缩减有风险，最好先备份数据</p>
-<ul>
+<li><code>lvreduce</code> 缩减逻辑卷，只针对ext文件系统，xfs不支持缩减，缩减有风险，最好先备份数据<ul>
 <li>-l 同lvextend</li>
-<li>-L 同lvextend<h4 id="5-在逻辑卷上创建文件系统并挂载"><a href="#5-在逻辑卷上创建文件系统并挂载" class="headerlink" title="5. 在逻辑卷上创建文件系统并挂载"></a>5. 在逻辑卷上创建文件系统并挂载</h4><pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.ext4 /dev/vg0/lv1
-<span class="token function">mount</span> /dev/vg0/lv1 /mnt/lv1/</code></pre>
-<h4 id="6-跨主机迁移卷组"><a href="#6-跨主机迁移卷组" class="headerlink" title="6. 跨主机迁移卷组"></a>6. 跨主机迁移卷组</h4></li>
+<li>-L 同lvextend</li>
 </ul>
-<ol>
+</li>
+</ul>
+<h4 id="5-在逻辑卷上创建文件系统并挂载"><a href="#5-在逻辑卷上创建文件系统并挂载" class="headerlink" title="5. 在逻辑卷上创建文件系统并挂载"></a>5. 在逻辑卷上创建文件系统并挂载</h4><pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.ext4 /dev/vg0/lv1
+<span class="token function">mount</span> /dev/vg0/lv1 /mnt/lv1/</code></pre>
+
+<h4 id="6-跨主机迁移卷组"><a href="#6-跨主机迁移卷组" class="headerlink" title="6. 跨主机迁移卷组"></a>6. 跨主机迁移卷组</h4><ol>
 <li>在旧系统中,umount 所有卷组上的逻辑卷</li>
 <li>禁用卷组</li>
 </ol>
-<p>  vgchange用于修改卷组的属性，经常被用来设置卷组是处于活动状态或者非活动状态。</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">vgchange –a n vg0
+<pre><code>vgchange用于修改卷组的属性，经常被用来设置卷组是处于活动状态或者非活动状态。
+</code></pre>
+  <pre class="language-bash" data-language="bash"><code class="language-bash">vgchange –a n vg0
 lvdisplay</code></pre>
 <ol start="3">
 <li>导出卷组<pre class="language-bash" data-language="bash"><code class="language-bash">vgexport vg0
@@ -2034,8 +2032,6 @@ vgdisplay</code></pre></li>
 <li>启用<pre class="language-bash" data-language="bash"><code class="language-bash">vgchange –ay vg0</code></pre></li>
 <li>mount 所有卷组上的逻辑卷</li>
 </ol>
-</li>
-</ul>
 <h4 id="7-拆除指定的pv存储设备"><a href="#7-拆除指定的pv存储设备" class="headerlink" title="7. 拆除指定的pv存储设备"></a>7. 拆除指定的pv存储设备</h4><ol>
 <li>pvmove 迁移物理卷数据，注意只能迁移到同一卷组下的其他物理卷</li>
 <li>vgreduce 从卷组中移除物理卷</li>
