@@ -189,14 +189,14 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">273</span>
+          <span class="site-state-item-count">253</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">64</span>
+        <span class="site-state-item-count">60</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -236,1143 +236,6 @@
 
 
     <div class="main-inner index posts-expand">
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/EasySwoole/%E4%BB%8E%E5%8D%8F%E7%A8%8B%E4%B8%AD%E8%8E%B7%E5%8F%96%E9%93%BE%E6%8E%A5%E7%9A%84%E6%96%B9%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/EasySwoole/%E4%BB%8E%E5%8D%8F%E7%A8%8B%E4%B8%AD%E8%8E%B7%E5%8F%96%E9%93%BE%E6%8E%A5%E7%9A%84%E6%96%B9%E5%BC%8F/" class="post-title-link" itemprop="url">从协程中获取链接的方式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:19:52" itemprop="dateCreated datePublished" datetime="2020-12-11T23:19:52+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:20:44" itemprop="dateModified" datetime="2021-03-24T07:20:44+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/EasySwoole/" itemprop="url" rel="index"><span itemprop="name">EasySwoole</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="defer、-invoker、-getObj"><a href="#defer、-invoker、-getObj" class="headerlink" title="defer、 invoker、 getObj"></a>defer、 invoker、 getObj</h1><pre class="language-php" data-language="php"><code class="language-php"><span class="token function">go</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token variable">$redisPool</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>App<span class="token punctuation">\</span>Pool<span class="token punctuation">\</span>RedisPool</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Pool<span class="token punctuation">\</span>Config</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Redis<span class="token punctuation">\</span>Config<span class="token punctuation">\</span>RedisConfig</span><span class="token punctuation">(</span><span class="token class-name class-name-fully-qualified static-context"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Config</span><span class="token operator">::</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">getConf</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'REDIS'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token variable">$redis</span> <span class="token operator">=</span> <span class="token variable">$redisPool</span><span class="token operator">-></span><span class="token function">getObj</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token variable">$redis</span><span class="token operator">-></span><span class="token keyword">echo</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'仙士可'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token variable">$redisPool</span><span class="token operator">-></span><span class="token function">recycleObj</span><span class="token punctuation">(</span><span class="token variable">$redis</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token function">go</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token variable">$redisPool</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>App<span class="token punctuation">\</span>Pool<span class="token punctuation">\</span>RedisPool</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Pool<span class="token punctuation">\</span>Config</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Redis<span class="token punctuation">\</span>Config<span class="token punctuation">\</span>RedisConfig</span><span class="token punctuation">(</span><span class="token class-name class-name-fully-qualified static-context"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Config</span><span class="token operator">::</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">getConf</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'REDIS'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token variable">$redisPool</span><span class="token operator">-></span><span class="token function">invoke</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token punctuation">(</span><span class="token class-name class-name-fully-qualified type-declaration"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Redis<span class="token punctuation">\</span>Redis</span> <span class="token variable">$redis</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token variable">$redis</span><span class="token operator">-></span><span class="token keyword">echo</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'仙士可'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token function">go</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token variable">$redisPool</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>App<span class="token punctuation">\</span>Pool<span class="token punctuation">\</span>RedisPool</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Pool<span class="token punctuation">\</span>Config</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name class-name-fully-qualified"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Redis<span class="token punctuation">\</span>Config<span class="token punctuation">\</span>RedisConfig</span><span class="token punctuation">(</span><span class="token class-name class-name-fully-qualified static-context"><span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>EasySwoole<span class="token punctuation">\</span>Config</span><span class="token operator">::</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">getConf</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'REDIS'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token variable">$redis</span> <span class="token operator">=</span> <span class="token variable">$redisPool</span><span class="token operator">-></span><span class="token function">defer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token variable">$redis</span><span class="token operator">-></span><span class="token keyword">echo</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'仙士可'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-
-
-
-<h2 id="getObj-获取一个连接池对象"><a href="#getObj-获取一个连接池对象" class="headerlink" title="getObj 获取一个连接池对象"></a>getObj 获取一个连接池对象</h2><blockquote>
-<p>​    通过getObj方法获取的对象,都必须调用unsetObj或者recycleObj进行回收,否则连接池对象会越来越少</p>
-</blockquote>
-<h3 id="invoke-获取一个连接-传入到-call回调函数中进行处理-回调结束后自动回收连接"><a href="#invoke-获取一个连接-传入到-call回调函数中进行处理-回调结束后自动回收连接" class="headerlink" title="invoke 获取一个连接,传入到$call回调函数中进行处理,回调结束后自动回收连接"></a>invoke 获取一个连接,传入到$call回调函数中进行处理,回调结束后自动回收连接</h3><blockquote>
-<p>​    通过该方法无需手动回收连接,在回调函数结束后,则自动回收</p>
-</blockquote>
-<h2 id="defer-获取一个连接-协程结束后自动回收"><a href="#defer-获取一个连接-协程结束后自动回收" class="headerlink" title="defer 获取一个连接,协程结束后自动回收"></a>defer 获取一个连接,协程结束后自动回收</h2><blockquote>
-<p>​    通过该方法无需手动回收连接,在协程结束后,则自动回收</p>
-<p>​    需要注意的事,defer方法是协程结束后才回收,如果你当前协程运行时间过长,则会一直无法回收,直到协程结束</p>
-</blockquote>
-<h2 id="三者的联系和区别"><a href="#三者的联系和区别" class="headerlink" title="三者的联系和区别"></a>三者的联系和区别</h2><p>getObj获取一个连接池对象, 需要手动回收, 而defer中封装了swoole的Coroutine::defer, 在Coroutine::defer处理连接池对象的回收。</p>
-<p>所以说getObj和defer的区别就在于回收的时机，前者自己把控，后者只能是在当前协程结束的时候回收。</p>
-<p>而invoke是传入一个匿名函数，在invoke内部执行<code>$obj = $this-&gt;getObj()</code>, 然后将$obj传入匿名函数。利用try finally, 在匿名函数执行完毕后就回收对象。</p>
-<p>总结：本质上都是通过getObj获取连接池对象。只不过defer和invoke又封装了一层，目的都是做到自动回收连接池对象。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/SPL/SplQueue/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/SPL/SplQueue/" class="post-title-link" itemprop="url">SplQueue</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:12:21" itemprop="dateCreated datePublished" datetime="2020-12-11T23:12:21+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:21:19" itemprop="dateModified" datetime="2021-03-24T07:21:19+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/SPL/" itemprop="url" rel="index"><span itemprop="name">SPL</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><font color=red>先进先出</font></p>
-<p>enqueue: 进入队列</p>
-<p>dequeue: 退出队列, 返回退出队列的元素</p>
-<p>bottom(): 队列底, 就是第一个添加到队列的元素</p>
-<p>top(): 队列头, 就是最后一个添加到队列的元素</p>
-<p>offsetSet(‘0’, data): 更新元素的值, offset=0是bottom所在的位置, 1、2、3… 以此类推</p>
-<p>rewind(): 使得指针指向bottom所在位置的节点</p>
-<p>key(): 当前节点的index</p>
-<p>current(): 当前节点的value</p>
-<p>valid(): 判断当前节点是否有效</p>
-<p>next(): 使得指针指向下一个节点</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/SPL/SPL%E5%9F%BA%E6%9C%AC%E6%A1%86%E6%9E%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/SPL/SPL%E5%9F%BA%E6%9C%AC%E6%A1%86%E6%9E%B6/" class="post-title-link" itemprop="url">SPL基本框架</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:12:13" itemprop="dateCreated datePublished" datetime="2020-12-11T23:12:13+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:21:17" itemprop="dateModified" datetime="2021-03-24T07:21:17+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/SPL/" itemprop="url" rel="index"><span itemprop="name">SPL</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>参考：<a target="_blank" rel="noopener" href="https://img.lujinkai.cn/blog/ljk/1607699201217.png">https://img.lujinkai.cn/blog/ljk/1607699201217.png</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/SPL/SPL/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/SPL/SPL/" class="post-title-link" itemprop="url">SPL</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:11:53" itemprop="dateCreated datePublished" datetime="2020-12-11T23:11:53+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:21:10" itemprop="dateModified" datetime="2021-03-24T07:21:10+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/SPL/" itemprop="url" rel="index"><span itemprop="name">SPL</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>参考：<a target="_blank" rel="noopener" href="https://www.imooc.com/video/2510/0">https://www.imooc.com/video/2510/0</a></p>
-<h2 id="什么是SPL"><a href="#什么是SPL" class="headerlink" title="什么是SPL"></a>什么是SPL</h2><p>Standard PHP Library 的缩写，它是用于解决<font color=red>典型（常见）问题</font>的一组接口与类的集合。</p>
-<h2 id="典型（常见）问题"><a href="#典型（常见）问题" class="headerlink" title="典型（常见）问题"></a>典型（常见）问题</h2><h3 id="数学建模-数据结构"><a href="#数学建模-数据结构" class="headerlink" title="数学建模/数据结构"></a>数学建模/数据结构</h3><p>解决数据怎么存储的问题</p>
-<h3 id="元素遍历"><a href="#元素遍历" class="headerlink" title="元素遍历"></a>元素遍历</h3><p>数据怎么查看的问题</p>
-<h3 id="常用方法的同意调用"><a href="#常用方法的同意调用" class="headerlink" title="常用方法的同意调用"></a>常用方法的同意调用</h3><p>通用方法（数组、集合的大小）</p>
-<p>自定义遍历</p>
-<h3 id="类定义的自动装载"><a href="#类定义的自动装载" class="headerlink" title="类定义的自动装载"></a>类定义的自动装载</h3><p>让php程序适应大型项目的管理要求，把功能的实现分散到不同文件中。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/PHP%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%20-%20%E6%95%B0%E7%BB%84/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E5%9F%BA%E7%A1%80/PHP%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%20-%20%E6%95%B0%E7%BB%84/" class="post-title-link" itemprop="url">PHP常用函数 - 数组</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:10:33" itemprop="dateCreated datePublished" datetime="2020-12-11T23:10:33+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:18:38" itemprop="dateModified" datetime="2021-03-24T07:18:38+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><h3 id="sort-rsort"><a href="#sort-rsort" class="headerlink" title="sort  /  rsort"></a>sort  /  rsort</h3><p>按值排序，值与下标没有绑定，升/降。 </p>
-<h3 id="asort-arsort"><a href="#asort-arsort" class="headerlink" title="asort / arsort"></a>asort / arsort</h3><p>按元素值进行排序，值与下标绑定。 </p>
-<h3 id="ksort-krsort"><a href="#ksort-krsort" class="headerlink" title="ksort / krsort"></a>ksort / krsort</h3><p>按键的值进行排序。 </p>
-<h3 id="natsort"><a href="#natsort" class="headerlink" title="natsort"></a>natsort</h3><p>自然排序</p>
-<pre class="language-php" data-language="php"><code class="language-php"><span class="token variable">$array1</span> <span class="token operator">=</span> <span class="token variable">$array2</span> <span class="token operator">=</span> <span class="token keyword">array</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"img12.png"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"img10.png"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"img2.png"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"img1.png"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token function">asort</span><span class="token punctuation">(</span><span class="token variable">$array1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token string double-quoted-string">"Standard sorting\n"</span><span class="token punctuation">;</span>
-<span class="token function">print_r</span><span class="token punctuation">(</span><span class="token variable">$array1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token function">natsort</span><span class="token punctuation">(</span><span class="token variable">$array2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token string double-quoted-string">"\nNatural order sorting\n"</span><span class="token punctuation">;</span>
-<span class="token function">print_r</span><span class="token punctuation">(</span><span class="token variable">$array2</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-
-<p>  以上例程会输出：</p>
-<pre class="language-php+html" data-language="php+html"><code class="language-php+html">Standard sorting
-Array
-(
-    [3] &#x3D;&gt; img1.png
-    [1] &#x3D;&gt; img10.png
-    [0] &#x3D;&gt; img12.png
-    [2] &#x3D;&gt; img2.png
-)
-
-Natural order sorting
-Array
-(
-    [3] &#x3D;&gt; img1.png
-    [2] &#x3D;&gt; img2.png
-    [1] &#x3D;&gt; img10.png
-    [0] &#x3D;&gt; img12.png
-)
-</code></pre>
-
-<h3 id="natcasesort"><a href="#natcasesort" class="headerlink" title="natcasesort"></a>natcasesort</h3><p>自然排序, 不区分大小写. natsort是区分大小的.</p>
-<h2 id="操作指针"><a href="#操作指针" class="headerlink" title="操作指针"></a>操作指针</h2><h3 id="current"><a href="#current" class="headerlink" title="current"></a>current</h3><p>返回当前被内部指针指向的数组单元的值，并不移动指针。如果内部指针指向超出了单元列表的末端，<strong>current()</strong>      返回 <strong>FALSE</strong>。 pos()就是current()的别名.</p>
-<h3 id="each"><a href="#each" class="headerlink" title="each"></a>each</h3><p>返回数组中当前的 键/值 对, 并将数组指针向前移动一步.</p>
-<h3 id="end"><a href="#end" class="headerlink" title="end"></a>end</h3><p>将数组的内部指针指向最后一个单元.</p>
-<h3 id="key"><a href="#key" class="headerlink" title="key"></a>key</h3><p>返回数组中内部指针指向的当前单元的键名。</p>
-<h3 id="next"><a href="#next" class="headerlink" title="next"></a>next</h3><p>将数组内部的指针向前移动一位.</p>
-<h3 id="prev"><a href="#prev" class="headerlink" title="prev"></a>prev</h3><p>将数组内部的指针倒回一位. 和 next 刚好相反</p>
-<h3 id="reset"><a href="#reset" class="headerlink" title="reset"></a>reset</h3><p>将数组的内部指针指向第一个单元.</p>
-<h2 id="堆栈操作"><a href="#堆栈操作" class="headerlink" title="堆栈操作"></a>堆栈操作</h2><h3 id="array-push"><a href="#array-push" class="headerlink" title="array_push"></a>array_push</h3><p>将一个或多个单元压入数组的末尾 (<strong>入栈</strong>)</p>
-<h3 id="array-pop"><a href="#array-pop" class="headerlink" title="array_pop"></a>array_pop</h3><p>弹出数组最后一个单元 (<strong>出栈</strong>)</p>
-<h3 id="array-shift"><a href="#array-shift" class="headerlink" title="array_shift"></a>array_shift</h3><p>将数组开头的单元移出数组.</p>
-<h3 id="array-unshift"><a href="#array-unshift" class="headerlink" title="array_unshift"></a>array_unshift</h3><p>在数组开头插入一个或多个单元.</p>
-<h2 id="统计"><a href="#统计" class="headerlink" title="统计"></a>统计</h2><h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="array-change-key-case"><a href="#array-change-key-case" class="headerlink" title="array_change_key_case"></a>array_change_key_case</h3><p>将数组中的所有键名修改为全大写或者全小写</p>
-<h3 id="array-chunk"><a href="#array-chunk" class="headerlink" title="*array_chunk"></a>*array_chunk</h3><p>将一个数组分割分成多个</p>
-<h3 id="array-column"><a href="#array-column" class="headerlink" title="array_column"></a>array_column</h3><p>返回数组中指定的一列</p>
-<h3 id="array-combine"><a href="#array-combine" class="headerlink" title="array_combine"></a>array_combine</h3><p>创建一个数组, 用一个数组的值作为键名, 另一个数组的值作为值.</p>
-<h3 id="array-count-values"><a href="#array-count-values" class="headerlink" title="*array_count_values"></a>*array_count_values</h3><p>统计数组中的每个值出现的次数</p>
-<h3 id="array-diff-key"><a href="#array-diff-key" class="headerlink" title="*array_diff_key"></a>*array_diff_key</h3><p>计算数组的差集, 比较$arr, $brr, $crr, $drr…多个数组, 返回$arr中有而其他数组中没有的 <strong>键</strong> 对应的值</p>
-<h3 id="array-diff"><a href="#array-diff" class="headerlink" title="array_diff"></a>array_diff</h3><p>计算数组的差集, 和array_diff_assoc的区别在于不检查键.</p>
-<h3 id="array-fill-keys"><a href="#array-fill-keys" class="headerlink" title="*array_fill_keys"></a>*array_fill_keys</h3><p>  <code>array array_fill_keys ( array $keys , [mixed] $value  )</code>   使用 <code>value</code> 参数的值作为值，使用 <code>keys</code> 数组的值作为键来填充一个数组。 </p>
-<h3 id="array-fill"><a href="#array-fill" class="headerlink" title="array_fill"></a>array_fill</h3><p>给定的值填充数组</p>
-<h3 id="array-filter"><a href="#array-filter" class="headerlink" title="array_filter"></a>array_filter</h3><p>用回调函数过滤数组中的单元</p>
-<p>示例: </p>
-<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">function</span> <span class="token function">odd</span><span class="token punctuation">(</span><span class="token variable">$var</span><span class="token punctuation">)</span>
-<span class="token punctuation">&#123;</span>
-    <span class="token comment">// returns whether the input integer is odd</span>
-    <span class="token keyword">return</span><span class="token punctuation">(</span><span class="token variable">$var</span> <span class="token operator">&amp;</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token keyword">function</span> <span class="token function">even</span><span class="token punctuation">(</span><span class="token variable">$var</span><span class="token punctuation">)</span>
-<span class="token punctuation">&#123;</span>
-    <span class="token comment">// returns whether the input integer is even</span>
-    <span class="token keyword">return</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span><span class="token variable">$var</span> <span class="token operator">&amp;</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token variable">$array1</span> <span class="token operator">=</span> <span class="token keyword">array</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"a"</span><span class="token operator">=></span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"b"</span><span class="token operator">=></span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"c"</span><span class="token operator">=></span><span class="token number">3</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"d"</span><span class="token operator">=></span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"e"</span><span class="token operator">=></span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token variable">$array2</span> <span class="token operator">=</span> <span class="token keyword">array</span><span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token keyword">echo</span> <span class="token string double-quoted-string">"Odd :\n"</span><span class="token punctuation">;</span>
-<span class="token function">print_r</span><span class="token punctuation">(</span><span class="token function">array_filter</span><span class="token punctuation">(</span><span class="token variable">$array1</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"odd"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">echo</span> <span class="token string double-quoted-string">"Even:\n"</span><span class="token punctuation">;</span>
-<span class="token function">print_r</span><span class="token punctuation">(</span><span class="token function">array_filter</span><span class="token punctuation">(</span><span class="token variable">$array2</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"even"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-
-<p>ps: &amp; 位与运算, 当都是1时则为1, 否则为0</p>
-<h3 id="array-flip"><a href="#array-flip" class="headerlink" title="*array_flip"></a>*array_flip</h3><p>交换数组中的键和值.</p>
-<h3 id="array-intersect-key"><a href="#array-intersect-key" class="headerlink" title="array_intersect_key"></a>array_intersect_key</h3><p>计算数组的交集, 比较$arr, $brr, $crr, $drr…多个数组, 返回$arr中有而其他数组中也有的 <strong>键</strong> 对应的值</p>
-<h3 id="array-intersect"><a href="#array-intersect" class="headerlink" title="array_intersect"></a>array_intersect</h3><p>计算数组的交集. 比较$arr, $brr, $crr, $drr…多个数组, 返回$arr中有而其他数组中也有的值</p>
-<h3 id="array-key-exists"><a href="#array-key-exists" class="headerlink" title="array_key_exists"></a>array_key_exists</h3><p>检查数组中是否有指定的键</p>
-<h3 id="key-exists"><a href="#key-exists" class="headerlink" title="key_exists"></a>key_exists</h3><p><code>array_key_exists</code>的别名.</p>
-<h3 id="array-keys"><a href="#array-keys" class="headerlink" title="array_keys"></a>array_keys</h3><p>返回数组中部分的或所有的键</p>
-<h3 id="array-map"><a href="#array-map" class="headerlink" title="array_map"></a>array_map</h3><p>为一个或多个数组的每个元素应用回调函数.</p>
-<h3 id="array-merge-recursive"><a href="#array-merge-recursive" class="headerlink" title="array_merge_recursive"></a>array_merge_recursive</h3><p>递归的合并多个数组, 相同键的值会合并到一个数组中.</p>
-<h3 id="array-merge"><a href="#array-merge" class="headerlink" title="array_merge"></a>array_merge</h3><p>合并多个数组, 相同键的值会覆盖.</p>
-<h3 id="array-multisort"><a href="#array-multisort" class="headerlink" title="array_multisort"></a>array_multisort</h3><p>可以用来一次对多个数组进行排序，或者根据某一维或多维对多维数组进行排序。 </p>
-<h3 id="array-pad"><a href="#array-pad" class="headerlink" title="*array_pad"></a>*array_pad</h3><p>  返回 array 的一个拷贝，并用 value 将其填补到  size 指定的长度。如果  size 为正，则填补到数组的右侧，如果为负则从左侧开始填补。如果 size 的绝对值小于或等于  array 数组的长度则没有任何填补。有可能一次最多填补 1048576 个单元。 </p>
-<h3 id="array-product"><a href="#array-product" class="headerlink" title="array_product"></a>array_product</h3><p>计算数组中所有值得乘积</p>
-<h3 id="array-rand"><a href="#array-rand" class="headerlink" title="array_rand"></a>array_rand</h3><p>从数组中随机取出一个或多个单元</p>
-<h3 id="array-reduce"><a href="#array-reduce" class="headerlink" title="array_reduce"></a>array_reduce</h3><p>将回调函数    <code>callback</code> <strong>迭代</strong>地作用到    <code>array</code> 数组中的每一个单元中，从而将数组简化为单一的值。 </p>
-<h3 id="array-replace-recursive"><a href="#array-replace-recursive" class="headerlink" title="array_replace_recursive"></a>array_replace_recursive</h3><p>使用后面数组元素的值替换数组 <code>array1</code> 的值。   如果一个键存在于第一个数组同时也存在于第二个数组，它的值将被第二个数组中的值替换。   如果一个键存在于第二个数组，但是不存在于第一个数组，则会在第一个数组中创建这个元素。   如果一个键仅存在于第一个数组，它将保持不变。  如果传递了多个替换数组，它们将被按顺序依次处理，后面的数组将覆盖之前的值。  是递归的：它将遍历数组并将相同的处理应用到数组的内部值。 </p>
-<h3 id="array-replace"><a href="#array-replace" class="headerlink" title="array_replace"></a>array_replace</h3><p>与array_replace_recursive的区别就是他是非递归的. </p>
-<h3 id="array-reverse"><a href="#array-reverse" class="headerlink" title="array_reverse"></a>array_reverse</h3><p>返回单元顺序相反的数组</p>
-<h3 id="array-search"><a href="#array-search" class="headerlink" title="array_search"></a>array_search</h3><p>在数组中搜索给定的值，如果成功则返回首个相应的键名，如果失败则返回false。</p>
-<h3 id="in-array"><a href="#in-array" class="headerlink" title="in_array"></a>in_array</h3><p>在数组中搜索给定的值，如果成功则返回true，如果失败则返回false。</p>
-<h3 id="array-slice"><a href="#array-slice" class="headerlink" title="array_slice"></a>array_slice</h3><p>从数组中取出一段. </p>
-<pre class="language-php" data-language="php"><code class="language-php"><span class="token variable">$foo</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">,</span><span class="token number">7</span><span class="token punctuation">,</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token function">array_slice</span><span class="token punctuation">(</span><span class="token function">array_reverse</span><span class="token punctuation">(</span><span class="token variable">$foo</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-
-<h3 id="array-splice"><a href="#array-splice" class="headerlink" title="array_splice"></a>array_splice</h3><p>去掉数组中的某一部分, 并用其他值代替.</p>
-<h3 id="array-sum"><a href="#array-sum" class="headerlink" title="array_sum"></a>array_sum</h3><p>对数组中所有值求和</p>
-<h3 id="array-unique"><a href="#array-unique" class="headerlink" title="array_unique"></a>array_unique</h3><p>移除数组中重复的值, 返回过滤后的数组.</p>
-<h3 id="array-values"><a href="#array-values" class="headerlink" title="array_values"></a>array_values</h3><p>返回数组的值并建立数字索引.</p>
-<h3 id="array-walk-recursive"><a href="#array-walk-recursive" class="headerlink" title="array_walk_recursive"></a>array_walk_recursive</h3><p>对数组中的每个成员<strong>递归</strong>地应用自定义函数, 函数默认传入两个参数, 值 和 键.</p>
-<h3 id="array-walk"><a href="#array-walk" class="headerlink" title="array_walk"></a>array_walk</h3><p>同array_walk_recursive, 但是不递归.</p>
-<h3 id="array"><a href="#array" class="headerlink" title="array"></a>array</h3><p>新建一个数组.</p>
-<h3 id="compact"><a href="#compact" class="headerlink" title="compact"></a>compact</h3><p>新建一个数组, 包括变量名和他们的值.</p>
-<h3 id="extract"><a href="#extract" class="headerlink" title="extract"></a>extract</h3><p>它的作用和 <code>compact</code> 刚好相反.</p>
-<h3 id="count"><a href="#count" class="headerlink" title="count"></a>count</h3><p>计算数组中的单元数目, 或对象中的属性个数. sizeof 是 count 的别名.</p>
-<h3 id="list"><a href="#list" class="headerlink" title="list"></a>list</h3><p>把数组中的值赋给一组变量. 注意: PHP5中, <code>list()</code>从最右边的参数开始赋值; PHP7中, <code>list()</code>从最左边的参数开始赋值. 通常而言, 不建议依赖于操作的顺序, 在未来可能会再次发生改变.</p>
-<h3 id="range"><a href="#range" class="headerlink" title="range"></a>range</h3><p>创建一个包含指定范围单元的数组.</p>
-<h3 id="shuffle"><a href="#shuffle" class="headerlink" title="shuffle"></a>shuffle</h3><p>打乱数组</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/%E7%B1%BB%E5%9E%8B%E9%99%90%E5%AE%9A/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E5%9F%BA%E7%A1%80/%E7%B1%BB%E5%9E%8B%E9%99%90%E5%AE%9A/" class="post-title-link" itemprop="url">类型限定</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:10:00" itemprop="dateCreated datePublished" datetime="2020-12-11T23:10:00+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:18:01" itemprop="dateModified" datetime="2021-03-24T07:18:01+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>示例:</p>
-<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function">onRequest</span><span class="token punctuation">(</span><span class="token operator">?</span><span class="token keyword type-hint">string</span> <span class="token variable">$action</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token operator">?</span><span class="token keyword return-type">bool</span>
-<span class="token punctuation">&#123;</span>
-    <span class="token keyword">return</span> <span class="token keyword static-context">parent</span><span class="token operator">::</span><span class="token function">onRequest</span><span class="token punctuation">(</span><span class="token variable">$action</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// TODO: Change the autogenerated stub</span>
-<span class="token punctuation">&#125;</span></code></pre>
-
-<p>已上示例表示传入的参数$action可以是null或者字符串,不能是其他类型。同理：返回值只能是bool或者null。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E5%92%8C%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E6%BA%90%E7%A0%81/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E5%92%8C%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80/" class="post-title-link" itemprop="url">逻辑地址和物理地址</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:05:09" itemprop="dateCreated datePublished" datetime="2020-12-11T23:05:09+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:19:55" itemprop="dateModified" datetime="2021-03-24T07:19:55+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>我们通过&amp;查看到的地址都是逻辑地址。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E6%BA%90%E7%A0%81/%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" class="post-title-link" itemprop="url">生命周期</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:04:42" itemprop="dateCreated datePublished" datetime="2020-12-11T23:04:42+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:20:11" itemprop="dateModified" datetime="2021-03-24T07:20:11+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="CLI模式"><a href="#CLI模式" class="headerlink" title="CLI模式"></a>CLI模式</h2><p>CLI模式也就是命令行模式，</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E6%BA%90%E7%A0%81/%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/" class="post-title-link" itemprop="url">目录结构</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 23:04:24" itemprop="dateCreated datePublished" datetime="2020-12-11T23:04:24+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:19:57" itemprop="dateModified" datetime="2021-03-24T07:19:57+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>zend_types.h中定义了所有变量的数据类型。</p>
-<p>zend_hash.h中定义了数组相关的api。</p>
-<p>zend_alloc_sizes.h 和 zend_alloc.c 和 zend_alloc.h 这三个文件是和内存相关。</p>
-<p>zend_alloc_sizes.h中重点掌握ZEND_MM_BINS_INFO这个宏定义。</p>
-<p>zend_alloc.h中重点掌握以下函数：</p>
-<pre class="language-c" data-language="c"><code class="language-c">ZEND_API <span class="token keyword">char</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">zend_strndup</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>s<span class="token punctuation">,</span> <span class="token class-name">size_t</span> length<span class="token punctuation">)</span> ZEND_ATTRIBUTE_MALLOC<span class="token punctuation">;</span>
-
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_emalloc</span><span class="token punctuation">(</span><span class="token class-name">size_t</span> size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span> ZEND_ATTRIBUTE_MALLOC <span class="token function">ZEND_ATTRIBUTE_ALLOC_SIZE</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_safe_emalloc</span><span class="token punctuation">(</span><span class="token class-name">size_t</span> nmemb<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size<span class="token punctuation">,</span> <span class="token class-name">size_t</span> offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span> ZEND_ATTRIBUTE_MALLOC<span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_safe_malloc</span><span class="token punctuation">(</span><span class="token class-name">size_t</span> nmemb<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size<span class="token punctuation">,</span> <span class="token class-name">size_t</span> offset<span class="token punctuation">)</span> ZEND_ATTRIBUTE_MALLOC<span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span>   ZEND_FASTCALL <span class="token function">_efree</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span><span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_ecalloc</span><span class="token punctuation">(</span><span class="token class-name">size_t</span> nmemb<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span> ZEND_ATTRIBUTE_MALLOC <span class="token function">ZEND_ATTRIBUTE_ALLOC_SIZE2</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_erealloc</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>ptr<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span> <span class="token function">ZEND_ATTRIBUTE_ALLOC_SIZE</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_erealloc2</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>ptr<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size<span class="token punctuation">,</span> <span class="token class-name">size_t</span> copy_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span> <span class="token function">ZEND_ATTRIBUTE_ALLOC_SIZE</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_safe_erealloc</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>ptr<span class="token punctuation">,</span> <span class="token class-name">size_t</span> nmemb<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size<span class="token punctuation">,</span> <span class="token class-name">size_t</span> offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span><span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">void</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_safe_realloc</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>ptr<span class="token punctuation">,</span> <span class="token class-name">size_t</span> nmemb<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size<span class="token punctuation">,</span> <span class="token class-name">size_t</span> offset<span class="token punctuation">)</span><span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">char</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_estrdup</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span> ZEND_ATTRIBUTE_MALLOC<span class="token punctuation">;</span>
-ZEND_API <span class="token keyword">char</span><span class="token operator">*</span>  ZEND_FASTCALL <span class="token function">_estrndup</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>s<span class="token punctuation">,</span> <span class="token class-name">size_t</span> length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span> ZEND_ATTRIBUTE_MALLOC<span class="token punctuation">;</span>
-ZEND_API <span class="token class-name">size_t</span> ZEND_FASTCALL <span class="token function">_zend_mem_block_size</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-
-<p>zend_alloc.c中重点掌握AG这个宏：</p>
-<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_alloc_globals</span> <span class="token punctuation">&#123;</span>
-        zend_mm_heap <span class="token operator">*</span>mm_heap<span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span> zend_alloc_globals<span class="token punctuation">;</span>
-
-<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifdef</span> <span class="token expression">ZTS</span></span>
-<span class="token keyword">static</span> <span class="token keyword">int</span> alloc_globals_id<span class="token punctuation">;</span>
-<span class="token macro property"><span class="token directive-hash">#</span> <span class="token directive keyword">define</span> <span class="token macro-name function">AG</span><span class="token expression"><span class="token punctuation">(</span>v<span class="token punctuation">)</span> <span class="token function">ZEND_TSRMG</span><span class="token punctuation">(</span>alloc_globals_id<span class="token punctuation">,</span> zend_alloc_globals <span class="token operator">*</span><span class="token punctuation">,</span> v<span class="token punctuation">)</span></span></span>
-<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">else</span></span>
-<span class="token macro property"><span class="token directive-hash">#</span> <span class="token directive keyword">define</span> <span class="token macro-name function">AG</span><span class="token expression"><span class="token punctuation">(</span>v<span class="token punctuation">)</span> <span class="token punctuation">(</span>alloc_globals<span class="token punctuation">.</span>v<span class="token punctuation">)</span></span></span>
-<span class="token keyword">static</span> zend_alloc_globals alloc_globals<span class="token punctuation">;</span>
-<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span></code></pre>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/ReflectionClass%E5%92%8CReflectionMethod/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E5%9F%BA%E7%A1%80/ReflectionClass%E5%92%8CReflectionMethod/" class="post-title-link" itemprop="url">ReflectionClass和ReflectionMethod</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 22:57:28" itemprop="dateCreated datePublished" datetime="2020-12-11T22:57:28+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:19:06" itemprop="dateModified" datetime="2021-03-24T07:19:06+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/class.reflectionclass.php">ReflectionClass</a><br><a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/class.reflectionmethod.php">ReflectionMethod</a></p>
-<p><strong>ReflectionClass</strong> 类报告了一个类的有关信息。</p>
-<p><strong>ReflectionMethod</strong> 类报告了一个方法的有关信息。</p>
-<p>实例化ReflectionMethod的时候需要传入对象和方法两个参数。</p>
-<p>通常ReflectionMethod可以作为参数传递到<strong>ReflectionClass</strong>的<a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/reflectionclass.getmethod.php">getMethod</a>。来限制获取的方法类别。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block ljk-index-post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/PHP%E4%B8%AD%E9%A2%84%E5%AE%9A%E4%B9%89%E7%9A%846%E4%B8%AA%E6%8E%A5%E5%8F%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
-      <meta itemprop="name" content="像方便面一样的男子">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="LJKのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/PHP/%E5%9F%BA%E7%A1%80/PHP%E4%B8%AD%E9%A2%84%E5%AE%9A%E4%B9%89%E7%9A%846%E4%B8%AA%E6%8E%A5%E5%8F%A3/" class="post-title-link" itemprop="url">PHP中预定义的6个接口</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-12-11 22:56:09" itemprop="dateCreated datePublished" datetime="2020-12-11T22:56:09+08:00">2020-12-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:18:59" itemprop="dateModified" datetime="2021-03-24T07:18:59+08:00">2021-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/PHP/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ol>
-<li>Traversable 遍历接口</li>
-<li>Iterator 迭代器接口</li>
-<li>IteratorAggregate 聚合式迭代器接口</li>
-<li>ArrayAccess 数组式访问接口</li>
-<li>Serializable 序列化接口</li>
-<li>Closure</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
 
     
 
@@ -2276,8 +1139,1318 @@ Value of *ip variable: 20</code></pre>
 
 
 
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/C/%E6%9F%94%E6%80%A7%E6%95%B0%E7%BB%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/C/%E6%9F%94%E6%80%A7%E6%95%B0%E7%BB%84/" class="post-title-link" itemprop="url">柔性数组</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:52:12" itemprop="dateCreated datePublished" datetime="2020-12-11T22:52:12+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:17:04" itemprop="dateModified" datetime="2021-03-24T07:17:04+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/C/%E7%BB%93%E6%9E%84%E4%BD%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/C/%E7%BB%93%E6%9E%84%E4%BD%93/" class="post-title-link" itemprop="url">结构体</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:51:51" itemprop="dateCreated datePublished" datetime="2020-12-11T22:51:51+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:17:00" itemprop="dateModified" datetime="2021-03-24T07:17:00+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>结构体是不同类型的变量的集合, 与数组相反, 数组是相同类型变量的集合</p>
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>示例: 定义一个名为house的结构体,有三种方式:</p>
+<p>定义结构体和定义变量分开</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token keyword">struct</span> <span class="token class-name">house</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">char</span> location<span class="token punctuation">[</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> area<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> price<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">house</span> kangqiao<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>定义结构体同时定义变量</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token keyword">struct</span> <span class="token class-name">house</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">char</span> location<span class="token punctuation">[</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> area<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> price<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>kangqiao<span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>只为一个变量定义结构体</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">char</span> location<span class="token punctuation">[</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> area<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> price<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>kangqiao<span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="初始化和引用"><a href="#初始化和引用" class="headerlink" title="初始化和引用"></a>初始化和引用</h2><pre class="language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token keyword">struct</span> <span class="token class-name">house</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">char</span> location<span class="token punctuation">[</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">float</span> area<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> price<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">house</span> kangqiao <span class="token operator">=</span> <span class="token punctuation">&#123;</span><span class="token string">'昌邑'</span><span class="token punctuation">,</span> <span class="token number">132.0</span><span class="token punctuation">,</span> <span class="token number">5000</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>		# 位置、面积、价格
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="结构体指针"><a href="#结构体指针" class="headerlink" title="结构体指针"></a>结构体指针</h2><h2 id="结构体的内存对齐方式"><a href="#结构体的内存对齐方式" class="headerlink" title="结构体的内存对齐方式"></a><a target="_blank" rel="noopener" href="https://blog.csdn.net/abc_xixi111/article/details/80262753">结构体的内存对齐方式</a></h2><p>对齐规则</p>
+<ol>
+<li>第一个成员在结构体变量偏移量为0 的地址处。</li>
+<li>其他成员变量要对齐到某个数字（对齐数）的整数倍的地址处。对齐数 = 编译器默认的一个对齐数与该成员大小中的较小值。vs中默认值是8 Linux默认值为4.</li>
+<li>结构体总大小为最大对齐数的整数倍。（每个成员变量都有自己的对齐数）</li>
+<li>如果嵌套结构体，嵌套的结构体对齐到自己的最大对齐数的整数倍处，结构体的整体大小就是所有最大对齐数（包含嵌套结构体的对齐数）的整数倍。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/C/%E5%85%B1%E7%94%A8%E4%BD%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/C/%E5%85%B1%E7%94%A8%E4%BD%93/" class="post-title-link" itemprop="url">共用体</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:51:37" itemprop="dateCreated datePublished" datetime="2020-12-11T22:51:37+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:16:57" itemprop="dateModified" datetime="2021-03-24T07:16:57+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>共用体也被称为联合体; 使用union关键字定义;</p>
+<ol>
+<li>union中可以定义多个成员，union的大小由最大的成员的大小决定。 </li>
+<li>union成员共享同一块大小的内存，一次只能使用其中的一个成员。 </li>
+<li>对某一个成员赋值，会覆盖其他成员的值（也不奇怪，因为他们共享一块内存。<font color=red>但前提是成员所占字节数相同，当成员所占字节数不同时只会覆盖相应字节上的值，比如对char成员赋值就不会把整个int成员覆盖掉，因为char只占一个字节，而int占四个字节</font>）</li>
+<li>联合体union的存放顺序是所有成员都从低地址开始存放的。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/vim/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/vim/" class="post-title-link" itemprop="url">vim</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:40:56" itemprop="dateCreated datePublished" datetime="2020-12-11T22:40:56+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-25 22:46:10" itemprop="dateModified" datetime="2021-03-25T22:46:10+08:00">2021-03-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">文本处理</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>vim有三种模式：</p>
+<pre class="language-none"><code class="language-none">- 命令模式 或 普通模式
+- 插入模式 或 编辑模式
+- 扩展命令模式 或 命令行模式 或 末行模式</code></pre>
+
+<h3 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h3><h4 id="光标跳转"><a href="#光标跳转" class="headerlink" title="光标跳转"></a>光标跳转</h4><h5 id="字符间跳转"><a href="#字符间跳转" class="headerlink" title="字符间跳转"></a>字符间跳转</h5><pre class="language-bash" data-language="bash"><code class="language-bash">j      <span class="token comment"># 下</span>
+k      <span class="token comment"># 上</span>
+h      <span class="token comment"># 左</span>
+l      <span class="token comment"># 右</span></code></pre>
+
+<h5 id="单词间跳转"><a href="#单词间跳转" class="headerlink" title="单词间跳转"></a>单词间跳转</h5><pre class="language-bash" data-language="bash"><code class="language-bash">w      <span class="token comment"># 定位下一个单词</span></code></pre>
+
+<h5 id="当前页跳转"><a href="#当前页跳转" class="headerlink" title="当前页跳转"></a>当前页跳转</h5><pre class="language-bash" data-language="bash"><code class="language-bash">H      <span class="token comment"># 定位页首</span>
+M      <span class="token comment"># 定位中间行</span>
+L      <span class="token comment"># 定位页末</span>
+zt     <span class="token comment"># 滚动屏幕, 使当前行置顶 top</span>
+zz     <span class="token comment"># 滚动屏幕, 使当前行置中</span>
+zb     <span class="token comment"># 滚动屏幕, 使当前行置底 bottom</span></code></pre>
+
+<h5 id="行首行尾跳转"><a href="#行首行尾跳转" class="headerlink" title="行首行尾跳转"></a>行首行尾跳转</h5><pre class="language-bash" data-language="bash"><code class="language-bash">^      <span class="token comment"># 定位行首第一个非空字符</span>
+<span class="token number">0</span>      <span class="token comment"># 定位行尾</span>
+$      <span class="token comment"># 定位行首</span></code></pre>
+
+<h5 id="行间移动"><a href="#行间移动" class="headerlink" title="行间移动"></a>行间移动</h5><pre class="language-bash" data-language="bash"><code class="language-bash">gg     <span class="token comment"># 定位文首</span>
+G      <span class="token comment"># 定位文末</span>
+nG     <span class="token comment"># 定位指定行行首, 例如定位第5行: `5G`</span></code></pre>
+
+<h5 id="句间和段落间移动"><a href="#句间和段落间移动" class="headerlink" title="句间和段落间移动"></a>句间和段落间移动</h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">)</span>      <span class="token comment"># 下一句</span>
+<span class="token punctuation">(</span>      <span class="token comment"># 上一句</span>
+<span class="token punctuation">&#125;</span>      <span class="token comment"># 下一段</span>
+<span class="token punctuation">&#123;</span>      <span class="token comment"># 上一段</span></code></pre>
+
+<h5 id="翻屏操作"><a href="#翻屏操作" class="headerlink" title="翻屏操作"></a>翻屏操作</h5><pre class="language-bash" data-language="bash"><code class="language-bash">ctrl+f     <span class="token comment"># 向后翻一屏</span>
+ctrl+d     <span class="token comment"># 向后翻半屏</span>
+ctrl+b     <span class="token comment"># 向前翻一屏</span>
+ctrl+u     <span class="token comment"># 向前翻半屏</span></code></pre>
+
+<h4 id="字符编辑"><a href="#字符编辑" class="headerlink" title="字符编辑"></a>字符编辑</h4><pre class="language-bash" data-language="bash"><code class="language-bash">x     <span class="token comment"># 剪切光标处字符</span>
+p     <span class="token comment"># 黏贴</span>
+~     <span class="token comment"># 转换大小写, 然后光标向后移一位</span>
+J     <span class="token comment"># 删除当前行前后的换行符</span></code></pre>
+
+<h4 id="替换-replace"><a href="#替换-replace" class="headerlink" title="替换 replace"></a>替换 replace</h4><pre class="language-bash" data-language="bash"><code class="language-bash">r    <span class="token comment"># 替换光标所在处的一个字符, 按下r,然后再按替换后的字符</span>
+R    <span class="token comment"># 切换成REPLACE模式, ESC回到命令模式, 按下r, 然后再输入替换后的内容</span></code></pre>
+
+<h4 id="删除-delete"><a href="#删除-delete" class="headerlink" title="删除 delete"></a>删除 delete</h4><pre class="language-bash" data-language="bash"><code class="language-bash">d      <span class="token comment"># 删除, 可结合光标跳转, 实现范围删除</span>
+d$     <span class="token comment"># 删除到行尾</span>
+d0     <span class="token comment"># 删除到行首</span>
+d^     <span class="token comment"># 删除到非空行首</span>
+<span class="token function">dd</span>     <span class="token comment"># 删除当前行</span>
+<span class="token comment">#dd    # 删除多行, 从当前行开始, 删除#行</span>
+D      <span class="token comment"># 删除到行尾, 等同于d$</span></code></pre>
+
+<h4 id="复制-yank"><a href="#复制-yank" class="headerlink" title="复制 yank"></a>复制 yank</h4><pre class="language-bash" data-language="bash"><code class="language-bash">y 	<span class="token comment"># 复制, 行为相似于d命令</span>
+Y 	<span class="token comment"># 复制整行</span></code></pre>
+
+<h4 id="粘贴-paste"><a href="#粘贴-paste" class="headerlink" title="粘贴 paste"></a>粘贴 paste</h4><pre class="language-bash" data-language="bash"><code class="language-bash">p 	<span class="token comment"># 整行, 则粘贴到下一行, 否则粘贴到光标后</span>
+P 	<span class="token comment"># 整行, 则粘贴到上一行, 否则粘贴到光标后</span></code></pre>
+
+
+<h4 id="命令模式-切换到-插入模式"><a href="#命令模式-切换到-插入模式" class="headerlink" title="命令模式 切换到 插入模式"></a>命令模式 切换到 插入模式</h4><p>以下快捷键, 进入插入模式</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">i    <span class="token comment"># 不动</span>
+I    <span class="token comment"># 定位行首</span>
+a    <span class="token comment"># 向后移一位</span>
+A    <span class="token comment"># 定位行尾</span>
+o    <span class="token comment"># 定位下一行行首, 并开辟新行</span>
+O    <span class="token comment"># 定位上一行行首, 并开辟新行</span></code></pre>
+
+<h3 id="插入模式"><a href="#插入模式" class="headerlink" title="插入模式"></a>插入模式</h3><p>从光标前输入数据</p>
+<h3 id="末行模式"><a href="#末行模式" class="headerlink" title="末行模式"></a>末行模式</h3><pre class="language-bash" data-language="bash"><code class="language-bash">:wq         <span class="token comment"># 存盘并退出</span>
+:q<span class="token operator">!</span>         <span class="token comment"># 不存盘强制退出</span>
+:r <span class="token function">file</span>     <span class="token comment"># 将file中的内容写入到当前文件, 例如\`:r a.log\`就把a.log中的内容写入到当前文件</span>
+:w <span class="token function">file</span>     <span class="token comment"># 将当前文件内容写入file文件, 如果file已存在, 需要\`:w! file\`强制覆盖文件</span>
+:<span class="token operator">!</span>command   <span class="token comment"># 不退出文件,执行命令</span>
+:r<span class="token operator">!</span>command  <span class="token comment"># 将执行命令的输出写入到当前文件</span></code></pre>
+
+
+<p>地址定界：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">n 		<span class="token comment"># 第几行, 例如2表示第2行</span>
+n,n 	<span class="token comment"># 第#行到到第#行, 例如 2,5 表示2到5行</span>
+n,+n 	<span class="token comment"># 第#行加#行, 例如 2,+3 表示2到5行</span>
+<span class="token builtin class-name">.</span> 		<span class="token comment"># 当前行</span>
+$ 		<span class="token comment">#　最后一行, .,$-1 表示当前行到倒数第二行</span>
+% 		<span class="token comment"># 全文, 相当于1、$</span>
+
+/pattern/ 				<span class="token comment"># 从当前行开始,直到第一次匹配到的行</span>
+/pattern1/,/pattern2/ 	<span class="token comment"># 从pattern1第一次匹配到行, 到pattern2第一次匹配到的行</span>
+n,/pattern/ 			<span class="token comment"># 从指定行开始, 到第一次pattern匹配到行</span>
+/pattern/,$ 			<span class="token comment"># 从pattern第一次匹配到的行, 到最后一行</span></code></pre>
+
+<p>地址定界后跟一个编辑命令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">d 		  <span class="token comment"># 删除</span>
+y 		  <span class="token comment"># 复制</span>
+w <span class="token function">file</span> 	  <span class="token comment"># 将范围内的行另存到file文件中</span>
+r <span class="token function">file</span> 	  <span class="token comment"># 在指定位置插入file文件中的所有内容</span></code></pre>
+
+<p>查找并替换：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">s/要查找的内容/替换为的内容/修饰符		<span class="token comment"># 当前行查找替换</span>
+%s/要查找的内容/替换为的内容/修饰符	<span class="token comment"># 全文查找替换</span>
+
+要查找的内容可使用正则
+替换为的内容不能使用正则，但可以使用<span class="token punctuation">\</span><span class="token number">1</span>, <span class="token punctuation">\</span><span class="token number">2</span>, <span class="token punctuation">..</span>.等后向引用符号；还可以使用“<span class="token operator">&amp;</span>”引用前面查找时查找到的整个内容
+修饰符：
+ i 	忽略大小写
+ g 	全局替换
+ gc 	全局替换, 每次替换前询问</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">u 		 <span class="token comment"># 撤销, 相当于windows中的ctrl+z</span>
+<span class="token comment">#u 		 # 撤销多步</span>
+U 		 <span class="token comment"># 撤销此行的所有操作</span>
+ctrl+r 	 <span class="token comment"># 取消撤销, 相当于windows中的ctrl+y</span></code></pre>
+
+<h4 id="高级用法"><a href="#高级用法" class="headerlink" title="高级用法"></a>高级用法</h4><p>示例：粘贴”wang”100次 </p>
+<pre class="language-none"><code class="language-none">100iwang [ESC]</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">di"      <span class="token comment"># 光标在” “之间，则删除” “之间的内容</span>
+yi<span class="token punctuation">(</span>      <span class="token comment"># 光标在()之间，则复制()之间的内容</span>
+vi<span class="token punctuation">[</span>      <span class="token comment"># 光标在[]之间，则选中[]之间的内容</span>
+dtx      <span class="token comment"># 删除字符直到遇见光标之后的第一个 x 字符</span>
+ytx      <span class="token comment"># 复制字符直到遇见光标之后的第一个 x 字符</span></code></pre>
+
+<h4 id="定制vim的工作特性"><a href="#定制vim的工作特性" class="headerlink" title="定制vim的工作特性"></a>定制vim的工作特性</h4><p>配置文件：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/etc/vimrc 	    <span class="token comment"># 全局</span>
+/.vimrc 		<span class="token comment"># 个人</span></code></pre>
+
+<pre class="language-none"><code class="language-none">set nu
+set nocompatible
+set showmode
+set showcmd
+set encoding&#x3D;utf-8
+set t_Co&#x3D;256
+
+&quot; 缩进
+set autoindent
+set tabstop&#x3D;4
+
+&quot; 外观
+set wrap
+set linebreak
+set wrapmargin&#x3D;2
+set showmatch
+set hlsearch
+set ignorecase
+set smartcase
+
+&quot; 编辑
+set autoread
+set wildmenu
+
+&quot; 插件
+autocmd FileType php set omnifunc&#x3D;phpcomplete#CompletePHP
+
+set tags&#x3D;&#x2F;data&#x2F;wwwroot&#x2F;php-7.1.32&#x2F;tags</code></pre>
+
+<h3 id="可视化模式"><a href="#可视化模式" class="headerlink" title="可视化模式"></a>可视化模式</h3><p>进入可视化模式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">v</span>           <span class="token comment"># 面向字符</span>
+V           <span class="token comment"># 面向整行</span>
+ctrl + <span class="token function">v</span>    <span class="token comment"># 面向块(列)</span></code></pre>
+
+<p>选中的文字可以被删除、复制、变更、过滤、搜索、替换等</p>
+<p>示例：在文件每一行行首插入 # 然后再删除</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">gg
+ctrl + <span class="token function">v</span>
+G
+I
+输入<span class="token comment">#</span>
+ESC退出 插入<span class="token comment">#成功</span>
+ctrl + <span class="token function">v</span>
+d 删除成功
+ESC退出</code></pre>
+
+<h3 id="vim总结"><a href="#vim总结" class="headerlink" title="vim总结"></a>vim总结</h3><p><img data-src="https://img.lujinkai.cn/blog/ljk/1596528940424.png"><br><img data-src="https://img.lujinkai.cn/blog/ljk/1596528977017.png"><br><img data-src="https://img.lujinkai.cn/blog/ljk/1596153844306.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/Socket/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/Socket/" class="post-title-link" itemprop="url">Socket</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:39:22" itemprop="dateCreated datePublished" datetime="2020-12-11T22:39:22+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-26 23:34:37" itemprop="dateModified" datetime="2021-03-26T23:34:37+08:00">2021-03-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>学习目标：</p>
+<ul>
+<li>了解<code>SOCKET</code>的基本操作如<code>accept/connect</code>、<code>send/recv</code>、<code>close</code>、<code>listen</code>、<code>bind</code></li>
+<li>了解<code>SOCKET</code>的接收缓存区、发送缓存区、阻塞/非阻塞、超时等概念</li>
+</ul>
+<p>在计算机通信领域, socket被翻译为”<font color=red>套接字</font>“，是计算机之间进行通信的一种约定或者一种方式。</p>
+<p>声明: 在windows和linux下socket是有差异的, 本文以linux下为准,忽略windows.</p>
+<h2 id="“套接字”有哪些类型呢？"><a href="#“套接字”有哪些类型呢？" class="headerlink" title="“套接字”有哪些类型呢？"></a>“套接字”有哪些类型呢？</h2><p>这个世界上有很多种套接字（<a target="_blank" rel="noopener" href="http://c.biancheng.net/socket/">socket</a>），比如 DARPA Internet 地址（Internet 套接字）、本地节点的路径名（Unix套接字）、CCITT X.25地址（X.25 套接字）等。但本教程只讲第一种套接字——Internet 套接字，它是最具代表性的，也是最经典最常用的。以后我们提及套接字，指的都是 Internet 套接字。</p>
+<p>根据数据的传输方式，可以将 Internet 套接字分成两种类型。通过 socket() 函数创建连接时，必须告诉它使用哪种数据传输方式。</p>
+<blockquote>
+<p>​    Internet 套接字其实还有很多其它数据传输方式，但是我可不想吓到你，本教程只讲常用的两种</p>
+</blockquote>
+<h3 id="流格式套接字-SOCK-STREAM"><a href="#流格式套接字-SOCK-STREAM" class="headerlink" title="流格式套接字(SOCK_STREAM)"></a>流格式套接字(SOCK_STREAM)</h3><p>流格式套接字（Stream Sockets）也叫“面向连接的套接字”，在代码中使用 SOCK_STREAM 表示。</p>
+<p>它使用TCP协议来确保数据的正确性，使用IP来控制数据如何从源头到达目的地，也就是常说的“路由”。</p>
+<h3 id="数据报格式套接字-SOCK-DGAM"><a href="#数据报格式套接字-SOCK-DGAM" class="headerlink" title="数据报格式套接字(SOCK_DGAM)"></a>数据报格式套接字(SOCK_DGAM)</h3><p>数据报格式套接字（Datagram Sockets）也叫“无连接的套接字”，在代码中使用 SOCK_DGRAM 表示。</p>
+<p>数据报套接字也使用 IP 协议作路由，但是它不使用 TCP 协议，而是使用 UDP 协议。</p>
+<h2 id="OSI网络七层模型"><a href="#OSI网络七层模型" class="headerlink" title="OSI网络七层模型"></a>OSI网络七层模型</h2><p>OSI 模型把网络通信的工作分为 7 层，从下到上分别是物理层、数据链路层、网络层、传输层、会话层、表示层和应用层。</p>
+<p>OSI 只是存在于概念和理论上的一种模型，它的缺点是分层太多，增加了网络工作的复杂性，所以没有大规模应用。后来人们对 OSI 进行了简化，合并了一些层，最终只保留了 4 层，从下到上分别是<font color=red>接口层、网络层、传输层和应用层</font>，这就是大名鼎鼎的 <font color=red>TCP/IP 模型</font>。</p>
+<p><font color=purple>这个网络模型究竟是干什么呢？简而言之就是进行数据封装的。</font></p>
+<p>我们平常使用的程序（或者说软件）一般都是通过应用层来访问网络的，程序产生的数据会一层一层地往下传输，直到最后的网络接口层，就通过网线发送到互联网上去了。数据每往下走一层，就会被这一层的协议增加一层包装，等到发送到互联网上时，已经比原始数据多了四层包装。整个数据封装的过程就像俄罗斯套娃。</p>
+<p>当另一台计算机接收到数据包时，会从网络接口层再一层一层往上传输，每传输一层就拆开一层包装，直到最后的应用层，就得到了最原始的数据，这才是程序要使用的数据。</p>
+<p>给数据加包装的过程，实际上就是在数据的头部增加一个标志（一个数据块），表示数据经过了这一层，我已经处理过了。给数据拆包装的过程正好相反，就是去掉数据头部的标志，让它逐渐现出原形。</p>
+<p>我们所说的 <a target="_blank" rel="noopener" href="http://c.biancheng.net/socket/">socket</a> 编程，是站在传输层的基础上，所以可以使用 TCP/UDP 协议，但是不能干「访问网页」这样的事情，因为访问网页所需要的 http 协议位于应用层。</p>
+<p>两台计算机进行通信时，必须遵守以下原则：</p>
+<ul>
+<li>必须是同一层次进行通信，比如，A 计算机的应用层和 B 计算机的传输层就不能通信，因为它们不在一个层次，数据的拆包会遇到问题。</li>
+<li>每一层的功能都必须相同，也就是拥有完全相同的网络模型。如果网络模型都不同，那不就乱套了，谁都不认识谁。</li>
+<li>数据只能逐层传输，不能跃层。</li>
+<li>每一层可以使用下层提供的服务，并向上层提供服务。</li>
+</ul>
+<h2 id="TCP-IP协议族"><a href="#TCP-IP协议族" class="headerlink" title="TCP/IP协议族"></a><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/2133.html">TCP/IP协议族</a></h2><p><img data-src="http://c.biancheng.net/uploads/allimg/190126/1-1Z126104435N0.gif"></p>
+<h2 id="IP、MAC和端口号——网络通信中确认身份信息的三要素"><a href="#IP、MAC和端口号——网络通信中确认身份信息的三要素" class="headerlink" title="IP、MAC和端口号——网络通信中确认身份信息的三要素"></a><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/2132.html">IP、MAC和端口号——网络通信中确认身份信息的三要素</a></h2><p>对于目前广泛使用 IPv4 地址，它的资源是非常有限的，一台计算机一个 IP 地址是不现实的，往往是一个局域网才拥有一个 IP 地址。换句话说，IP 地址只能定位到一个局域网，无法定位到具体的一台计算机。</p>
+<p>其实，真正能唯一标识一台计算机的是 MAC 地址，每个网卡的 MAC 地址在全世界都是独一无二的。计算机出厂时，MAC 地址已经被写死到网卡里面了（当然通过某些“奇巧淫技”也是可以修改的）。局域网中的路由器/交换机会记录每台计算机的 MAC 地址。</p>
+<blockquote>
+<p>MAC 地址是 Media Access Control Address 的缩写，直译为“媒体访问控制地址”，也称为局域网地址（LAN Address），以太网地址（Ethernet Address）或物理地址（Physical Address）。</p>
+</blockquote>
+<p>数据包中除了会附带对方的 IP 地址，还会附带对方的 MAC 地址，当数据包达到局域网以后，路由器/交换机会根据数据包中的 MAC 地址找到对应的计算机，然后把数据包转交给它，这样就完成了数据的传递。</p>
+<p>有了 IP 地址和 MAC 地址，虽然可以找到目标计算机，但仍然不能进行通信。为了区分不同的网络程序，计算机会为每个网络程序分配一个独一无二的端口号（Port Number），例如，Web 服务的端口号是 80，FTP 服务的端口号是 21，SMTP 服务的端口号是 25。</p>
+<p>端口（Port）是一个虚拟的、逻辑上的概念。可以将端口理解为一道门，数据通过这道门流入流出，每道门有不同的编号，就是端口号。如下图所示：</p>
+<p><img data-src="http://c.biancheng.net/uploads/allimg/190126/15060130Z-0.jpg"></p>
+<h2 id="Linux下的socket演示程序"><a href="#Linux下的socket演示程序" class="headerlink" title="Linux下的socket演示程序"></a><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/2128.html">Linux下的socket演示程序</a></h2><p>详细信息参考链接。</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token comment">//创建套接字</span>
+<span class="token keyword">int</span> serv_sock <span class="token operator">=</span> <span class="token function">socket</span><span class="token punctuation">(</span>AF_INET<span class="token punctuation">,</span> SOCK_STREAM<span class="token punctuation">,</span> IPPROTO_TCP<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>AF_INET：使用过IPv4地址</p>
+<p>SOCK_STREAM：设置套接字</p>
+<p>IPPROTO_TCP：使用TCP协议，这里也可以写0，SOCK_STREAM默认就是TCP</p>
+<h3 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h3><p>socket() 函数确定了套接字的各种属性，<font color=red>bind()</font> 函数让套接字与特定的IP地址和端口对应起来，这样客户端才能连接到该套接字。</p>
+<p><font color=red>listen()</font> 让套接字处于被动监听状态。所谓被动监听，是指套接字一直处于“睡眠”中，直到客户端发起请求才会被“唤醒”。</p>
+<p><font color=red>accept()</font> 函数用来接收客户端的请求。程序一旦执行到 accept() 就会被阻塞（暂停运行），直到客户端发起请求。</p>
+<p><font color=red>write()</font> 函数用来向套接字文件中写入数据，也就是向客户端发送数据。</p>
+<p>和普通文件一样，socket 在使用完毕后也要用 <font color=red>close()</font> 关闭。</p>
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><p><font color=red>connect()</font> 向服务器发起请求, 直到服务器传回数据后，connect() 才运行结束。</p>
+<p>通过 <font color=red>read()</font> 从套接字文件中读取数据。</p>
+<h2 id="socket-函数"><a href="#socket-函数" class="headerlink" title="socket() 函数"></a>socket() 函数</h2><pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">socket</span><span class="token punctuation">(</span><span class="token keyword">int</span> af<span class="token punctuation">,</span> <span class="token keyword">int</span> type<span class="token punctuation">,</span> <span class="token keyword">int</span> protocol<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>af 为地址族（Address Family），也就是 IP 地址类型，常用的有 AF_INET 和 AF_INET6。AF 是“Address Family”的简写，INET是“Inetnet”的简写。AF_INET 表示 IPv4 地址，例如 127.0.0.1；AF_INET6 表示 IPv6 地址，例如 1030::C9B4:FF12:48AA:1A2B。</p>
+<p>type 为数据传输方式/套接字类型，常用的有 SOCK_STREAM（流格式套接字/面向连接的套接字） 和 SOCK_DGRAM（数据报套接字/无连接的套接字）。</p>
+<p>protocol 表示传输协议，常用的有 IPPROTO_TCP 和 IPPTOTO_UDP，分别表示 TCP 传输协议和 UDP 传输协议。</p>
+<p>正如大家所想，一般情况下有了 af 和 type 两个参数就可以创建套接字了，操作系统会自动推演出协议类型，除非遇到这样的情况：有两种不同的协议支持同一种地址类型和数据传输类型。如果我们不指明使用哪种协议，操作系统是没办法自动推演的。</p>
+<p>满足 af 和 type 这两个条件的协议只有一种，可以将 protocol 的值设为 0，系统会自动推演出应该使用什么协议，如下所示：</p>
+<pre class="language-none"><code class="language-none">int tcp_socket &#x3D; socket(AF_INET, SOCK_STREAM, 0);  &#x2F;&#x2F;创建TCP套接字
+int udp_socket &#x3D; socket(AF_INET, SOCK_DGRAM, 0);  &#x2F;&#x2F;创建UDP套接字</code></pre>
+
+<h2 id="bind-和-connect-函数"><a href="#bind-和-connect-函数" class="headerlink" title="bind() 和 connect() 函数"></a>bind() 和 connect() 函数</h2><p><a target="_blank" rel="noopener" href="http://c.biancheng.net/socket/">socket</a>() 函数用来创建套接字，确定套接字的各种属性，然后服务器端要用 bind() 函数将套接字与特定的 IP 地址和端口绑定起来，只有这样，流经该 IP 地址和端口的数据才能交给套接字处理。类似地，客户端也要用 connect() 函数建立连接。</p>
+<h2 id="listen-和accept-函数：让套接字进入监听状态并响应客户端请求"><a href="#listen-和accept-函数：让套接字进入监听状态并响应客户端请求" class="headerlink" title="listen()和accept()函数：让套接字进入监听状态并响应客户端请求"></a>listen()和accept()函数：让套接字进入监听状态并响应客户端请求</h2><p>对于服务器端程序，使用 bind() 绑定套接字后，还需要使用 listen() 函数让套接字进入被动监听状态，再调用 accept() 函数，就可以随时响应客户端的请求了。</p>
+<h3 id="listen-函数"><a href="#listen-函数" class="headerlink" title="listen() 函数"></a>listen() 函数</h3><p>通过 listen() 函数可以让套接字进入被动监听状态, 所谓被动监听，是指当没有客户端请求时，套接字处于“睡眠”状态，只有当接收到客户端请求时，套接字才会被“唤醒”来响应请求。</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">listen</span><span class="token punctuation">(</span><span class="token keyword">int</span> sock<span class="token punctuation">,</span> <span class="token keyword">int</span> backlog<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h4 id="请求队列"><a href="#请求队列" class="headerlink" title="请求队列"></a>请求队列</h4><p>当套接字正在处理客户端请求时，如果有新的请求进来，套接字是没法处理的，只能把它放进<font color=green>缓冲区</font>，待当前请求处理完毕后，再从缓冲区中读取出来处理。如果不断有新的请求进来，它们就按照先后顺序在缓冲区中排队，直到缓冲区满。这个缓冲区，就称为请求队列（Request Queue）。</p>
+<p>缓冲区的长度（能存放多少个客户端请求）可以通过 listen() 函数的 backlog 参数指定，但究竟为多少并没有什么标准，可以根据你的需求来定，并发量小的话可以是10或者20。</p>
+<p>如果将 backlog 的值设置为 SOMAXCONN，就由系统来决定请求队列长度，这个值一般比较大，可能是几百，或者更多。</p>
+<p>当请求队列满时，就不再接收新的请求，对于 Linux，客户端会收到 ECONNREFUSED 错误，对于 Windows，客户端会收到 WSAECONNREFUSED 错误。</p>
+<p>注意：listen() 只是让套接字处于监听状态，并没有接收请求。接收请求需要使用 accept() 函数。</p>
+<h3 id="accept-函数"><a href="#accept-函数" class="headerlink" title="accept() 函数"></a>accept() 函数</h3><p>当套接字处于监听状态时，可以通过 accept() 函数来接收客户端请求。</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">accept</span><span class="token punctuation">(</span><span class="token keyword">int</span> sock<span class="token punctuation">,</span> <span class="token keyword">struct</span> <span class="token class-name">sockaddr</span> <span class="token operator">*</span>addr<span class="token punctuation">,</span> <span class="token class-name">socklen_t</span> <span class="token operator">*</span>addrlen<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p><font color=#b22222>accept() 返回一个新的套接字来和客户端通信，addr 保存了客户端的IP地址和端口号，而 sock 是服务器端的套接字，注意区分</font>。后面和客户端通信时，要使用这个新生成的套接字，而不是原来服务器端的套接字。</p>
+<p>最后需要说明的是：listen() 只是让套接字进入监听状态，并没有真正接收客户端请求，listen() 后面的代码会继续执行，直到遇到 accept()。accept() 会阻塞程序执行（后面代码不能被执行），直到有新的请求到来。</p>
+<h2 id="send-recv-和write-read-：发送数据和接收数据"><a href="#send-recv-和write-read-：发送数据和接收数据" class="headerlink" title="send()/recv()和write()/read()：发送数据和接收数据"></a>send()/recv()和write()/read()：发送数据和接收数据</h2><p>Linux 不区分套接字文件和普通文件，使用 write() 可以向套接字中写入数据，使用 read() 可以从套接字中读取数据。</p>
+<p><font color=#b22222>前面我们说过，两台计算机之间的通信相当于两个套接字之间的通信，在服务器端用 write() 向套接字写入数据，客户端就能收到，然后再使用 read() 从套接字中读取出来，就完成了一次通信。</font></p>
+<p>Windows区分普通文件和套接字，并定义了专门的接收和发送的函数: 从服务器端发送数据使用 <font color=red>send()</font> 函数; 在客户端接收数据使用 <font color=red>recv()</font> 函数;</p>
+<h2 id="如何让服务器端持续不断地监听客户端的请求"><a href="#如何让服务器端持续不断地监听客户端的请求" class="headerlink" title="如何让服务器端持续不断地监听客户端的请求?"></a>如何让服务器端持续不断地监听客户端的请求?</h2><p>答: 使用while</p>
+<h2 id="socket缓冲区以及阻塞模式详解"><a href="#socket缓冲区以及阻塞模式详解" class="headerlink" title="socket缓冲区以及阻塞模式详解"></a><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/2349.html">socket缓冲区以及阻塞模式详解</a></h2><h3 id="socket缓冲区"><a href="#socket缓冲区" class="headerlink" title="socket缓冲区"></a>socket缓冲区</h3><p><font color=#b22222>每个 socket 被创建后，都会分配两个缓冲区，输入缓冲区和输出缓冲区。</font></p>
+<p><font color=red>write()</font> 并不立即向网络中传输数据，而是先将数据写入缓冲区中，再由TCP协议将数据从缓冲区发送到目标机器。一旦将数据写入到缓冲区，函数就可以成功返回，不管它们有没有到达目标机器，也不管它们何时被发送到网络，这些都是TCP协议负责的事情。</p>
+<p>TCP协议独立于 <font color=red>write()</font>  函数，数据有可能刚被写入缓冲区就发送到网络，也可能在缓冲区中不断积压，多次写入的数据被一次性发送到网络，这取决于当时的网络情况、当前线程是否空闲等诸多因素，不由程序员控制。</p>
+<p><font color=red>read()</font> 函数也是如此，也从输入缓冲区中读取数据，而不是直接从网络中读取。</p>
+<p><img data-src="http://c.biancheng.net/uploads/allimg/190219/1149355056-0.jpg" alt="TCP套接字I/O缓冲区示意图"></p>
+<p>这些I/O缓冲区特性可整理如下：</p>
+<ul>
+<li>I/O缓冲区在每个TCP套接字中单独存在；</li>
+<li>I/O缓冲区在创建套接字时自动生成；</li>
+<li>即使关闭套接字也会继续传送输出缓冲区中遗留的数据；</li>
+<li>关闭套接字将丢失输入缓冲区中的数据。</li>
+</ul>
+<p>输入输出缓冲区的默认大小一般都是 8K，可以通过 getsockopt() 函数获取：</p>
+<h3 id="阻塞模式"><a href="#阻塞模式" class="headerlink" title="阻塞模式"></a>阻塞模式</h3><p>对于TCP套接字（默认情况下），当使用 write() 发送数据时：</p>
+<ol>
+<li>首先会检查缓冲区，如果缓冲区的可用空间长度小于要发送的数据，那么 write() 会被阻塞（暂停执行），直到缓冲区中的数据被发送到目标机器，腾出足够的空间，才唤醒 write() 函数继续写入数据。</li>
+<li>如果TCP协议正在向网络发送数据，那么输出缓冲区会被锁定，不允许写入，write() 也会被阻塞，直到数据发送完毕缓冲区解锁，write()/send() 才会被唤醒。</li>
+<li>如果要写入的数据大于缓冲区的最大长度，那么将分批写入。</li>
+<li>直到所有数据被写入缓冲区 write() 才能返回。</li>
+</ol>
+<p>当使用 read() 读取数据时：</p>
+<ol>
+<li>首先会检查缓冲区，如果缓冲区中有数据，那么就读取，否则函数会被阻塞，直到网络上有数据到来。</li>
+<li> 如果要读取的数据长度小于缓冲区中的数据长度，那么就不能一次性将缓冲区中的所有数据读出，剩余数据将不断囤积，直到有 read() 函数再次读取。</li>
+<li>直到读取到数据后 read() 函数才会返回，否则就一直被阻塞。</li>
+</ol>
+<p>这就是TCP套接字的阻塞模式。所谓阻塞，就是上一步动作没有完成，下一步动作将暂停，直到上一步动作完成后才能继续，以保持同步性。</p>
+<blockquote>
+<p>​    CP套接字默认情况下是阻塞模式，也是最常用的。当然你也可以更改为非阻塞模式，后续我们会讲解。</p>
+</blockquote>
+<h2 id="TCP协议的粘包问题（数据的无边界性）"><a href="#TCP协议的粘包问题（数据的无边界性）" class="headerlink" title="TCP协议的粘包问题（数据的无边界性）"></a>TCP协议的粘包问题（数据的无边界性）</h2><h2 id="图解TCP数据报结构以及三次握手（非常详细）"><a href="#图解TCP数据报结构以及三次握手（非常详细）" class="headerlink" title="图解TCP数据报结构以及三次握手（非常详细）"></a><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/2351.html">图解TCP数据报结构以及三次握手（非常详细）</a></h2>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/ubuntu/Ubuntu%2018.04%E6%90%9C%E7%8B%97%E8%BE%93%E5%85%A5%E6%B3%95%E6%98%BE%E7%A4%BA%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%B7%A5%E5%85%B7/ubuntu/Ubuntu%2018.04%E6%90%9C%E7%8B%97%E8%BE%93%E5%85%A5%E6%B3%95%E6%98%BE%E7%A4%BA%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="post-title-link" itemprop="url">Ubuntu 18.04搜狗输入法显示乱码问题解决方案</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:36:05" itemprop="dateCreated datePublished" datetime="2020-12-11T22:36:05+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:12:47" itemprop="dateModified" datetime="2021-03-24T07:12:47+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/ubuntu/" itemprop="url" rel="index"><span itemprop="name">ubuntu</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/dailymatters/p/12431344.html">https://www.cnblogs.com/dailymatters/p/12431344.html</a></p>
+<p>将英文键盘设置为第一个选项即可。</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1597624853522.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/ubuntu/Linux%E4%B9%8Bman%E5%91%BD%E4%BB%A4%E4%B8%AD%E6%96%87%E6%B1%89%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%B7%A5%E5%85%B7/ubuntu/Linux%E4%B9%8Bman%E5%91%BD%E4%BB%A4%E4%B8%AD%E6%96%87%E6%B1%89%E5%8C%96/" class="post-title-link" itemprop="url">Linux之man命令中文汉化</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:35:36" itemprop="dateCreated datePublished" datetime="2020-12-11T22:35:36+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:13:07" itemprop="dateModified" datetime="2021-03-24T07:13:07+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/ubuntu/" itemprop="url" rel="index"><span itemprop="name">ubuntu</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> autoconf
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> opencc</code></pre>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/man-pages-zh/manpages-zh">github地址</a><br>下载zip压缩包</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> autoreconf --install --force
+<span class="token function">sudo</span> ./configure --prefix<span class="token operator">=</span>/usr/local/zhman --disable-zhtw
+<span class="token function">sudo</span> <span class="token function">make</span>
+<span class="token function">sudo</span> <span class="token function">make</span> <span class="token function">install</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"alias cman='man -M /usr/local/zhman/share/man/zh_CN' "</span> <span class="token operator">>></span> ~/.bashrc
+<span class="token builtin class-name">.</span> ~/.bashrc</code></pre>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/%E6%97%A0%E9%99%90%E5%B1%82%E7%BA%A7%E8%8F%9C%E5%8D%95%E2%80%94%E5%B7%A6%E5%8F%B3%E5%80%BC%E6%A0%91%E5%9E%8B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E8%BF%90%E7%BB%B4/MySQL/%E6%97%A0%E9%99%90%E5%B1%82%E7%BA%A7%E8%8F%9C%E5%8D%95%E2%80%94%E5%B7%A6%E5%8F%B3%E5%80%BC%E6%A0%91%E5%9E%8B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-title-link" itemprop="url">无限层级菜单—左右值树型数据结构</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:23:55" itemprop="dateCreated datePublished" datetime="2020-12-11T22:23:55+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-24 07:32:13" itemprop="dateModified" datetime="2021-03-24T07:32:13+08:00">2021-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>参考：<a target="_blank" rel="noopener" href="http://caijt.com/2016/01/19/422/">http://caijt.com/2016/01/19/422/</a></p>
+<p>参考：<a target="_blank" rel="noopener" href="https://app.yinxiang.com/shard/s57/nl/12854860/90760f75-a41b-4109-ba50-4b22a952ef1d">无限层级菜单—左右值树型数据结构 | 菜工的IT生涯</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/gof%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/gof%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/" class="post-title-link" itemprop="url">面向对象设计原则</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:19:49" itemprop="dateCreated datePublished" datetime="2020-12-11T22:19:49+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-29 14:09:04" itemprop="dateModified" datetime="2021-08-29T14:09:04+08:00">2021-08-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/gof%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">gof设计模式</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>软件实体包括以下部分：</p>
+<ol>
+<li>项目中划分出的模块</li>
+<li>类与接口</li>
+<li>方法</li>
+</ol>
+<p>在软件开发中, 程序员要尽量根据7条原则开发程序</p>
+<h2 id="1-开闭原则"><a href="#1-开闭原则" class="headerlink" title="1. 开闭原则"></a>1. 开闭原则</h2><p>当应用的需求改变时, 在不修改软件实体的源代码或者二进制代码的前提下, 可以扩展模块的功能, 使其满足新的需求。</p>
+<h2 id="2-里式替换原则"><a href="#2-里式替换原则" class="headerlink" title="2. 里式替换原则"></a>2. 里式替换原则</h2><p>继承必须确保超类所拥有的性质在子类中仍然成立, 里氏替换原则主要阐述了有关继承的一些原则，也就是什么时候应该使用继承，什么时候不应该使用继承，以及其中蕴含的原理。里氏替换原是继承复用的基础，它反映了基类与子类之间的关系，<strong>是对开闭原则的补充</strong>，是对实现抽象化的具体步骤的规范。</p>
+<p>里氏替换原则通俗来讲就是：<strong>子类可以扩展父类的功能，但不能改变父类原有的功能。也就是说：子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</strong></p>
+<h2 id="3-依赖倒置原则"><a href="#3-依赖倒置原则" class="headerlink" title="3. 依赖倒置原则"></a>3. 依赖倒置原则</h2><p>要面向接口编程, 不要面向实现编程。</p>
+<p>依赖倒置原则是实现开闭原则的重要途径之一，它降低了客户与实现模块之间的耦合。</p>
+<h2 id="4-单一职责原则"><a href="#4-单一职责原则" class="headerlink" title="4. 单一职责原则"></a>4. 单一职责原则</h2><p>一个类应该有且只有一个引起它变化的原因，否则应该被拆分。</p>
+<p>注意：单一职责同样也适用于方法。一个方法应该尽可能做好一件事情。如果一个方法处理的事情太多，其颗粒度会变得很粗，不利于重用。</p>
+<h2 id="5-接口隔离"><a href="#5-接口隔离" class="headerlink" title="5. 接口隔离"></a>5. 接口隔离</h2><p>要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用。</p>
+<p>接口隔离原则和单一职责都是为了提高类的内聚性、降低它们之间的耦合性，体现了封装的思想，但两者是不同的：</p>
+<ul>
+<li>单一职责原则注重的是职责，而接口隔离原则注重的是对接口依赖的隔离。</li>
+<li>单一职责原则主要是约束类，它针对的是程序中的实现和细节；接口隔离原则主要约束接口，主要针对抽象和程序整体框架的构建。</li>
+</ul>
+<h2 id="6-迪米特法则"><a href="#6-迪米特法则" class="headerlink" title="6. 迪米特法则"></a>6. 迪米特法则</h2><p>如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。其目的是降低类之间的耦合度，提高模块的相对独立性。</p>
+<p>从迪米特法则的定义和特点可知，它强调以下两点：</p>
+<ol>
+<li>从依赖者的角度来说，只依赖应该依赖的对象。</li>
+<li>从被依赖者的角度说，只暴露应该暴露的方法。</li>
+</ol>
+<p>所以，在运用迪米特法则时要注意以下 6 点。</p>
+<ol>
+<li>在类的划分上，应该创建弱耦合的类。类与类之间的耦合越弱，就越有利于实现可复用的目标。</li>
+<li>在类的结构设计上，尽量降低类成员的访问权限。</li>
+<li>在类的设计上，优先考虑将一个类设置成不变类。</li>
+<li>在对其他类的引用上，将引用其他对象的次数降到最低。</li>
+<li>不暴露类的属性成员，而应该提供相应的访问器（set 和 get 方法）。</li>
+<li>谨慎使用序列化（Serializable）功能。</li>
+</ol>
+<h2 id="7-合成复用"><a href="#7-合成复用" class="headerlink" title="7. 合成复用"></a>7. 合成复用</h2>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/gof%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%A0%86%E5%92%8C%E6%A0%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/gof%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%A0%86%E5%92%8C%E6%A0%88/" class="post-title-link" itemprop="url">堆和栈</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:19:30" itemprop="dateCreated datePublished" datetime="2020-12-11T22:19:30+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-29 14:09:04" itemprop="dateModified" datetime="2021-08-29T14:09:04+08:00">2021-08-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/gof%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">gof设计模式</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>参考博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/K346K346/article/details/80849966">https://blog.csdn.net/K346K346/article/details/80849966</a></p>
+<ol>
+<li>程序内存布局场景下，堆与栈表示两种内存管理方式；</li>
+<li>数据结构场景下，堆与栈表示两种常见的数据结构；</li>
+</ol>
+<h2 id="程序内存分区中的堆和栈"><a href="#程序内存分区中的堆和栈" class="headerlink" title="程序内存分区中的堆和栈"></a>程序内存分区中的堆和栈</h2><h3 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h3><p>栈由操作系统自动分配释放，用与存放函数的参数值，局部变量等，其操作方式类似与数据结构中的栈。</p>
+<p><font color=red>栈区向地址减小的方向增长。</font>程序员无法控制，若分配失败，则提示栈移出错误。</p>
+<h3 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h3><p>堆由开发人员分配和释放，若开发人员不释放，程序结束时由OS回收，分配方式类似与链表。</p>
+<p>php中new等可以申请内存，delete等可以删除内存。</p>
+<h2 id="数据结构中的堆和栈"><a href="#数据结构中的堆和栈" class="headerlink" title="数据结构中的堆和栈"></a>数据结构中的堆和栈</h2><h3 id="栈-1"><a href="#栈-1" class="headerlink" title="栈"></a>栈</h3><p>栈的基本操作包括初始化、判断栈是否为空、入栈、出栈及获取栈顶元素等。</p>
+<h3 id="堆-1"><a href="#堆-1" class="headerlink" title="堆"></a>堆</h3><p>堆是一种特殊的完全二叉树，当且仅当满足所有节点的值总是不大于或不小于其父节点的值的完全二叉树被称之为堆。堆的这一特性称之为堆序性。因此，在一个堆中，根节点是最大（或最小）节点。如果根节点最小，称之为小顶堆（或小根堆），如果根节点最大，称之为大顶堆（或大根堆）。堆的左右孩子没有大小的顺序。下面是一个小顶堆示例：</p>
+<p><img data-src="https://img.lujinkai.cn/blog/ljk/1612271015031.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block ljk-index-post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/Vue2/%E7%94%A8element%E7%9A%84upload%E7%BB%84%E4%BB%B6%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0%E5%92%8C%E5%8E%8B%E7%BC%A9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://img.lujinkai.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/%E5%89%8D%E7%AB%AF/Vue2/%E7%94%A8element%E7%9A%84upload%E7%BB%84%E4%BB%B6%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0%E5%92%8C%E5%8E%8B%E7%BC%A9/" class="post-title-link" itemprop="url">用element的upload组件实现多图片上传和压缩</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 22:09:37" itemprop="dateCreated datePublished" datetime="2020-12-11T22:09:37+08:00">2020-12-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-29 14:09:04" itemprop="dateModified" datetime="2021-08-29T14:09:04+08:00">2021-08-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/Vue2/" itemprop="url" rel="index"><span itemprop="name">Vue2</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010227042/article/details/90756308">https://blog.csdn.net/u010227042/article/details/90756308</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
