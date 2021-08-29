@@ -30,7 +30,7 @@
 <meta property="og:description" content="https:&#x2F;&#x2F;www.easyswoole.com&#x2F;Components&#x2F;jwt.htmlhttps:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1608021814182894637&amp;wfr&#x3D;spider&amp;for&#x3D;pc使用JWT实现单点登录（完全跨域方案） JWT：JSON Web Token JWT 不仅可用于认证，还可用于信息交换。善用 JWT 有助于减少服务器请">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-12-11T15:21:58.000Z">
-<meta property="article:modified_time" content="2021-03-23T23:20:57.000Z">
+<meta property="article:modified_time" content="2021-08-11T13:23:36.000Z">
 <meta property="article:author" content="像方便面一样的男子">
 <meta property="article:tag" content="EasySwoole">
 <meta name="twitter:card" content="summary">
@@ -180,7 +180,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90token-%E7%BC%96%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">生成token    编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90token-%E8%A7%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">解析token    解码</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90token-%E7%BC%96%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">生成token    编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90token-%E8%A7%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">解析token    解码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#easyswoole%E4%B8%AD%E7%9A%84jwt"><span class="nav-number">3.</span> <span class="nav-text">easyswoole中的jwt</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -195,7 +195,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">242</span>
+          <span class="site-state-item-count">273</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -207,7 +207,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">88</span>
+        <span class="site-state-item-count">91</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -283,7 +283,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-24 07:20:57" itemprop="dateModified" datetime="2021-03-24T07:20:57+08:00">2021-03-24</time>
+        <time title="修改时间：2021-08-11 21:23:36" itemprop="dateModified" datetime="2021-08-11T21:23:36+08:00">2021-08-11</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -321,6 +321,71 @@
 <li>密钥可以保证token的安全性，但是无法防止token的盗用问题，为了减少盗用和窃取，推荐使用HTTPS协议进行传输</li>
 </ul>
 <h2 id="解析token-解码"><a href="#解析token-解码" class="headerlink" title="解析token    解码"></a>解析token    解码</h2><p>base64解码token，得到一堆明文信息和签名，明文信息里有一个字段说明了加密用的算法，将明文信息使用指定的加密方式加密，如果等于签名，则token校验通过，在进行超时等其他参数的校验</p>
+<h2 id="easyswoole中的jwt"><a href="#easyswoole中的jwt" class="headerlink" title="easyswoole中的jwt"></a>easyswoole中的jwt</h2><p>官方文档：<a target="_blank" rel="noopener" href="https://www.easyswoole.com/Components/jwt.html">https://www.easyswoole.com/Components/jwt.html</a></p>
+<p>官方文档写的比较简略，通过查阅源码，可以有更详细的了解。</p>
+<p>token由三或四部分组成：</p>
+<ol>
+<li><p>前缀：prefix，可省略</p>
+</li>
+<li><p>头部：header，是alg（加密方式）和typ（类型，默认JWT且无法更改）的组合，经过base64转码</p>
+</li>
+<li><p>有效载荷：payload，包含以下信息，经过base64转码</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token string single-quoted-string">'exp'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getExp</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 过期时间，默认两个小时</span>
+<span class="token string single-quoted-string">'sub'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getSub</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 主题，没有默认值</span>
+<span class="token string single-quoted-string">'nbf'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getNbf</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 在此之前不可用，默认time()</span>
+<span class="token string single-quoted-string">'aud'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getAud</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 用户，无默认值</span>
+<span class="token string single-quoted-string">'iat'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getIat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 发布时间，默认time()</span>
+<span class="token string single-quoted-string">'jti'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getJti</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// jwt-id，用于标识jwt，默认10字节的随机字符串</span>
+<span class="token string single-quoted-string">'iss'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getIss</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 发行人，默认'EasySwoole'</span>
+<span class="token comment">// token状态，0初始状态，1合法token，-1非法token，-2过期token，生成token的时候，status默认给1</span>
+<span class="token comment">// 不太理解payload中为什么要包含这个字段</span>
+<span class="token string single-quoted-string">'status'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getStatus</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>		
+<span class="token string single-quoted-string">'data'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getData</span><span class="token punctuation">(</span><span class="token punctuation">)</span>			<span class="token comment">// 自定义的数据</span></code></pre>
+
+<p>必要的信息都有默认值：</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token comment">// Jwt</span>
+<span class="token keyword">private</span> <span class="token variable">$secretKey</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'EasySwoole'</span><span class="token punctuation">;</span>
+<span class="token keyword">private</span> <span class="token variable">$alg</span> <span class="token operator">=</span> <span class="token class-name static-context">Jwt</span><span class="token operator">::</span><span class="token constant">ALG_METHOD_HS256</span><span class="token punctuation">;</span> <span class="token comment">// 默认加密方式</span>
+
+<span class="token comment">// JwtObject</span>
+<span class="token keyword">protected</span> <span class="token variable">$iss</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'EasySwoole'</span><span class="token punctuation">;</span> <span class="token comment">// 发行人</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">nbf</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">nbf</span> <span class="token operator">=</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">iat</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">iat</span> <span class="token operator">=</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">exp</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">exp</span> <span class="token operator">=</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">7200</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">jti</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">jti</span> <span class="token operator">=</span> <span class="token class-name static-context">Random</span><span class="token operator">::</span><span class="token function">character</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+<li><p>签名：signature，包含secretKey（秘钥）、header、payload、alg，经过加密然后base64转码</p>
+<p>除了secretKey，其他所有信息相当于都是明文，secretKey储存在服务器的内存中，如果重启服务，secretKey就会丢失，之前的token就都无法通过校验，所以<strong>推荐直接修改Jwt组件中的默认secretKey，然后在生成token的时候，不指定secretKey，使用默认值</strong></p>
+</li>
+</ol>
+<p>生成token，以下是最简略的写法：</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">use</span> <span class="token package">EasySwoole<span class="token punctuation">\</span>Jwt<span class="token punctuation">\</span>Jwt</span><span class="token punctuation">;</span>
+
+<span class="token variable">$token</span> <span class="token operator">=</span> <span class="token class-name static-context">Jwt</span><span class="token operator">::</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">publish</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">__toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>生成token，以下是推荐写法：</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">use</span> <span class="token package">EasySwoole<span class="token punctuation">\</span>Jwt<span class="token punctuation">\</span>Jwt</span><span class="token punctuation">;</span>
+
+<span class="token variable">$jwtObject</span> <span class="token operator">=</span> <span class="token class-name static-context">Jwt</span><span class="token operator">::</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">publish</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setPrefix</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'Bearer'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">// token前缀，Bearer表示标准jwt格式</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setSub</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'yuanzhan'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">// 主题</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setAud</span><span class="token punctuation">(</span><span class="token variable">$userId</span><span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">// 用户id</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setExp</span><span class="token punctuation">(</span><span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">3600</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">// 过期时间设置为1个小时</span>
+<span class="token comment">// 自定义数据</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setData</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+    <span class="token string single-quoted-string">'other_info'</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token variable">$token</span> <span class="token operator">=</span> <span class="token variable">$jwt</span><span class="token operator">-></span><span class="token function">__toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
 
     </div>
 
