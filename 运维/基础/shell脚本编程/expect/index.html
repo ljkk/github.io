@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="expect 基于 Tcl( Tool Command Language )语言开发，主要应用于自动化交互式操作的场景,借助 expect 处理交互的命令,可以将交互过程如:ssh 登录,ftp 登录等写在一个脚本上,使之自动化完成。尤其适用于需要对多台服务器执行相同操作的环境中,可以大大提高系统管理人员的工作效率。 expect 可以认为是一种脚本语言，下面介绍的是 expect 环境下的变量和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="expect">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/expect/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="expect 基于 Tcl( Tool Command Language )语言开发，主要应用于自动化交互式操作的场景,借助 expect 处理交互的命令,可以将交互过程如:ssh 登录,ftp 登录等写在一个脚本上,使之自动化完成。尤其适用于需要对多台服务器执行相同操作的环境中,可以大大提高系统管理人员的工作效率。 expect 可以认为是一种脚本语言，下面介绍的是 expect 环境下的变量和">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T14:23:22.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="shell">
+<meta property="article:tag" content="expect">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/expect/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/expect/","path":"运维/基础/shell脚本编程/expect/","title":"expect"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>expect | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E9%87%8F"><span class="nav-number">1.</span> <span class="nav-text">变量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%8F%98%E9%87%8F"><span class="nav-number">1.1.</span> <span class="nav-text">定义变量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#close-slave-onexec-0-1-i-spawn-id"><span class="nav-number">2.1.</span> <span class="nav-text">close [-slave] [-onexec 0|1] [-i spawn_id]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#debug-now-0-1"><span class="nav-number">2.2.</span> <span class="nav-text">debug [[-now] 0|1]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#disconnect"><span class="nav-number">2.3.</span> <span class="nav-text">disconnect</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exit-opts-status"><span class="nav-number">2.4.</span> <span class="nav-text">exit [-opts] [status]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-continue-continue-timer-%E2%98%85"><span class="nav-number">2.5.</span> <span class="nav-text">exp_continue [-continue_timer] ★</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-internal-f-file-value"><span class="nav-number">2.6.</span> <span class="nav-text">exp_internal [-f file] value</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-open-args-i-spawn-id"><span class="nav-number">2.7.</span> <span class="nav-text">exp_open [args] [-i spawn_id]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-pid-i-spawn-id"><span class="nav-number">2.8.</span> <span class="nav-text">exp_pid [-i spawn_id]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-send"><span class="nav-number">2.9.</span> <span class="nav-text">exp_send</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-send-error"><span class="nav-number">2.10.</span> <span class="nav-text">exp_send_error</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-send-log"><span class="nav-number">2.11.</span> <span class="nav-text">exp_send_log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-send-tty"><span class="nav-number">2.12.</span> <span class="nav-text">exp_send_tty</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-send-user"><span class="nav-number">2.13.</span> <span class="nav-text">exp_send_user</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp-version-exit-version"><span class="nav-number">2.14.</span> <span class="nav-text">exp_version [[-exit] version]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expect-opts-pat1-body1-%E2%80%A6-opts-patn-bodyn-%E2%98%85"><span class="nav-number">2.15.</span> <span class="nav-text">expect [[-opts] pat1 body1] … [-opts] patn [bodyn] ★</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expect-after-expect-args"><span class="nav-number">2.16.</span> <span class="nav-text">expect_after [expect_args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expect-background-expect-args"><span class="nav-number">2.17.</span> <span class="nav-text">expect_background [expect_args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expect-before-expect-args"><span class="nav-number">2.18.</span> <span class="nav-text">expect_before [expect_args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expect-tty-expect-args"><span class="nav-number">2.19.</span> <span class="nav-text">expect_tty [expect_args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expect-user-expect-args"><span class="nav-number">2.20.</span> <span class="nav-text">expect_user [expect_args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fork"><span class="nav-number">2.21.</span> <span class="nav-text">fork</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#interact-string1-body1-%E2%80%A6-stringn-bodyn-%E2%98%85"><span class="nav-number">2.22.</span> <span class="nav-text">interact [string1 body1] … [stringn [bodyn]] ★</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#interpreter-args"><span class="nav-number">2.23.</span> <span class="nav-text">interpreter [args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#log-file-args-a-file"><span class="nav-number">2.24.</span> <span class="nav-text">log_file [args] [[-a] file]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#log-user-info-0-1"><span class="nav-number">2.25.</span> <span class="nav-text">log_user -info|0|1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#match-max-d-i-spawn-id-size"><span class="nav-number">2.26.</span> <span class="nav-text">match_max [-d] [-i spawn_id] [size]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#overlay-spawn-id-spawn-id-%E2%80%A6-program-args"><span class="nav-number">2.27.</span> <span class="nav-text">overlay [-# spawn_id] [-# spawn_id] […] program [args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#parity-d-i-spawn-id-value"><span class="nav-number">2.28.</span> <span class="nav-text">parity [-d] [-i spawn_id] [value]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#remove-nulls-d-i-spawn-id-value"><span class="nav-number">2.29.</span> <span class="nav-text">remove_nulls [-d] [-i spawn_id] [value]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#send-flags-string-%E2%98%85"><span class="nav-number">2.30.</span> <span class="nav-text">send [-flags] string ★</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#send-error-flags-string"><span class="nav-number">2.31.</span> <span class="nav-text">send_error [-flags] string</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#send-log-%E2%80%93-string"><span class="nav-number">2.32.</span> <span class="nav-text">send_log [–] string</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#send-tty-flags-string"><span class="nav-number">2.33.</span> <span class="nav-text">send_tty [-flags] string</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#send-user-flags-string"><span class="nav-number">2.34.</span> <span class="nav-text">send_user [-flags] string</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sleep-seconds"><span class="nav-number">2.35.</span> <span class="nav-text">sleep seconds</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#spawn-args-program-args-%E2%98%85"><span class="nav-number">2.36.</span> <span class="nav-text">spawn [args] program [args] ★</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#strace-level"><span class="nav-number">2.37.</span> <span class="nav-text">strace level</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stty-args"><span class="nav-number">2.38.</span> <span class="nav-text">stty args</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#system-args"><span class="nav-number">2.39.</span> <span class="nav-text">system args</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timestamp-args"><span class="nav-number">2.40.</span> <span class="nav-text">timestamp [args]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#trap-command-signals"><span class="nav-number">2.41.</span> <span class="nav-text">trap [[command] signals]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#wait-args"><span class="nav-number">2.42.</span> <span class="nav-text">wait [args]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8C%83%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">范例</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/expect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="expect | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          expect
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:23:22" itemprop="dateCreated datePublished" datetime="2020-12-09T22:23:22+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">shell脚本编程</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>expect 基于 Tcl( Tool Command Language )语言开发，主要应用于自动化交互式操作的场景,借助 expect 处理交互的命令,可以将交互过程如:ssh 登录,ftp 登录等写在一个脚本上,使之自动化完成。尤其适用于需要对多台服务器执行相同操作的环境中,可以大大提高系统管理人员的工作效率。</p>
+<p>expect 可以认为是一种脚本语言，下面介绍的是 expect 环境下的变量和命令：</p>
+<h2 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h2><h3 id="定义变量"><a href="#定义变量" class="headerlink" title="定义变量"></a>定义变量</h3><pre class="language-tcl" data-language="tcl"><code class="language-tcl"><span class="token keyword">set</span> <span class="token variable">name</span> value</code></pre>
+
+<p>调用变量</p>
+<pre class="language-tcl" data-language="tcl"><code class="language-tcl">$<span class="token variable">name</span></code></pre>
+
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><h3 id="close-slave-onexec-0-1-i-spawn-id"><a href="#close-slave-onexec-0-1-i-spawn-id" class="headerlink" title="close [-slave] [-onexec 0|1] [-i spawn_id]"></a>close [-slave] [-onexec 0|1] [-i spawn_id]</h3><h3 id="debug-now-0-1"><a href="#debug-now-0-1" class="headerlink" title="debug [[-now] 0|1]"></a>debug [[-now] 0|1]</h3><h3 id="disconnect"><a href="#disconnect" class="headerlink" title="disconnect"></a>disconnect</h3><h3 id="exit-opts-status"><a href="#exit-opts-status" class="headerlink" title="exit [-opts] [status]"></a>exit [-opts] [status]</h3><h3 id="exp-continue-continue-timer-★"><a href="#exp-continue-continue-timer-★" class="headerlink" title="exp_continue [-continue_timer] ★"></a>exp_continue [-continue_timer] ★</h3><p>不返回结果，继续执行。</p>
+<h3 id="exp-internal-f-file-value"><a href="#exp-internal-f-file-value" class="headerlink" title="exp_internal [-f file] value"></a>exp_internal [-f file] value</h3><h3 id="exp-open-args-i-spawn-id"><a href="#exp-open-args-i-spawn-id" class="headerlink" title="exp_open [args] [-i spawn_id]"></a>exp_open [args] [-i spawn_id]</h3><h3 id="exp-pid-i-spawn-id"><a href="#exp-pid-i-spawn-id" class="headerlink" title="exp_pid [-i spawn_id]"></a>exp_pid [-i spawn_id]</h3><h3 id="exp-send"><a href="#exp-send" class="headerlink" title="exp_send"></a>exp_send</h3><h3 id="exp-send-error"><a href="#exp-send-error" class="headerlink" title="exp_send_error"></a>exp_send_error</h3><h3 id="exp-send-log"><a href="#exp-send-log" class="headerlink" title="exp_send_log"></a>exp_send_log</h3><h3 id="exp-send-tty"><a href="#exp-send-tty" class="headerlink" title="exp_send_tty"></a>exp_send_tty</h3><h3 id="exp-send-user"><a href="#exp-send-user" class="headerlink" title="exp_send_user"></a>exp_send_user</h3><h3 id="exp-version-exit-version"><a href="#exp-version-exit-version" class="headerlink" title="exp_version [[-exit] version]"></a>exp_version [[-exit] version]</h3><h3 id="expect-opts-pat1-body1-…-opts-patn-bodyn-★"><a href="#expect-opts-pat1-body1-…-opts-patn-bodyn-★" class="headerlink" title="expect [[-opts] pat1 body1] … [-opts] patn [bodyn] ★"></a>expect [[-opts] pat1 body1] … [-opts] patn [bodyn] ★</h3><p>模式匹配，匹配成功后执行指定操作，如果没有指定操作，则忽略。<br>eof 和 timeout 是关键字<br>如果匹配的是关键字”eof”，则在文件结束时候执行指定操作，如果匹配的是关键字”timeout”,则在超时时执行指定的操作，默认的超时时间是 10 秒，可以设置为 30 秒<code>set timeout 30</code>，或者设置不超时<code>set timeout -</code></p>
+<pre class="language-tcl" data-language="tcl"><code class="language-tcl"><span class="token keyword">set</span> <span class="token variable">timeout</span> 30
+<span class="token comment"># 匹配一次</span>
+expect 'hi' <span class="token punctuation">&#123;</span>send <span class="token string">"You said hi\n"</span><span class="token punctuation">&#125;</span>
+<span class="token comment"># 匹配多次：每次匹配成功后执行指定操作，返回的结果用来进行下一次模式匹配。</span>
+expect <span class="token punctuation">&#123;</span>
+    busy               <span class="token punctuation">&#123;</span>puts busy\n ; exp_continue<span class="token punctuation">&#125;</span>
+    failed             abort
+    <span class="token string">"invalid password"</span> abort
+    timeout            abort
+    connected
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="expect-after-expect-args"><a href="#expect-after-expect-args" class="headerlink" title="expect_after [expect_args]"></a>expect_after [expect_args]</h3><h3 id="expect-background-expect-args"><a href="#expect-background-expect-args" class="headerlink" title="expect_background [expect_args]"></a>expect_background [expect_args]</h3><h3 id="expect-before-expect-args"><a href="#expect-before-expect-args" class="headerlink" title="expect_before [expect_args]"></a>expect_before [expect_args]</h3><h3 id="expect-tty-expect-args"><a href="#expect-tty-expect-args" class="headerlink" title="expect_tty [expect_args]"></a>expect_tty [expect_args]</h3><h3 id="expect-user-expect-args"><a href="#expect-user-expect-args" class="headerlink" title="expect_user [expect_args]"></a>expect_user [expect_args]</h3><h3 id="fork"><a href="#fork" class="headerlink" title="fork"></a>fork</h3><h3 id="interact-string1-body1-…-stringn-bodyn-★"><a href="#interact-string1-body1-…-stringn-bodyn-★" class="headerlink" title="interact [string1 body1] … [stringn [bodyn]] ★"></a>interact [string1 body1] … [stringn [bodyn]] ★</h3><p>interact 是交互的意思。将当前进程的控制权交给用户，就是让用户手动处理的意思。</p>
+<h3 id="interpreter-args"><a href="#interpreter-args" class="headerlink" title="interpreter [args]"></a>interpreter [args]</h3><h3 id="log-file-args-a-file"><a href="#log-file-args-a-file" class="headerlink" title="log_file [args] [[-a] file]"></a>log_file [args] [[-a] file]</h3><h3 id="log-user-info-0-1"><a href="#log-user-info-0-1" class="headerlink" title="log_user -info|0|1"></a>log_user -info|0|1</h3><h3 id="match-max-d-i-spawn-id-size"><a href="#match-max-d-i-spawn-id-size" class="headerlink" title="match_max [-d] [-i spawn_id] [size]"></a>match_max [-d] [-i spawn_id] [size]</h3><h3 id="overlay-spawn-id-spawn-id-…-program-args"><a href="#overlay-spawn-id-spawn-id-…-program-args" class="headerlink" title="overlay [-# spawn_id] [-# spawn_id] […] program [args]"></a>overlay [-# spawn_id] [-# spawn_id] […] program [args]</h3><h3 id="parity-d-i-spawn-id-value"><a href="#parity-d-i-spawn-id-value" class="headerlink" title="parity [-d] [-i spawn_id] [value]"></a>parity [-d] [-i spawn_id] [value]</h3><h3 id="remove-nulls-d-i-spawn-id-value"><a href="#remove-nulls-d-i-spawn-id-value" class="headerlink" title="remove_nulls [-d] [-i spawn_id] [value]"></a>remove_nulls [-d] [-i spawn_id] [value]</h3><h3 id="send-flags-string-★"><a href="#send-flags-string-★" class="headerlink" title="send [-flags] string ★"></a>send [-flags] string ★</h3><p>将字符串发送给当前进程。</p>
+<ul>
+<li>-i</li>
+<li>-null</li>
+<li>-break</li>
+<li>-s</li>
+<li>-h</li>
+</ul>
+<h3 id="send-error-flags-string"><a href="#send-error-flags-string" class="headerlink" title="send_error [-flags] string"></a>send_error [-flags] string</h3><h3 id="send-log-–-string"><a href="#send-log-–-string" class="headerlink" title="send_log [–] string"></a>send_log [–] string</h3><h3 id="send-tty-flags-string"><a href="#send-tty-flags-string" class="headerlink" title="send_tty [-flags] string"></a>send_tty [-flags] string</h3><h3 id="send-user-flags-string"><a href="#send-user-flags-string" class="headerlink" title="send_user [-flags] string"></a>send_user [-flags] string</h3><h3 id="sleep-seconds"><a href="#sleep-seconds" class="headerlink" title="sleep seconds"></a>sleep seconds</h3><h3 id="spawn-args-program-args-★"><a href="#spawn-args-program-args-★" class="headerlink" title="spawn [args] program [args] ★"></a>spawn [args] program [args] ★</h3><p>spawn 是繁衍的意思。新建一个进程，运行指定命令，标准输入，标准输出、标准错误都在 expect 环境内，方便其他 expect 命令进行后续处理。<br>spawn 启动进程时，会产生一个变量 spawn_id, 存储了进程的描述符。用 close 关闭当前进程及其相关文件。</p>
+<pre class="language-tcl" data-language="tcl"><code class="language-tcl"><span class="token comment">#!/usr/bin/expect</span>
+spawn ssh 10.0.0.7
+expect <span class="token punctuation">&#123;</span>
+	<span class="token string">"yes/no"</span> <span class="token punctuation">&#123;</span> send <span class="token string">"yes\n"</span>;exp_continue <span class="token punctuation">&#125;</span>
+	<span class="token string">"password"</span> <span class="token punctuation">&#123;</span> send <span class="token string">"123456"</span> <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+interact</code></pre>
+
+<h3 id="strace-level"><a href="#strace-level" class="headerlink" title="strace level"></a>strace level</h3><h3 id="stty-args"><a href="#stty-args" class="headerlink" title="stty args"></a>stty args</h3><h3 id="system-args"><a href="#system-args" class="headerlink" title="system args"></a>system args</h3><h3 id="timestamp-args"><a href="#timestamp-args" class="headerlink" title="timestamp [args]"></a>timestamp [args]</h3><h3 id="trap-command-signals"><a href="#trap-command-signals" class="headerlink" title="trap [[command] signals]"></a>trap [[command] signals]</h3><h3 id="wait-args"><a href="#wait-args" class="headerlink" title="wait [args]"></a>wait [args]</h3><h2 id="范例"><a href="#范例" class="headerlink" title="范例"></a>范例</h2><p>写成 expect 脚本，可以接收参数，[lindex $argv 0]表示调用第一个参数。</p>
+<pre class="language-tcl" data-language="tcl"><code class="language-tcl"><span class="token comment">#!/usr/bin/expect</span>
+<span class="token keyword">set</span> <span class="token variable">ip</span> <span class="token punctuation">[</span><span class="token keyword">lindex</span> $<span class="token variable">argv</span> 0<span class="token punctuation">]</span>
+<span class="token keyword">set</span> <span class="token variable">user</span> <span class="token punctuation">[</span><span class="token keyword">lindex</span> $<span class="token variable">argv</span> 1<span class="token punctuation">]</span>
+<span class="token keyword">set</span> <span class="token variable">password</span> <span class="token punctuation">[</span><span class="token keyword">lindex</span> $<span class="token variable">argv</span> 2<span class="token punctuation">]</span>
+<span class="token keyword">set</span> <span class="token variable">timeout</span> 10
+spawn ssh $<span class="token variable">user</span>@$<span class="token variable">ip</span>
+expect <span class="token punctuation">&#123;</span>
+	<span class="token string">"yes/no"</span> <span class="token punctuation">&#123;</span> send <span class="token string">"yes\n"</span>;exp_continue <span class="token punctuation">&#125;</span>
+	<span class="token string">"password"</span> <span class="token punctuation">&#123;</span> send <span class="token string">"$password\n"</span> <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+expect <span class="token string">"]#"</span> <span class="token punctuation">&#123;</span> send <span class="token string">"useradd haha\n"</span> <span class="token punctuation">&#125;</span>
+expect <span class="token string">"]#"</span> <span class="token punctuation">&#123;</span> send <span class="token string">"echo 123456 |passwd --stdin haha\n"</span> <span class="token punctuation">&#125;</span>
+send <span class="token string">"exit\n"</span>
+expect eof
+
+<span class="token comment">#./ssh4.exp 10.0.0.7 root 123456</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token assign-left variable">ip</span><span class="token operator">=</span><span class="token variable">$1</span>
+<span class="token assign-left variable">user</span><span class="token operator">=</span><span class="token variable">$2</span>
+<span class="token assign-left variable">password</span><span class="token operator">=</span><span class="token variable">$3</span>
+<span class="token function">expect</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF
+set timeout 20
+spawn ssh <span class="token variable">$user</span>@<span class="token variable">$ip</span>
+expect &#123;
+	"yes/no" &#123; send "yes<span class="token entity" title="\n">\n</span>";exp_continue &#125;
+	"password" &#123; send "<span class="token variable">$password</span><span class="token entity" title="\n">\n</span>" &#125;
+&#125;
+expect "]#" &#123; send "useradd hehe<span class="token entity" title="\n">\n</span>" &#125;
+expect "]#" &#123; send "echo 123456 |passwd --stdin hehe<span class="token entity" title="\n">\n</span>" &#125;
+expect "]#" &#123; send "exit<span class="token entity" title="\n">\n</span>" &#125;
+expect eof
+EOF</span>
+
+<span class="token comment">#./ssh5.sh 192.168.8.10 root 123456</span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/shell/" rel="tag"><i class="fa fa-tag"></i> shell</a>
+              <a href="/tags/expect/" rel="tag"><i class="fa fa-tag"></i> expect</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/mail/" rel="prev" title="mail">
+                  <i class="fa fa-chevron-left"></i> mail
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/" rel="next" title="shell脚本编程">
+                  shell脚本编程 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

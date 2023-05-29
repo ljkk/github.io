@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="容器生命周期 容器管理 docker container启动容器 run每次 run，都会启动一个新的容器 # docker run [选项] [镜像名] [shell命令] [参数] docker container run [OPTIONS] IMAGE [COMMAND] [ARG...]  COMMAND：一次性运行容器中命令 OPTIONS： -i, --interactive			Ke">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker容器管理">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.3.docker%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="容器生命周期 容器管理 docker container启动容器 run每次 run，都会启动一个新的容器 # docker run [选项] [镜像名] [shell命令] [参数] docker container run [OPTIONS] IMAGE [COMMAND] [ARG...]  COMMAND：一次性运行容器中命令 OPTIONS： -i, --interactive			Ke">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605789687110.png">
+<meta property="article:published_time" content="2021-01-08T03:27:26.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.486Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1605789687110.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.3.docker%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.3.docker%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/","path":"运维/Docker/1.3.docker容器管理/","title":"docker容器管理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>docker容器管理 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">1.</span> <span class="nav-text">容器生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86-docker-container"><span class="nav-number">2.</span> <span class="nav-text">容器管理 docker container</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E5%AE%B9%E5%99%A8-run"><span class="nav-number">2.1.</span> <span class="nav-text">启动容器 run</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AE%B9%E5%99%A8%E4%BF%A1%E6%81%AF"><span class="nav-number">2.2.</span> <span class="nav-text">查看容器信息</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E5%AE%B9%E5%99%A8-ls"><span class="nav-number">2.2.1.</span> <span class="nav-text">查看当前存在的容器 ls</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AE%B9%E5%99%A8%E5%86%85%E7%9A%84%E8%BF%9B%E7%A8%8B-top"><span class="nav-number">2.2.2.</span> <span class="nav-text">查看容器内的进程 top</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AE%B9%E5%99%A8%E8%B5%84%E6%BA%90%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5-stats"><span class="nav-number">2.2.3.</span> <span class="nav-text">查看容器资源使用情况 stats</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AE%B9%E5%99%A8%E7%9A%84%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF-inspect"><span class="nav-number">2.2.4.</span> <span class="nav-text">查看容器的详细信息 inspect</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%AE%B9%E5%99%A8-rm-%E3%80%81prune"><span class="nav-number">2.3.</span> <span class="nav-text">删除容器 rm 、prune</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E5%92%8C%E5%81%9C%E6%AD%A2"><span class="nav-number">2.4.</span> <span class="nav-text">容器的启动和停止</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%99%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84%E5%AE%B9%E5%99%A8%E5%8F%91%E4%BF%A1%E5%8F%B7-kill"><span class="nav-number">2.5.</span> <span class="nav-text">给正在运行的容器发信号 kill</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E6%AD%A3%E5%9C%A8%E8%BF%90%E8%A1%8C%E7%9A%84%E5%AE%B9%E5%99%A8-exec"><span class="nav-number">2.6.</span> <span class="nav-text">进入正在运行的容器 exec</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9A%B4%E9%9C%B2%E7%AB%AF%E5%8F%A3"><span class="nav-number">2.7.</span> <span class="nav-text">暴露端口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AE%B9%E5%99%A8%E6%97%A5%E5%BF%97-logs"><span class="nav-number">2.8.</span> <span class="nav-text">查看容器日志 logs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E9%80%92%E8%BF%90%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="nav-number">2.9.</span> <span class="nav-text">传递运行命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E5%AE%B9%E5%99%A8-DNS"><span class="nav-number">2.10.</span> <span class="nav-text">指定容器 DNS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E5%86%85%E5%92%8C%E5%AE%BF%E4%B8%BB%E6%9C%BA%E4%B9%8B%E9%97%B4%E5%A4%8D%E5%88%B6%E6%96%87%E4%BB%B6-cp"><span class="nav-number">2.11.</span> <span class="nav-text">容器内和宿主机之间复制文件 cp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-systemd-%E6%8E%A7%E5%88%B6%E5%AE%B9%E5%99%A8%E8%BF%90%E8%A1%8C"><span class="nav-number">2.12.</span> <span class="nav-text">使用 systemd 控制容器运行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E9%80%92%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">2.13.</span> <span class="nav-text">传递环境变量</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.3.docker%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="docker容器管理 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker容器管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 11:27:26" itemprop="dateCreated datePublished" datetime="2021-01-08T11:27:26+08:00">2021-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="容器生命周期"><a href="#容器生命周期" class="headerlink" title="容器生命周期"></a>容器生命周期</h3><p><img data-src="//img.to2b.cn/blog/ljk/1605789687110.png"></p>
+<h3 id="容器管理-docker-container"><a href="#容器管理-docker-container" class="headerlink" title="容器管理 docker container"></a>容器管理 <code>docker container</code></h3><h4 id="启动容器-run"><a href="#启动容器-run" class="headerlink" title="启动容器 run"></a>启动容器 <code>run</code></h4><p>每次 run，都会启动一个新的容器</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker run [选项] [镜像名] [shell命令] [参数]</span>
+<span class="token function">docker</span> container run <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> <span class="token punctuation">[</span>ARG<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+COMMAND：一次性运行容器中命令
+OPTIONS：
+-i, <span class="token parameter variable">--interactive</span>			Keep STDIN <span class="token function">open</span> even <span class="token keyword">if</span> not attached，通常和-t 一起使用
+-t, <span class="token parameter variable">--tty</span>					分配 pseudo-TTY,通常和-i 一起使用,注意对应的容器必须运行 shell 才支持进入
+-d, <span class="token parameter variable">--detach</span>				后台运行容器，并返回容器 ID，默认前台运行
+<span class="token parameter variable">--name</span> string				启动容器时会自动随机字符作为容器名，--name 指定容器名称
+<span class="token parameter variable">-h</span> string					设置虚拟机内的 <span class="token function">hostname</span>
+<span class="token parameter variable">--rm</span>						退出后立即删除容器，一次性运行，下次从镜像中启动
+-p, <span class="token parameter variable">--publish</span> list			（小写p）暴露指定端口映射，为避免宿主机端口冲突，要做好端口规划
+-P, --publish-all			（大些P）暴露所有端口，随机，默认从 <span class="token number">32768</span> 开始
+<span class="token parameter variable">--dns</span> list					Set custom DNS servers
+<span class="token parameter variable">--entrypoint</span> string			Overwrite the default ENTRYPOINT of the image
+<span class="token parameter variable">--privileged</span>				赋予虚拟机内的 root 真正的 root 权限，有权限宿主机，没有特殊需求不要使用
+<span class="token parameter variable">-e</span><span class="token operator">=</span><span class="token punctuation">[</span><span class="token punctuation">]</span>						传递环境变量
+--env-file<span class="token operator">=</span><span class="token punctuation">[</span><span class="token punctuation">]</span>				传递环境变量，文件
+<span class="token parameter variable">--restart</span> string			容器的重启策略，面向生产环境的启动策略
+              no				<span class="token comment"># 默认策略，容器退出时不重启容器</span>
+              on-failure		<span class="token comment"># 容器非正常退出时（退出状态非 0），才会重启容器</span>
+              on-failure:3		<span class="token comment"># 容器非正常退出时重启容器，最多重启 3 次</span>
+              always			<span class="token comment"># 容器退出时总是重启容器，设置为 always，则启动 docker 服务的时候会自动启动容器</span>
+              unless-stopped	<span class="token comment"># 容器退出时总是重启容器，但是不考虑在 docker 守护进程启动时就已经停止了的容器</span>
+-v,--volume list			数据卷相关</code></pre>
+
+<p><strong>注意：容器启动后，如果容器内没有前台运行的进程，将自动退出停止</strong></p>
+<p><strong>退出容器：</strong><code>exit</code> 容器停止；<code>ctrl+p+q</code> 容器不停止</p>
+<h4 id="查看容器信息"><a href="#查看容器信息" class="headerlink" title="查看容器信息"></a>查看容器信息</h4><h5 id="查看当前存在的容器-ls"><a href="#查看当前存在的容器-ls" class="headerlink" title="查看当前存在的容器 ls"></a>查看当前存在的容器 <code>ls</code></h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
+<span class="token function">docker</span> container <span class="token function">ls</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
+
+选项:
+-a, <span class="token parameter variable">--all</span> 		查看所所有容器，包括退出状态的容器（默认只显示处于运行状态的容器）
+-q, <span class="token parameter variable">--quiet</span> 	Only display numeric IDs
+-s, <span class="token parameter variable">--size</span> 		显示容器大小
+-f, <span class="token parameter variable">--filter</span> 	过滤，例如 <span class="token variable"><span class="token variable">`</span><span class="token parameter variable">-f</span> <span class="token assign-left variable">status</span><span class="token operator">=</span>exited<span class="token variable">`</span></span>
+-l, <span class="token parameter variable">--latest</span> 	显示最新创建的容器
+-n, <span class="token parameter variable">--last</span> 		int Show n last created containers <span class="token punctuation">(</span>includes all states<span class="token punctuation">)</span><span class="token punctuation">(</span>default -1<span class="token punctuation">)</span></code></pre>
+
+<h5 id="查看容器内的进程-top"><a href="#查看容器内的进程-top" class="headerlink" title="查看容器内的进程 top"></a>查看容器内的进程 <code>top</code></h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container <span class="token function">top</span> CONTAINER <span class="token punctuation">[</span>ps OPTIONS<span class="token punctuation">]</span></code></pre>
+
+<h5 id="查看容器资源使用情况-stats"><a href="#查看容器资源使用情况-stats" class="headerlink" title="查看容器资源使用情况 stats"></a>查看容器资源使用情况 <code>stats</code></h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container stats --help</span>
+Usage:	<span class="token function">docker</span> container stats <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -a, 	<span class="token parameter variable">--all</span>             	Show all containers <span class="token punctuation">(</span>default shows just running<span class="token punctuation">)</span>
+  		<span class="token parameter variable">--format</span> string   	Pretty-print images using a Go template
+  		--no-stream       	Disable streaming stats and only pull the first result
+  		--no-trunc        	Do not truncate output</code></pre>
+
+<h5 id="查看容器的详细信息-inspect"><a href="#查看容器的详细信息-inspect" class="headerlink" title="查看容器的详细信息 inspect"></a>查看容器的详细信息 <code>inspect</code></h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container inspect --help</span>
+Usage:	<span class="token function">docker</span> container inspect <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -f, <span class="token parameter variable">--format</span> string   Format the output using the given Go template
+  -s, <span class="token parameter variable">--size</span>            Display total <span class="token function">file</span> sizes</code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> inspect <span class="token number">9997</span>
+<span class="token function">docker</span> inspect <span class="token parameter variable">-f</span> <span class="token string">"&#123;&#123;.Metadata&#125;&#125;"</span> test:v1.0		<span class="token comment"># 选择性查看</span>
+<span class="token function">docker</span> inspect <span class="token parameter variable">-f</span> <span class="token string">"&#123;&#123;.Created&#125;&#125;"</span> c1</code></pre>
+
+<h4 id="删除容器-rm-、prune"><a href="#删除容器-rm-、prune" class="headerlink" title="删除容器 rm 、prune"></a>删除容器 <code>rm</code> 、<code>prune</code></h4><p><code>rm</code> 和 <code>prune</code> 都是删除容器。<code>rm</code> 是强制删除，即使容器处于运行状态；<code>prune</code> 只删除停止的容器。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container rm --help</span>
+Usage:	<span class="token function">docker</span> container <span class="token function">rm</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -f, <span class="token parameter variable">--force</span>     Force the removal of a running container <span class="token punctuation">(</span>uses SIGKILL<span class="token punctuation">)</span>
+  -l, <span class="token parameter variable">--link</span>      Remove the specified <span class="token function">link</span>
+  -v, <span class="token parameter variable">--volumes</span>   同时删除数据卷</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container prune --help</span>
+Usage:	<span class="token function">docker</span> container prune <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
+
+Options:
+  		<span class="token parameter variable">--filter</span> filter		Provide filter values <span class="token punctuation">(</span>e.g. <span class="token string">'until=&lt;timestamp>'</span><span class="token punctuation">)</span>
+  -f, 	<span class="token parameter variable">--force</span>           	不提示确认信息</code></pre>
+
+<p>范例：删除指定状态的容器</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rm</span> <span class="token variable"><span class="token variable">`</span><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-qf</span> <span class="token assign-left variable">status</span><span class="token operator">=</span>exited<span class="token variable">`</span></span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">alias</span> <span class="token assign-left variable">rmc</span><span class="token operator">=</span><span class="token string">'docker container ls -aq | xargs -n1 docker container rm -f'</span></code></pre>
+
+<h4 id="容器的启动和停止"><a href="#容器的启动和停止" class="headerlink" title="容器的启动和停止"></a>容器的启动和停止</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>pause<span class="token operator">|</span>unpause 容器ID</code></pre>
+
+<ul>
+<li><code>start</code>：启动容器，后台启动，并执行默认 COMMAND</li>
+<li><code>stop</code>：关闭容器</li>
+<li><code>restart</code>：重启容器</li>
+<li><code>pause</code>：暂停容器中的所有进程</li>
+<li><code>unpause</code>：恢复容器中的进程</li>
+</ul>
+<h4 id="给正在运行的容器发信号-kill"><a href="#给正在运行的容器发信号-kill" class="headerlink" title="给正在运行的容器发信号 kill"></a>给正在运行的容器发信号 <code>kill</code></h4><p>默认信号 SIGKILL，即 9 信号</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container kill --help</span>
+Usage:	<span class="token function">docker</span> container <span class="token function">kill</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -s, <span class="token parameter variable">--signal</span> string   Signal to send to the container <span class="token punctuation">(</span>default <span class="token string">"KILL"</span><span class="token punctuation">)</span></code></pre>
+
+<h4 id="进入正在运行的容器-exec"><a href="#进入正在运行的容器-exec" class="headerlink" title="进入正在运行的容器 exec"></a>进入正在运行的容器 <code>exec</code></h4><p><code>run -it</code> 是新建容器，并进入，如果要进入正在运行的容器，推荐使用 <code>exec</code>，exit 退出的时候容器不停止。</p>
+<p>此外 <code>attach</code> 也可以进入容器，但是 exit 退出后容器会自动关闭，所以不推荐使用。</p>
+<p><code>exec</code> 的作用是在运行的容器中执行命令</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container exec --help</span>
+Usage:	<span class="token function">docker</span> container <span class="token builtin class-name">exec</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER COMMAND <span class="token punctuation">[</span>ARG<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -d, 	<span class="token parameter variable">--detach</span>               Detached mode: run <span class="token builtin class-name">command</span> <span class="token keyword">in</span> the background
+  		--detach-keys string   Override the key sequence <span class="token keyword">for</span> detaching a container
+  -e, 	<span class="token parameter variable">--env</span> list				Set environment variables
+  -i, 	<span class="token parameter variable">--interactive</span>          Keep STDIN <span class="token function">open</span> even <span class="token keyword">if</span> not attached
+        <span class="token parameter variable">--privileged</span>           Give extended privileges to the <span class="token builtin class-name">command</span>
+  -t, 	<span class="token parameter variable">--tty</span>                  Allocate a pseudo-TTY
+  -u, 	<span class="token parameter variable">--user</span> string          Username or <span class="token environment constant">UID</span> <span class="token punctuation">(</span>format: <span class="token operator">&lt;</span>name<span class="token operator">|</span>uid<span class="token operator">></span><span class="token punctuation">[</span>:<span class="token operator">&lt;</span>group<span class="token operator">|</span>gid<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -w, 	<span class="token parameter variable">--workdir</span> string       Working directory inside the containe</code></pre>
+
+<p>常见用法：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#常见用法</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> 容器ID <span class="token function">sh</span><span class="token operator">|</span><span class="token function">bash</span>	<span class="token comment"># 进入容器，且exit退出但容器不停止</span></code></pre>
+
+<h4 id="暴露端口"><a href="#暴露端口" class="headerlink" title="暴露端口"></a>暴露端口</h4><p>端口映射的本质就是利用 NAT 技术实现的</p>
+<p>暴露所有端口，随机：大写 P</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container run <span class="token parameter variable">-P</span></code></pre>
+
+<p>暴露指定端口：小写 p</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container run <span class="token parameter variable">-p</span>
+
+<span class="token comment"># 范例</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">80</span> <span class="token parameter variable">--name</span> nginx-test-port1 nginx	<span class="token comment"># 容器80映射到宿主机随机端口</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">81</span>:80 <span class="token parameter variable">--name</span> nginx-test-port2 nginx	<span class="token comment"># 容器80端口映射到宿主机本地端口81</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">10.0</span>.0.100:82:80 <span class="token parameter variable">--name</span> nginx-test-port3 docker.io/nginx	<span class="token comment"># 指定宿主机ip</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">10.0</span>.0.100::80 <span class="token parameter variable">--name</span> nginx-test-port4 docker.io/nginx
+<span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">10.0</span>.0.100:83:80/udp <span class="token parameter variable">--name</span> nginx-test-port5 docker.io/nginx <span class="token comment">#指定udp，默认tcp</span>
+<span class="token comment"># 一次性映射多个端口+协议</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">8080</span>:80/tcp <span class="token parameter variable">-p</span> <span class="token number">8443</span>:443/tcp <span class="token parameter variable">-p</span> <span class="token number">53</span>:53/udp <span class="token parameter variable">--name</span> nginx-test-port6 nginx</code></pre>
+
+<h4 id="查看容器日志-logs"><a href="#查看容器日志-logs" class="headerlink" title="查看容器日志 logs"></a>查看容器日志 logs</h4><p>查看容器中运行的进程在控制台输出的日志信息，如果容器中的进程不在控制台输出日志，那就没办法了，所以这种方法一般不用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container logs --help</span>
+Usage:	<span class="token function">docker</span> container logs <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER
+
+Options:
+  		<span class="token parameter variable">--details</span>        	Show extra details provided to logs
+  -f, 	<span class="token parameter variable">--follow</span>         	Follow log output
+  		<span class="token parameter variable">--since</span> string      Show logs since timestamp <span class="token punctuation">(</span>e.g. <span class="token number">2013</span>-01-02T13:23:37<span class="token punctuation">)</span> or relative <span class="token punctuation">(</span>e.g. 42m <span class="token keyword">for</span> <span class="token number">42</span> minutes<span class="token punctuation">)</span>
+  		<span class="token parameter variable">--tail</span> string       Number of lines to show from the end of the logs <span class="token punctuation">(</span>default <span class="token string">"all"</span><span class="token punctuation">)</span>
+  -t, 	<span class="token parameter variable">--timestamps</span>     	Show timestamps
+  		<span class="token parameter variable">--until</span> string      Show logs before a timestamp <span class="token punctuation">(</span>e.g. <span class="token number">2013</span>-01-02T13:23:37<span class="token punctuation">)</span> or relative <span class="token punctuation">(</span>e.g. 42m <span class="token keyword">for</span> <span class="token number">42</span> minutes<span class="token punctuation">)</span></code></pre>
+
+<h4 id="传递运行命令"><a href="#传递运行命令" class="headerlink" title="传递运行命令"></a>传递运行命令</h4><p>当<code>docker run xxx</code>启动容器，如果 xxx 容器中没有常驻前台的进程，xxx 会认为没什么任务，在启动后马上退出，有的服务支持前台运行，有的不支持，如果服务不支持前台运行，我们可以启动一个常驻前台的进程，阻止容器推出，常用的方式是让容器运行<code>tail -f /etc/hosts</code>命令，注意不要监听频繁更改的文件，避免产生不必要的磁盘 IO</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># nginx前台运行，直接后台启动即可</span>
+<span class="token function">docker</span> container run <span class="token parameter variable">-d</span> nginx:1120
+<span class="token comment"># alpine没有常驻前台的进程，以下两种方式均可</span>
+<span class="token comment"># 在容器内执行`/bin/sh`，然后把容器放到宿主机后台，sh是交互式命令，所以也有常驻前台的效果</span>
+<span class="token function">docker</span> container run <span class="token parameter variable">-itd</span> alpine
+<span class="token function">docker</span> run <span class="token parameter variable">-d</span> alpine <span class="token string">'tail -f /etc/hosts'</span></code></pre>
+
+<h4 id="指定容器-DNS"><a href="#指定容器-DNS" class="headerlink" title="指定容器 DNS"></a>指定容器 DNS</h4><p>默认采用宿主机的 dns 地址，可以在 run 启动容器时指定</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># docker container run -it --dns 1.1.1.1 --dns 8.8.8.8 alpine:1119</span>
+/ <span class="token comment"># cat /etc/resolv.conf</span>
+search magedu.com
+nameserver <span class="token number">1.1</span>.1.1
+nameserver <span class="token number">8.8</span>.8.8</code></pre>
+
+<h4 id="容器内和宿主机之间复制文件-cp"><a href="#容器内和宿主机之间复制文件-cp" class="headerlink" title="容器内和宿主机之间复制文件 cp"></a>容器内和宿主机之间复制文件 cp</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker container cp --help</span>
+Usage:	<span class="token function">docker</span> container <span class="token function">cp</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER:SRC_PATH DEST_PATH
+		<span class="token function">docker</span> container <span class="token function">cp</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> SRC_PATH CONTAINER:DEST_PATH
+
+Options:
+  -a, <span class="token parameter variable">--archive</span>       Archive mode <span class="token punctuation">(</span>copy all uid/gid information<span class="token punctuation">)</span>
+  -L, --follow-link   Always follow symbol <span class="token function">link</span> <span class="token keyword">in</span> SRC_PATH</code></pre>
+
+<h4 id="使用-systemd-控制容器运行"><a href="#使用-systemd-控制容器运行" class="headerlink" title="使用 systemd 控制容器运行"></a>使用 systemd 控制容器运行</h4><p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># /lib/systemd/system/hello.service</span>
+<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>Hello World
+<span class="token assign-left variable">After</span><span class="token operator">=</span>docker.service
+<span class="token assign-left variable">Requires</span><span class="token operator">=</span>docker.service
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">TimeoutStartSec</span><span class="token operator">=</span><span class="token number">0</span>
+<span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>-/usr/bin/docker <span class="token function">kill</span> busybox-hello
+<span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>-/usr/bin/docker <span class="token function">rm</span> busybox-hello
+<span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>/usr/bin/docker pull busybox
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/bin/docker run <span class="token parameter variable">--name</span> busybox-hello busybox /bin/sh <span class="token parameter variable">-c</span> <span class="token string">"while true; do echo Hello World; sleep 1; done"</span>
+<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/usr/bin/docker <span class="token function">kill</span> busybox-hello
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target</code></pre>
+
+<h4 id="传递环境变量"><a href="#传递环境变量" class="headerlink" title="传递环境变量"></a>传递环境变量</h4><p><code>docker container -e</code> 和 <code>docker container --env-file</code></p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token punctuation">\</span>
+	<span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--name</span> mysql-test1 <span class="token punctuation">\</span>
+    <span class="token parameter variable">-v</span> /data/mysql:/var/lib/mysql <span class="token punctuation">\</span>
+    <span class="token parameter variable">-p</span> <span class="token number">3306</span>:3306 <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token assign-left variable">MYSQL_DATABASE</span><span class="token operator">=</span>wordpress <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token assign-left variable">MYSQL_USER</span><span class="token operator">=</span>wpuser <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token assign-left variable">MYSQL_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span> <span class="token punctuation">\</span>
+    mysql:5.7.30
+
+<span class="token comment"># 或</span>
+<span class="token function">docker</span> run <span class="token punctuation">\</span>
+    <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--name</span> mysql-test2 <span class="token punctuation">\</span>
+    <span class="token parameter variable">-v</span> /root/mysql/:/etc/mysql/conf.d <span class="token punctuation">\</span>
+    <span class="token parameter variable">-v</span> /data/mysql2:/var/lib/mysql <span class="token punctuation">\</span>
+    <span class="token parameter variable">-p</span> <span class="token number">3307</span>:3306 <span class="token punctuation">\</span>
+    --env-file<span class="token operator">=</span>env.list <span class="token punctuation">\</span>
+    mysql:5.7.30
+
+<span class="token function">cat</span> env.list
+<span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span>
+<span class="token assign-left variable">MYSQL_DATABASE</span><span class="token operator">=</span>wordpress
+<span class="token assign-left variable">MYSQL_USER</span><span class="token operator">=</span>wpuser
+<span class="token assign-left variable">MYSQL_PASSWORD</span><span class="token operator">=</span>wppass</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/1.2.docker%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86/" rel="prev" title="docker镜像管理">
+                  <i class="fa fa-chevron-left"></i> docker镜像管理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/2.docker%E9%95%9C%E5%83%8F%E5%88%B6%E4%BD%9C/" rel="next" title="docker镜像制作">
+                  docker镜像制作 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="磁盘结构一切皆文件：open()，read()，write()，close() 设备文件：关联至驱动程序，进而能够与对应的硬件设备进行通信 设备号码：  主设备号：major number, 标识设备类型 次设备号：minor number, 标识同一类型下的不同设备   设备类型：  块设备：block，存取设备单位“块”，磁盘等 字符设备：char，存取设备单位“字符”，键盘等  机械硬盘的结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="磁盘存储和文件系统">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%A3%81%E7%9B%98/%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="磁盘结构一切皆文件：open()，read()，write()，close() 设备文件：关联至驱动程序，进而能够与对应的硬件设备进行通信 设备号码：  主设备号：major number, 标识设备类型 次设备号：minor number, 标识同一类型下的不同设备   设备类型：  块设备：block，存取设备单位“块”，磁盘等 字符设备：char，存取设备单位“字符”，键盘等  机械硬盘的结">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597737342339.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597843069614.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597843135650.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597750164277.png">
+<meta property="og:image" content="https://s1.ax1x.com/2020/08/18/dKTrWj.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597841934404.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597751158479.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597846560522.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613137329211.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597908144289.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925562640.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925584778.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925609938.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925619610.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925634961.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925647457.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925705105.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925717387.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597925729291.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1597932121999.png">
+<meta property="article:published_time" content="2020-12-09T14:36:00.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.510Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="磁盘管理">
+<meta property="article:tag" content="文件系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1597737342339.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%A3%81%E7%9B%98/%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%A3%81%E7%9B%98/%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/","path":"运维/基础/磁盘/磁盘存储和文件系统/","title":"磁盘存储和文件系统"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>磁盘存储和文件系统 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">磁盘结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">创建设备文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%8C%BA%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">分区类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%99%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%B7%BB%E5%8A%A0%E7%A1%AC%E7%9B%98"><span class="nav-number">2.1.</span> <span class="nav-text">给虚拟机添加硬盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MBR"><span class="nav-number">2.2.</span> <span class="nav-text">MBR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPT"><span class="nav-number">2.3.</span> <span class="nav-text">GPT</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">3.</span> <span class="nav-text">磁盘常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#df"><span class="nav-number">3.1.</span> <span class="nav-text">df</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#du"><span class="nav-number">3.2.</span> <span class="nav-text">du</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dd"><span class="nav-number">3.3.</span> <span class="nav-text">dd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%88%86%E5%8C%BA"><span class="nav-number">4.</span> <span class="nav-text">管理分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lsblk"><span class="nav-number">4.1.</span> <span class="nav-text">lsblk</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#blkid"><span class="nav-number">4.2.</span> <span class="nav-text">blkid</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fdisk"><span class="nav-number">4.3.</span> <span class="nav-text">fdisk</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E5%8A%A0%E8%BD%BD%E5%88%86%E5%8C%BA%E8%A1%A8"><span class="nav-number">4.4.</span> <span class="nav-text">重新加载分区表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gdisk"><span class="nav-number">4.5.</span> <span class="nav-text">gdisk</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#parted"><span class="nav-number">4.6.</span> <span class="nav-text">parted</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.</span> <span class="nav-text">管理文件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%BB%84%E6%88%90"><span class="nav-number">5.1.</span> <span class="nav-text">文件系统组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E7%BA%A7%E5%9D%97%E5%92%8C-inode-table"><span class="nav-number">5.2.</span> <span class="nav-text">超级块和 inode table</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mkfs"><span class="nav-number">5.3.</span> <span class="nav-text">mkfs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tune2fs-%E3%80%81dumpefs%E3%80%81xfs-info"><span class="nav-number">5.4.</span> <span class="nav-text">tune2fs 、dumpefs、xfs_info</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fsck%E3%80%81e2fsck%E3%80%81xfs-repair"><span class="nav-number">5.5.</span> <span class="nav-text">fsck、e2fsck、xfs_repair</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%82%E8%BD%BD%E8%AE%BE%E5%A4%87"><span class="nav-number">6.</span> <span class="nav-text">挂载设备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mount"><span class="nav-number">6.1.</span> <span class="nav-text">mount</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mount-o-options"><span class="nav-number">6.1.1.</span> <span class="nav-text">mount -o options</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#umount"><span class="nav-number">6.2.</span> <span class="nav-text">umount</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#findmnt"><span class="nav-number">6.3.</span> <span class="nav-text">findmnt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lsof%E3%80%81fuser"><span class="nav-number">6.4.</span> <span class="nav-text">lsof、fuser</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E6%8C%82%E8%BD%BD"><span class="nav-number">6.5.</span> <span class="nav-text">持久挂载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86-swap-%E7%A9%BA%E9%97%B4"><span class="nav-number">7.</span> <span class="nav-text">管理 swap 空间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E5%88%86%E5%8C%BA%E5%AE%9E%E7%8E%B0%E8%BF%87%E7%A8%8B"><span class="nav-number">7.1.</span> <span class="nav-text">交换分区实现过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#swap-%E7%9A%84%E4%BD%BF%E7%94%A8%E7%AD%96%E7%95%A5"><span class="nav-number">7.2.</span> <span class="nav-text">swap 的使用策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-%E7%AE%A1%E7%90%86"><span class="nav-number">8.</span> <span class="nav-text">RAID 管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#raid0"><span class="nav-number">8.1.</span> <span class="nav-text">raid0</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid-1"><span class="nav-number">8.2.</span> <span class="nav-text">raid 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid-4"><span class="nav-number">8.3.</span> <span class="nav-text">raid 4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid-5"><span class="nav-number">8.4.</span> <span class="nav-text">raid 5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid-6"><span class="nav-number">8.5.</span> <span class="nav-text">raid 6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid-10"><span class="nav-number">8.6.</span> <span class="nav-text">raid 10</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid-50"><span class="nav-number">8.7.</span> <span class="nav-text">raid 50</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid-60"><span class="nav-number">8.8.</span> <span class="nav-text">raid 60</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JBOD"><span class="nav-number">8.9.</span> <span class="nav-text">JBOD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#raid7"><span class="nav-number">8.10.</span> <span class="nav-text">raid7</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9E%E7%8E%B0-raid"><span class="nav-number">8.11.</span> <span class="nav-text">软件实现 raid</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LVM-%E7%AE%A1%E7%90%86%E5%92%8C-LVM-%E5%BF%AB%E7%85%A7"><span class="nav-number">9.</span> <span class="nav-text">LVM 管理和 LVM 快照</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%9C%AF%E8%AF%AD%E5%87%86%E5%A4%87"><span class="nav-number">9.1.</span> <span class="nav-text">基本术语准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E8%BF%87%E7%A8%8B"><span class="nav-number">9.2.</span> <span class="nav-text">实现过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85-lvm2-%E5%8C%85"><span class="nav-number">9.2.1.</span> <span class="nav-text">1. 安装 lvm2 包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%B0%86%E8%AE%BE%E5%A4%87%E6%8C%87%E5%AE%9A%E4%B8%BA%E7%89%A9%E7%90%86%E5%8D%B7"><span class="nav-number">9.2.2.</span> <span class="nav-text">2. 将设备指定为物理卷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E7%94%A8%E4%B8%80%E4%B8%AA%E6%88%96%E5%A4%9A%E4%B8%AA%E7%89%A9%E7%90%86%E5%8D%B7%E6%9D%A5%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%8D%B7%E7%BB%84"><span class="nav-number">9.2.3.</span> <span class="nav-text">3. 用一个或多个物理卷来创建一个卷组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E5%9C%A8%E5%8D%B7%E7%BB%84%E4%B8%8A%E5%88%9B%E5%BB%BA%E9%80%BB%E8%BE%91%E5%8D%B7"><span class="nav-number">9.2.4.</span> <span class="nav-text">4. 在卷组上创建逻辑卷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E5%9C%A8%E9%80%BB%E8%BE%91%E5%8D%B7%E4%B8%8A%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%B9%B6%E6%8C%82%E8%BD%BD"><span class="nav-number">9.2.5.</span> <span class="nav-text">5. 在逻辑卷上创建文件系统并挂载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E8%B7%A8%E4%B8%BB%E6%9C%BA%E8%BF%81%E7%A7%BB%E5%8D%B7%E7%BB%84"><span class="nav-number">9.2.6.</span> <span class="nav-text">6. 跨主机迁移卷组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-%E6%8B%86%E9%99%A4%E6%8C%87%E5%AE%9A%E7%9A%84-pv-%E5%AD%98%E5%82%A8%E8%AE%BE%E5%A4%87"><span class="nav-number">9.2.7.</span> <span class="nav-text">7. 拆除指定的 pv 存储设备</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E5%8D%B7%E5%BF%AB%E7%85%A7"><span class="nav-number">9.3.</span> <span class="nav-text">逻辑卷快照</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%A3%81%E7%9B%98/%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="磁盘存储和文件系统 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          磁盘存储和文件系统
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:36:00" itemprop="dateCreated datePublished" datetime="2020-12-09T22:36:00+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%A3%81%E7%9B%98/" itemprop="url" rel="index"><span itemprop="name">磁盘</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="磁盘结构"><a href="#磁盘结构" class="headerlink" title="磁盘结构"></a>磁盘结构</h2><p><strong>一切皆文件</strong>：open()，read()，write()，close()</p>
+<p>设备文件：关联至驱动程序，进而能够与对应的硬件设备进行通信</p>
+<p><strong>设备号码</strong>：</p>
+<ul>
+<li>主设备号：major number, 标识设备类型</li>
+<li>次设备号：minor number, 标识同一类型下的不同设备</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597737342339.png"></p>
+<p><strong>设备类型</strong>：</p>
+<ul>
+<li>块设备：block，存取设备单位“块”，磁盘等</li>
+<li>字符设备：char，存取设备单位“字符”，键盘等</li>
+</ul>
+<p>机械硬盘的结构有两种，如下图所示：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597843069614.png" style="zoom:50%;" /> <img data-src="//img.to2b.cn/blog/ljk/1597843135650.png" style="zoom:50%;" /></p>
+<p>硬盘寻址方式有两种：CHS 和 LBA</p>
+<p>CHS：24 bit 位寻址，其中前 10 位表示柱面,中间 8 位表示磁头,后面 6 位表示扇区，最大寻址空间 8 GB</p>
+<p>LBA：逻辑块寻址，LBA 是一个整数，表示从第几个扇区开始，到第几个扇区结束就完了，没有柱面磁头等概念，扇区这个概念也是逻辑上的，一个扇区通常是 512 个字节</p>
+<h3 id="创建设备文件"><a href="#创建设备文件" class="headerlink" title="创建设备文件"></a>创建设备文件</h3><p>如果两个设备文件的类型、主次号码都相同，那这俩就是同一个设备</p>
+<p>touch 创建普通文件，mknod 创建设备文件，删除用 rm，不能 cp 直接拷贝，如果要拷贝，使用<code>cp -a</code>保留属性即可拷贝</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ll /dev/null /dev/zero</span>
+crw-rw-rw-. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">3</span> Aug <span class="token number">18</span> <span class="token number">14</span>:39 /dev/null
+crw-rw-rw-. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">5</span> Aug <span class="token number">18</span> <span class="token number">14</span>:39 /dev/zero
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#mknod ./testnull c 1 3</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#mknod ./testzero c 1 5</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ll</span>
+total <span class="token number">0</span>
+crw-r--r--. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">3</span> Aug <span class="token number">18</span> <span class="token number">17</span>:16 testnull
+crw-r--r--. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">5</span> Aug <span class="token number">18</span> <span class="token number">17</span>:17 testzero</code></pre>
+
+<h2 id="分区类型"><a href="#分区类型" class="headerlink" title="分区类型"></a>分区类型</h2><p>两种分区方式：mbr、gpt</p>
+<h3 id="给虚拟机添加硬盘"><a href="#给虚拟机添加硬盘" class="headerlink" title="给虚拟机添加硬盘"></a>给虚拟机添加硬盘</h3><p>虚拟机-&gt;添加-&gt;硬盘-&gt;scsi-&gt;虚拟硬盘-&gt;单个文件-&gt;完成</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> - - - <span class="token operator">></span> /sys/class/scsi_host/host0/scan
+<span class="token comment"># 如果lsblk还不显示，再试试host1和host2</span></code></pre>
+
+<h3 id="MBR"><a href="#MBR" class="headerlink" title="MBR"></a>MBR</h3><p>mbr 最多四个主分区，可以 3 个主分区+1 扩展分区（N 个逻辑分区）</p>
+<p>主分区和扩展分区对应 1~4，&#x2F;dev&#x2F;sda3，逻辑分区从 5 开始，&#x2F;dev&#x2F;sda5</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597750164277.png"></p>
+<p>每个分区项占 16 个字节。</p>
+<ul>
+<li>第 1 个字节：活动分区启动计算机，非活动分区只是数据分区，所以四个分区只有一个 80，其他三个都是 00。</li>
+<li>第 2、3、4 个字节：这三个字节说明分区在硬盘上的起始位置，CHS 寻址。</li>
+<li>第 5 个字节：说明分区是否使用，0 表示未使用。</li>
+<li>第 6、7、8 个字节：这三个字节说明分区在硬盘上的结束位置，CHS 寻址。我们现在已经不使用 CHS 寻址了，虽然仍然给它保留了位置。</li>
+<li>第 9、10、11、12 个字节：这四个字节说明分区在硬盘上的起始位置，LBA 寻址。</li>
+<li>第 12、13、14、15、16 个字节：最后这四个字节说明分区在硬盘上的结束位置，LBA 寻址。按照每个扇区 512 个字节计算，4 个字节 32 位最多表示 2^32*512&#x3D;2199023255552 字节&#x3D;2T，所以 mbr 下 LBA 的寻址范围最大就是 2T，所以 mbr 分区的硬盘容量最大 2T，注意是硬盘 2T，不是分区 2T。</li>
+</ul>
+<p>逻辑分区的分区信息储存在自己的分区内，所以逻辑分区可以有无数个。具体分区信息看图：</p>
+<p><img data-src="https://s1.ax1x.com/2020/08/18/dKTrWj.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597841934404.png"></p>
+<p><code>hexdump -C /dev/sda -n 512</code> 查看硬盘的前 512 个字节，55 aa 这两个字节是结束标志位，高亮的 64 个字节是分区表，每 16 个字节是一个分区项</p>
+<p>mbr 中的分区表 DPT：<br><img data-src="//img.to2b.cn/blog/ljk/1597751158479.png"></p>
+<h3 id="GPT"><a href="#GPT" class="headerlink" title="GPT"></a>GPT</h3><p>gpt 支持 128 个分区，一般来说，windows 只能是 bios+mbr 或者 uefi+gpt 的组合，而 Linux 可以 bios+gpt 通过 grub 启动</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597846560522.png"></p>
+<h2 id="磁盘常用命令"><a href="#磁盘常用命令" class="headerlink" title="磁盘常用命令"></a>磁盘常用命令</h2><h3 id="df"><a href="#df" class="headerlink" title="df"></a>df</h3><p>查看文件系统空间实际占用等信息</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>FILE<span class="token punctuation">]</span><span class="token punctuation">..</span>.</code></pre>
+
+<ul>
+<li>-H 进制为 1000，而不是 1024</li>
+<li>-T 显示文件系统类型</li>
+<li>-h human-readable</li>
+<li>-i 查看 inodes 的使用情况</li>
+<li>-P 以 Posix 兼容的格式输出</li>
+</ul>
+<h3 id="du"><a href="#du" class="headerlink" title="du"></a>du</h3><p>查看某目录总体空间实际占用状态</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">du</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. DIR</code></pre>
+
+<ul>
+<li>-h human-readable</li>
+<li>-s summary 只显示目录占用的空间，不一一列出目录下所有的文件</li>
+<li>–max-depth&#x3D;# 指定显示的目录层级，该选项和-s 冲突</li>
+<li>-x 忽略不在同一个文件系统的目录</li>
+</ul>
+<p>问题：如果 df 和 du 统计的结果差距过大，是为什么？</p>
+<pre class="language-none"><code class="language-none">如果差距比较小，只有几十或者几十百m，是正常情况。如果差距过大，则是因为删除大文件导致。df直接统计分区，du对目录下的文件逐个统计，如果删除大文件，但是还有进程引用这个文件，此时df还会统计到它，而du是统计不到它的，这样就会造成df和du统计的结果差距过大
+
+解决方法：&#96;lsof | grep delete&#96; 找出占用已删除文件的进程，然后杀掉就行了</code></pre>
+
+<h3 id="dd"><a href="#dd" class="headerlink" title="dd"></a>dd</h3><p>从目标文件 1 拷贝内容写入到目标文件 2</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/<span class="token environment constant">PATH</span>/FROM/SRC <span class="token assign-left variable">of</span><span class="token operator">=</span>/<span class="token environment constant">PATH</span>/TO/DEST <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token comment"># count=#</span></code></pre>
+
+<ul>
+<li>if&#x3D;file1：in file &#x3D; file1 从 file1 读取内容</li>
+<li>of&#x3D;file2：out file&#x3D;file2 将读取的内容写入到 file2</li>
+<li>bs&#x3D;size：block size 指定块的大小，默认单位是字节</li>
+<li>count&#x3D;# 读取#个块，如果要读取 1G 的内容，可以<code>bs=1024M count=1</code>，也可以<code>bs=1M count=1024</code>，或者<code>bs=64M count=16</code>。不指定 bs 和 count，可以理解为备份</li>
+<li>skip&#x3D;# 读 file1 的时候，忽略前#个块，从#+1 个块开始读取</li>
+<li>seek&#x3D;# 写 file2 的时候，忽略前#个块，从#+1 个块开始写入</li>
+<li>conv&#x3D;conversion[,conversion…] 用指定的参数转换文件<ul>
+<li>conversion 转换参数:</li>
+<li>ascii 转换 EBCDIC 为 ASCII</li>
+<li>ebcdic 转换 ASCII 为 EBCDIC</li>
+<li>lcase 把大写字符转换为小写字符</li>
+<li>ucase 把小写字符转换为大写字符</li>
+<li>nocreat 不创建输出文件</li>
+<li>noerror 出错时不停止</li>
+<li>notrunc 不截短输出文件，file2 被写入内容的位置开始，默认先截断成 0 字节大小，这个参数可以保证不截断。例如 file2 内容是 123456789，从开头位置写入 ab，默认从开头往后，都截断成 0 字节，然后再写入 ab，添加 notrunc 参数，写完后是 ab3456789。</li>
+<li>sync 把每个输入块填充到 ibs 个字节，不足部分用空(NUL)字符补齐</li>
+<li>fdatasync 写完成前，物理写入输出文件</li>
+</ul>
+</li>
+</ul>
+<p>范例:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#备份MBR</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">of</span><span class="token operator">=</span>/tmp/mbr.bak <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">512</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span>
+
+<span class="token comment">#破坏MBR中的bootloader</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">seek</span><span class="token operator">=</span><span class="token number">446</span>
+
+<span class="token comment">#有一个大与2K的二进制文件fileA。现在想从第64个字节位置开始读取，需要读取的大小是128Byts。又有fileB, 想把上面读取到的128Bytes写到第32个字节开始的位置，替换128Bytes，实现如下</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>fileA <span class="token assign-left variable">of</span><span class="token operator">=</span>fileB <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">128</span> <span class="token assign-left variable">skip</span><span class="token operator">=</span><span class="token number">63</span> <span class="token assign-left variable">seek</span><span class="token operator">=</span><span class="token number">31</span> <span class="token assign-left variable">conv</span><span class="token operator">=</span>notrunc
+
+<span class="token comment">#将本地的/dev/sdx整盘备份到/dev/sdy</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sdx <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdy
+
+<span class="token comment">#将/dev/sdx全盘数据备份到指定路径的image文件</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sdx <span class="token assign-left variable">of</span><span class="token operator">=</span>/path/to/image
+
+<span class="token comment">#备份/dev/sdx全盘数据，并利用gzip压缩，保存到指定路径</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sdx <span class="token operator">|</span> <span class="token function">gzip</span> <span class="token operator">></span>/path/to/image.gz
+
+<span class="token comment">#将备份文件恢复到指定盘</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/path/to/image <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdx
+
+<span class="token comment">#将压缩的备份文件恢复到指定盘</span>
+<span class="token function">gzip</span> <span class="token parameter variable">-dc</span> /path/to/image.gz <span class="token operator">|</span> <span class="token function">dd</span> <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdx
+
+<span class="token comment">#将内存里的数据拷贝到root目录下的mem.bin文件</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/mem <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/mem.bin <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1024</span>
+
+<span class="token comment">#拷贝光盘数据到root文件夹下，并保存为cdrom.iso文件</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/cdrom <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/cdrom.iso
+
+<span class="token comment">#销毁磁盘数据</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/urandom <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sda1
+
+<span class="token comment">#通过比较dd指令输出中命令的执行时间，即可确定系统最佳的block size大小</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1000000</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">2048</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">500000</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">4096</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">250000</span>
+
+<span class="token comment">#测试硬盘写速度</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1000000</span>
+
+<span class="token comment">#测试硬盘读速度</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span>64k <span class="token operator">|</span> <span class="token function">dd</span> <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/null</code></pre>
+
+<p>练习：</p>
+<ol>
+<li>创建一个 2G 的文件系统，块大小为 2048byte，预留 1%可用空间,文件系统 ext4，卷标为 TEST，要求<br>此分区开机后自动挂载至&#x2F;test 目录，且默认有 acl 挂载选项</li>
+<li>写一个脚本，完成如下功能：<br>(1) 列出当前系统识别到的所有磁盘设备<br>(2) 如磁盘数量为 1，则显示其空间使用信息<br>否则，则显示最后一个磁盘上的空间使用信息</li>
+<li>将 CentOS6 的 CentOS-6.10-x86_64-bin-DVD1.iso 和 CentOS-6.10-x86_64-bin-DVD2.iso 两个文件，<br>合并成一个 CentOS-6.10-x86_64-Everything.iso 文件，并将其配置为 yum 源</li>
+</ol>
+<h2 id="管理分区"><a href="#管理分区" class="headerlink" title="管理分区"></a>管理分区</h2><h3 id="lsblk"><a href="#lsblk" class="headerlink" title="lsblk"></a>lsblk</h3><p>列出块设备</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lsblk <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>device<span class="token operator">></span> <span class="token punctuation">..</span>.<span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li>-f：列出文件系统相关信息</li>
+</ul>
+<h3 id="blkid"><a href="#blkid" class="headerlink" title="blkid"></a>blkid</h3><p>查看块设备（包括交换分区）所使用的文件系统类型、LABEL、UUID 等信息</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">blkid <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>DEVICE<span class="token punctuation">]</span></code></pre>
+
+<p>-U UUID 根据指定的 UUID 来查找对应的设备<br>-L LABEL 根据指定的 LABEL 来查找对应的设备</p>
+<h3 id="fdisk"><a href="#fdisk" class="headerlink" title="fdisk"></a>fdisk</h3><p>管理 mbr 分区。交互式，根据提示操作即可。</p>
+<pre class="language-none"><code class="language-none">m：查看帮助
+p：查看分区
+n：增加分区
+d：删除分区
+w：保存并退出
+q：不保存并退出</code></pre>
+
+<p>对硬盘进行分区操作，如果硬盘上已有其他已经挂载的分区，w 保存操作后，centos7 及以前的系统识别不到分区更改，需要手动通知内核重新读取硬盘分区表</p>
+<p>硬盘增加分区，前提是硬盘要有未分配的空间</p>
+<h3 id="重新加载分区表"><a href="#重新加载分区表" class="headerlink" title="重新加载分区表"></a>重新加载分区表</h3><p>centos7 和 centos5：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">partprobe</code></pre>
+
+<p>centos6：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 增加分区</span>
+partx <span class="token parameter variable">-a</span> /dev/DEVICE
+<span class="token comment"># 删除分区</span>
+partx <span class="token parameter variable">-d</span> <span class="token parameter variable">--nr</span> M-N /dev/DEVICE</code></pre>
+
+<h3 id="gdisk"><a href="#gdisk" class="headerlink" title="gdisk"></a>gdisk</h3><p>管理 gpt 分区，操作和 fdisk 雷同</p>
+<h3 id="parted"><a href="#parted" class="headerlink" title="parted"></a>parted</h3><p>高级分区操作，可以使交互式或非交互式，parted 的操作都是实时生效的，所以一般不用</p>
+<h2 id="管理文件系统"><a href="#管理文件系统" class="headerlink" title="管理文件系统"></a>管理文件系统</h2><h3 id="文件系统组成"><a href="#文件系统组成" class="headerlink" title="文件系统组成"></a>文件系统组成</h3><p>以 ls 命令为例，它的作用是列出文件，它并不会与 ext4、xfs 等文件系统直接交互，而是和 vfs 进行交互，由 vfs 处理各种文件系统的兼容性</p>
+<ul>
+<li>内核中的模块：ext4, xfs, vfat</li>
+<li>Linux 的虚拟文件系统：VFS</li>
+<li>用户空间的管理工具：mkfs.ext4、mkfs.xfs、mkfs.vfat</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613137329211.png"></p>
+<p>新硬盘，先 fdisk 分区，然后 mkfs 创建文件系统，最后 mount 挂载</p>
+<p>文件系统是操作系统用于明确存储设备或分区上的文件的方法和数据结构；即在存储设备上组织文件的方法。操作系统中负责管理和存储文件信息的软件结构称为文件管理系统，简称文件系统从系统角度来看，文件系统是对文件存储设备的空间进行组织和分配，负责文件存储并对存入的文件进行保护和检索的系统。具体地说，它负责为用户建立文件，存入、读出、修改、转储文件，控制文件的存取，安全控制，日志，压缩，加密等</p>
+<p>当前系统支持的文件系统：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/kernel-3.10.0-1127.el7.x86_64</span></code></pre>
+
+<p>上面显示的不全，我不知道为什么，通过查看内核包可以看到所有支持的文件系统，每个 xz 压缩包都是对应文件系统的驱动。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># centos7</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/</span>
+kernel-3.10.0-1127.el7.x86_64
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># rpm -ql `!!` | grep '/fs/'</span>
+<span class="token function">rpm</span> <span class="token parameter variable">-ql</span> <span class="token variable"><span class="token variable">`</span><span class="token function">rpm</span> <span class="token parameter variable">-qf</span> /lib/modules/3.10.0-1127.el7.x86_64/<span class="token variable">`</span></span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'/fs/'</span>
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/binfmt_misc.ko.xz
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/btrfs
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/btrfs/btrfs.ko.xz
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cachefiles
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cachefiles/cachefiles.ko.xz
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/ceph
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/ceph/ceph.ko.xz
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cifs
+/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cifs/cifs.ko.xz
+<span class="token punctuation">..</span>.
+<span class="token punctuation">..</span>.
+
+<span class="token comment"># ubuntu18.04</span>
+lujinkai@Z510:~$ dpkg <span class="token parameter variable">-S</span> /lib/modules/5.4.0-42-generic/kernel/fs/
+linux-modules-extra-5.4.0-42-generic, linux-modules-5.4.0-42-generic: /lib/modules/5.4.0-42-generic/kernel/fs
+lujinkai@Z510:~$ dpkg <span class="token parameter variable">-L</span> linux-modules-extra-5.4.0-42-generic <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'/fs/'</span>
+/lib/modules/5.4.0-42-generic/kernel/fs/9p
+/lib/modules/5.4.0-42-generic/kernel/fs/adfs
+/lib/modules/5.4.0-42-generic/kernel/fs/adfs/adfs.ko
+/lib/modules/5.4.0-42-generic/kernel/fs/affs
+/lib/modules/5.4.0-42-generic/kernel/fs/affs/affs.ko
+/lib/modules/5.4.0-42-generic/kernel/fs/afs
+/lib/modules/5.4.0-42-generic/kernel/fs/afs/kafs.ko
+/lib/modules/5.4.0-42-generic/kernel/fs/aufs
+/lib/modules/5.4.0-42-generic/kernel/fs/autofs
+/lib/modules/5.4.0-42-generic/kernel/fs/befs
+/lib/modules/5.4.0-42-generic/kernel/fs/befs/befs.ko
+/lib/modules/5.4.0-42-generic/kernel/fs/bfs
+/lib/modules/5.4.0-42-generic/kernel/fs/bfs/bfs.ko
+<span class="token punctuation">..</span>.
+<span class="token punctuation">..</span>.
+<span class="token punctuation">..</span>.</code></pre>
+
+<p>或者查看 &#x2F;proc&#x2F;filesystems，nodev 标注的文件系统不需要块文件，也就是说不需要硬盘，文件就可以</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># cat /proc/filesystems</span>
+nodev	sysfs
+nodev	rootfs
+nodev	ramfs
+nodev	bdev
+nodev	proc
+nodev	cgroup
+nodev	cpuset
+nodev	tmpfs
+nodev	devtmpfs
+nodev	debugfs
+nodev	securityfs
+nodev	sockfs
+nodev	dax
+nodev	bpf
+nodev	pipefs
+nodev	configfs
+nodev	devpts
+nodev	hugetlbfs
+nodev	autofs
+nodev	pstore
+nodev	mqueue
+nodev	selinuxfs
+	xfs
+	iso9660
+	ext3
+	ext2
+	ext4
+	vfat
+</code></pre>
+
+<h3 id="超级块和-inode-table"><a href="#超级块和-inode-table" class="headerlink" title="超级块和 inode table"></a>超级块和 inode table</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># mkfs.ext4 /dev/sdb5</span>
+<span class="token function">mke2fs</span> <span class="token number">1.42</span>.9 <span class="token punctuation">(</span><span class="token number">28</span>-Dec-2013<span class="token punctuation">)</span>
+Filesystem <span class="token assign-left variable">label</span><span class="token operator">=</span>
+OS type: Linux
+Block <span class="token assign-left variable">size</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token punctuation">(</span>log<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span>
+Fragment <span class="token assign-left variable">size</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token punctuation">(</span>log<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span>
+<span class="token assign-left variable">Stride</span><span class="token operator">=</span><span class="token number">0</span> blocks, Stripe <span class="token assign-left variable">width</span><span class="token operator">=</span><span class="token number">0</span> blocks
+<span class="token number">128016</span> inodes, <span class="token number">512000</span> blocks
+<span class="token number">25600</span> blocks <span class="token punctuation">(</span><span class="token number">5.00</span>%<span class="token punctuation">)</span> reserved <span class="token keyword">for</span> the super user
+First data <span class="token assign-left variable">block</span><span class="token operator">=</span><span class="token number">1</span>
+Maximum filesystem <span class="token assign-left variable">blocks</span><span class="token operator">=</span><span class="token number">34078720</span>
+<span class="token number">63</span> block <span class="token function">groups</span>
+<span class="token number">8192</span> blocks per group, <span class="token number">8192</span> fragments per group
+<span class="token number">2032</span> inodes per group
+Superblock backups stored on blocks:
+	<span class="token number">8193</span>, <span class="token number">24577</span>, <span class="token number">40961</span>, <span class="token number">57345</span>, <span class="token number">73729</span>, <span class="token number">204801</span>, <span class="token number">221185</span>, <span class="token number">401409</span>
+
+Allocating group tables: <span class="token keyword">done</span>
+Writing inode tables: <span class="token keyword">done</span>
+Creating journal <span class="token punctuation">(</span><span class="token number">8192</span> blocks<span class="token punctuation">)</span>: <span class="token keyword">done</span>
+Writing superblocks and filesystem accounting information: <span class="token keyword">done</span></code></pre>
+
+<p>文件系统把每个分区分成多个块组（block group），每个块组中有很多块，每个块的大小通常为 4K，具体块组的组成看下图。超级块（super block）中存储了所有块组的元数据，超级块存储在块组 0 中，并在其他部分块组有备份；块组描述符表（GDT）是块组描述符的集合，和超级组一样，也是储存块组 0 中，在其他部分块组中备份；块位图（block bitmap）描述了块的使用情况；节点位图（inode bitmap）描述了节点的使用情况。节点表（inode table）存储节点；数据块（data blocks）存储数据</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597908144289.png"></p>
+<p><strong>块组描述符</strong><br>Ext3 文件系统的每个块组描述符占用 32 字节，用以描述块组中的位图起始地址、i-节点表起始地址、空闲块数、空闲 i-节点数等信息，每个块组都有这样的一个块组描述符，所有的块组描述符集中存放，组成块组描述符表。</p>
+<h3 id="mkfs"><a href="#mkfs" class="headerlink" title="mkfs"></a>mkfs</h3><p>创建文件系统</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.FS_TYPE /dev/DEVICE</code></pre>
+
+<p>FS_TYPE：ext4、xfs 等，具体 tab 可以提示</p>
+<h3 id="tune2fs-、dumpefs、xfs-info"><a href="#tune2fs-、dumpefs、xfs-info" class="headerlink" title="tune2fs 、dumpefs、xfs_info"></a>tune2fs 、dumpefs、xfs_info</h3><p>tune2fs 查看超级块信息，dumpe2fs 查看超级块和各个块组的信息，tune2fs 和 dump2fs 只适用于 ext 文件系统，xfs 文件系统使用 xfs_info 命令</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># tune2fs -l /dev/sdb5</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># dumpe2fs /dev/sdb5</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># xfs_info /dev/sda1</span></code></pre>
+
+<h3 id="fsck、e2fsck、xfs-repair"><a href="#fsck、e2fsck、xfs-repair" class="headerlink" title="fsck、e2fsck、xfs_repair"></a>fsck、e2fsck、xfs_repair</h3><p>tune2fs、dumpe2fs 查看分区的 ext 文件系统信息，Filesystem state 标记为 no clean，说明文件系统发生故障。使用 e2fsck 可以修复。如果是 xfs 文件系统发生故障，使用 xfs_repair 修改。fsck 通用，不管什么文件系统都可以修复</p>
+<p>注意：1. 修复之前一定要 umount 先取消挂载</p>
+<ol start="2">
+<li>数据不一定能恢复</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash">fsck.FS_TYPE  /dev/DEVICE
+e2fsck  /dev/DEVICE
+xfs_repair /dev/DEVICE</code></pre>
+
+<h2 id="挂载设备"><a href="#挂载设备" class="headerlink" title="挂载设备"></a>挂载设备</h2><h3 id="mount"><a href="#mount" class="headerlink" title="mount"></a>mount</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mount</span>  device MOUNT_POINT
+
+<span class="token function">mount</span> <span class="token punctuation">[</span>-lhV<span class="token punctuation">]</span>
+<span class="token function">mount</span> <span class="token parameter variable">-a</span> <span class="token punctuation">[</span>-fFnrsvw<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t vfstype<span class="token punctuation">]</span> <span class="token punctuation">[</span>-O optlist<span class="token punctuation">]</span>
+<span class="token function">mount</span> <span class="token punctuation">[</span>-fnrsvw<span class="token punctuation">]</span> <span class="token punctuation">[</span>-o option<span class="token punctuation">[</span>,option<span class="token punctuation">]</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span>  device<span class="token operator">|</span><span class="token function">dir</span>
+<span class="token function">mount</span> <span class="token punctuation">[</span>-fnrsvw<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t vfstype<span class="token punctuation">]</span> <span class="token punctuation">[</span>-o options<span class="token punctuation">]</span> device <span class="token function">dir</span></code></pre>
+
+<p>device：设备文件:例如:&#x2F;dev&#x2F;sda5、伪文件系统名称:proc, sysfs, devtmpfs, configfs</p>
+<p>MOUNT_POINT：挂载点目录必须事先存在,建议使用空目录</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看当前已挂载的所有设备</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># mount</span>
+sysfs on /sys <span class="token builtin class-name">type</span> sysfs <span class="token punctuation">(</span>rw,nosuid,nodev,noexec,relatime,seclabel<span class="token punctuation">)</span>
+proc on /proc <span class="token builtin class-name">type</span> proc <span class="token punctuation">(</span>rw,nosuid,nodev,noexec,relatime<span class="token punctuation">)</span>
+devtmpfs on /dev <span class="token builtin class-name">type</span> devtmpfs <span class="token punctuation">(</span>rw,nosuid,seclabel,size<span class="token operator">=</span>487128k,nr_inodes<span class="token operator">=</span><span class="token number">121782</span>,mode<span class="token operator">=</span><span class="token number">755</span><span class="token punctuation">)</span>
+securityfs on /sys/kernel/security <span class="token builtin class-name">type</span> securityfs <span class="token punctuation">(</span>rw,nosuid,nodev,noexec,relatime<span class="token punctuation">)</span>
+tmpfs on /dev/shm <span class="token builtin class-name">type</span> tmpfs <span class="token punctuation">(</span>rw,nosuid,nodev,seclabel<span class="token punctuation">)</span>
+devpts on /dev/pts <span class="token builtin class-name">type</span> devpts <span class="token punctuation">(</span>rw,nosuid,noexec,relatime,seclabel,gid<span class="token operator">=</span><span class="token number">5</span>,mode<span class="token operator">=</span><span class="token number">620</span>,ptmxmode<span class="token operator">=</span>000<span class="token punctuation">)</span>
+<span class="token punctuation">..</span>.
+<span class="token punctuation">..</span>.
+<span class="token punctuation">..</span>.
+<span class="token comment"># 通过查看/etc/mtab文件显示当前已挂载的所有设备</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># ll /etc/mtab</span>
+lrwxrwxrwx. <span class="token number">1</span> root root <span class="token number">17</span> Aug <span class="token number">14</span> <span class="token number">19</span>:22 /etc/mtab -<span class="token operator">></span> /proc/self/mounts
+
+<span class="token comment"># 查看内核追踪到的已挂载的所有设备</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># ll /proc/mounts</span>
+lrwxrwxrwx. <span class="token number">1</span> root root <span class="token number">11</span> Aug <span class="token number">20</span> <span class="token number">18</span>:06 /proc/mounts -<span class="token operator">></span> self/mounts</code></pre>
+
+<h4 id="mount-o-options"><a href="#mount-o-options" class="headerlink" title="mount -o options"></a><code>mount -o options</code></h4><p>挂载不同的文件系统，-o 的 options 是不同的，具体有哪些 option，参考对应的文件系统的挂载选项，例如：要挂载 nfs，<code>man mount.nfs</code> 查看对应 option，要挂载 cifs，<code>man mount.cifs</code>查看对应的 option …</p>
+<h3 id="umount"><a href="#umount" class="headerlink" title="umount"></a>umount</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">umount</span> MOUNT_POINT<span class="token operator">|</span>device</code></pre>
+
+<h3 id="findmnt"><a href="#findmnt" class="headerlink" title="findmnt"></a>findmnt</h3><p>查看挂载点信息</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">findmnt MOUNT_POINT<span class="token operator">|</span>device</code></pre>
+
+<h3 id="lsof、fuser"><a href="#lsof、fuser" class="headerlink" title="lsof、fuser"></a>lsof、fuser</h3><p>查看正在访问指定文件系统的进程</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">lsof</span> MOUNT_POINT</code></pre>
+
+<p>终止所有正在访问指定挂载点的进程</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">fuser</span> <span class="token parameter variable">-km</span> MOUNT_POINT</code></pre>
+
+<h3 id="持久挂载"><a href="#持久挂载" class="headerlink" title="持久挂载"></a>持久挂载</h3><p>mount 命令是临时挂载，将挂载信息写入到&#x2F;etc&#x2F;fstab 中可以下次开机时自动启用挂载。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># cat /etc/fstab</span>
+
+<span class="token comment">#</span>
+<span class="token comment"># /etc/fstab</span>
+<span class="token comment"># Created by anaconda on Wed Jul 29 17:08:37 2020</span>
+<span class="token comment">#</span>
+<span class="token comment"># Accessible filesystems, by reference, are maintained under '/dev/disk'</span>
+<span class="token comment"># See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</span>
+<span class="token comment">#</span>
+<span class="token assign-left variable">UUID</span><span class="token operator">=</span>28eb957c-1e98-4175-9a00-3efdef247355 /                       xfs     defaults        <span class="token number">0</span> <span class="token number">0</span>
+<span class="token assign-left variable">UUID</span><span class="token operator">=</span>25ea1f67-ee88-44b1-935e-8af77eadf856 /boot                   xfs     defaults        <span class="token number">0</span> <span class="token number">0</span>
+<span class="token assign-left variable">UUID</span><span class="token operator">=</span>91664c04-1540-4e35-8711-c3f183a556ca /data                   xfs     defaults        <span class="token number">0</span> <span class="token number">0</span>
+<span class="token assign-left variable">UUID</span><span class="token operator">=</span>a1966abb-acf9-4f53-8a86-733a93c2d576 swap                    swap    defaults        <span class="token number">0</span> <span class="token number">0</span>
+
+/dev/sr0 /data/repo/centos/7/x86_64 iso9660 defaults <span class="token number">0</span> <span class="token number">0</span></code></pre>
+
+<p>注意&#x2F;etc&#x2F;fstab 中 device 一般用 UUID 指代，而不是路径，因为 UUID 稳定，一般不会更改，&#x2F;dev&#x2F;sr0 这种不是特别合适。</p>
+<p><code>man 5 fstab</code>可以查看&#x2F;etc&#x2F;fstab 文件的格式，最后两个选项：</p>
+<ul>
+<li>转储频率：0:不做备份 1:每天转储 2:每隔一天转储</li>
+<li>fsck 检查的文件系统的顺序：允许的数字是 0 1 2<ul>
+<li>0：不自检</li>
+<li>1：首先自检;一般只有 rootfs 才用</li>
+<li>2：非 rootfs 使用</li>
+</ul>
+</li>
+</ul>
+<p>添加新的挂载项，执行<code>mount -a</code>使挂载生效</p>
+<h2 id="管理-swap-空间"><a href="#管理-swap-空间" class="headerlink" title="管理 swap 空间"></a>管理 swap 空间</h2><h3 id="交换分区实现过程"><a href="#交换分区实现过程" class="headerlink" title="交换分区实现过程"></a>交换分区实现过程</h3><ol>
+<li>创建交换分区或者文件</li>
+<li>使用 mkswap 写入特殊签名</li>
+<li>在&#x2F;etc&#x2F;fstab 文件中添加适当的条目</li>
+<li>使用<code>swapon -a</code> 激活交换空间</li>
+</ol>
+<p>范例：以文件实现 swap 功能</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># dd if=/dev/zero of=/swapfile bs=1M count=1024</span>
+<span class="token number">1024</span>+0 records <span class="token keyword">in</span>
+<span class="token number">1024</span>+0 records out
+<span class="token number">1073741824</span> bytes <span class="token punctuation">(</span><span class="token number">1.1</span> GB<span class="token punctuation">)</span> copied, <span class="token number">2.04882</span> s, <span class="token number">524</span> MB/s
+
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># mkswap /swapfile</span>
+Setting up swapspace version <span class="token number">1</span>, size <span class="token operator">=</span> <span class="token number">1048572</span> KiB
+no label, <span class="token assign-left variable">UUID</span><span class="token operator">=</span>8ae1b7bc-7038-4f6a-9940-b75ec91beb21
+
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># chmod 600 /swapfile</span>
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># swapon /swapfile</span>
+
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># swapon -s</span>
+Filename				Type		    Size	           Used	Priority
+/dev/sda5               partition	<span class="token number">2097148</span>	      <span class="token number">0</span>	         <span class="token parameter variable">-2</span>
+/swapfile                <span class="token function">file</span>	            <span class="token number">1048572</span>	       <span class="token number">0</span>	     <span class="token parameter variable">-3</span></code></pre>
+
+<h3 id="swap-的使用策略"><a href="#swap-的使用策略" class="headerlink" title="swap 的使用策略"></a>swap 的使用策略</h3><p>&#x2F;proc&#x2F;sys&#x2F;vm&#x2F;swappiness 的值决定了当内存占用达到一定的百分比时,会启用 swap 分区的空间，例如 swappiness 的值为 30，说明当物理内存使用到 70%，就开始使用 swap，应该将这个值设置为 0</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 临时修改</span>
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># echo 0 > /proc/sys/vm/swappiness</span>
+
+<span class="token comment"># 永久修改</span>
+<span class="token comment"># centos7</span>
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># echo 'vm.swappiness=0' >> /etc/sysctl.conf</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># sysctl -p</span>
+vm.swappiness <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token comment"># ubuntu18.04</span>
+lujinkai@Z510:~$ <span class="token builtin class-name">echo</span> <span class="token string">'vm.swappiness=0'</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">of</span><span class="token operator">=</span>/etc/sysctl.conf <span class="token assign-left variable">oflag</span><span class="token operator">=</span>append <span class="token assign-left variable">conv</span><span class="token operator">=</span>notrunc
+<span class="token punctuation">[</span>sudo<span class="token punctuation">]</span> password <span class="token keyword">for</span> lujinkai:
+<span class="token number">0</span>+1 records <span class="token keyword">in</span>
+<span class="token number">0</span>+1 records out
+<span class="token number">16</span> bytes copied, <span class="token number">0.000102837</span> s, <span class="token number">156</span> kB/s
+lujinkai@Z510:~$ <span class="token function">sudo</span> <span class="token function">sysctl</span> <span class="token parameter variable">-p</span>
+vm.swappiness <span class="token operator">=</span> <span class="token number">0</span>
+</code></pre>
+
+<h2 id="RAID-管理"><a href="#RAID-管理" class="headerlink" title="RAID 管理"></a>RAID 管理</h2><p>RAID：独立硬盘冗余阵列，简称磁盘阵列，利用虚拟化存储技术把多个硬盘组合起来,成为一个或多个硬盘阵列组,目的为提升性能或数据冗余,或是两者同时提升。</p>
+<p>简单来说,RAID 把多个硬盘组合成为一个逻辑硬盘,因此,操作系统只会把它当作一个实体硬盘。</p>
+<p>RAID 层级不同,数据会以多种模式分散于各个硬盘，常用的 RAID 层级：RAID 0、RAID 1、RAID 5、RAID 6、RAID 10、RAID 50、RAID 60</p>
+<h3 id="raid0"><a href="#raid0" class="headerlink" title="raid0"></a>raid0</h3><p>数据分散在多个硬盘，读写速度都有提升，但是一个硬盘坏了，所有数据都被破坏<br><img data-src="//img.to2b.cn/blog/ljk/1597925562640.png"></p>
+<h3 id="raid-1"><a href="#raid-1" class="headerlink" title="raid 1"></a>raid 1</h3><p>数据备份到多个硬盘，有几个硬盘，就有几个备份，理论上，两个硬盘组 raid1，空间利用率有 50%，三个硬盘组 raid 1，空间利用率只有 33%<br><img data-src="//img.to2b.cn/blog/ljk/1597925584778.png"></p>
+<h3 id="raid-4"><a href="#raid-4" class="headerlink" title="raid 4"></a>raid 4</h3><p>设置单独校验盘，数据分散在其他的硬盘，其他硬盘通过<strong>亦或运算</strong>得出的值，最多允许一块硬盘损坏，当存储数据的盘有坏的，其他盘可以计算出丢失的那部分数据。缺点是校验盘最容易坏。<br><img data-src="//img.to2b.cn/blog/ljk/1597925609938.png"></p>
+<h3 id="raid-5"><a href="#raid-5" class="headerlink" title="raid 5"></a>raid 5</h3><p>是 raid 4 的升级版，校验不是单独一块盘，而是将校验分散在所有硬盘，最多允许一块硬盘损坏<br><img data-src="//img.to2b.cn/blog/ljk/1597925619610.png"></p>
+<h3 id="raid-6"><a href="#raid-6" class="headerlink" title="raid 6"></a>raid 6</h3><p>是 raid 5 的升级版，校验由一份升级为两份，增加容错性，允许两块硬盘损坏。</p>
+<p><font color=red>生产中，通常会准备热备盘，例如 raid5 就需要额外 1 块盘做热备</font></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597925634961.png"></p>
+<h3 id="raid-10"><a href="#raid-10" class="headerlink" title="raid 10"></a>raid 10</h3><p>是 raid1 和 raid0 的组合，解决 raid 0 没有容错能力的缺点。<br><img data-src="//img.to2b.cn/blog/ljk/1597925647457.png"></p>
+<h3 id="raid-50"><a href="#raid-50" class="headerlink" title="raid 50"></a>raid 50</h3><p>是 raid 5 和 raid 0 的组合，对比 raid 10，读写的速度更快<br><img data-src="//img.to2b.cn/blog/ljk/1597925705105.png"></p>
+<h3 id="raid-60"><a href="#raid-60" class="headerlink" title="raid 60"></a>raid 60</h3><p>是 raid 6 和 raid 0 的组合，增加 raid 50 的容错能力<br><img data-src="//img.to2b.cn/blog/ljk/1597925717387.png"></p>
+<h3 id="JBOD"><a href="#JBOD" class="headerlink" title="JBOD"></a>JBOD</h3><p>将多块磁盘的空间合并一个大的连续空间使用<br><img data-src="//img.to2b.cn/blog/ljk/1597925729291.png"></p>
+<h3 id="raid7"><a href="#raid7" class="headerlink" title="raid7"></a>raid7</h3><p>RAID 7 并非公开的 RAID 标准，而是 Storage Computer Corporation 的专利硬件产品名称，RAID 7 是以 RAID 3 及 RAID 4 为基础所发展，但是经过强化以解决原来的一些限制。另外，在实现中使用大量的缓冲存储器以及用以实现异步数组管理的专用即时处理器，使得 RAID 7 可以同时处理大量的 IO 要求，所以性能甚至超越了许多其他 RAID 标准的实际产品。但也因为如此，在价格方面非常的高昂.RAID7 可以理解为一个独立存储计算机，自身带有操作系统和管理工具，可以独立运行，理论上性能最高的 RAID 模式。</p>
+<h3 id="软件实现-raid"><a href="#软件实现-raid" class="headerlink" title="软件实现 raid"></a>软件实现 raid</h3><p>可以通过软件实现 raid，但是企业中不用，所以略过。。。</p>
+<h2 id="LVM-管理和-LVM-快照"><a href="#LVM-管理和-LVM-快照" class="headerlink" title="LVM 管理和 LVM 快照"></a>LVM 管理和 LVM 快照</h2><p>LVM 逻辑卷管理器，本质上是一个虚拟设备驱动，在磁盘分区和文件系统之间添加一个逻辑层。底层的物理磁盘不再由内核直接控制，而是由 LVM 层来控制。LVM 维持着逻辑盘区和物理盘区之间的映射。LVM 逻辑设备向上层应用提供了和物理磁盘相同的功能，如文件系统的创建和数据的访问等</p>
+<h3 id="基本术语准备"><a href="#基本术语准备" class="headerlink" title="基本术语准备"></a>基本术语准备</h3><ul>
+<li><p>物理存储介质（PhysicalStorageMedia）<br>指系统的物理存储设备：磁盘，是存储系统<strong>最底层</strong>的存储单元</p>
+</li>
+<li><p>物理卷（Physical Volume，PV）<br>物理卷是由磁盘分区转化而来</p>
+</li>
+<li><p>卷组（Volume Group，VG）<br>类似于非 LVM 系统中的物理磁盘，其由一个或多个物理卷 PV 组成。可以在卷组上创建一个或多个 LV（逻辑卷）</p>
+</li>
+<li><p>逻辑卷（Logical Volume，LV）<br>类似于非 LVM 系统中的磁盘分区，逻辑卷建立在卷组 VG 之上。在逻辑卷 LV 之上可以建立文件系统</p>
+</li>
+<li><p>物理块（Physical Extent，PE）<br>PE 是物理卷 PV 的基本划分单元，具有唯一编号的 PE 是可以被 LVM 寻址的最小单元。PE 的大小是可配置的，默认为 4MB。所以物理卷（PV）由大小等同的基本单元 PE 组成</p>
+</li>
+<li><p>逻辑块（Logical Extent，LE）<br>逻辑卷 LV 也被划分为可被寻址的基本单位，称为 LE。在同一个卷组中，LE 的大小和 PE 是相同的，并且一一对应</p>
+</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1597932121999.png"></p>
+<p>物理卷：还是&#x2F;dev&#x2F;sda、&#x2F;dev&#x2F;sdb 等，名称系统分配</p>
+<p>逻辑卷：&#x2F;dev&#x2F;vg0&#x2F;lv1 等，名称自定义</p>
+<h3 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h3><h4 id="1-安装-lvm2-包"><a href="#1-安装-lvm2-包" class="headerlink" title="1. 安装 lvm2 包"></a>1. 安装 lvm2 包</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># yum -y install lvm2</span></code></pre>
+
+<h4 id="2-将设备指定为物理卷"><a href="#2-将设备指定为物理卷" class="headerlink" title="2. 将设备指定为物理卷"></a>2. 将设备指定为物理卷</h4><ul>
+<li><code>pvs</code> 简要显示 pv 信息</li>
+<li><code>pvdisplay</code> 详细显示 pv 信息</li>
+<li><code>pvcreate /dev/DEVICE</code> 创建 pv</li>
+<li><code>pvremove /dev/DEVICE</code> 删除 pv</li>
+<li><code>pvmove</code> 搬移 PV 中的资料(只限于同一 VG 中)<ul>
+<li><code>pvmove /dev/hda5 /dev/hda6</code> 将 VG 中 pv hda5 的内容搬移到 hda6 中</li>
+<li><code>pvmove /dev/hda5</code> 也可以这样，lvm 决定 hda5 的内容被复制到哪里</li>
+</ul>
+</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvcreate /dev/sdb</span>
+WARNING: dos signature detected on /dev/sdb at offset <span class="token number">510</span>. Wipe it? <span class="token punctuation">[</span>y/n<span class="token punctuation">]</span>: y
+  Wiping dos signature on /dev/sdb.
+  Physical volume <span class="token string">"/dev/sdb"</span> successfully created.
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvcreate /dev/sdc</span>
+  Physical volume <span class="token string">"/dev/sdc"</span> successfully created.
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lsblk -f</span>
+NAME   FSTYPE   LABEL           UUID                                   MOUNTPOINT
+sda
+<span class="token operator">|</span>-sda1 xfs                      25ea1f67-ee88-44b1-935e-8af77eadf856   /boot
+<span class="token operator">|</span>-sda2 xfs                      28eb957c-1e98-4175-9a00-3efdef247355   /
+<span class="token operator">|</span>-sda3 xfs                      91664c04-1540-4e35-8711-c3f183a556ca   /data
+<span class="token operator">|</span>-sda4
+<span class="token operator">|</span>-sda5 swap                     a1966abb-acf9-4f53-8a86-733a93c2d576   <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+<span class="token operator">|</span>-sda6
+`-sda7
+sdb    LVM2_mem                 F4zIYp-IM1g-gJS6-ktqS-OZOD-u46a-z6YrQd
+sdc    LVM2_mem                 rAL8Wi-ln8P-LmUK-FaQn-40Mk-iGw4-ocXIUe
+sr0    iso9660  CentOS <span class="token number">7</span> x86_64 <span class="token number">2020</span>-04-22-00-51-40-00                 /data/repo/
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvs</span>
+  PV         VG Fmt  Attr PSize  PFree
+  /dev/sdb      lvm2 ---  <span class="token number">10</span>.00g <span class="token number">10</span>.00g
+  /dev/sdc      lvm2 ---   <span class="token number">5</span>.00g  <span class="token number">5</span>.00g
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvdisplay</span>
+  <span class="token string">"/dev/sdb"</span> is a new physical volume of <span class="token string">"10.00 GiB"</span>
+  --- NEW Physical volume ---
+  PV Name               /dev/sdb
+  VG Name
+  PV Size               <span class="token number">10.00</span> GiB
+  Allocatable           NO
+  PE Size               <span class="token number">0</span>
+  Total PE              <span class="token number">0</span>
+  Free PE               <span class="token number">0</span>
+  Allocated PE          <span class="token number">0</span>
+  PV UUID               F4zIYp-IM1g-gJS6-ktqS-OZOD-u46a-z6YrQd
+
+  <span class="token string">"/dev/sdc"</span> is a new physical volume of <span class="token string">"5.00 GiB"</span>
+  --- NEW Physical volume ---
+  PV Name               /dev/sdc
+  VG Name
+  PV Size               <span class="token number">5.00</span> GiB
+  Allocatable           NO
+  PE Size               <span class="token number">0</span>
+  Total PE              <span class="token number">0</span>
+  Free PE               <span class="token number">0</span>
+  Allocated PE          <span class="token number">0</span>
+  PV UUID               rAL8Wi-ln8P-LmUK-FaQn-40Mk-iGw4-ocXIUe
+</code></pre>
+
+<h4 id="3-用一个或多个物理卷来创建一个卷组"><a href="#3-用一个或多个物理卷来创建一个卷组" class="headerlink" title="3. 用一个或多个物理卷来创建一个卷组"></a>3. 用一个或多个物理卷来创建一个卷组</h4><ul>
+<li><code>vgs</code> 显示卷组</li>
+<li><code>vgdisplay</code> 显示卷组</li>
+<li><code>vgcreate 卷组名 物理卷列表</code> 创建卷组</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 指定PE大小为16M，默认4M</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># vgcreate -s 16M vg0 /dev/sdb /dev/sdc</span>
+  Volume group <span class="token string">"vg0"</span> successfully created
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># vgs</span>
+  VG  <span class="token comment">#PV #LV #SN Attr   VSize   VFree</span>
+  vg0   <span class="token number">2</span>   <span class="token number">0</span>   <span class="token number">0</span> wz--n- <span class="token operator">&lt;</span><span class="token number">14</span>.97g <span class="token operator">&lt;</span><span class="token number">14</span>.97g
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># vgdisplay</span>
+  --- Volume group ---
+  VG Name               vg0
+  System ID
+  Format                lvm2
+  Metadata Areas        <span class="token number">2</span>
+  Metadata Sequence No  <span class="token number">1</span>
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                <span class="token number">0</span>
+  Cur LV                <span class="token number">0</span>
+  Open LV               <span class="token number">0</span>
+  Max PV                <span class="token number">0</span>
+  Cur PV                <span class="token number">2</span>
+  Act PV                <span class="token number">2</span>
+  VG Size               <span class="token operator">&lt;</span><span class="token number">14.97</span> GiB
+  PE Size               <span class="token number">16.00</span> MiB
+  Total PE              <span class="token number">958</span>
+  Alloc PE / Size       <span class="token number">0</span> / <span class="token number">0</span>
+  Free  PE / Size       <span class="token number">958</span> / <span class="token operator">&lt;</span><span class="token number">14.97</span> GiB
+  VG UUID               zszcPb-urGs-jKX8-ZOCu-Xlb8-JPrD-b5bVt8</code></pre>
+
+<ul>
+<li><code>vgextend 卷组名 物理卷列表</code> 向卷组中添加物理卷</li>
+<li><code>vgreduce 卷组名 物理卷列表</code> 从卷组中删除物理卷</li>
+<li><code>vgremove 卷组名</code> 删除卷组<ul>
+<li>删除卷组之前应该先使用 pvmove 将数据迁移</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-在卷组上创建逻辑卷"><a href="#4-在卷组上创建逻辑卷" class="headerlink" title="4. 在卷组上创建逻辑卷"></a>4. 在卷组上创建逻辑卷</h4><ul>
+<li><p><code>lvs</code></p>
+</li>
+<li><p><code>lvdisplay</code></p>
+</li>
+<li><p><code>lvcreate</code> 创建逻辑卷</p>
+<ul>
+<li>n 后面跟逻辑卷名</li>
+<li>s 创建快照</li>
+<li>l 指定逻辑卷的大小（LE 数）<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 卷组vg0分配100个PE给新建逻辑卷lv0，这样lv0的大小就是100个LE</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvcreate -l 100 -n lv0 vg0</span>
+<span class="token comment"># 其他范例</span>
+lvcreate <span class="token parameter variable">-l</span> <span class="token number">60</span>%VG <span class="token parameter variable">-n</span> mylv testvg
+lvcreate <span class="token parameter variable">-l</span> <span class="token number">100</span>%FREE <span class="token parameter variable">-n</span> yourlv testvg</code></pre></li>
+<li>L 指定逻辑卷的大小，单位为“kKmMgGtT”<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 卷组vg0分配1G给新建逻辑卷lv1</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvcreate -L 1G -n lv1 vg0</span></code></pre></li>
+</ul>
+</li>
+<li><p><code>lvremove 逻辑卷</code> 删除逻辑卷</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvs</span>
+  LV   VG  Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv0  vg0 -wi-a-----   <span class="token number">1</span>.56g
+  lv1  vg0 -wi-a-----   <span class="token number">1</span>.00g
+  lv2  vg0 -wi-a----- <span class="token operator">&lt;</span><span class="token number">12</span>.41g
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvremove lv2</span>
+  Volume group <span class="token string">"lv2"</span> not found
+  Cannot process volume group lv2
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvremove /dev/vg0/lv2</span>
+Do you really want to remove active logical volume vg0/lv2? <span class="token punctuation">[</span>y/n<span class="token punctuation">]</span>: y
+  Logical volume <span class="token string">"lv2"</span> successfully removed
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvs</span>
+  LV   VG  Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv0  vg0 -wi-a----- <span class="token number">1</span>.56g
+  lv1  vg0 -wi-a----- <span class="token number">1</span>.00g</code></pre>
+</li>
+<li><p><code>lvextend</code> 扩展逻辑卷</p>
+<ul>
+<li>-L [+]kKmMgGtT 没有+表示扩展至指定大小，有+表示增加指定大小</li>
+<li>-l [+]Number[PERCENT]</li>
+<li>-r 如果逻辑卷上已经有文件系统，同步扩展文件系统</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 两步实现：</span>
+<span class="token comment"># 1. 实现逻辑卷的空间扩展</span>
+lvextend <span class="token parameter variable">-L</span> <span class="token punctuation">[</span>+<span class="token punctuation">]</span><span class="token comment">#[mMgGtT] /dev/VG_NAME/LV_NAME</span>
+<span class="token comment"># 2. 实现文件系统的扩展</span>
+resize2fs /dev/VG_NAME/LV_NAME	<span class="token comment"># 针对ext</span>
+<span class="token comment"># 或：</span>
+xfs_growfs MOUNTPOINT			<span class="token comment"># 针对xfs</span>
+
+<span class="token comment"># 一步实现</span>
+lvresize <span class="token parameter variable">-r</span> <span class="token parameter variable">-l</span> +100%FREE /dev/VG_NAME/LV_NAME</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvextend -r -L +1G /dev/vg0/lv1</span></code></pre>
+</li>
+<li><p><code>lvreduce</code> 缩减逻辑卷，只针对 ext 文件系统，xfs 不支持缩减，缩减有风险，最好先备份数据</p>
+<ul>
+<li>-l 同 lvextend</li>
+<li>-L 同 lvextend</li>
+</ul>
+</li>
+</ul>
+<h4 id="5-在逻辑卷上创建文件系统并挂载"><a href="#5-在逻辑卷上创建文件系统并挂载" class="headerlink" title="5. 在逻辑卷上创建文件系统并挂载"></a>5. 在逻辑卷上创建文件系统并挂载</h4><pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.ext4 /dev/vg0/lv1
+<span class="token function">mount</span> /dev/vg0/lv1 /mnt/lv1/</code></pre>
+
+<h4 id="6-跨主机迁移卷组"><a href="#6-跨主机迁移卷组" class="headerlink" title="6. 跨主机迁移卷组"></a>6. 跨主机迁移卷组</h4><ol>
+<li><p>在旧系统中,umount 所有卷组上的逻辑卷</p>
+</li>
+<li><p>禁用卷组</p>
+<p>vgchange 用于修改卷组的属性，经常被用来设置卷组是处于活动状态或者非活动状态。</p>
+</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash">vgchange –a n vg0
+lvdisplay</code></pre>
+
+<ol start="3">
+<li>导出卷组</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash">vgexport vg0
+pvscan
+vgdisplay</code></pre>
+
+<ol start="4">
+<li>拆下旧硬盘在目标计算机上,并导入卷组</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash">vgimport vg0</code></pre>
+
+<ol start="5">
+<li>启用</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash">vgchange –ay vg0</code></pre>
+
+<ol start="6">
+<li>mount 所有卷组上的逻辑卷</li>
+</ol>
+<h4 id="7-拆除指定的-pv-存储设备"><a href="#7-拆除指定的-pv-存储设备" class="headerlink" title="7. 拆除指定的 pv 存储设备"></a>7. 拆除指定的 pv 存储设备</h4><ol>
+<li>pvmove 迁移物理卷数据，注意只能迁移到同一卷组下的其他物理卷</li>
+<li>vgreduce 从卷组中移除物理卷</li>
+<li>pvremove 从机器上移除物理卷</li>
+</ol>
+<h3 id="逻辑卷快照"><a href="#逻辑卷快照" class="headerlink" title="逻辑卷快照"></a>逻辑卷快照</h3><p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.xfs	/dev/vg0/data
+<span class="token function">mount</span>	/dev/vg0/data/	/mnt/data
+
+<span class="token comment">#为现有逻辑卷创建快照，快照大小一般指定为十分之一</span>
+<span class="token comment">#  -p|--permission rw|r</span>
+lvcreate	<span class="token parameter variable">-l</span>	<span class="token number">64</span>	<span class="token parameter variable">-s</span>	<span class="token parameter variable">-n</span>	data-snapshot	<span class="token parameter variable">-p</span>	r	/dev/vg0/data
+
+<span class="token comment">#挂载快照</span>
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /mnt/snap
+<span class="token function">mount</span> <span class="token parameter variable">-o</span> ro,nouuid /dev/vg0/data-snapshot /mnt/snap		<span class="token comment">#  -o ro,nouuid 只读，不校验重复uuid</span>
+
+<span class="token comment">#恢复快照</span>
+<span class="token function">umount</span> /dev/vg0/data-snapshot
+<span class="token function">umount</span> /dev/vg0/data
+lvconvert <span class="token parameter variable">--merge</span> /dev/vg0/data-snapshot
+
+<span class="token comment">#删除快照</span>
+<span class="token function">umount</span>	/mnt/snap
+lvremove	/dev/vg0/data-snapshot</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%A3%81%E7%9B%98%E7%AE%A1%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 磁盘管理</a>
+              <a href="/tags/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" rel="tag"><i class="fa fa-tag"></i> 文件系统</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BD%AF%E4%BB%B6/%E8%BD%AF%E4%BB%B6%E7%AE%A1%E7%90%86/" rel="prev" title="软件管理">
+                  <i class="fa fa-chevron-left"></i> 软件管理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E8%B7%AF%E7%94%B1%E5%99%A8/" rel="next" title="路由器">
+                  路由器 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Redux 是什么？Redux 是一个使用叫做“action”的事件来管理和更新应用状态的模式和工具库 它以集中式 Store（centralized store）的方式对整个应用中使用的状态进行集中管理，其规则确保状态只能以可预测的方式更新。 Redux 库和工具Redux 是一个小型的独立 JS 库。 但是，它通常与其他几个包一起使用： React-ReduxRedux 可以集成到任何的 UI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redux">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/1.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="Redux 是什么？Redux 是一个使用叫做“action”的事件来管理和更新应用状态的模式和工具库 它以集中式 Store（centralized store）的方式对整个应用中使用的状态进行集中管理，其规则确保状态只能以可预测的方式更新。 Redux 库和工具Redux 是一个小型的独立 JS 库。 但是，它通常与其他几个包一起使用： React-ReduxRedux 可以集成到任何的 UI">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1634971418586.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/ReduxDataFlowDiagram-49fa8c3968371d9ef6f2a1486bd40a26.gif">
+<meta property="article:published_time" content="2022-01-25T14:48:37.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:22.370Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="react">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1634971418586.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/1.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/1.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/","path":"前端/React/redux/1.基础教程-基础概念/","title":"Redux"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Redux | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redux-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">Redux 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redux-%E5%BA%93%E5%92%8C%E5%B7%A5%E5%85%B7"><span class="nav-number">2.</span> <span class="nav-text">Redux 库和工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#React-Redux"><span class="nav-number">2.1.</span> <span class="nav-text">React-Redux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redux-Toolkit"><span class="nav-number">2.2.</span> <span class="nav-text">Redux Toolkit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redux-DevTools-%E6%89%A9%E5%B1%95"><span class="nav-number">2.3.</span> <span class="nav-text">Redux DevTools 扩展</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E5%90%91%E6%95%B0%E6%8D%AE%E6%B5%81-one-way-data-flow"><span class="nav-number">3.</span> <span class="nav-text">单向数据流( one-way data flow )</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AF%E5%8F%98%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">不可变性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">5.</span> <span class="nav-text">术语</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#action"><span class="nav-number">5.1.</span> <span class="nav-text">action</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#action-creator"><span class="nav-number">5.2.</span> <span class="nav-text">action creator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reducer"><span class="nav-number">5.3.</span> <span class="nav-text">reducer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#store"><span class="nav-number">5.4.</span> <span class="nav-text">store</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dispatch"><span class="nav-number">5.5.</span> <span class="nav-text">dispatch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#selector"><span class="nav-number">5.6.</span> <span class="nav-text">selector</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redux-%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="nav-number">6.</span> <span class="nav-text">redux 数据流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/1.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Redux | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redux
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-01-25 22:48:37" itemprop="dateCreated datePublished" datetime="2022-01-25T22:48:37+08:00">2022-01-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:22" itemprop="dateModified" datetime="2023-05-29T16:58:22+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/" itemprop="url" rel="index"><span itemprop="name">React</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/redux/" itemprop="url" rel="index"><span itemprop="name">redux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Redux-是什么？"><a href="#Redux-是什么？" class="headerlink" title="Redux 是什么？"></a>Redux 是什么？</h2><p><strong>Redux 是一个使用叫做“action”的事件来管理和更新应用状态的模式和工具库</strong> 它以集中式 Store（centralized store）的方式对整个应用中使用的状态进行集中管理，其规则确保状态只能以可预测的方式更新。</p>
+<h2 id="Redux-库和工具"><a href="#Redux-库和工具" class="headerlink" title="Redux 库和工具"></a>Redux 库和工具</h2><p>Redux 是一个小型的独立 JS 库。 但是，它通常与其他几个包一起使用：</p>
+<h3 id="React-Redux"><a href="#React-Redux" class="headerlink" title="React-Redux"></a>React-Redux</h3><p>Redux 可以集成到任何的 UI 框架中，其中最常见的是 React 。<a target="_blank" rel="noopener" href="https://react-redux.js.org/"><strong>React-Redux</strong></a> 是 Redux 官方维护的。</p>
+<h3 id="Redux-Toolkit"><a href="#Redux-Toolkit" class="headerlink" title="Redux Toolkit"></a>Redux Toolkit</h3><p><a target="_blank" rel="noopener" href="https://redux-toolkit.js.org/"><strong>Redux Toolkit</strong></a> 是官方推荐的编写 Redux 逻辑的方法。</p>
+<h3 id="Redux-DevTools-扩展"><a href="#Redux-DevTools-扩展" class="headerlink" title="Redux DevTools 扩展"></a>Redux DevTools 扩展</h3><p><a target="_blank" rel="noopener" href="https://github.com/zalmoxisus/redux-devtools-extension"><strong>Redux DevTools 扩展</strong></a> 可以显示 Redux 存储中状态随时间变化的历史记录。这允许你有效地调试应用程序，包括使用强大的技术，如“时间旅行调试”。</p>
+<h2 id="单向数据流-one-way-data-flow"><a href="#单向数据流-one-way-data-flow" class="headerlink" title="单向数据流( one-way data flow )"></a>单向数据流( <strong>one-way data flow</strong> )</h2><img data-src="//img.to2b.cn/blog/ljk/1634971418586.png" style="zoom:50%;" />
+
+<p>基于 state 渲染 view，当发生某些 action（例如用户单击按钮）时，生成新的 state，基于新的 state 再重新渲染 view，这就是单向数据流。</p>
+<p>然而，当我们有<strong>多个组件需要共享和使用相同 state</strong>时，可能会变得很复杂，尤其是当这些组件位于应用程序的不同部分时。</p>
+<p>解决这个问题的一种方法是从组件中提取共享 state，并将其放入组件树之外的一个集中位置。这样，我们的组件树就变成了一个大“view”，任何组件都可以访问 state 或触发 action，无论它们在树中的哪个位置！</p>
+<h2 id="不可变性"><a href="#不可变性" class="headerlink" title="不可变性"></a>不可变性</h2><p>“Mutable” 意为 “可改变的”，而 “immutable” 意为永不可改变。</p>
+<p>JavaScript 的对象（object）和数组（array）默认都是 mutable 的。</p>
+<p><strong>如果想要不可变的方式来更新，代码必需先 <em>复制</em> 原来的 object&#x2F;array，然后更新它的复制体</strong>。</p>
+<p>展开运算符（spread operator）可以实现这个目的。</p>
+<p><strong>Redux 期望所有状态更新都是使用不可变的方式</strong>。</p>
+<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><h3 id="action"><a href="#action" class="headerlink" title="action"></a>action</h3><p><strong>action</strong> 是一个具有 <code>type</code> 字段的普通 JavaScript 对象。<strong>你可以将 action 视为描述应用程序中发生了什么的事件</strong>.</p>
+<h3 id="action-creator"><a href="#action-creator" class="headerlink" title="action creator"></a>action creator</h3><p><strong>action creator</strong> 是一个创建并返回一个 action 对象的函数。它的作用是让你不必每次都手动编写 action 对象：</p>
+<pre class="language-javascript" data-language="javascript"><code class="language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">addTodo</span> <span class="token operator">=</span> <span class="token parameter">text</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">return</span> <span class="token punctuation">&#123;</span>
+		<span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">"todos/todoAdded"</span><span class="token punctuation">,</span>
+		<span class="token literal-property property">payload</span><span class="token operator">:</span> text<span class="token punctuation">,</span>
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="reducer"><a href="#reducer" class="headerlink" title="reducer"></a>reducer</h3><p><strong>reducer</strong> 是一个函数，接收当前的 <code>state</code> 和一个 <code>action</code> 对象，必要时决定如何更新状态，并返回新状态。函数签名是：<code>(state, action) =&gt; newState</code>。 <strong>你可以将 reducer 视为一个事件监听器，它根据接收到的 action（事件）类型处理事件。</strong></p>
+<p>reducer 必须符合一下规则：</p>
+<ul>
+<li>仅使用 <code>state</code> 和 <code>action</code> 参数计算新的状态值</li>
+<li>禁止直接修改 <code>state</code>。必须通过复制现有的 <code>state</code> 并对复制的值进行更改的方式来做 _不可变更新（immutable updates）_。</li>
+<li>禁止任何异步逻辑、依赖随机值或导致其他“副作用”的代码</li>
+</ul>
+<p>reducer 函数内部的逻辑通常遵循以下步骤：</p>
+<ul>
+<li>检查 reducer 是否关心这个 action<ul>
+<li>如果是，则复制 state，使用新值更新 state 副本，然后返回新 state</li>
+</ul>
+</li>
+<li>否则，返回原来的 state 不变</li>
+</ul>
+<p><strong>Redux 中 <em>真正</em> 重要的是 reducer 函数，以及其中计算新状态的逻辑。</strong></p>
+<h3 id="store"><a href="#store" class="headerlink" title="store"></a>store</h3><p>当前 Redux 应用的状态存在于一个名为 <strong>store</strong> 的对象中。</p>
+<p><code>store</code> 是通过传入一个 <code>reducer</code> 来创建的，并且有一个名为 <code>getState</code> 的方法，它返回当前<code>state</code>。</p>
+<h3 id="dispatch"><a href="#dispatch" class="headerlink" title="dispatch"></a>dispatch</h3><p>Redux store 有一个方法叫 <code>dispatch</code>。<strong>更新 state 的唯一方法是调用 <code>store.dispatch()</code> 并传入一个 action 对象</strong>。 store 将执行所有 reducer 函数并计算出更新后的 state，调用 <code>getState()</code> 可以获取新 state。</p>
+<p>**dispatch 一个 action 可以形象的理解为 “触发一个事件”**。发生了一些事情，我们希望 store 知道这件事。 Reducer 就像事件监听器一样，当它们收到关注的 action 后，它就会更新 state 作为响应。</p>
+<h3 id="selector"><a href="#selector" class="headerlink" title="selector"></a>selector</h3><p>随着应用变得越来越大，会遇到应用程序的不同部分需要读取相同的数据，selector 函数可以从 store 状态树中提取指定的片段。</p>
+<h2 id="redux-数据流"><a href="#redux-数据流" class="headerlink" title="redux 数据流"></a>redux 数据流</h2><p>早些时候，我们谈到了“单向数据流”，它描述了更新应用程序的以下步骤序列：</p>
+<ul>
+<li>State 描述了应用程序在特定时间点的状况</li>
+<li>基于 state 来渲染 UI</li>
+<li>当发生某些事情时（例如用户单击按钮），state 会根据发生的事情进行更新</li>
+<li>基于新的 state 重新渲染 UI</li>
+</ul>
+<p>具体来说，对于 Redux，我们可以将这些步骤分解为更详细的内容：</p>
+<ul>
+<li>初始启动：<ul>
+<li>使用最顶层的 root reducer 函数创建 Redux store</li>
+<li>store 调用一次 root reducer，并将返回值保存为它的初始 <code>state</code></li>
+<li>当 UI 首次渲染时，UI 组件访问 Redux store 的当前 state，并使用该数据来决定要呈现的内容。同时监听 store 的更新，以便他们可以知道 state 是否已更改。</li>
+</ul>
+</li>
+<li>更新环节：<ul>
+<li>应用程序中发生了某些事情，例如用户单击按钮</li>
+<li>dispatch 一个 action 到 Redux store，例如 <code>dispatch(&#123;type: &#39;counter/increment&#39;&#125;)</code></li>
+<li>store 用之前的 <code>state</code> 和当前的 <code>action</code> 再次运行 reducer 函数，并将返回值保存为新的 <code>state</code></li>
+<li>store 通知所有订阅过的 UI，通知它们 store 发生更新</li>
+<li>每个订阅过 store 数据的 UI 组件都会检查它们需要的 state 部分是否被更新。</li>
+<li>发现数据被更新的每个组件都强制使用新数据重新渲染，紧接着更新网页</li>
+</ul>
+</li>
+</ul>
+<p>动画的方式来表达数据流更新：</p>
+<img data-src="//img.to2b.cn/blog/ljk/ReduxDataFlowDiagram-49fa8c3968371d9ef6f2a1486bd40a26.gif" style="zoom:50%;" />
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><strong>Redux 是一个管理全局应用状态的库</strong><ul>
+<li>Redux 通常与 React-Redux 库一起使用，把 Redux 和 React 集成在一起</li>
+<li>Redux Toolkit 是编写 Redux 逻辑的推荐方式</li>
+</ul>
+</li>
+<li><strong>Redux 使用 “单向数据流”</strong><ul>
+<li>State 描述了应用程序在某个时间点的状态，UI 基于该状态渲染</li>
+<li>当应用程序中发生某些事情时：<ul>
+<li>UI dispatch 一个 action</li>
+<li>store 调用 reducer，随后根据发生的事情来更新 state</li>
+<li>store 通知 UI state 发生了变化</li>
+</ul>
+</li>
+<li>UI 基于新 state 重新渲染</li>
+</ul>
+</li>
+<li><strong>Redux 有这几种类型的代码</strong><ul>
+<li><em>Action</em> 是有 <code>type</code> 字段的<strong>纯对象</strong>，描述发生了什么</li>
+<li><em>Reducer</em> 是纯函数，基于先前的 state 和 action 来计算新的 state</li>
+<li>每当 dispatch 一个 action 后，<em>store</em> 就会调用 root reducer</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/react/" rel="tag"><i class="fa fa-tag"></i> react</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/React/react-router/" rel="prev" title="react-router">
+                  <i class="fa fa-chevron-left"></i> react-router
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/Golang/%E5%9F%BA%E7%A1%80/" rel="next" title="基础">
+                  基础 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

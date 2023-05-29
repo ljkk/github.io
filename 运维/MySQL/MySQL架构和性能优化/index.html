@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="MySQL 是 C&#x2F;S 架构，上图是 MySQL 的架构图，从上到下：  connectors：连接器，编程语言角度可以理解为连入数据库的驱动，mysql 角度称作专用语言对应的链接器  connection pool：mysql 是单进程多线程模型，每个用户连接，都会创建一个单独的连接线程，connection pool 的作用就是维护线程池，管理众多线程应对众多客户端的并发请求，完">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL架构和性能优化">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/MySQL%E6%9E%B6%E6%9E%84%E5%92%8C%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="MySQL 是 C&#x2F;S 架构，上图是 MySQL 的架构图，从上到下：  connectors：连接器，编程语言角度可以理解为连入数据库的驱动，mysql 角度称作专用语言对应的链接器  connection pool：mysql 是单进程多线程模型，每个用户连接，都会创建一个单独的连接线程，connection pool 的作用就是维护线程池，管理众多线程应对众多客户端的并发请求，完">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1603164166263.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1603181278008.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1603201489173.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/image-20220929145043845.png">
+<meta property="article:published_time" content="2020-12-31T15:08:09.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1603164166263.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/MySQL%E6%9E%B6%E6%9E%84%E5%92%8C%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/MySQL%E6%9E%B6%E6%9E%84%E5%92%8C%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/","path":"运维/MySQL/MySQL架构和性能优化/","title":"MySQL架构和性能优化"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MySQL架构和性能优化 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">1.</span> <span class="nav-text">存储引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MyISAM"><span class="nav-number">1.1.</span> <span class="nav-text">MyISAM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#InnoDB"><span class="nav-number">1.2.</span> <span class="nav-text">InnoDB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">1.3.</span> <span class="nav-text">其他存储引擎</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">1.4.</span> <span class="nav-text">管理存储引擎</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">2.</span> <span class="nav-text">系统数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE%E5%92%8C%E7%8A%B6%E6%80%81"><span class="nav-number">3.</span> <span class="nav-text">服务器配置和状态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%80%89%E9%A1%B9"><span class="nav-number">3.1.</span> <span class="nav-text">服务器选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%B3%BB%E7%BB%9F%E5%8F%98%E9%87%8F"><span class="nav-number">3.2.</span> <span class="nav-text">服务器系统变量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL-MODE"><span class="nav-number">3.2.1.</span> <span class="nav-text">SQL_MODE</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%8A%B6%E6%80%81%E5%8F%98%E9%87%8F"><span class="nav-number">3.3.</span> <span class="nav-text">服务器状态变量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E7%BC%93%E5%AD%98"><span class="nav-number">4.</span> <span class="nav-text">查询缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="nav-number">5.</span> <span class="nav-text">索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.1.</span> <span class="nav-text">索引的类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%BC%9A%E5%A4%B1%E6%95%88%E7%9A%84%E6%83%85%E5%86%B5"><span class="nav-number">5.2.</span> <span class="nav-text">索引会失效的情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96"><span class="nav-number">5.3.</span> <span class="nav-text">索引优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">5.3.1.</span> <span class="nav-text">优化表空间</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E7%B4%A2%E5%BC%95"><span class="nav-number">5.4.</span> <span class="nav-text">管理索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXPLAIN-%E5%B7%A5%E5%85%B7"><span class="nav-number">5.5.</span> <span class="nav-text">EXPLAIN 工具</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-number">6.</span> <span class="nav-text">并发控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E6%9C%BA%E5%88%B6"><span class="nav-number">6.1.</span> <span class="nav-text">锁机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%BC%8F%E4%BD%BF%E7%94%A8%E9%94%81"><span class="nav-number">6.2.</span> <span class="nav-text">显式使用锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1-Transactions"><span class="nav-number">6.3.</span> <span class="nav-text">事务 Transactions</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%89%B9%E6%80%A7-ACID"><span class="nav-number">6.3.1.</span> <span class="nav-text">事务特性 ACID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E5%91%BD%E4%BB%A4"><span class="nav-number">6.3.2.</span> <span class="nav-text">事务命令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">6.4.</span> <span class="nav-text">事务隔离级别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%84%8F%E8%AF%BB%E5%92%8C%E5%B9%BB%E8%AF%BB"><span class="nav-number">6.4.1.</span> <span class="nav-text">什么是脏读和幻读</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86"><span class="nav-number">7.</span> <span class="nav-text">日志管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#x2F-mysql-history"><span class="nav-number">7.1.</span> <span class="nav-text">~&#x2F;.mysql_history</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97"><span class="nav-number">7.2.</span> <span class="nav-text">事务日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E6%97%A5%E5%BF%97"><span class="nav-number">7.3.</span> <span class="nav-text">错误日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E6%97%A5%E5%BF%97"><span class="nav-number">7.4.</span> <span class="nav-text">通用日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97"><span class="nav-number">7.5.</span> <span class="nav-text">慢查询日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#profile-%E5%B7%A5%E5%85%B7"><span class="nav-number">7.6.</span> <span class="nav-text">profile 工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%97%A5%E5%BF%97%EF%BC%88%E5%A4%87%E4%BB%BD%EF%BC%89"><span class="nav-number">7.7.</span> <span class="nav-text">二进制日志（备份）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9"><span class="nav-number">7.7.1.</span> <span class="nav-text">相关配置选项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%8F%98%E9%87%8F"><span class="nav-number">7.7.2.</span> <span class="nav-text">相关变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7%E5%92%8C%E5%91%BD%E4%BB%A4"><span class="nav-number">7.7.3.</span> <span class="nav-text">相关工具和命令</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/MySQL%E6%9E%B6%E6%9E%84%E5%92%8C%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="MySQL架构和性能优化 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL架构和性能优化
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-31 23:08:09" itemprop="dateCreated datePublished" datetime="2020-12-31T23:08:09+08:00">2020-12-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p><img data-src="//img.to2b.cn/blog/ljk/1603164166263.png"></p>
+<p>MySQL 是 C&#x2F;S 架构，上图是 MySQL 的架构图，从上到下：</p>
+<ul>
+<li><p>connectors：连接器，编程语言角度可以理解为连入数据库的驱动，mysql 角度称作专用语言对应的链接器</p>
+</li>
+<li><p>connection pool：mysql 是单进程多线程模型，每个用户连接，都会创建一个单独的连接线程，connection pool 的作用就是维护线程池，管理众多线程应对众多客户端的并发请求，完成并发相应，对于 mysql，它实现的功能包括：</p>
+<ul>
+<li>authentication：用户认证，校验账号密码</li>
+<li>thread reuse：线程重用，用户退出后，线程有可能并非被销毁，而是把它清理完以后，重新收归到线程池当中的空闲线程中去，以完成所谓的线程重用</li>
+<li>connection limit：限制线程池的线程数量，决定并发连接的数量，超过上限则排队或拒绝</li>
+<li>check memory：检测内存</li>
+<li>caches：线程缓存</li>
+</ul>
+</li>
+<li><p>SQL Interface：SQL 解释器 或 SQL 接口，可以理解为 mysql 的外壳，就像 shell 是 linux 的外壳一样。对 SQL 语句做词法分析、句法分析</p>
+</li>
+<li><p>parser：分析器，解释器分析语法是否有错误，分析器做执行分析，或者加查询翻译，例如 connection pool 校验用户是否合法，parser 检查用户是否有操作权限</p>
+</li>
+<li><p>optimizer：查询优化器，提高 SQL 的执行效率</p>
+</li>
+<li><p>caches &amp; buffers：从 mysql8.0 开始已被取消，推荐使用 Redis、Memcached 等软件</p>
+</li>
+<li><p>pluggable storage engines：插件式存储引擎</p>
+<ul>
+<li>MySAM：MySQL 经典的存储引擎</li>
+<li>InnoDB：Innobase Oy 公司开发，2006 年五月由甲骨文公司并购提供给 MySQL</li>
+<li>NDB：主要用于 MySQL Cluster 分布式集群环境</li>
+<li>Archive：做归档</li>
+<li>…</li>
+</ul>
+</li>
+<li><p>file system：</p>
+</li>
+<li><p>files &amp; logs：</p>
+</li>
+</ul>
+<p>MySQL 还提供管理和服务工具，例如：备份和恢复工具，安全工具，复制工具，集群服务，管理、配置、迁移、元数据等工具</p>
+<h2 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h2><h3 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h3><ul>
+<li>不支持事务，所以崩溃恢复性较差</li>
+<li>表级锁定</li>
+<li>读写相互锁定，写入时不能读，读时不能写</li>
+<li>不支持外键</li>
+<li>读取数据快，占用资源少</li>
+<li>不支持 MVCC（多版本并发控制机制）高并发</li>
+</ul>
+<p>数据库文件：</p>
+<ul>
+<li>tbl_name.frm：储存数据表定义</li>
+<li>tbl_name.MYD：存储数据</li>
+<li>tbl_name.MYI：存储索引</li>
+</ul>
+<h3 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB"></a>InnoDB</h3><p>Innodb 和 MyISAM 的主要区别在于是否支持事务，其他的区别只是表面区别，根本原因还是是否支持事务导致的</p>
+<ul>
+<li>行级锁</li>
+<li>支持事务，所以崩溃恢复性好</li>
+<li>读写阻塞与事务隔离级别相关</li>
+<li>支持 MVCC 高并发</li>
+</ul>
+<p>数据库文件：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1603181278008.png"></p>
+<p>innodb 读取数据是以 page 为单位</p>
+<p>innodb_file_per_table &#x3D; ON（mysql5.6.6 后默认开启）设置独立表空间：</p>
+<ul>
+<li>tbl_name.frm：储存数据表定义</li>
+<li>tbl_name.ibd：存储数据和索引，myisam 把数据和索引分开存储，而 innodb 存储在一起</li>
+</ul>
+<p>innodb_file_per_table &#x3D; OFF 设置共享表空间：</p>
+<ul>
+<li>tbl_name.frm：储存数据表定义</li>
+<li>ibdata1：所有表的数据和索引都存储在 ibdata1 中，默认位于 datadir 目录下</li>
+</ul>
+<p>关于 ibdata1 文件：</p>
+<p>ibdata1 是共享表空间，设置 innodb_file_per_table &#x3D; ON 后，ibdata1 还会增长，那其中存储的数据是什么呢？不太清楚…</p>
+<h3 id="其他存储引擎"><a href="#其他存储引擎" class="headerlink" title="其他存储引擎"></a>其他存储引擎</h3><p>Performance_Schema、Memory、MRG_MyISAM、Archive、Federated 联合、BDB、Cluster&#x2F;NDB、CSV、BLACKHOLE、example</p>
+<h3 id="管理存储引擎"><a href="#管理存储引擎" class="headerlink" title="管理存储引擎"></a>管理存储引擎</h3><ul>
+<li>查看</li>
+</ul>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment"># 查看mysql支持的存储引擎</span>
+<span class="token keyword">show</span> engines<span class="token punctuation">;</span>
+
+<span class="token comment"># 查看当前默认的存储引擎</span>
+<span class="token keyword">show</span> variables <span class="token operator">like</span> <span class="token string">'%storage_engine%'</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 查看库中所有表使用的存储引擎</span>
+<span class="token keyword">show</span> <span class="token keyword">table</span> <span class="token keyword">status</span> <span class="token keyword">from</span> db_name<span class="token punctuation">;</span>
+
+<span class="token comment"># 查看库中指定表的存储引擎</span>
+<span class="token keyword">show</span> <span class="token keyword">table</span> <span class="token keyword">status</span> <span class="token operator">like</span> <span class="token string">'tb_name'</span><span class="token punctuation">;</span>
+<span class="token keyword">show</span> <span class="token keyword">create</span> <span class="token keyword">table</span> tb_name<span class="token punctuation">;</span></code></pre>
+
+<ul>
+<li>设置</li>
+</ul>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment"># 设置默认的存储引擎</span>
+vim <span class="token operator">/</span>etc<span class="token operator">/</span>my<span class="token punctuation">.</span>cnf
+<span class="token punctuation">[</span>mysqld<span class="token punctuation">]</span>
+default_storage_engine<span class="token operator">=</span> <span class="token keyword">InnoDB</span>
+
+设置表的存储引擎：
+<span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> tb_name<span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">)</span> <span class="token keyword">ENGINE</span><span class="token operator">=</span><span class="token keyword">InnoDB</span><span class="token punctuation">;</span>
+<span class="token keyword">ALTER</span> <span class="token keyword">TABLE</span> tb_name <span class="token keyword">ENGINE</span><span class="token operator">=</span><span class="token keyword">InnoDB</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="系统数据库"><a href="#系统数据库" class="headerlink" title="系统数据库"></a>系统数据库</h2><ul>
+<li><p><strong>mysql</strong><br>是 mysql 的核心数据库，类似于 Sql Server 中的 master 库，主要负责存储数据库的用户、权限设置、关键字等 mysql 自己需要使用的控制和管理信息</p>
+</li>
+<li><p><strong>performance_schema</strong><br>MySQL 5.5 开始新增的数据库，主要用于收集数据库服务器性能参数,库里表的存储引擎均为 PERFORMANCE_SCHEMA，用户不能创建存储引擎为 PERFORMANCE_SCHEMA 的表</p>
+</li>
+<li><p><strong>information_schema</strong><br>MySQL 5.0 之后产生的，一个虚拟数据库，物理上并不存在 information_schema 数据库类似与“数据字典”，提供了访问数据库元数据的方式，即数据的数据。比如数据库名或表名，列类型，访问权限（更加细化的访问方式）</p>
+</li>
+<li><p><strong>sys</strong><br>MySQL5.7 之后新增加的数据库，库中所有数据源来自 performance_schema。目标是 performance_schema 的把复杂度降低，让 DBA 能更好的阅读这个库里的内容。让 DBA 更快的了解 DB 的运行情况</p>
+</li>
+</ul>
+<h2 id="服务器配置和状态"><a href="#服务器配置和状态" class="headerlink" title="服务器配置和状态"></a>服务器配置和状态</h2><h3 id="服务器选项"><a href="#服务器选项" class="headerlink" title="服务器选项"></a>服务器选项</h3><ul>
+<li>查看 mysqld 可用选项列表及当前值</li>
+</ul>
+<pre class="language-sql" data-language="sql"><code class="language-sql">mysqld <span class="token comment">--verbose --help</span></code></pre>
+
+<ul>
+<li>获取 mysqld 当前启动选项</li>
+</ul>
+<pre class="language-sql" data-language="sql"><code class="language-sql">mysqld <span class="token comment">--print-defaults</span></code></pre>
+
+<h3 id="服务器系统变量"><a href="#服务器系统变量" class="headerlink" title="服务器系统变量"></a>服务器系统变量</h3><p>分为全局和会话两种：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment"># 查看所有系统变量</span>
+<span class="token keyword">SHOW</span> <span class="token punctuation">[</span><span class="token keyword">SESSION</span><span class="token punctuation">]</span> VARIABLES<span class="token punctuation">;</span>	<span class="token comment"># SESSION是关键字，不是变量</span>
+<span class="token comment"># 查看global变量</span>
+<span class="token keyword">SHOW</span> <span class="token keyword">GLOBAL</span> VARIABLES<span class="token punctuation">;</span>
+
+<span class="token comment"># 查看指定的系统变量</span>
+<span class="token keyword">SHOW</span> VARIABLES <span class="token operator">LIKE</span> <span class="token string">'VAR_NAME'</span><span class="token punctuation">;</span>
+<span class="token keyword">SELECT</span> @<span class="token variable">@VAR_NAME</span><span class="token punctuation">;</span></code></pre>
+
+<p>修改变量：仅对修改后新创建的会话有效；对已经建立的会话无效</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment"># 修改全局变量</span>
+<span class="token keyword">SET</span> <span class="token keyword">GLOBAL</span> system_var_name<span class="token operator">=</span><span class="token keyword">value</span><span class="token punctuation">;</span>
+<span class="token keyword">SET</span> @<span class="token variable">@global.system_var_name</span><span class="token operator">=</span><span class="token keyword">value</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 修改会话变量</span>
+<span class="token keyword">SET</span> <span class="token punctuation">[</span><span class="token keyword">SESSION</span><span class="token punctuation">]</span> system_var_name<span class="token operator">=</span><span class="token keyword">value</span><span class="token punctuation">;</span>
+<span class="token keyword">SET</span> @@<span class="token punctuation">[</span><span class="token keyword">session</span><span class="token punctuation">.</span><span class="token punctuation">]</span>system_var_name<span class="token operator">=</span><span class="token keyword">value</span><span class="token punctuation">;</span></code></pre>
+
+<p><font color='red'>注意：</font>选项 和 变量长得很像，不要搞混，选项和变量使用中使用下划线_或者横线-都可以，但是默认变量使用下划线，选项使用横线，这点在使用 grep 查询的时候要注意<br>选项列表：<code>mysqld --verbose --help</code><br>变量列表：<code>show variables;</code><br>变量修改都是临时性的，重启服务就失效了，要想永久设置，需要修改或添加配置文件（my.conf）中的相关选项</p>
+<h4 id="SQL-MODE"><a href="#SQL-MODE" class="headerlink" title="SQL_MODE"></a>SQL_MODE</h4><p>SQL_MODE：对其设置可以完成一些约束检查的工作,可分别进行全局的设置或当前会话的设置</p>
+<p>常见 MODE：</p>
+<ul>
+<li>NO_AUTO_CREATE_USER： 禁止 GRANT 创建密码为空的用户</li>
+<li>NO_ZERO_DATE：在严格模式，不允许使用’0000-00-00’的时间</li>
+<li>ONLY_FULL_GROUP_BY： 对于 GROUP BY 聚合操作，如果在 SELECT 中的列，没有在 GROUP BY 中出现，那么将认为这个 SQL 是不合法的</li>
+<li>NO_BACKSLASH_ESCAPES： 反斜杠“\”作为普通字符而非转义字符</li>
+<li>PIPES_AS_CONCAT： 将”||”视为连接操作符而非“或”运算符</li>
+</ul>
+<p>变量只能临时修改，所以选项也提供了 sql_mode，以便可以永久修改</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment"># sql_mode 变量</span>
+<span class="token number">06</span>:<span class="token number">47</span>:<span class="token number">43</span><span class="token punctuation">(</span>root<span class="token variable">@localhost</span><span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">(</span>none<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token keyword">show</span> variables <span class="token operator">like</span> <span class="token string">'sql_mode'</span><span class="token punctuation">;</span>
+<span class="token comment"># sql_mode 选项</span>
+<span class="token punctuation">[</span>root<span class="token variable">@c71</span> <span class="token operator">~</span><span class="token punctuation">]</span>$mysqladmin <span class="token operator">-</span>uroot <span class="token operator">-</span>plujinkai variables <span class="token operator">|</span> grep sql_mode</code></pre>
+
+<h3 id="服务器状态变量"><a href="#服务器状态变量" class="headerlink" title="服务器状态变量"></a>服务器状态变量</h3><p>分为全局状态 和 会话状态，状态变量是只读的，用于保存 mysqld 运行中统计数据的变量，不可更改</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">SHOW</span> <span class="token punctuation">[</span><span class="token keyword">SESSION</span><span class="token punctuation">]</span> <span class="token keyword">STATUS</span><span class="token punctuation">;</span>
+<span class="token keyword">SHOW</span> <span class="token keyword">GLOBAL</span> <span class="token keyword">STATUS</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="查询缓存"><a href="#查询缓存" class="headerlink" title="查询缓存"></a>查询缓存</h2><p>了解即可，MySQL8.0 中已经取消了查询缓存</p>
+<h2 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h2><h3 id="索引的类型"><a href="#索引的类型" class="headerlink" title="索引的类型"></a>索引的类型</h3><p>关于索引的类型，这部分比较难，先跳过吧，等学学数据结构再回来看\</p>
+<h3 id="索引会失效的情况"><a href="#索引会失效的情况" class="headerlink" title="索引会失效的情况"></a>索引会失效的情况</h3><ul>
+<li><p>列与列对比：某个表中，有两列（id 和 c_id）都建了单独索引，下面这种查询条件不会走索引</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> test <span class="token keyword">where</span> id<span class="token operator">=</span>c_id<span class="token punctuation">;</span></code></pre>
+</li>
+<li><p>索引设置的列中出现了 NULL 值，此列在使用时不会使用索引</p>
+</li>
+<li><p>&lt;&gt;、NOT、in、not exists 这类查询条件为非时，索引定位很困难</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> test <span class="token keyword">where</span> id<span class="token operator">&lt;></span><span class="token number">500</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> test <span class="token keyword">where</span> id <span class="token operator">in</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> test <span class="token keyword">where</span> <span class="token operator">not</span> <span class="token operator">in</span> <span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">,</span><span class="token number">7</span><span class="token punctuation">,</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token number">9</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> test <span class="token keyword">where</span> <span class="token operator">not</span> <span class="token keyword">exists</span> <span class="token punctuation">(</span><span class="token keyword">select</span> <span class="token number">1</span> <span class="token keyword">from</span> test_02 <span class="token keyword">where</span> test_02<span class="token punctuation">.</span>id<span class="token operator">=</span>test<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+</li>
+<li><p>LIKE 模糊搜索时，前置通配符会让索引失效，例如查询姓张的人 <code>like 张%</code>会走索引，但是查询叫明的人 <code>like %明</code>，索引会失效</p>
+</li>
+<li><p>对索引使用计算，可能会让索引失效，例如：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> test <span class="token keyword">where</span> upper<span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token operator">=</span><span class="token string">'SUNYANG'</span><span class="token punctuation">;</span>		<span class="token comment"># 索引失效</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> test <span class="token keyword">where</span> name<span class="token operator">=</span>upper<span class="token punctuation">(</span><span class="token string">'sunyang'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment"># 没有对索引进行计算，所以索引不失效</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> sunyang <span class="token keyword">where</span> id<span class="token operator">/</span><span class="token number">2</span><span class="token operator">=</span>:type_id<span class="token punctuation">;</span>		<span class="token comment"># 索引失效</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> sunyang <span class="token keyword">where</span> id<span class="token operator">=</span>:type_id<span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">;</span>		<span class="token comment"># 没有对索引进行计算，所以索引不失效</span></code></pre>
+</li>
+<li><p>复合索引前导列区分大，前导列区分度大，且查后导列的时候，前导列的分裂会非常耗资源，执行计划想，还不如全表扫描来的快，然后就索引失效了</p>
+</li>
+<li><p>当查询条件存在隐式转换时，索引会失效。比如在数据库里 id 存的 number 类型，但是在查询时，却用了下面的形式：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> sunyang <span class="token keyword">where</span> id<span class="token operator">=</span><span class="token string">'123'</span><span class="token punctuation">;</span></code></pre></li>
+</ul>
+<h3 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h3><ul>
+<li>对于经常在 where 子句使用的列，最好设置索引</li>
+<li>对于有多个列 where 或者 order by 子句，应该建立复合索引</li>
+<li>不要在索引列上进行运算（函数操作和表达式操作）</li>
+<li>尽量使用短索引，如果可以，应该制定一个前缀长度</li>
+<li>多列索引：AND 操作时更适合使用多列索引，而非为每个列创建单独的索引</li>
+<li>索引的最左前缀原则</li>
+<li>选择合适的索引列顺序：无排序和分组时，将选择性最高放左侧</li>
+<li>每个列都要设置<code>NOT NULL</code>，并设置 DEFAULT 值，并且 DEFAULT 值不要设置空串，可以给一个空格</li>
+<li>LIKE 语句，尽量使用后置通配符，不要使用前置通配符</li>
+<li>尽量不要使用&lt;&gt;、NOT、in、not exists 操作，虽然可能使用索引，但性能不高</li>
+<li>查询时，能不要 *就不用 *，尽量写全字段名，比如：<code>select id,name,age from students;</code></li>
+<li>大部分情况连接效率远大于子查询，但是数据量大的时候，连接要尽量不要用</li>
+<li>在有大量记录的表分页时使用 limit</li>
+<li>多使用 explain 和 profile 分析查询语句</li>
+<li>查看慢查询日志，找出执行时间长的 sql 语句优化</li>
+</ul>
+<h4 id="优化表空间"><a href="#优化表空间" class="headerlink" title="优化表空间"></a>优化表空间</h4><pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">OPTIMIZE</span> <span class="token keyword">TABLE</span> tb_name<span class="token punctuation">;</span></code></pre>
+
+<h3 id="管理索引"><a href="#管理索引" class="headerlink" title="管理索引"></a>管理索引</h3><p>给已存在的表添加索引：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">ALTER</span> <span class="token keyword">TABLE</span> tbl_name <span class="token keyword">ADD</span> <span class="token keyword">INDEX</span> index_name<span class="token punctuation">(</span>index_col_name<span class="token punctuation">[</span><span class="token punctuation">(</span>length<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>删除索引：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">DROP</span> <span class="token keyword">INDEX</span> index_name <span class="token keyword">ON</span> tbl_name<span class="token punctuation">;</span>
+<span class="token keyword">ALTER</span> <span class="token keyword">TABLE</span> tbl_name <span class="token keyword">DROP</span> <span class="token keyword">INDEX</span> index_name<span class="token punctuation">(</span>index_col_name<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>查看索引：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">SHOW</span> INDEXES <span class="token keyword">FROM</span> <span class="token punctuation">[</span>db_name<span class="token punctuation">.</span><span class="token punctuation">]</span>tbl_name<span class="token punctuation">;</span></code></pre>
+
+<h3 id="EXPLAIN-工具"><a href="#EXPLAIN-工具" class="headerlink" title="EXPLAIN 工具"></a>EXPLAIN 工具</h3><p>可以通过 EXPLAIN 来分析索引的有效性，获取查询执行计划信息，用来查看查询优化器如何执行查询。</p>
+<p>参考资料： <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/explain-output.html">https://dev.mysql.com/doc/refman/5.7/en/explain-output.html</a></p>
+<p>语法：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">explain 查询语句</code></pre>
+
+<p>示例：</p>
+<p><img data-src="http://img.to2b.cn/blog/ljk/1603201489173.png"></p>
+<p><code>explain</code> 输出信息说明：</p>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>执行编号，标识 select 所属的行。如果在语句中没子查询或关联查询，只有唯一的 select，每行都将显示 1。否则，内层的 select 语句一般会顺序编号，对应于其在原始语句中的位置</td>
+</tr>
+<tr>
+<td>select_type</td>
+<td>- 简单查询：SIMPLE<br>- 复杂查询：PRIMARY（最外面的 SELECT）、DERIVED（用于 FROM 中的子查询）、UNION（UNION 语句的第一个之后的 SELECT 语句）、UNION RESUlT（匿名临时表）、SUBQUERY（简单子查询）</td>
+</tr>
+<tr>
+<td>table</td>
+<td>表名</td>
+</tr>
+<tr>
+<td>partitions</td>
+<td></td>
+</tr>
+<tr>
+<td>type</td>
+<td>关联类型或访问类型，即 MySQL 决定的如何去查询表中的行的方式</td>
+</tr>
+<tr>
+<td>possible_keys</td>
+<td>查询可能会用到的索引</td>
+</tr>
+<tr>
+<td>key</td>
+<td>显示 mysql 决定采用哪个索引来优化查询</td>
+</tr>
+<tr>
+<td>key_len</td>
+<td>显示 mysql 在索引里使用的字节数</td>
+</tr>
+<tr>
+<td>ref</td>
+<td>根据索引返回表中匹配某单个值的所有行</td>
+</tr>
+<tr>
+<td>rows</td>
+<td>为了找到所需的行而需要读取的行数，估算值，不精确。通过把所有 rows 列值相乘，可粗略估算整个查询会检查的行数</td>
+</tr>
+<tr>
+<td>filtered</td>
+<td>按表条件筛选的行的百分比</td>
+</tr>
+<tr>
+<td>Extra</td>
+<td>额外信息</td>
+</tr>
+</tbody></table>
+<p><font color=red>重点：</font> type 显示的是访问类型，是较为重要的一个指标，结果值从好到坏依次是：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">NULL
+system
+const
+eq_ref
+ref
+fulltext
+ref_or_null
+index_merge
+unique_subquery
+index_subquery
+range
+index
+ALL
+
+# 重点掌握以下10种
+NULL &gt; system &gt; const &gt; eq_ref &gt; ref &gt; ref_or_null &gt; index_merge &gt; range &gt; index &gt; ALL</code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/image-20220929145043845.png" alt="explain"></p>
+<h2 id="并发控制"><a href="#并发控制" class="headerlink" title="并发控制"></a>并发控制</h2><h3 id="锁机制"><a href="#锁机制" class="headerlink" title="锁机制"></a>锁机制</h3><p><strong>读锁：</strong>共享锁，也称为 S 锁,只读不可写（包括当前事务），多个读互不阻塞<br><strong>写锁：</strong>独占锁，排它锁，也称为 X 锁，写锁会阻塞其它事务（不包括当前事务）的读和写</p>
+<p>S 锁和 S 锁是兼容的，X 锁和其它锁都不兼容</p>
+<p>锁粒度：</p>
+<ul>
+<li>表级锁：MyISAM</li>
+<li>行级锁：InnodB</li>
+</ul>
+<p>实现</p>
+<ul>
+<li>存储引擎：自行实现其锁策略和锁粒度</li>
+<li>服务器级：实现了锁，表级锁，用户可显式请求</li>
+</ul>
+<p>分类：</p>
+<ul>
+<li>隐式锁：由存储引擎自动施加锁</li>
+<li>显式锁：用户手动请求</li>
+</ul>
+<p>锁策略：在锁粒度及数据安全性寻求的平衡机制</p>
+<h3 id="显式使用锁"><a href="#显式使用锁" class="headerlink" title="显式使用锁"></a>显式使用锁</h3><pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment"># 加锁</span>
+<span class="token keyword">LOCK</span> <span class="token keyword">TABLE</span><span class="token punctuation">[</span>S<span class="token punctuation">]</span>
+    tbl_name <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token keyword">AS</span><span class="token punctuation">]</span> alias<span class="token punctuation">]</span> lock_type
+    <span class="token punctuation">[</span><span class="token punctuation">,</span> tbl_name <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token keyword">AS</span><span class="token punctuation">]</span> alias<span class="token punctuation">]</span> lock_type<span class="token punctuation">]</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token punctuation">[</span>WAIT n<span class="token operator">|</span>NOWAIT<span class="token punctuation">]</span>
+
+lock_type:
+    <span class="token keyword">READ</span> <span class="token punctuation">[</span><span class="token keyword">LOCAL</span><span class="token punctuation">]</span>
+  <span class="token operator">|</span> <span class="token punctuation">[</span>LOW_PRIORITY<span class="token punctuation">]</span> <span class="token keyword">WRITE</span>
+  <span class="token operator">|</span> <span class="token keyword">WRITE</span> CONCURRENT
+
+<span class="token comment"># 解锁</span>
+<span class="token keyword">UNLOCK</span> <span class="token keyword">TABLES</span></code></pre>
+
+<p>通常在备份前加全局读锁</p>
+<h3 id="事务-Transactions"><a href="#事务-Transactions" class="headerlink" title="事务 Transactions"></a>事务 Transactions</h3><p>事务：一组原子性的 SQL 语句，或一个独立工作单元</p>
+<p>事务日志：记录事务信息，实现 undo,redo 等故障恢复功能</p>
+<h4 id="事务特性-ACID"><a href="#事务特性-ACID" class="headerlink" title="事务特性 ACID"></a>事务特性 ACID</h4><ul>
+<li>A：atomicity 原子性；整个事务中的所有操作要么全部成功执行，要么全部失败后回滚</li>
+<li>C：consistency 一致性；数据库总是从一个一致性状态转换为另一个一致性状态</li>
+<li>I：Isolation 隔离性；一个事务所做出的操作在提交之前，是不能为其它事务所见；隔离有多种隔离级别，实现并发</li>
+<li>D：durability 持久性；一旦事务提交，其所做的修改会永久保存于数据库中</li>
+</ul>
+<h4 id="事务命令"><a href="#事务命令" class="headerlink" title="事务命令"></a>事务命令</h4><p>显式启动事务：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">BEGIN</span>
+<span class="token comment"># 或</span>
+<span class="token keyword">BEGIN</span> <span class="token keyword">WORK</span>
+<span class="token comment"># 或</span>
+<span class="token keyword">START</span> <span class="token keyword">TRANSACTION</span></code></pre>
+
+<p>结束事务：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment">#提交</span>
+<span class="token keyword">COMMIT</span>
+
+<span class="token comment">#回滚</span>
+<span class="token keyword">ROLLBACK</span></code></pre>
+
+<p>自动提交：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">set</span> autocommit<span class="token operator">=</span>&#123;<span class="token number">1</span><span class="token operator">|</span><span class="token number">0</span>&#125;</code></pre>
+
+<p>默认为 1，为 0 时设为非自动提交，建议：显式请求和提交事务，而不要使用“自动提交”功能</p>
+<p>事务支持保存点：…</p>
+<p>查看事务：</p>
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token comment">#查看当前正在进行的事务</span>
+<span class="token keyword">SELECT</span> <span class="token operator">*</span> <span class="token keyword">FROM</span> INFORMATION_SCHEMA<span class="token punctuation">.</span>INNODB_TRX<span class="token punctuation">;</span>
+<span class="token comment">#查看当前锁定的事务</span>
+<span class="token keyword">SELECT</span> <span class="token operator">*</span> <span class="token keyword">FROM</span> INFORMATION_SCHEMA<span class="token punctuation">.</span>INNODB_LOCKS<span class="token punctuation">;</span>
+<span class="token comment">#查看当前等锁的事务</span>
+<span class="token keyword">SELECT</span> <span class="token operator">*</span> <span class="token keyword">FROM</span> INFORMATION_SCHEMA<span class="token punctuation">.</span>INNODB_LOCK_WAITS<span class="token punctuation">;</span></code></pre>
+
+<h3 id="事务隔离级别"><a href="#事务隔离级别" class="headerlink" title="事务隔离级别"></a>事务隔离级别</h3><p>MySQL 支持四种隔离级别，事务隔离级别从上至下更加严格，默认为 REPEATABLE-READ</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>隔离级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+<th>加读锁</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READ UNCOMMITTED</td>
+<td>读未提交</td>
+<td>可以出现</td>
+<td>可以出现</td>
+<td>可以出现</td>
+<td>否</td>
+</tr>
+<tr>
+<td>READ COMMITTED</td>
+<td>读提交</td>
+<td>不允许出现</td>
+<td>可以出现</td>
+<td>可以出现</td>
+<td>否</td>
+</tr>
+<tr>
+<td>REPEATABLE READ</td>
+<td>可重复读</td>
+<td>不允许出现</td>
+<td>不允许出现</td>
+<td>可以出现</td>
+<td>否</td>
+</tr>
+<tr>
+<td>SERIALIZABLE</td>
+<td>序列化</td>
+<td>不允许出现</td>
+<td>不允许出现</td>
+<td>不允许出现</td>
+<td>是</td>
+</tr>
+</tbody></table>
+<p><strong>MVCC 和事务的隔离级别：</strong><br>MVCC（多版本并发控制机制）只在 REPEATABLE READ 和 READ COMMITTED 两个隔离级别下工作。其<br>他两个隔离级别都和 MVCC 不兼容,因为 READ UNCOMMITTED 总是读取最新的数据行，而不是符合当前<br>事务版本的数据行。而 SERIALIZABLE 则会对所有读取的行都加锁</p>
+<p><strong>指定事务隔离级别：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 变量</span>
+SET <span class="token assign-left variable">tx_isolation</span><span class="token operator">=</span><span class="token string">'READ-UNCOMMITTED|READ-COMMITTED|REPEATABLE-READ|SERIALIZABLE'</span>
+<span class="token comment"># 选项</span>
+<span class="token function">vim</span> /etc/my.cnf
+<span class="token punctuation">[</span>mysqld<span class="token punctuation">]</span>
+transaction-isolation<span class="token operator">=</span>SERIALIZABLE</code></pre>
+
+<p><strong>死锁：</strong>两个或多个事务在同一资源相互占用，并请求锁定对方占用的资源的状态</p>
+<h4 id="什么是脏读和幻读"><a href="#什么是脏读和幻读" class="headerlink" title="什么是脏读和幻读"></a>什么是脏读和幻读</h4><p><strong>脏读</strong><br>脏读是指当一个事务正在访问数据，并且对数据进行了修改。而这种修改还没有提交到数据库中，这时，另外一个事务也访问了这个数据，然后使用了这个数据。</p>
+<p>例子： 1.财务将董震的工资从 1000 修改成了 8000（但未提交事务） 2.此时应董震读取自己的工资发现自己的工资变成了 8000，高兴的上蹦下跳 3.接着财务发现操作有误，回滚了事务，此时董震的工资又变成了 1000，此时董震记取的工资 8000 是一个 脏数据<br><strong>幻读</strong><br>幻读是指当事务不是独立执行时发生的一种现象，例如第一个事务对一个表中的数据进行了修改，这种修改涉及到了表中的全部数据行。同时，第二个事务也修改了这个表中的数据，这种修改是向表中插入一行新数据。那么，以后就会发生操作第一个事务的用户发现表中还有没有修改的数据行，就好像发生了幻觉一样。</p>
+<p>例子：<br>目前公司员工工资为 1000 的有 10 人</p>
+<ol>
+<li>事务 1 读取所有的员工工资为 1000 的员工。</li>
+<li>2.这时事务 2 向 employee 表插入了一条员工纪录，工资也为 1000</li>
+<li>3.事务 1 再次读取所有工资为 1000 的员工，共读取了 11 条记录。</li>
+</ol>
+<p>解决方法：如果在操作事务完成数据处理之前，任何其它事务都不可以添加新数据。</p>
+<h2 id="日志管理"><a href="#日志管理" class="headerlink" title="日志管理"></a>日志管理</h2><p>MySQL 支持丰富的日志</p>
+<h3 id="x2F-mysql-history"><a href="#x2F-mysql-history" class="headerlink" title="~&#x2F;.mysql_history"></a>~&#x2F;.mysql_history</h3><p>~&#x2F;.mysql_history 文件记录了所有的操作数据库的命令</p>
+<h3 id="事务日志"><a href="#事务日志" class="headerlink" title="事务日志"></a>事务日志</h3><p>transaction log</p>
+<p>事务日志的写入类型为“追加”，因此其操作为“顺序 IO”；通常也被称为：预写式日志 write ahead logging</p>
+<p>事务日志分类两部分：redo 和 undo</p>
+<ul>
+<li><p>redo log：实现 WAL（Write Ahead Log)，数据更新前先记录 redo log；</p>
+<p>redo 日志存储在 ib_logfile0， ib_logfile1…文件中</p>
+</li>
+<li><p>undo log：保存与执行的操作相反的操作，用于实现 rollback；</p>
+<p>undo 日志和数据存储在一起，都在 ibdata1 或 tbl_name.ibd 文件中，当 DB 写压力比较大的时候，可以设置开启独立的 undo 表空间</p>
+</li>
+</ul>
+<p>相关配置选项：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">innodb_log_file_size <span class="token number">50331648</span>	<span class="token comment"># 每个日志文件大小</span>
+innodb_log_files_in_group <span class="token number">2</span>		<span class="token comment"># 日志组成员个数</span>
+innodb_log_group_home_dir ./ 	<span class="token comment"># 事务文件路径</span>
+innodb_flush_log_at_trx_commit 	<span class="token comment"># 默认为1</span></code></pre>
+
+<p><code>innodb_flush_log_at_trx_commit=0|1|2</code></p>
+<ul>
+<li>0：事务提交到 mysql 的日志缓冲区，每秒刷新到磁盘一次，提高性能，但是 mysql 服务崩溃可能会丢失最后一秒的事务</li>
+<li>1：默认值，每次提交事务都刷新到磁盘，完全遵守 ACID 特性</li>
+<li>2：事务提交到 OS 的缓冲区，每秒刷新到磁盘一次，性能比 0 略差，操作系统崩溃可能丢失最后一秒的事务</li>
+</ul>
+<p>推荐设置为 2<br>设置为 1，同时 sync-binlog &#x3D; 1，表示最高级别的容错</p>
+<h3 id="错误日志"><a href="#错误日志" class="headerlink" title="错误日志"></a>错误日志</h3><ul>
+<li>mysqld 启动和关闭过程中输出的事件信息</li>
+<li>mysqld 运行中产生的错误信息</li>
+<li>event scheduler 运行一个 event 时产生的日志信息</li>
+<li>在主从复制架构中的从服务器上启动从服务器线程时产生的信息</li>
+</ul>
+<p>错误文件路径：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>mysqld<span class="token punctuation">]</span>
+<span class="token assign-left variable">log_error</span><span class="token operator">=</span><span class="token variable">$&#123;data_dir&#125;</span>/mysql-error.log</code></pre>
+
+<p>错误文件记录警告的级别：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>mysqld<span class="token punctuation">]</span>
+log_error_verbosity <span class="token operator">=</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token number">2</span> <span class="token operator">|</span> <span class="token number">3</span>
+<span class="token comment"># 1 错误信息；2  错误信息和告警信息； 3：错误信息、告警信息和通知信息</span></code></pre>
+
+<h3 id="通用日志"><a href="#通用日志" class="headerlink" title="通用日志"></a><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/7780.html">通用日志</a></h3><p>通用日志记录对数据库的通用操作，包括 错误的 SQL 语句，如果数据库的使用非常频繁，通用查询日志将会占用非常大的磁盘空间，对系统性能影响较大。一般情况下，数据管理员可以删除很长时间之前的通用查询日志或关闭此日志，以保证 MySQL 服务器上的硬盘空间。</p>
+<p>通用日志可以保存在 file（默认）或 table（mysql.general_log 表）</p>
+<p>通用日志相关设置</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># 默认是关闭的</span>
+<span class="token key attr-name">general-log</span><span class="token punctuation">=</span><span class="token value attr-value">ON|OFF</span>
+<span class="token key attr-name">general-log-file</span><span class="token punctuation">=</span><span class="token value attr-value">HOSTNAME.log</span>
+<span class="token key attr-name">log-output</span><span class="token punctuation">=</span><span class="token value attr-value">TABLE | FILE | NONE</span></code></pre>
+
+<h3 id="慢查询日志"><a href="#慢查询日志" class="headerlink" title="慢查询日志"></a>慢查询日志</h3><p>记录执行查询时长超出指定时长的操作</p>
+<p>慢查询相关设置选项：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># 开启或关闭慢查询，支持全局和会话，只有全局设置才会生成慢查询文件</span>
+<span class="token key attr-name">slow-query-log</span> <span class="token punctuation">=</span> <span class="token value attr-value">ON|OFF</span>
+
+<span class="token key attr-name">slow-query-log-file</span> <span class="token punctuation">=</span> <span class="token value attr-value">HOSTNAME-slow.log</span>
+
+<span class="token comment"># 慢查询的阀值，单位秒,默认为10s，建议修改为1s</span>
+<span class="token key attr-name">long-query-time</span> <span class="token punctuation">=</span> <span class="token value attr-value">N</span>
+
+<span class="token comment"># 记录不使用索引或使用全索引扫描的SQL语句，即使没达到慢查询阀值，默认OFF不记录</span>
+<span class="token key attr-name">log-queries-not-using-indexes</span> <span class="token punctuation">=</span> <span class="token value attr-value">ON</span>
+
+<span class="token comment"># 多少次查询才记录，mariadb特有</span>
+<span class="token key attr-name">log-slow-rate-limit</span> <span class="token punctuation">=</span> <span class="token value attr-value">1</span></code></pre>
+
+<p>慢查询分析工具 <strong>mysqldumpslow</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">mysqldumpslow <span class="token punctuation">[</span> OPTS<span class="token punctuation">..</span>. <span class="token punctuation">]</span> <span class="token punctuation">[</span> LOGS<span class="token punctuation">..</span>. <span class="token punctuation">]</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 mysql<span class="token punctuation">]</span><span class="token comment"># mysqldumpslow --help</span>
+<span class="token punctuation">[</span>root@4710419222 mysql<span class="token punctuation">]</span><span class="token comment"># mysqldumpslow -s t /data/mysql/mysql-slow.log</span>
+
+Reading mysql slow query log from /data/mysql/mysql-slow.log
+Count: <span class="token number">3</span>  <span class="token assign-left variable">Time</span><span class="token operator">=</span><span class="token number">93</span>.62s <span class="token punctuation">(</span>280s<span class="token punctuation">)</span>  <span class="token assign-left variable">Lock</span><span class="token operator">=</span><span class="token number">0</span>.00s <span class="token punctuation">(</span>0s<span class="token punctuation">)</span>  <span class="token assign-left variable">Rows</span><span class="token operator">=</span><span class="token number">927.0</span> <span class="token punctuation">(</span><span class="token number">2781</span><span class="token punctuation">)</span>, 2users@3hosts
+  SELECT * FROM <span class="token variable"><span class="token variable">`</span>sp_goods<span class="token variable">`</span></span>
+
+Count: <span class="token number">3</span>  <span class="token assign-left variable">Time</span><span class="token operator">=</span><span class="token number">13</span>.45s <span class="token punctuation">(</span>40s<span class="token punctuation">)</span>  <span class="token assign-left variable">Lock</span><span class="token operator">=</span><span class="token number">0</span>.00s <span class="token punctuation">(</span>0s<span class="token punctuation">)</span>  <span class="token assign-left variable">Rows</span><span class="token operator">=</span><span class="token number">4578.0</span> <span class="token punctuation">(</span><span class="token number">13734</span><span class="token punctuation">)</span>, 2users@3hosts
+  SELECT * FROM <span class="token variable"><span class="token variable">`</span>sp_goods_pics<span class="token variable">`</span></span>
+
+Count: <span class="token number">1</span>  <span class="token assign-left variable">Time</span><span class="token operator">=</span><span class="token number">2</span>.63s <span class="token punctuation">(</span>2s<span class="token punctuation">)</span>  <span class="token assign-left variable">Lock</span><span class="token operator">=</span><span class="token number">0</span>.00s <span class="token punctuation">(</span>0s<span class="token punctuation">)</span>  <span class="token assign-left variable">Rows</span><span class="token operator">=</span><span class="token number">3802.0</span> <span class="token punctuation">(</span><span class="token number">3802</span><span class="token punctuation">)</span>, lujinkai<span class="token punctuation">[</span>lujinkai<span class="token punctuation">]</span>@<span class="token punctuation">[</span><span class="token number">124.134</span>.219.24<span class="token punctuation">]</span>
+  SELECT * FROM <span class="token variable"><span class="token variable">`</span>sp_attribute<span class="token variable">`</span></span>
+
+Count: <span class="token number">1</span>  <span class="token assign-left variable">Time</span><span class="token operator">=</span><span class="token number">1</span>.28s <span class="token punctuation">(</span>1s<span class="token punctuation">)</span>  <span class="token assign-left variable">Lock</span><span class="token operator">=</span><span class="token number">0</span>.00s <span class="token punctuation">(</span>0s<span class="token punctuation">)</span>  <span class="token assign-left variable">Rows</span><span class="token operator">=</span><span class="token number">1457.0</span> <span class="token punctuation">(</span><span class="token number">1457</span><span class="token punctuation">)</span>, lujinkai<span class="token punctuation">[</span>lujinkai<span class="token punctuation">]</span>@<span class="token punctuation">[</span><span class="token number">124.134</span>.219.24<span class="token punctuation">]</span>
+  SELECT * FROM <span class="token variable"><span class="token variable">`</span>sp_category<span class="token variable">`</span></span></code></pre>
+
+<h3 id="profile-工具"><a href="#profile-工具" class="headerlink" title="profile 工具"></a>profile 工具</h3><p>profile 工具可以对一条 SQL 的性能进行分析，开启 profile 功能后，所有查询包括错误的语句都会记录在内。</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">mysqld</span><span class="token punctuation">]</span></span>
+<span class="token comment"># 设置profile可以缓存的SQL语句数量，可以设置0-100，默认15</span>
+<span class="token key attr-name">profiling-history-size</span><span class="token punctuation">=</span><span class="token value attr-value">15</span></code></pre>
+
+<p>profile 不能通过设置配置文件的方式自动启动，只能通过设置变量的方式会话启动</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">10</span>:13:33<span class="token punctuation">(</span>root@localhost<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">(</span>none<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token builtin class-name">set</span> @@profiling<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span>	<span class="token comment"># 开启profile</span></code></pre>
+
+<p>set profiling&#x3D;0 或者退出会话自动关闭 profile</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 查看profile缓存的sql语句</span>
+MySQL <span class="token punctuation">[</span>blog<span class="token punctuation">]</span><span class="token operator">></span> show profiles<span class="token punctuation">;</span>
++----------+------------+-----------------------------------+
+<span class="token operator">|</span> Query_ID <span class="token operator">|</span> Duration   <span class="token operator">|</span> Query                             <span class="token operator">|</span>
++----------+------------+-----------------------------------+
+<span class="token operator">|</span>        <span class="token number">1</span> <span class="token operator">|</span> <span class="token number">0.00195000</span> <span class="token operator">|</span> show variables like <span class="token string">'%profiling%'</span> <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">2</span> <span class="token operator">|</span> <span class="token number">0.00019525</span> <span class="token operator">|</span> SELECT DATABASE<span class="token punctuation">(</span><span class="token punctuation">)</span>                 <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">3</span> <span class="token operator">|</span> <span class="token number">0.00057600</span> <span class="token operator">|</span> show databases                    <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">4</span> <span class="token operator">|</span> <span class="token number">0.00013950</span> <span class="token operator">|</span> SELECT DATABASE<span class="token punctuation">(</span><span class="token punctuation">)</span>                 <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">5</span> <span class="token operator">|</span> <span class="token number">0.00043075</span> <span class="token operator">|</span> show tables                       <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">6</span> <span class="token operator">|</span> <span class="token number">0.00439525</span> <span class="token operator">|</span> <span class="token keyword">select</span> * from no1_user            <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">7</span> <span class="token operator">|</span> <span class="token number">0.00058925</span> <span class="token operator">|</span> show databases                    <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">8</span> <span class="token operator">|</span> <span class="token number">0.00020350</span> <span class="token operator">|</span> SELECT DATABASE<span class="token punctuation">(</span><span class="token punctuation">)</span>                 <span class="token operator">|</span>
+<span class="token operator">|</span>        <span class="token number">9</span> <span class="token operator">|</span> <span class="token number">0.00136600</span> <span class="token operator">|</span> show tables                       <span class="token operator">|</span>
+<span class="token operator">|</span>       <span class="token number">10</span> <span class="token operator">|</span> <span class="token number">0.00425275</span> <span class="token operator">|</span> <span class="token keyword">select</span> * from typecho_contents    <span class="token operator">|</span>
++----------+------------+-----------------------------------+
+<span class="token number">10</span> rows <span class="token keyword">in</span> set, <span class="token number">1</span> warning <span class="token punctuation">(</span><span class="token number">0.00</span> sec<span class="token punctuation">)</span>
+
+<span class="token comment"># 2. 分析Query_ID=10的sql语句，查看执行这条语句的时间都消耗在了哪里</span>
+MySQL <span class="token punctuation">[</span>blog<span class="token punctuation">]</span><span class="token operator">></span> show profile <span class="token keyword">for</span> query <span class="token number">10</span><span class="token punctuation">;</span>
++--------------------------------+----------+
+<span class="token operator">|</span> Status                         <span class="token operator">|</span> Duration <span class="token operator">|</span>
++--------------------------------+----------+
+<span class="token operator">|</span> starting                       <span class="token operator">|</span> <span class="token number">0.000034</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000015</span> <span class="token operator">|</span>
+<span class="token operator">|</span> starting                       <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span>
+<span class="token operator">|</span> checking query cache <span class="token keyword">for</span> query <span class="token operator">|</span> <span class="token number">0.000056</span> <span class="token operator">|</span>
+<span class="token operator">|</span> checking permissions           <span class="token operator">|</span> <span class="token number">0.000010</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Opening tables                 <span class="token operator">|</span> <span class="token number">0.002307</span> <span class="token operator">|</span>
+<span class="token operator">|</span> init                           <span class="token operator">|</span> <span class="token number">0.000045</span> <span class="token operator">|</span>
+<span class="token operator">|</span> System lock                    <span class="token operator">|</span> <span class="token number">0.000013</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000004</span> <span class="token operator">|</span>
+<span class="token operator">|</span> System lock                    <span class="token operator">|</span> <span class="token number">0.000029</span> <span class="token operator">|</span>
+<span class="token operator">|</span> optimizing                     <span class="token operator">|</span> <span class="token number">0.000007</span> <span class="token operator">|</span>
+<span class="token operator">|</span> statistics                     <span class="token operator">|</span> <span class="token number">0.000019</span> <span class="token operator">|</span>
+<span class="token operator">|</span> preparing                      <span class="token operator">|</span> <span class="token number">0.000018</span> <span class="token operator">|</span>
+<span class="token operator">|</span> executing                      <span class="token operator">|</span> <span class="token number">0.000004</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Sending data                   <span class="token operator">|</span> <span class="token number">0.001413</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000006</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Sending data                   <span class="token operator">|</span> <span class="token number">0.000159</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000006</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Sending data                   <span class="token operator">|</span> <span class="token number">0.000053</span> <span class="token operator">|</span>
+<span class="token operator">|</span> end                            <span class="token operator">|</span> <span class="token number">0.000005</span> <span class="token operator">|</span>
+<span class="token operator">|</span> query end                      <span class="token operator">|</span> <span class="token number">0.000007</span> <span class="token operator">|</span>
+<span class="token operator">|</span> closing tables                 <span class="token operator">|</span> <span class="token number">0.000009</span> <span class="token operator">|</span>
+<span class="token operator">|</span> freeing items                  <span class="token operator">|</span> <span class="token number">0.000008</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>
+<span class="token operator">|</span> freeing items                  <span class="token operator">|</span> <span class="token number">0.000015</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>
+<span class="token operator">|</span> freeing items                  <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>
+<span class="token operator">|</span> storing result <span class="token keyword">in</span> query cache  <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span>
+<span class="token operator">|</span> cleaning up                    <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span>
++--------------------------------+----------+
+<span class="token number">29</span> rows <span class="token keyword">in</span> set, <span class="token number">1</span> warning <span class="token punctuation">(</span><span class="token number">0.00</span> sec<span class="token punctuation">)</span>
+
+<span class="token comment"># 3. 第二步的查询的结果不够细致，显示CPU的耗时情况</span>
+MySQL <span class="token punctuation">[</span>blog<span class="token punctuation">]</span><span class="token operator">></span> show profile cpu <span class="token keyword">for</span> query <span class="token number">10</span><span class="token punctuation">;</span>
++--------------------------------+----------+----------+------------+
+<span class="token operator">|</span> Status                         <span class="token operator">|</span> Duration <span class="token operator">|</span> CPU_user <span class="token operator">|</span> CPU_system <span class="token operator">|</span>
++--------------------------------+----------+----------+------------+
+<span class="token operator">|</span> starting                       <span class="token operator">|</span> <span class="token number">0.000034</span> <span class="token operator">|</span> <span class="token number">0.000018</span> <span class="token operator">|</span>   <span class="token number">0.000016</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000015</span> <span class="token operator">|</span> <span class="token number">0.000007</span> <span class="token operator">|</span>   <span class="token number">0.000007</span> <span class="token operator">|</span>
+<span class="token operator">|</span> starting                       <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>   <span class="token number">0.000001</span> <span class="token operator">|</span>
+<span class="token operator">|</span> checking query cache <span class="token keyword">for</span> query <span class="token operator">|</span> <span class="token number">0.000056</span> <span class="token operator">|</span> <span class="token number">0.000030</span> <span class="token operator">|</span>   <span class="token number">0.000027</span> <span class="token operator">|</span>
+<span class="token operator">|</span> checking permissions           <span class="token operator">|</span> <span class="token number">0.000010</span> <span class="token operator">|</span> <span class="token number">0.000005</span> <span class="token operator">|</span>   <span class="token number">0.000004</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Opening tables                 <span class="token operator">|</span> <span class="token number">0.002307</span> <span class="token operator">|</span> <span class="token number">0.000243</span> <span class="token operator">|</span>   <span class="token number">0.000216</span> <span class="token operator">|</span>
+<span class="token operator">|</span> init                           <span class="token operator">|</span> <span class="token number">0.000045</span> <span class="token operator">|</span> <span class="token number">0.000023</span> <span class="token operator">|</span>   <span class="token number">0.000021</span> <span class="token operator">|</span>
+<span class="token operator">|</span> System lock                    <span class="token operator">|</span> <span class="token number">0.000013</span> <span class="token operator">|</span> <span class="token number">0.000007</span> <span class="token operator">|</span>   <span class="token number">0.000006</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000004</span> <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>   <span class="token number">0.000001</span> <span class="token operator">|</span>
+<span class="token operator">|</span> System lock                    <span class="token operator">|</span> <span class="token number">0.000029</span> <span class="token operator">|</span> <span class="token number">0.000015</span> <span class="token operator">|</span>   <span class="token number">0.000014</span> <span class="token operator">|</span>
+<span class="token operator">|</span> optimizing                     <span class="token operator">|</span> <span class="token number">0.000007</span> <span class="token operator">|</span> <span class="token number">0.000004</span> <span class="token operator">|</span>   <span class="token number">0.000003</span> <span class="token operator">|</span>
+<span class="token operator">|</span> statistics                     <span class="token operator">|</span> <span class="token number">0.000019</span> <span class="token operator">|</span> <span class="token number">0.000010</span> <span class="token operator">|</span>   <span class="token number">0.000009</span> <span class="token operator">|</span>
+<span class="token operator">|</span> preparing                      <span class="token operator">|</span> <span class="token number">0.000018</span> <span class="token operator">|</span> <span class="token number">0.000009</span> <span class="token operator">|</span>   <span class="token number">0.000009</span> <span class="token operator">|</span>
+<span class="token operator">|</span> executing                      <span class="token operator">|</span> <span class="token number">0.000004</span> <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>   <span class="token number">0.000001</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Sending data                   <span class="token operator">|</span> <span class="token number">0.001413</span> <span class="token operator">|</span> <span class="token number">0.000345</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000006</span> <span class="token operator">|</span> <span class="token number">0.000005</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Sending data                   <span class="token operator">|</span> <span class="token number">0.000159</span> <span class="token operator">|</span> <span class="token number">0.000163</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000006</span> <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Sending data                   <span class="token operator">|</span> <span class="token number">0.000053</span> <span class="token operator">|</span> <span class="token number">0.000054</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> end                            <span class="token operator">|</span> <span class="token number">0.000005</span> <span class="token operator">|</span> <span class="token number">0.000004</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> query end                      <span class="token operator">|</span> <span class="token number">0.000007</span> <span class="token operator">|</span> <span class="token number">0.000006</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> closing tables                 <span class="token operator">|</span> <span class="token number">0.000009</span> <span class="token operator">|</span> <span class="token number">0.000009</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> freeing items                  <span class="token operator">|</span> <span class="token number">0.000008</span> <span class="token operator">|</span> <span class="token number">0.000008</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span> <span class="token number">0.000001</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> freeing items                  <span class="token operator">|</span> <span class="token number">0.000015</span> <span class="token operator">|</span> <span class="token number">0.000015</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> Waiting <span class="token keyword">for</span> query cache lock   <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> freeing items                  <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span> <span class="token number">0.000002</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> storing result <span class="token keyword">in</span> query cache  <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
+<span class="token operator">|</span> cleaning up                    <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span> <span class="token number">0.000003</span> <span class="token operator">|</span>   <span class="token number">0.000000</span> <span class="token operator">|</span>
++--------------------------------+----------+----------+------------+
+<span class="token number">29</span> rows <span class="token keyword">in</span> set, <span class="token number">1</span> warning <span class="token punctuation">(</span><span class="token number">0.00</span> sec<span class="token punctuation">)</span></code></pre>
+
+<p>除了可以查看 CPU 的耗时情况，还支持分析很多类型，例如：</p>
+<table>
+<thead>
+<tr>
+<th>分析类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>all</td>
+<td>显示所有性能信息</td>
+</tr>
+<tr>
+<td>block io</td>
+<td>显示块 IO（块的输入输出）的次数</td>
+</tr>
+<tr>
+<td>context switches</td>
+<td>上下文切换相关开销</td>
+</tr>
+<tr>
+<td>cpu</td>
+<td>显示用户和系统的 cpu 的耗时情况</td>
+</tr>
+<tr>
+<td>ipc</td>
+<td>显示发送和接受的消息数量</td>
+</tr>
+<tr>
+<td>memory</td>
+<td>暂时还没有这个选项，未来可能有</td>
+</tr>
+<tr>
+<td>page faults</td>
+<td>显示主要和次要的页面故障</td>
+</tr>
+<tr>
+<td>swaps</td>
+<td>显示 swap 的次数</td>
+</tr>
+</tbody></table>
+<p>分析多个类型时，使用逗号分割，例如：<code>show profile cpu,block io for query 10;</code></p>
+<h3 id="二进制日志（备份）"><a href="#二进制日志（备份）" class="headerlink" title="二进制日志（备份）"></a>二进制日志（备份）</h3><p>生产中，上述日志都可以不开启，但是二进制日志一定要开启，因为二进制日志我们是当备份用的</p>
+<ol>
+<li>记录导致数据改变或潜在导致数据改变的 SQL 语句，例如 SELECT 语句是不会被记录的</li>
+<li>记录已提交的事务，不会记录脏数据</li>
+<li>不依赖于存储引擎</li>
+</ol>
+<p>注意区分二进制日志和事务日志</p>
+<h4 id="相关配置选项"><a href="#相关配置选项" class="headerlink" title="相关配置选项"></a>相关配置选项</h4><pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">mysqld</span><span class="token punctuation">]</span></span>
+<span class="token comment"># 设置二进制日志的路径，生产中应该设置单独的目录（磁盘）存放</span>
+<span class="token key attr-name">log-bin</span> <span class="token punctuation">=</span> <span class="token value attr-value">/data/mysqlbinlog/mysql-bin</span>
+<span class="token comment"># 二进制日志记录的格式，5.7默认MIXED，8.0默认ROW</span>
+<span class="token key attr-name">binlog-format</span> <span class="token punctuation">=</span> <span class="token value attr-value">STATEMENT | ROW | MIXED</span>
+<span class="token comment"># 二进制日志的最大值，字节为单位，默认1G</span>
+<span class="token key attr-name">max-binlog-size</span> <span class="token punctuation">=</span> <span class="token value attr-value">1073741824</span>
+<span class="token comment"># 为每个session分配的内存，用作事务的二进制日志缓存，默认1M</span>
+<span class="token key attr-name">binlog-cache-size</span> <span class="token punctuation">=</span> <span class="token value attr-value">1048576</span>
+<span class="token comment"># 限制最大缓存，默认16EB，保持默认值即可</span>
+<span class="token key attr-name">max-binlog-cache-size</span> <span class="token punctuation">=</span> <span class="token value attr-value">18446744073709547520</span>
+<span class="token comment"># 二进制日志是否即时同步到磁盘，默认0，由操作系统负责同步日志到磁盘</span>
+<span class="token key attr-name">sync-binlog</span> <span class="token punctuation">=</span> <span class="token value attr-value">1 | 0</span>
+<span class="token comment"># 二进制日志可以自动删除的天数。 默认为0，即不自动删除</span>
+<span class="token key attr-name">expire-logs-days</span> <span class="token punctuation">=</span> <span class="token value attr-value">N</span></code></pre>
+
+<p><code>log-bin = /data/mysqlbinlog/mysql-bin</code>：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 mysqlbinlog<span class="token punctuation">]</span><span class="token variable">$ll</span> ./mysql-bin.*
+-rw-r----- <span class="token number">1</span> mysql mysql  <span class="token number">177</span> Oct <span class="token number">16</span> <span class="token number">21</span>:37 ./mysql-bin.000001
+-rw-r----- <span class="token number">1</span> mysql mysql <span class="token number">3683</span> Oct <span class="token number">16</span> <span class="token number">22</span>:38 ./mysql-bin.000002
+-rw-r----- <span class="token number">1</span> mysql mysql  <span class="token number">228</span> Oct <span class="token number">22</span> 09:26 mysql-bin.index</code></pre>
+
+<p><code>binlog-format = STATEMENT | ROW | MIXED</code>：</p>
+<ul>
+<li>statement：基于语句记录，日志量较少，但生产中不推荐使用，因为二进制日志是用来备份的，如果记录了类似<code>update table set time = now();</code>的语句，那将来恢复备份的时候 now()值就变了</li>
+<li>row：基于行记录，日志量较大，例如上面的 update 操作，statement 模式原封不动的只记录一条语句，而 row 模式则记录每一条数据的更改，并且不会记录 now()，而是转成确切时间记录，所以 row 模式更加安全，生产中推荐使用</li>
+<li>mixed：混合模式，让系统根据情况自行切换 statement 和 row 模式，这样即相对节省硬盘空间，也安全，但是万一系统判断错了呢，所以还是推荐使用 row 模式，确保万无一失</li>
+</ul>
+<p><code>max-binlog-size = 1073741824</code>：以下三种情况会切换二进制日志（就是生产一个新的二进制日志文件，后面的数据库更改操作记录在新的二进制日志文件中）</p>
+<ul>
+<li>重启数据库</li>
+<li>二进制日志文件达到了 max_binlog_size 设置的值</li>
+<li>执行<code>flush logs;</code>命令主动刷新所有日志</li>
+</ul>
+<p><code>binlog-cache-size = 1048576</code><br><code>max-binlog-cache-size = 18446744073709547520</code></p>
+<p>当事务过大，所需缓存超过了<code>binlog-cache-size</code>分配的内存大小，会使用临时文件，如果超过了<code>max-binlog-cache-size</code>限制的最大值，则直接报错</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">10</span>:32:47<span class="token punctuation">(</span>root@localhost<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">(</span>none<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token operator">></span> show global status like <span class="token string">'bin%'</span><span class="token punctuation">;</span>
++----------------------------+-------+
+<span class="token operator">|</span> Variable_name              <span class="token operator">|</span> Value <span class="token operator">|</span>
++----------------------------+-------+
+<span class="token operator">|</span> Binlog_cache_disk_use      <span class="token operator">|</span> <span class="token number">0</span>     <span class="token operator">|</span>
+<span class="token operator">|</span> Binlog_cache_use           <span class="token operator">|</span> <span class="token number">0</span>     <span class="token operator">|</span>
+<span class="token operator">|</span> Binlog_stmt_cache_disk_use <span class="token operator">|</span> <span class="token number">0</span>     <span class="token operator">|</span>
+<span class="token operator">|</span> Binlog_stmt_cache_use      <span class="token operator">|</span> <span class="token number">0</span>     <span class="token operator">|</span>
++----------------------------+-------+
+<span class="token number">4</span> rows <span class="token keyword">in</span> <span class="token builtin class-name">set</span> <span class="token punctuation">(</span><span class="token number">0.00</span> sec<span class="token punctuation">)</span>
+
+<span class="token comment"># Binlog_cache_disk_use表示因binlog_cache_size设计的内存不足导致缓存二进制日志用到了临时文件的次数</span>
+<span class="token comment"># Binlog_cache_use表示用binlog_cache_size缓存的次数</span>
+<span class="token comment"># 当Binlog_cache_disk_use值比较大的时候，可以考虑适当的调高binlog_cache_size的值</span></code></pre>
+
+<h4 id="相关变量"><a href="#相关变量" class="headerlink" title="相关变量"></a>相关变量</h4><pre class="language-ini" data-language="ini"><code class="language-ini">09:40:36(root@localhost) [(none)]> select @@sql_log_bin;
++---------------+
+| @@sql_log_bin |
++---------------+
+|             1 |
++---------------+
+1 row in set (0.00 sec)</code></pre>
+
+<p>log-bin 配置选项是全局级别的，sql_log_bin 变量是会话级别的</p>
+<h4 id="相关工具和命令"><a href="#相关工具和命令" class="headerlink" title="相关工具和命令"></a>相关工具和命令</h4><p><strong>mysqlbinlog</strong>：二进制日志的客户端命令工具，支持离线查看二进制日志</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">mysqlbinlog <span class="token punctuation">[</span>options<span class="token punctuation">]</span> log-files
+
+--start-position<span class="token operator">=</span><span class="token comment"># 指定开始位置</span>
+--stop-position<span class="token operator">=</span><span class="token comment">#</span>
+--start-datetime<span class="token operator">=</span> <span class="token comment">#时间格式：YYYY-MM-DD hh:mm:ss</span>
+--stop-datetime<span class="token operator">=</span>
+--base64-output<span class="token punctuation">[</span><span class="token operator">=</span>name<span class="token punctuation">]</span>
+<span class="token parameter variable">-v</span> <span class="token parameter variable">-vvv</span></code></pre>
+
+<p>mysqlbinlog 可以用于简单的备份</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 备份 在Mysql5.5以下版本使用mysqlbinlog命令时如果报错，就加上"--no-defaults"选项</span>
+<span class="token punctuation">[</span>root@c71 mysql<span class="token punctuation">]</span><span class="token variable">$mysqlbinlog</span> --no-defaults /data/mysql/mysql-bin.000014 <span class="token operator">></span> ~/test.sql
+<span class="token comment"># 恢复</span>
+<span class="token punctuation">[</span>root@c71 mysql<span class="token punctuation">]</span><span class="token variable">$mysql</span> <span class="token parameter variable">-uroot</span> <span class="token parameter variable">-plujinkai</span> <span class="token operator">&lt;</span> ~/test.sql</code></pre>
+
+<p><strong>PURGE</strong>：清除指定二进制日志</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">PURGE <span class="token punctuation">&#123;</span> BINARY <span class="token operator">|</span> MASTER <span class="token punctuation">&#125;</span> LOGS <span class="token punctuation">&#123;</span> TO <span class="token string">'log_name'</span> <span class="token operator">|</span> BEFORE datetime_expr <span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">PURGE</span> <span class="token keyword">BINARY</span> LOGS <span class="token keyword">TO</span> <span class="token string">'mariadb-bin.000003'</span><span class="token punctuation">;</span> <span class="token comment"># 删除mariadb-bin.000003之前的日志</span>
+<span class="token keyword">PURGE</span> <span class="token keyword">BINARY</span> LOGS BEFORE <span class="token string">'2017-01-23'</span><span class="token punctuation">;</span>
+<span class="token keyword">PURGE</span> <span class="token keyword">BINARY</span> LOGS BEFORE <span class="token string">'2017-03-22 09:25:30'</span><span class="token punctuation">;</span></code></pre>
+
+<p><strong>RESET MASTER</strong>：删除所有二进制日志，index 文件重新计数，一般在完成备份后，可以执行此操作</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"><i class="fa fa-tag"></i> MySQL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/MySQL/SQL%E8%AF%AD%E8%A8%80/" rel="prev" title="SQL语言">
+                  <i class="fa fa-chevron-left"></i> SQL语言
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/MySQL/MySQL%E5%A4%87%E4%BB%BD%E5%92%8C%E6%81%A2%E5%A4%8D/" rel="next" title="MySQL备份和恢复">
+                  MySQL备份和恢复 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

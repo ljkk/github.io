@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="pstree, ps, pidof, pgrep, top, htop, glance, pmap, vmstat, dstat,kill, pkill, job, bg, fg, nohup pstree进程树，来自 psmisc 软件包（fuser 和 killall 也来自 psmisc ） connecting.asciidoc  pstree [OPTION] [ PID | USER">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程相关命令">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="pstree, ps, pidof, pgrep, top, htop, glance, pmap, vmstat, dstat,kill, pkill, job, bg, fg, nohup pstree进程树，来自 psmisc 软件包（fuser 和 killall 也来自 psmisc ） connecting.asciidoc  pstree [OPTION] [ PID | USER">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.lujinkai.cn/note/htop.png">
+<meta property="article:published_time" content="2020-12-09T14:55:44.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.510Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="进程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.lujinkai.cn/note/htop.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/","path":"运维/基础/进程和计划任务/进程相关命令/","title":"进程相关命令"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>进程相关命令 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#pstree"><span class="nav-number">1.</span> <span class="nav-text">pstree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ps"><span class="nav-number">2.</span> <span class="nav-text">ps</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%BB%84%E5%90%88"><span class="nav-number">2.1.</span> <span class="nav-text">常用组合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%B1%9E%E6%80%A7"><span class="nav-number">2.2.</span> <span class="nav-text">常见属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E7%A0%81"><span class="nav-number">2.3.</span> <span class="nav-text">进程状态码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#prtstat"><span class="nav-number">3.</span> <span class="nav-text">prtstat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%92%8C%E8%B0%83%E6%95%B4%E8%BF%9B%E7%A8%8B%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">4.</span> <span class="nav-text">设置和调整进程优先级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nice"><span class="nav-number">4.1.</span> <span class="nav-text">nice</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#renice"><span class="nav-number">4.2.</span> <span class="nav-text">renice</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%9C%E7%B4%A2%E8%BF%9B%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">搜索进程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pgrep"><span class="nav-number">5.1.</span> <span class="nav-text">pgrep</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pidof"><span class="nav-number">5.2.</span> <span class="nav-text">pidof</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#uptime-%E5%92%8C-w"><span class="nav-number">6.</span> <span class="nav-text">uptime 和 w</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mpstat"><span class="nav-number">7.</span> <span class="nav-text">mpstat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#top"><span class="nav-number">8.</span> <span class="nav-text">top</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#htop"><span class="nav-number">9.</span> <span class="nav-text">htop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#free"><span class="nav-number">10.</span> <span class="nav-text">free</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pmap"><span class="nav-number">11.</span> <span class="nav-text">pmap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vmstat"><span class="nav-number">12.</span> <span class="nav-text">vmstat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iostat"><span class="nav-number">13.</span> <span class="nav-text">iostat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dstat"><span class="nav-number">14.</span> <span class="nav-text">dstat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iotop"><span class="nav-number">15.</span> <span class="nav-text">iotop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iftop"><span class="nav-number">16.</span> <span class="nav-text">iftop</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#iftop-%E5%92%8C-nethogs"><span class="nav-number">16.1.</span> <span class="nav-text">iftop 和 nethogs</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nload"><span class="nav-number">17.</span> <span class="nav-text">nload</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#glances"><span class="nav-number">18.</span> <span class="nav-text">glances</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lsof"><span class="nav-number">19.</span> <span class="nav-text">lsof</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cockpit"><span class="nav-number">20.</span> <span class="nav-text">cockpit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kill"><span class="nav-number">21.</span> <span class="nav-text">kill</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%9C%E4%B8%9A%E7%AE%A1%E7%90%86"><span class="nav-number">22.</span> <span class="nav-text">作业管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nohup"><span class="nav-number">22.1.</span> <span class="nav-text">nohup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#screen"><span class="nav-number">22.2.</span> <span class="nav-text">screen</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tmux"><span class="nav-number">22.3.</span> <span class="nav-text">tmux</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E8%BF%90%E8%A1%8C"><span class="nav-number">23.</span> <span class="nav-text">并行运行</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%BF%9B%E7%A8%8B%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="进程相关命令 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          进程相关命令
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:55:44" itemprop="dateCreated datePublished" datetime="2020-12-09T22:55:44+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">进程和计划任务</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>pstree, ps, pidof, pgrep, top, htop, glance, pmap, vmstat, dstat,kill, pkill, job, bg, fg, nohup</p>
+<h2 id="pstree"><a href="#pstree" class="headerlink" title="pstree"></a>pstree</h2><p>进程树，来自 psmisc 软件包（fuser 和 killall 也来自 psmisc ） <a href="../../../../../../data/wwwroot/go-elasticsearch/.doc/connecting.asciidoc">connecting.asciidoc</a> </p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">pstree <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span> <span class="token punctuation">[</span> PID <span class="token operator">|</span> <span class="token environment constant">USER</span> <span class="token punctuation">]</span>
+
+OPTION：
+<span class="token parameter variable">-p</span>       <span class="token comment"># 显示PID</span>
+<span class="token parameter variable">-T</span>       <span class="token comment"># 不显示线程，只显示进程</span>
+<span class="token parameter variable">-u</span>       <span class="token comment"># 显示进程所属用户</span>
+<span class="token parameter variable">-H</span> pid   <span class="token comment"># 高亮显示指定进程及其前辈进程</span></code></pre>
+
+<h2 id="ps"><a href="#ps" class="headerlink" title="ps"></a>ps</h2><p>process state，默认显示当前终端中的进程，Linux 系统各进程的相关信息均保存在<code>/proc/PID</code>目录下的各个文件中。ps 显示的是进程快照，如果要动态显示实时的进程信息，可以使用 top 命令</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ps</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span></code></pre>
+
+<p>ps 的参数有非常多，三种风格都支持</p>
+<p>大致分以下五类，这五类是我划分的，和 man 文档不太一样，下面是常见的 option：</p>
+<ol>
+<li><p>简单选择范围</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">a     <span class="token comment"># 显示所有终端的进程</span>
+x     <span class="token comment"># 显示不链接终端的进程</span>
+<span class="token parameter variable">-e</span>    <span class="token comment"># 显示所有进程，和ax显示的进程一样多，但是不如ax显示的属性多</span></code></pre>
+</li>
+<li><p>按条件查询<br>查询条件之间用逗号分割</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-p</span> <span class="token operator">|</span> p pidlist  <span class="token comment"># 指定pid列表</span>
+<span class="token parameter variable">--ppid</span> pidlist  <span class="token comment"># 显示属于pid的子进程</span>
+<span class="token parameter variable">-C</span> cmdlist      <span class="token comment"># 指定命令列表</span>
+<span class="token parameter variable">-u</span> userlist     <span class="token comment"># 指定 effective user 列表，可以写用户名或用户id</span>
+<span class="token parameter variable">-U</span> userlist     <span class="token comment"># 指定 real user 列表</span>
+<span class="token parameter variable">-g</span> grplist      <span class="token comment">#  指定effective group 列表，可以写组名或组id</span>
+<span class="token parameter variable">-G</span> grplist      <span class="token comment">#  指定real group 列表</span>
+<span class="token parameter variable">-t</span> ttylist      <span class="token comment"># 指定tty</span></code></pre>
+</li>
+<li><p>控制输出属性</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">o 属性列表  <span class="token comment"># 指定属性，属性之间用逗号分割</span>
+u          <span class="token comment"># 显示user，以及%cpu、%mem等信息，适合面向用户</span>
+<span class="token parameter variable">-f</span>         <span class="token comment"># 显示UID、PPID、C与STIME</span>
+<span class="token parameter variable">-F</span>         <span class="token comment"># 比-f多显示SZ、RSS、PSR</span></code></pre>
+</li>
+<li><p>格式化输出</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">f                                   <span class="token comment"># 显示进程树，相当于 --forest</span>
+k<span class="token operator">|</span>--sort <span class="token punctuation">[</span>+<span class="token operator">|</span>-<span class="token punctuation">]</span>key<span class="token punctuation">[</span>,<span class="token punctuation">[</span>+<span class="token operator">|</span>-<span class="token punctuation">]</span>key<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span class="token punctuation">]</span>  <span class="token comment"># 按照属性排序，如果多个属性，用逗号分割，属性前加-表示倒序</span>
+<span class="token parameter variable">-H</span>                                  <span class="token comment"># 显示进程层级格式，和 f 差不多</span>
+
+<span class="token function">ps</span> aux k %cpu   等于   <span class="token function">ps</span> aux <span class="token parameter variable">--sort</span> %cpu    等于   <span class="token function">ps</span> aux <span class="token parameter variable">--sort</span><span class="token operator">=</span>%cpu
+<span class="token function">ps</span> aux k -%cpu  等于   <span class="token function">ps</span> aux <span class="token parameter variable">--sort</span> -%cpu   等于   <span class="token function">ps</span> aux <span class="token parameter variable">--sort</span><span class="token operator">=</span>-%cpu</code></pre>
+</li>
+<li><p>显示线程</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-L</span>    <span class="token comment"># 显示线程</span></code></pre>
+</li>
+<li><p>其他</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-L</span>   <span class="token comment"># 显示所有属性，小写的那列是属性code，大写的是属性header，`ps | head -1`输出的就是header</span></code></pre></li>
+</ol>
+<p>很多 option 是冲突的，有的冲突会报错，有的结果无意义我也算它冲突，大概有以下两种情况：</p>
+<ol>
+<li><p>按条件查询 和 简单选择范围：我们的预期是从指定的范围内按条件查询，然后输出查询的结果，有的命令确实是这个逻辑，但是 ps 会把所有的进程和查询到的进程都输出，这样的结果是没有意义的</p>
+</li>
+<li><p>控制输出的属性：当多个这种类型的 option 组合在一起，如果指定的属性列表是包含关系，则正常，否则报错，例如-f 和-F 会按照-F 输出结果，但是-f 和 u 就会报错。<br>简单选择范围 的 option 默认展示若干属性，它们和控制输出的属性不冲突</p>
+</li>
+</ol>
+<h3 id="常用组合"><a href="#常用组合" class="headerlink" title="常用组合"></a>常用组合</h3><h3 id="常见属性"><a href="#常见属性" class="headerlink" title="常见属性"></a>常见属性</h3><p><code>ps L</code>可以查看所有进程属性，有 170 个，我叫它属性，实际 man 文档称之为 SPECIFIERS（说明符），o 选项可以指定 ps 输出哪些进程属性，下面是常用的进程属性：</p>
+<ul>
+<li>user|euser：effective user，有效的用户</li>
+<li>ruser：real user 真正的用户，例如普通用户 lujinkai 使用 sudo 执行命令，那 effective user 就是 lujinkai，real user 就是 root</li>
+<li>fuser：</li>
+<li>suser：</li>
+<li>%cpu：cpu 占用率，精确到小数点后一位</li>
+<li>c：cpu 占有率，精确到个位数</li>
+<li>%mem：内存占有率</li>
+<li>pid：进程 id，如果是线程，则是线程所在进程的 id</li>
+<li>ppid：父进程 id</li>
+<li>lwp|spid|tid：线程 id</li>
+<li>s|state：minimal state display (one character)</li>
+<li>stat：multi-character process state</li>
+<li>ni|nice：nice 优先级</li>
+<li>pri：priority 优先级</li>
+<li>rtprio：rtprio 优先级</li>
+<li>sz：物理内存大小，包括文本、数据和堆栈空间</li>
+<li>psr：processor，CPU 编号，表示进程占用哪个 CPU 核心</li>
+<li>vsz：虚拟内存大小，单位 k</li>
+<li>rss：常驻内存大小，包括了共享库内存的大小（不同进程引用同一个库文件，那这些进程的 rss 中都包含了这个共享库的大小），单位 k</li>
+<li><strong>comm：进程名，例如：<code>mysqld</code></strong></li>
+<li>command：完整命令，例如：<code>/usr/local/mysql/bin/mysqld --basedir=/usr/local/mysql --datadir=/data/mysql --plugin-dir</code></li>
+<li>time|cputiime：进程占用 CPU 的累计时间</li>
+<li><strong>lstart：开始时间</strong></li>
+<li>etime：运行时间</li>
+<li>stime：启动进程的时间</li>
+</ul>
+<h3 id="进程状态码"><a href="#进程状态码" class="headerlink" title="进程状态码"></a>进程状态码</h3><pre class="language-bash" data-language="bash"><code class="language-bash">D    <span class="token comment"># 睡眠状态，不可中断 (通常是IO)</span>
+R    <span class="token comment"># 可执行状态，进程处于运行或就绪状态 (on run queue)</span>
+S    <span class="token comment"># 睡眠状态（sleeping） 可中断 (waiting for an event to complete)</span>
+T    <span class="token comment"># stopped by job control signal</span>
+t    <span class="token comment"># stopped by debugger during the tracing</span>
+W    <span class="token comment"># paging (not valid since the 2.6.xx kernel)</span>
+X    <span class="token comment"># 退出状态，进程即将被销毁 (should never be seen)</span>
+Z    <span class="token comment"># 退出状态（zombie），终止但是未被父进程收回，进程成为僵尸进程</span>
+I    <span class="token comment"># Idle kernel thread,CentOS 8 新特性</span></code></pre>
+
+<p>对于 BSD 风格，stat 还会显示下面的状态码：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token operator">&lt;</span>    <span class="token comment"># 高优先级(对其他用户不好)</span>
+N    <span class="token comment"># 低优先级(对其他用户很好)</span>
+L    <span class="token comment"># 内存分页并带锁(用于实时和自定义IO)</span>
+s    <span class="token comment"># is a session leader</span>
+l    <span class="token comment"># 多线程 (using CLONE_THREAD, like NPTL pthreads do)</span>
++    <span class="token comment"># 在前台进程组中，前台进程</span></code></pre>
+
+<h2 id="prtstat"><a href="#prtstat" class="headerlink" title="prtstat"></a>prtstat</h2><p>查看进程详细信息，ps 适合查找进程，确定 pid，然后使用 prtstat 查看详细信息。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">prtstat <span class="token punctuation">[</span>options<span class="token punctuation">]</span> PID <span class="token punctuation">..</span>.
+
+<span class="token parameter variable">-r</span>    <span class="token comment"># raw格式显示</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># prtstat 24954</span>
+Process: php-fpm       		State: S <span class="token punctuation">(</span>sleeping<span class="token punctuation">)</span>
+  CPU<span class="token comment">#:  0  		TTY: 0:0	Threads: 1</span>
+Process, Group and Session IDs
+  Process ID: <span class="token number">24954</span>		  Parent ID: <span class="token number">24953</span>
+    Group ID: <span class="token number">24953</span>		 Session ID: <span class="token number">24953</span>
+  T Group ID: <span class="token parameter variable">-1</span>
+
+Page Faults
+  This Process    <span class="token punctuation">(</span>minor major<span class="token punctuation">)</span>:     <span class="token number">8195</span>         <span class="token number">0</span>
+  Child Processes <span class="token punctuation">(</span>minor major<span class="token punctuation">)</span>:        <span class="token number">0</span>         <span class="token number">0</span>
+CPU Times
+  This Process    <span class="token punctuation">(</span>user system guest blkio<span class="token punctuation">)</span>:   <span class="token number">0.15</span>   <span class="token number">0.02</span>   <span class="token number">0.00</span>   <span class="token number">0.00</span>
+  Child processes <span class="token punctuation">(</span>user system guest<span class="token punctuation">)</span>:         <span class="token number">0.00</span>   <span class="token number">0.00</span>   <span class="token number">0.00</span>
+Memory
+  Vsize:       <span class="token number">185</span> MB
+  RSS:         <span class="token number">17</span> MB      		 RSS Limit: <span class="token number">18446744073709</span> MB
+  Code Start:  0x400000  		 Code Stop:  0xeab9c1
+  Stack Start: 0x7fff3beae6e0
+  Stack Pointer <span class="token punctuation">(</span>ESP<span class="token punctuation">)</span>: 0x7fff3beae198	 Inst Pointer <span class="token punctuation">(</span>EIP<span class="token punctuation">)</span>: 0x7f67ad7f8840
+Scheduling
+  Policy: normal
+  Nice:   <span class="token number">0</span> 		 RT Priority: <span class="token number">0</span> <span class="token punctuation">(</span>non RT<span class="token punctuation">)</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment">#</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment">#</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># prtstat -r 24954</span>
+         pid: <span class="token number">24954</span>          	                  comm: php-fpm
+       state: S              	                  ppid: <span class="token number">24953</span>
+        pgrp: <span class="token number">24953</span>          	               session: <span class="token number">24953</span>
+      tty_nr: <span class="token number">0</span>              	                 tpgid: <span class="token parameter variable">-1</span>
+       flags: <span class="token number">402140</span>         	                minflt: <span class="token number">8195</span>
+     cminflt: <span class="token number">0</span>              	                majflt: <span class="token number">0</span>
+     cmajflt: <span class="token number">0</span>              	                 utime: <span class="token number">15</span>
+       stime: <span class="token number">2</span>              	                cutime: <span class="token number">0</span>
+      cstime: <span class="token number">0</span>              	              priority: <span class="token number">20</span>
+        nice: <span class="token number">0</span>              	           num_threads: <span class="token number">1</span>
+ itrealvalue: <span class="token number">0</span>              	             starttime: <span class="token number">2798685522</span>
+       vsize: <span class="token number">185421824</span>      	                   rss: <span class="token number">4316</span>
+      rsslim: <span class="token number">18446744073709551615</span>	             startcode: <span class="token number">4194304</span>
+     endcode: <span class="token number">15382977</span>       	            startstack: <span class="token number">140734198638304</span>
+     kstkesp: 7FFF3BEAE198   	               kstkeip: 7F67AD7F8840
+       wchan: <span class="token number">18446744071584583552</span>	                 nswap: <span class="token number">0</span>
+      cnswap: <span class="token number">18446744071584583552</span>	           exit_signal: <span class="token number">17</span>
+   processor: <span class="token number">0</span>              	           rt_priority: <span class="token number">0</span>
+      policy: <span class="token number">0</span>              	 delayaccr_blkio_ticks: <span class="token number">0</span>
+  guest_time: <span class="token number">0</span>              	           cguest_time: <span class="token number">0</span>
+</code></pre>
+
+<h2 id="设置和调整进程优先级"><a href="#设置和调整进程优先级" class="headerlink" title="设置和调整进程优先级"></a>设置和调整进程优先级</h2><p>静态优先级：在创建进程时确定的，且在进程的整个运行期间保持不变，静态优先级的范围是 100 到 139</p>
+<h3 id="nice"><a href="#nice" class="headerlink" title="nice"></a>nice</h3><p>进程默认启动时的 nice 值是 0，对应 的优先级是 120，只有根用户才能降低 nice 值</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">nice</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span> <span class="token punctuation">[</span>COMMAND <span class="token punctuation">[</span>ARG<span class="token punctuation">]</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+<span class="token parameter variable">-n</span>    <span class="token comment"># 指定优先级， -20到19</span></code></pre>
+
+<p>以指定的优先级来启动进程：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#nice -n -10 ping 127.0.0.1</span></code></pre>
+
+<h3 id="renice"><a href="#renice" class="headerlink" title="renice"></a>renice</h3><p>调整正在执行中的进程的优先级</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#renice -n -20 2118</span></code></pre>
+
+<h2 id="搜索进程"><a href="#搜索进程" class="headerlink" title="搜索进程"></a>搜索进程</h2><p>按条件搜索进程：</p>
+<ul>
+<li><code>ps options | grep &#39;pattern&#39; </code> 最灵活</li>
+<li>pgrep 按预定义的模式</li>
+<li>pidof 按确切的程序名称查看 pid</li>
+</ul>
+<h3 id="pgrep"><a href="#pgrep" class="headerlink" title="pgrep"></a>pgrep</h3><p>顾名思义，过滤进程</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"> pgrep <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>pattern<span class="token operator">></span>
+
+<span class="token parameter variable">-u</span> uidlist  <span class="token comment"># effective user</span>
+<span class="token parameter variable">-U</span> uidlist  <span class="token comment"># real user</span>
+<span class="token parameter variable">-t</span> terminal <span class="token comment"># 与指定终端相关的进程</span>
+<span class="token parameter variable">-l</span>          <span class="token comment"># 显示进程名</span>
+<span class="token parameter variable">-a</span>          <span class="token comment"># 显示完整格式的进程名</span>
+<span class="token parameter variable">-P</span> pid      <span class="token comment"># 显示指定进程的子进程</span></code></pre>
+
+<h3 id="pidof"><a href="#pidof" class="headerlink" title="pidof"></a>pidof</h3><pre class="language-bash" data-language="bash"><code class="language-bash">pidof <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>program <span class="token punctuation">[</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span><span class="token punctuation">]</span>
+
+<span class="token parameter variable">-x</span>    <span class="token comment"># 按脚本名称查找pid</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#pidof -x ping.sh</span>
+<span class="token number">19035</span></code></pre>
+
+<h2 id="uptime-和-w"><a href="#uptime-和-w" class="headerlink" title="uptime 和 w"></a>uptime 和 w</h2><p>uptime 显示：当前时间、系统启动时间、当前在线人数、系统负载（1、5、15 分钟的平均负载,一般不会超过 1,超过 5 时建议警报）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># uptime</span>
+ <span class="token number">22</span>:04:28 up <span class="token number">325</span> days,  <span class="token number">4</span>:05,  <span class="token number">2</span> users,  load average: <span class="token number">0.01</span>, <span class="token number">0.04</span>, <span class="token number">0.05</span></code></pre>
+
+<p>w 除了显示 uptime 显示的内容外，还可以在线人员的信息</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># w</span>
+ <span class="token number">22</span>:07:46 up <span class="token number">325</span> days,  <span class="token number">4</span>:08,  <span class="token number">2</span> users,  load average: <span class="token number">0.05</span>, <span class="token number">0.03</span>, <span class="token number">0.05</span>
+<span class="token environment constant">USER</span>     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+root     pts/1    <span class="token number">39.164</span>.140.134   <span class="token number">20</span>:17    <span class="token number">3</span>:14   <span class="token number">0</span>.49s  <span class="token number">0</span>.49s <span class="token parameter variable">-bash</span>
+root     pts/4    <span class="token number">39.164</span>.140.134   <span class="token number">21</span>:17    <span class="token number">2</span>.00s  <span class="token number">0</span>.04s  <span class="token number">0</span>.00s w</code></pre>
+
+<h2 id="mpstat"><a href="#mpstat" class="headerlink" title="mpstat"></a>mpstat</h2><p>来自于 sysstat 包，显示 CPU 相关统计</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">mpstat <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span> interval <span class="token punctuation">[</span> count <span class="token punctuation">]</span>
+
+<span class="token parameter variable">-p</span>    <span class="token comment"># 指定查看的cpu核心</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ mpstat
+Linux <span class="token number">5.4</span>.0-46-generic <span class="token punctuation">(</span>Z510<span class="token punctuation">)</span> 	09/03/20 	_x86_64_	<span class="token punctuation">(</span><span class="token number">4</span> CPU<span class="token punctuation">)</span>
+
+<span class="token number">22</span>:15:39     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+<span class="token number">22</span>:15:39     all   <span class="token number">10.43</span>    <span class="token number">0.51</span>    <span class="token number">3.06</span>    <span class="token number">0.07</span>    <span class="token number">0.00</span>    <span class="token number">0.86</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">85.08</span>
+lujinkai@Z510:~$ mpstat <span class="token number">1</span> <span class="token number">3</span>
+Linux <span class="token number">5.4</span>.0-46-generic <span class="token punctuation">(</span>Z510<span class="token punctuation">)</span> 	09/03/20 	_x86_64_	<span class="token punctuation">(</span><span class="token number">4</span> CPU<span class="token punctuation">)</span>
+
+<span class="token number">22</span>:15:45     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+<span class="token number">22</span>:15:46     all   <span class="token number">10.97</span>    <span class="token number">0.00</span>    <span class="token number">3.83</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.51</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">84.69</span>
+<span class="token number">22</span>:15:47     all    <span class="token number">6.72</span>    <span class="token number">0.00</span>    <span class="token number">3.98</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">1.99</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">87.31</span>
+<span class="token number">22</span>:15:48     all    <span class="token number">6.08</span>    <span class="token number">0.00</span>    <span class="token number">3.54</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">1.27</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">89.11</span>
+Average:     all    <span class="token number">7.91</span>    <span class="token number">0.00</span>    <span class="token number">3.78</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">1.26</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">87.05</span>
+lujinkai@Z510:~$ mpstat <span class="token parameter variable">-P</span> <span class="token number">0</span> <span class="token number">1</span> <span class="token number">2</span>
+Linux <span class="token number">5.4</span>.0-46-generic <span class="token punctuation">(</span>Z510<span class="token punctuation">)</span> 	09/03/20 	_x86_64_	<span class="token punctuation">(</span><span class="token number">4</span> CPU<span class="token punctuation">)</span>
+
+<span class="token number">22</span>:15:52     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+<span class="token number">22</span>:15:53       <span class="token number">0</span>    <span class="token number">7.22</span>    <span class="token number">0.00</span>    <span class="token number">5.15</span>    <span class="token number">1.03</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">86.60</span>
+
+<span class="token number">22</span>:15:53     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+<span class="token number">22</span>:15:54       <span class="token number">0</span>    <span class="token number">7.14</span>    <span class="token number">0.00</span>    <span class="token number">7.14</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">1.02</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">84.69</span>
+
+Average:     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+Average:       <span class="token number">0</span>    <span class="token number">7.18</span>    <span class="token number">0.00</span>    <span class="token number">6.15</span>    <span class="token number">0.51</span>    <span class="token number">0.00</span>    <span class="token number">0.51</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>    <span class="token number">0.00</span>   <span class="token number">85.64</span></code></pre>
+
+<h2 id="top"><a href="#top" class="headerlink" title="top"></a>top</h2><p>查看进程实时状态</p>
+<h2 id="htop"><a href="#htop" class="headerlink" title="htop"></a>htop</h2><p>top 的升级版</p>
+<p>cpu4 核 4 线程和 4 核 8 线程的区别：</p>
+<pre class="language-none"><code class="language-none">4核 就是有4个物理核心，4线程 就是一个核心对应一个线程，8线程就是两个线程对应一个核心，是intel使用超线程技术，把一个物理核心模拟成两个逻辑核心。所以任务管理器或者htop会显示会显示出8张CPU表</code></pre>
+
+<p>关于 PR、NI、PRI：</p>
+<pre class="language-none"><code class="language-none">PR：priority 优先级，系统调节
+NI：nice	反应一个进程“优先级”状态的值，其取值范围是-20至19，一共40个级别。这个值越小，表示进程“优先级”越高。就像人一样，越nice的人，抢占资源的能力就越差，而越不nice的人抢占能力就越强。这个值用户可以调节
+PRI：PR + NI，PRI才是进程最终的优先级，用户可以通过调节NI来影响它</code></pre>
+
+<p><img data-src="//img.lujinkai.cn/note/htop.png"></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>-8             <span class="token comment"># cpu每个核心负载</span>
+Mem             <span class="token comment"># 物理内存，共计7.51G，已用4.95G</span>
+Swp             <span class="token comment"># 交换内存，共计2G，已使用4M</span>
+Tasks           <span class="token comment"># 进程、线程、正在运行的进程，当前系统有268个进程，910个线程，正在运行的进程有1个</span>
+Load average    <span class="token comment"># 系统1分钟、5分钟、10分钟的平均负载情况</span>
+Uptime          <span class="token comment"># 系统运行时间</span>
+
+PID             <span class="token comment"># 进程id</span>
+<span class="token environment constant">USER</span>            <span class="token comment"># 运行此进程的用户</span>
+PRI             <span class="token comment"># 运行此进程的优先级</span>
+NI              <span class="token comment"># 进程的优先级别值，默认的为0，可以进行调整</span>
+VIRT            <span class="token comment"># 进程占用的虚拟内存</span>
+RES             <span class="token comment"># 进程当前使用的内存大小，但不包括swap out，包含其他进程的共享，如果申请100m，实际只使用10m，它只增长10m，与virt相反</span>
+SHR             <span class="token comment"># 进程占用的共享内存值，计算某个进程所占用的物理内存大小公式：RES - SHRS </span>
+<span class="token comment"># 进程的状态，其中S表示休眠，R表示正在运行，Z表示僵死状态，N表示该进程优先值是负数</span>
+    O               <span class="token comment"># 进程正在处理器运行</span>
+    S               <span class="token comment"># 睡眠状态（sleeping） 可中断</span>
+    D               <span class="token comment"># 睡眠状态（disk sleep），有时候也叫不可中断睡眠状态，在这个状态的进程通常会等待I/O的结束</span>
+    R               <span class="token comment"># 可执行状态（runable）Running or runnable (on run queue) 进程处于运行或就绪状态</span>
+    I               <span class="token comment"># 空闲状态（idle）</span>
+    Z               <span class="token comment"># 退出状态（zombie）进程成为僵尸进程</span>
+    T               <span class="token comment"># 暂停状态或跟踪状态（stoped or traced）  </span>
+    B               <span class="token comment"># 进程正在等待更多的内存页</span>
+    X               <span class="token comment"># 退出状态，进程即将被销毁</span>
+%CPU            <span class="token comment"># 该进程占用的CPU使用率</span>
+%MEM            <span class="token comment"># 该进程占用的物理内存和总内存的百分比</span>
+TIME+           <span class="token comment"># 该进程启动后占用的总的CPU时间</span>
+COMMAND         <span class="token comment"># 进程启动的启动命令名称</span></code></pre>
+
+<p>VIRT：进程占用的虚拟内存，这个虚拟内存和 swp 没有关系，是进程“需要的”虚拟内存大小，包括进程使用的库，代码，数据等。</p>
+<p>假如进程申请 100m 的内存，但实际上只使用 了 10m，那么它会增长 100m，而不是实际的使用量</p>
+<p>现代操作系统里面分配虚拟地址空间操作不同于分配物理内存。在 64 位操作系统上，可用的最大虚拟地址空间有 16EB，即大概 180 亿 GB。那么在一台只有 16G 的物理内存的机器上，我也能要求获得 4TB 的地址空间以备将来使用。例如：</p>
+<pre class="language-java" data-language="java"><code class="language-java"><span class="token keyword">void</span> <span class="token operator">*</span>mem <span class="token operator">=</span> <span class="token function">mmap</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">4</span>ul <span class="token operator">*</span> <span class="token number">1024</span>ul <span class="token operator">*</span> <span class="token number">1024</span>ul <span class="token operator">*</span> <span class="token number">1024</span>ul <span class="token operator">*</span> <span class="token number">1024</span>ul<span class="token punctuation">,</span> <span class="token constant">PROT_READ</span> <span class="token operator">|</span> <span class="token constant">PROT_WRITE</span><span class="token punctuation">,</span> <span class="token constant">MAP_PRIVATE</span> <span class="token operator">|</span> <span class="token constant">MAP_ANONYMOUS</span> <span class="token operator">|</span> <span class="token constant">MAP_NORESERVE</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>当使用 mmap 并设置 MAP_NORESERVE 标志时，并不会要求实际的物理内存和 swap 空间存在。所以上述代码可以在 top 中看到使用了 4096g 的 VIRT 虚拟内存，这当然是不可能的，它只是表示使用了 4096GB 的地址空间而已</p>
+<p>一般来说不用太在意 VIRT 太高，因为你有 16EB 的空间可以使用</p>
+<h2 id="free"><a href="#free" class="headerlink" title="free"></a>free</h2><p>显示内存使用情况</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">free</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token parameter variable">-b</span>    <span class="token comment">#以字节为单位</span>
+<span class="token parameter variable">-m</span>    <span class="token comment">#以MB为单位</span>
+<span class="token parameter variable">-g</span>    <span class="token comment">#以GB为单位</span>
+<span class="token parameter variable">-h</span>    <span class="token comment">#易读格式</span>
+<span class="token parameter variable">-o</span>    <span class="token comment">#不显示-/+buffers/cache行</span>
+<span class="token parameter variable">-t</span>    <span class="token comment">#显示RAM + swap的总和</span>
+<span class="token parameter variable">-s</span> n  <span class="token comment">#刷新间隔为n秒</span>
+<span class="token parameter variable">-c</span> n  <span class="token comment">#刷新n次后即退出</span></code></pre>
+
+<h2 id="pmap"><a href="#pmap" class="headerlink" title="pmap"></a>pmap</h2><p>进程对应的内存映射</p>
+<h2 id="vmstat"><a href="#vmstat" class="headerlink" title="vmstat"></a>vmstat</h2><p>虚拟内存信息</p>
+<h2 id="iostat"><a href="#iostat" class="headerlink" title="iostat"></a>iostat</h2><p>统计 CPU 和设备 IO 信息</p>
+<h2 id="dstat"><a href="#dstat" class="headerlink" title="dstat"></a>dstat</h2><p>系统资源统计</p>
+<h2 id="iotop"><a href="#iotop" class="headerlink" title="iotop"></a>iotop</h2><p>监视磁盘 I&#x2F;O</p>
+<h2 id="iftop"><a href="#iftop" class="headerlink" title="iftop"></a>iftop</h2><p>显示网络带宽使用情况</p>
+<h3 id="iftop-和-nethogs"><a href="#iftop-和-nethogs" class="headerlink" title="iftop 和 nethogs"></a>iftop 和 nethogs</h3><p>…</p>
+<h2 id="nload"><a href="#nload" class="headerlink" title="nload"></a>nload</h2><p>查看网络实时吞吐量</p>
+<h2 id="glances"><a href="#glances" class="headerlink" title="glances"></a>glances</h2><p>综合监控工具</p>
+<h2 id="lsof"><a href="#lsof" class="headerlink" title="lsof"></a>lsof</h2><p>查看进程打开文件</p>
+<h2 id="cockpit"><a href="#cockpit" class="headerlink" title="cockpit"></a>cockpit</h2><p>CentOS8 新特性</p>
+<h2 id="kill"><a href="#kill" class="headerlink" title="kill"></a>kill</h2><p>信号发送</p>
+<h2 id="作业管理"><a href="#作业管理" class="headerlink" title="作业管理"></a>作业管理</h2><h3 id="nohup"><a href="#nohup" class="headerlink" title="nohup"></a>nohup</h3><p>no hang up，不挂断的意思，如果当前 terminal 关闭了，命令就转为后台继续运行</p>
+<p>nohup 和 &amp; 的区别：</p>
+<p>如果不是通过 exit 退出 terminal，而是点击 × 强行关闭 terminal，通过 &amp; 进入后台的命令会被杀死，而通过 nohup 会将命令转后台继续运行，所以二者通常搭配一起使用</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk bin<span class="token punctuation">]</span><span class="token variable">$nohup</span> ./cerebro <span class="token operator">></span>/dev/null <span class="token operator"><span class="token file-descriptor important">2</span>></span><span class="token file-descriptor important">&amp;1</span> <span class="token operator">&amp;</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token number">4149</span></code></pre>
+
+<h3 id="screen"><a href="#screen" class="headerlink" title="screen"></a>screen</h3><ul>
+<li>创建新会话: <code>screen -S &lt;session-name&gt;</code></li>
+<li>加入会话：<code>screen -x &lt;session-name&gt;</code></li>
+<li>退出并关闭会话：<code>exit</code></li>
+<li>剥离当前会话：<code>ctrl + a,d</code></li>
+<li>显示所有已经打开的会话：<code>screen -ls</code></li>
+<li>恢复某会话：<code>screen -r &lt;session-name&gt;</code></li>
+</ul>
+<p>关于 <code>-x</code> 和 <code>-r</code> : -x 是加入会话，多个终端都可以加入，-r 是恢复会话，当一个终端恢复会话，其他终端就无法恢复，只能加入</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">screen</span> <span class="token parameter variable">-S</span> new
+<span class="token comment"># ctrl + a,d</span>
+<span class="token function">screen</span> <span class="token parameter variable">-r</span> new
+<span class="token comment"># 另起一个终端</span>
+<span class="token function">screen</span> <span class="token parameter variable">-x</span> new</code></pre>
+
+<h3 id="tmux"><a href="#tmux" class="headerlink" title="tmux"></a>tmux</h3><p>Tmux 是一个终端复用器（terminal multiplexer），类似 screen，但是更易用，也更强大</p>
+<p>tmux 好像不能共享会话</p>
+<ul>
+<li><p>新建会话：<code>tmux new -s &lt;session-name&gt;</code></p>
+</li>
+<li><p>查看所有会话：<code>tmux ls</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 lujinkai<span class="token punctuation">]</span><span class="token comment"># tmux ls</span>
+jin: <span class="token number">1</span> windows <span class="token punctuation">(</span>created Sat Jul <span class="token number">25</span> <span class="token number">13</span>:51:23 <span class="token number">2020</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>80x45<span class="token punctuation">]</span> <span class="token punctuation">(</span>attached<span class="token punctuation">)</span>	<span class="token comment">#当前所处的会话是jin</span>
+kai: <span class="token number">1</span> windows <span class="token punctuation">(</span>created Sat Jul <span class="token number">25</span> <span class="token number">13</span>:51:34 <span class="token number">2020</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>80x45<span class="token punctuation">]</span>
+lu: <span class="token number">1</span> windows <span class="token punctuation">(</span>created Sat Jul <span class="token number">25</span> <span class="token number">13</span>:49:33 <span class="token number">2020</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>80x45<span class="token punctuation">]</span></code></pre>
+</li>
+<li><p>退出会话：<code>exit</code></p>
+</li>
+<li><p>分离会话：ctrl + b d 或者<code>tmux detach</code></p>
+</li>
+<li><p>接入会话：<code>tmux attach -t &lt;session-name&gt; </code> 用于重新接入某个已经存在的会话。</p>
+</li>
+<li><p>切换会话：<code>tmux switch -t &lt;session-name&gt;</code></p>
+</li>
+<li><p>杀死会话：<code>tmux kill-session -t &lt;session-name&gt; </code></p>
+</li>
+</ul>
+<h2 id="并行运行"><a href="#并行运行" class="headerlink" title="并行运行"></a>并行运行</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E8%BF%9B%E7%A8%8B/" rel="tag"><i class="fa fa-tag"></i> 进程</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/" rel="prev" title="进程、系统性能和计划任务">
+                  <i class="fa fa-chevron-left"></i> 进程、系统性能和计划任务
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B%E7%9A%84pid/" rel="next" title="进程和线程的pid">
+                  进程和线程的pid <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

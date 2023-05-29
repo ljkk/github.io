@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="部署kubectl apply -f nginx.yaml --record&#x3D;true	# --record&#x3D;true为记录执行的kubectl  滚动更新滚动更新策略 spec.strategy： apiVersion: extensions&#x2F;v1beta1 kind: Deployment metadata:   name: Enter deployment name spec:   stra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="业务镜像版本升级及回滚">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E4%B8%9A%E5%8A%A1%E9%95%9C%E5%83%8F%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E5%8F%8A%E5%9B%9E%E6%BB%9A/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="部署kubectl apply -f nginx.yaml --record&#x3D;true	# --record&#x3D;true为记录执行的kubectl  滚动更新滚动更新策略 spec.strategy： apiVersion: extensions&#x2F;v1beta1 kind: Deployment metadata:   name: Enter deployment name spec:   stra">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-19T16:25:13.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E4%B8%9A%E5%8A%A1%E9%95%9C%E5%83%8F%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E5%8F%8A%E5%9B%9E%E6%BB%9A/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E4%B8%9A%E5%8A%A1%E9%95%9C%E5%83%8F%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E5%8F%8A%E5%9B%9E%E6%BB%9A/","path":"运维/Kubernetes/业务镜像版本升级及回滚/","title":"业务镜像版本升级及回滚"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>业务镜像版本升级及回滚 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2"><span class="nav-number">1.</span> <span class="nav-text">部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E6%9B%B4%E6%96%B0"><span class="nav-number">2.</span> <span class="nav-text">滚动更新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E6%BB%9A"><span class="nav-number">3.</span> <span class="nav-text">回滚</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E6%BB%9A%E5%88%B0%E4%B8%8A%E4%B8%80%E4%B8%AA%E7%89%88%E6%9C%AC"><span class="nav-number">3.1.</span> <span class="nav-text">回滚到上一个版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E6%BB%9A%E5%88%B0%E6%8C%87%E5%AE%9A%E7%89%88%E6%9C%AC"><span class="nav-number">3.2.</span> <span class="nav-text">回滚到指定版本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Jenkins-%E6%8C%81%E7%BB%AD%E7%BB%A7%E6%89%BF%E4%B8%8E%E9%83%A8%E7%BD%B2"><span class="nav-number">4.</span> <span class="nav-text">Jenkins 持续继承与部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%8D%87%E7%BA%A7%E5%92%8C%E5%9B%9E%E6%BB%9A"><span class="nav-number">5.</span> <span class="nav-text">代码升级和回滚</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E4%B8%9A%E5%8A%A1%E9%95%9C%E5%83%8F%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E5%8F%8A%E5%9B%9E%E6%BB%9A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="业务镜像版本升级及回滚 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          业务镜像版本升级及回滚
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-20 00:25:13" itemprop="dateCreated datePublished" datetime="2021-03-20T00:25:13+08:00">2021-03-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl apply <span class="token parameter variable">-f</span> nginx.yaml <span class="token parameter variable">--record</span><span class="token operator">=</span>true	<span class="token comment"># --record=true为记录执行的kubectl</span></code></pre>
+
+<h2 id="滚动更新"><a href="#滚动更新" class="headerlink" title="滚动更新"></a>滚动更新</h2><p><strong>滚动更新策略 <code>spec.strategy</code>：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: Enter deployment name
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: <span class="token number">1</span>			<span class="token comment"># 一次性最多添加多少pod</span>
+      maxUnavailable: <span class="token number">1</span>		<span class="token comment"># 不可用Pod的数量最多是多少</span>
+    type: RollingUpdate		<span class="token comment"># 指定更新策略：滚动更新</span>
+  replicas: Enter the number of replicas
+  template:
+    metadata:
+      labels:
+        editor: vscode
+    spec:
+      containers:
+      - name: name
+        image: Enter containers image</code></pre>
+
+<p>更新策略有两种：</p>
+<ul>
+<li>RollingUpdate ：默认的更新策略，表示滚动更新</li>
+<li>Recreate：重建，会终止所有正在运行的实例，然后用较新的版本来重新创建它们，即在创建新 Pods 之前，所有现有的 Pods 会被杀死，测试环境可以使用</li>
+</ul>
+<p>Pod 有多个副本，滚动更新的过程就是轮流更新 pod，直至所有 pod 都更新成功，至于如何轮流更新，取决于 maxSurge 和 maxUnavailable 这两个参数，示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 如果Pod有5个</span>
+maxSurge: <span class="token number">1</span>			<span class="token comment"># 每次添加1个新版本Pod，启动成功后删除一个旧版本Pod</span>
+maxUnavailable: <span class="token number">0</span>	<span class="token comment"># 不允许有不可用的Pod，即更新过程中始终保持5个Pod正常运行</span></code></pre>
+
+<p><strong>升级命令 <code>kubectl set</code>：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">set</span> image <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> TYPE NAME<span class="token punctuation">)</span> <span class="token assign-left variable">CONTAINER_NAME_1</span><span class="token operator">=</span>CONTAINER_IMAGE_1 <span class="token punctuation">..</span>. <span class="token assign-left variable">CONTAINER_NAME_N</span><span class="token operator">=</span>CONTAINER_IMAGE_N <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例</span>
+kubectl <span class="token builtin class-name">set</span> image deployment/nginx <span class="token assign-left variable">busybox</span><span class="token operator">=</span>busybox <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1
+kubectl <span class="token builtin class-name">set</span> image deployments,rc <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 <span class="token parameter variable">--all</span>
+kubectl <span class="token builtin class-name">set</span> image daemonset abc *<span class="token operator">=</span>nginx:1.9.1
+kubectl <span class="token builtin class-name">set</span> image <span class="token parameter variable">-f</span> path/to/file.yaml <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 <span class="token parameter variable">--local</span> <span class="token parameter variable">-o</span> yaml</code></pre>
+
+<p>除了使用 <code>kubectl get</code> 命令升级，还可以直接 <code>kubectl apply -f</code> 升级，但是需要先手动修改 yaml 文件，所以不推荐使用</p>
+<h2 id="回滚"><a href="#回滚" class="headerlink" title="回滚"></a>回滚</h2><h3 id="回滚到上一个版本"><a href="#回滚到上一个版本" class="headerlink" title="回滚到上一个版本"></a>回滚到上一个版本</h3><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout undo deployment/nginx-deployment <span class="token parameter variable">-n</span> linux36</code></pre>
+
+<h3 id="回滚到指定版本"><a href="#回滚到指定版本" class="headerlink" title="回滚到指定版本"></a>回滚到指定版本</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看当前版本号</span>
+kubectl rollout <span class="token function">history</span> deployment/nginx-deployment <span class="token parameter variable">-n</span> linux36
+deployment.extensions/nginx-deployment
+REVISION CHANGE-CAUSE
+<span class="token number">1</span> 	kubectl apply <span class="token parameter variable">--filename</span><span class="token operator">=</span>nginx.yaml <span class="token parameter variable">--record</span><span class="token operator">=</span>true
+<span class="token number">3</span> 	kubectl apply <span class="token parameter variable">--filename</span><span class="token operator">=</span>nginx.yaml <span class="token parameter variable">--record</span><span class="token operator">=</span>true
+<span class="token number">4</span> 	kubectl apply <span class="token parameter variable">--filename</span><span class="token operator">=</span>nginx.yaml <span class="token parameter variable">--record</span><span class="token operator">=</span>true
+
+<span class="token comment"># 回滚到指定的1版本</span>
+kubectl rollout undo deployment/nginx-deployment --to-revision<span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">-n</span> linux36</code></pre>
+
+<h2 id="Jenkins-持续继承与部署"><a href="#Jenkins-持续继承与部署" class="headerlink" title="Jenkins 持续继承与部署"></a>Jenkins 持续继承与部署</h2><p>参考以下脚本：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$cat</span> build-command.sh
+
+<span class="token comment">#!/bin/bash</span>
+<span class="token function">docker</span> build <span class="token parameter variable">-t</span> harbor.magedu.local/pub-images/nginx-base-wordpress:v1.14.2  <span class="token builtin class-name">.</span>
+<span class="token function">sleep</span> <span class="token number">1</span>
+<span class="token function">docker</span> push  harbor.magedu.local/pub-images/nginx-base-wordpress:v1.14.2</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$cat</span> linux36-ningx-deploy.sh
+
+<span class="token comment">#!/bin/bash</span>
+<span class="token comment">#Author: ZhangShiJie</span>
+<span class="token comment">#Date: 2019-08-03</span>
+<span class="token comment">#Version: v1</span>
+<span class="token comment">#记录脚本开始执行时间</span>
+<span class="token assign-left variable">starttime</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +<span class="token string">'%Y-%m-%d %H:%M:%S'</span><span class="token variable">)</span></span>
+<span class="token comment">#变量</span>
+<span class="token assign-left variable">SHELL_DIR</span><span class="token operator">=</span><span class="token string">"/root/scripts"</span>
+<span class="token assign-left variable">SHELL_NAME</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$0</span>"</span>
+<span class="token assign-left variable">K8S_CONTROLLER1</span><span class="token operator">=</span><span class="token string">"192.168.7.101"</span>
+<span class="token assign-left variable">K8S_CONTROLLER2</span><span class="token operator">=</span><span class="token string">"192.168.7.102"</span>
+<span class="token assign-left variable">DATE</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +%Y-%m-%d_%H_%M_%S<span class="token variable">)</span></span>
+<span class="token assign-left variable">METHOD</span><span class="token operator">=</span><span class="token variable">$1</span>
+<span class="token assign-left variable">Branch</span><span class="token operator">=</span><span class="token variable">$2</span>
+<span class="token keyword">if</span> <span class="token builtin class-name">test</span> <span class="token parameter variable">-z</span> <span class="token variable">$Branch</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token assign-left variable">Branch</span><span class="token operator">=</span>develop
+<span class="token keyword">fi</span>
+<span class="token keyword">function</span> <span class="token function-name function">Code_Clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token assign-left variable">Git_URL</span><span class="token operator">=</span><span class="token string">"git@172.20.100.1:linux36/app1.git"</span>
+    <span class="token assign-left variable">DIR_NAME</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token builtin class-name">echo</span> $<span class="token punctuation">&#123;</span>Git_URL<span class="token punctuation">&#125;</span> <span class="token operator">|</span> <span class="token function">awk</span> <span class="token parameter variable">-F</span> <span class="token string">"/"</span> <span class="token string">'&#123;print $2&#125;'</span> <span class="token operator">|</span> <span class="token function">awk</span> <span class="token parameter variable">-F</span> <span class="token string">"."</span> <span class="token string">'&#123;print $1&#125;'</span><span class="token variable">)</span></span>
+    <span class="token assign-left variable">DATA_DIR</span><span class="token operator">=</span><span class="token string">"/data/gitdata/linux36"</span>
+    <span class="token assign-left variable">Git_Dir</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$&#123;DATA_DIR&#125;</span>/<span class="token variable">$&#123;DIR_NAME&#125;</span>"</span>
+    <span class="token builtin class-name">cd</span> <span class="token variable">$&#123;DATA_DIR&#125;</span> <span class="token operator">&amp;&amp;</span> <span class="token builtin class-name">echo</span> <span class="token string">"即将清空上一版本代码并获取当前分支最新代码"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> <span class="token function">rm</span> <span class="token parameter variable">-rf</span>
+    <span class="token variable">$&#123;DIR_NAME&#125;</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"即将开始从分支<span class="token variable">$&#123;Branch&#125;</span> 获取代码"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token function">git</span> clone <span class="token parameter variable">-b</span> <span class="token variable">$&#123;Branch&#125;</span> <span class="token variable">$&#123;Git_URL&#125;</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"分支<span class="token variable">$&#123;Branch&#125;</span> 克隆完成，即将进行代码编译!"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token comment">#cd $&#123;Git_Dir&#125; &amp;&amp; mvn clean package</span>
+    <span class="token comment">#echo "代码编译完成，即将开始将IP地址等信息替换为测试环境"</span>
+    <span class="token comment">#####################################################</span>
+    <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token builtin class-name">cd</span> <span class="token variable">$&#123;Git_Dir&#125;</span>
+    <span class="token function">tar</span> czf <span class="token variable">$&#123;DIR_NAME&#125;</span>.tar.gz ./*
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">#将打包好的压缩文件拷贝到k8s 控制端服务器</span>
+<span class="token keyword">function</span> <span class="token function-name function">Copy_File</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"压缩文件打包完成，即将拷贝到k8s 控制端服务器<span class="token variable">$&#123;K8S_CONTROLLER1&#125;</span>"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token function">scp</span> <span class="token variable">$&#123;Git_Dir&#125;</span>/<span class="token variable">$&#123;DIR_NAME&#125;</span>.tar.gz root@<span class="token variable">$&#123;K8S_CONTROLLER1&#125;</span>:/opt/k8s-
+    data/dockerfile/linux36/nginx/
+    <span class="token builtin class-name">echo</span> <span class="token string">"压缩文件拷贝完成,服务器<span class="token variable">$&#123;K8S_CONTROLLER1&#125;</span>即将开始制作Docker 镜像!"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">#到控制端执行脚本制作并上传镜像</span>
+<span class="token keyword">function</span> <span class="token function-name function">Make_Image</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"开始制作Docker镜像并上传到Harbor服务器"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token function">ssh</span> root@<span class="token variable">$&#123;K8S_CONTROLLER1&#125;</span> <span class="token string">"cd /opt/k8s-data/dockerfile/linux36/nginx &amp;&amp; bash build-
+command.sh <span class="token variable">$&#123;DATE&#125;</span>"</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"Docker镜像制作完成并已经上传到harbor服务器"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">#到控制端更新k8s yaml文件中的镜像版本号,从而保持yaml文件中的镜像版本号和k8s中版本号一致</span>
+<span class="token keyword">function</span> <span class="token function-name function">Update_k8s_yaml</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"即将更新k8s yaml文件中镜像版本"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token function">ssh</span> root@<span class="token variable">$&#123;K8S_CONTROLLER1&#125;</span> <span class="token string">"cd /opt/k8s-data/yaml/linux36/nginx &amp;&amp; sed -i 's/image:
+harbor.magedu.*/image: harbor.magedu.net\/linux36\/nginx-web1:<span class="token variable">$&#123;DATE&#125;</span>/g' nginx.yaml"</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"k8s yaml文件镜像版本更新完成,即将开始更新容器中镜像版本"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">#到控制端更新k8s中容器的版本号,有两种更新办法，一是指定镜像版本更新，二是apply执行修改过的yaml文件</span>
+<span class="token keyword">function</span> <span class="token function-name function">Update_k8s_container</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">#第一种方法</span>
+    <span class="token function">ssh</span> root@<span class="token variable">$&#123;K8S_CONTROLLER1&#125;</span> <span class="token string">"kubectl set image deployment/linux36-nginx-deployment linux36-nginx-container=harbor.magedu.net/linux36/nginx-web1:<span class="token variable">$&#123;DATE&#125;</span> -n linux36"</span>
+    <span class="token comment">#第二种方法,推荐使用第一种</span>
+    <span class="token comment">#ssh root@$&#123;K8S_CONTROLLER1&#125; "cd /opt/k8s-data/yaml/web-test/tomcat-app1 &amp;&amp; kubectl apply -f web-test.yam --record"</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"k8s 镜像更新完成"</span> <span class="token operator">&amp;&amp;</span> <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"当前业务镜像版本: harbor.magedu.net/linux36/nginx-web1:<span class="token variable">$&#123;DATE&#125;</span>"</span>
+    <span class="token comment">#计算脚本累计执行时间，如果不需要的话可以去掉下面四行</span>
+    <span class="token assign-left variable">endtime</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +<span class="token string">'%Y-%m-%d %H:%M:%S'</span><span class="token variable">)</span></span>
+    <span class="token assign-left variable">start_seconds</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> <span class="token parameter variable">--date</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$starttime</span>"</span> +%s<span class="token variable">)</span></span>
+    <span class="token assign-left variable">end_seconds</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> <span class="token parameter variable">--date</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$endtime</span>"</span> +%s<span class="token variable">)</span></span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"本次业务镜像更新总计耗时："</span><span class="token variable"><span class="token variable">$((</span>end_seconds <span class="token operator">-</span> start_seconds<span class="token variable">))</span></span><span class="token string">"s"</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">#基于k8s 内置版本管理回滚到上一个版本</span>
+<span class="token keyword">function</span> <span class="token function-name function">rollback_last_version</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"即将回滚之上一个版本"</span>
+    <span class="token function">ssh</span> root@<span class="token variable">$&#123;K8S_CONTROLLER1&#125;</span> <span class="token string">"kubectl rollout undo deployment/linux36-nginx-deployment -n linux36"</span>
+    <span class="token function">sleep</span> <span class="token number">1</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"已执行回滚至上一个版本"</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">#使用帮助</span>
+<span class="token function-name function">usage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"部署使用方法为 <span class="token variable">$&#123;SHELL_DIR&#125;</span>/<span class="token variable">$&#123;SHELL_NAME&#125;</span> deploy "</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"回滚到上一版本使用方法为 <span class="token variable">$&#123;SHELL_DIR&#125;</span>/<span class="token variable">$&#123;SHELL_NAME&#125;</span> rollback_last_version"</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">#主函数</span>
+<span class="token function-name function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">case</span> <span class="token variable">$&#123;METHOD&#125;</span> <span class="token keyword">in</span>
+    deploy<span class="token punctuation">)</span>
+        Code_Clone
+        Copy_File
+        Make_Image
+        Update_k8s_yaml
+        Update_k8s_container
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    rollback_last_version<span class="token punctuation">)</span>
+        rollback_last_version
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *<span class="token punctuation">)</span>
+        usage
+        <span class="token punctuation">;</span><span class="token punctuation">;</span>
+    <span class="token keyword">esac</span>
+<span class="token punctuation">&#125;</span>
+
+main <span class="token variable">$1</span> <span class="token variable">$2</span> <span class="token variable">$3</span></code></pre>
+
+<h2 id="代码升级和回滚"><a href="#代码升级和回滚" class="headerlink" title="代码升级和回滚"></a>代码升级和回滚</h2><p>代码升级：Jenkins 负责 pull 最新代码，编译成 war 包（如果需要），然后将编译后的包发送到 k8s 或者专门负责制作镜像的服务器，使用 dockerfile 制作完新镜像后，就上传到 harbor，最后再由 kubectl 执行更新镜像的操作</p>
+<p>代码回滚：直接回滚镜像即可</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/Pod%E7%9A%84%E7%8A%B6%E6%80%81%E5%92%8C%E6%8E%A2%E9%92%88/" rel="prev" title="Pod的状态和探针">
+                  <i class="fa fa-chevron-left"></i> Pod的状态和探针
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/Prometheus/" rel="next" title="Prometheus">
+                  Prometheus <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

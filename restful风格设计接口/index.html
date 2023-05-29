@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="按 resful 风格设计接口: 按资源来设置接口的请求地址, 通过不同的请求类型来区分要对这个资源进行什么操作 get 语义是获取数据 post 语义是添加信息 delete 语义是删除数据 put 语义是更新数据（是更新这个数据的【所有信息】） patch 语义是更新数据（是更新数据的【部分信息】） 假如要做注册 请求类型: post 请求地址: ‘&#x2F;users’ (必须表示的是资源">
+<meta property="og:type" content="article">
+<meta property="og:title" content="restful 风格设计接口">
+<meta property="og:url" content="http://blog.lujinkai.cn/restful%E9%A3%8E%E6%A0%BC%E8%AE%BE%E8%AE%A1%E6%8E%A5%E5%8F%A3/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="按 resful 风格设计接口: 按资源来设置接口的请求地址, 通过不同的请求类型来区分要对这个资源进行什么操作 get 语义是获取数据 post 语义是添加信息 delete 语义是删除数据 put 语义是更新数据（是更新这个数据的【所有信息】） patch 语义是更新数据（是更新数据的【部分信息】） 假如要做注册 请求类型: post 请求地址: ‘&#x2F;users’ (必须表示的是资源">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-07T13:23:01.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.478Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="restful">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/restful%E9%A3%8E%E6%A0%BC%E8%AE%BE%E8%AE%A1%E6%8E%A5%E5%8F%A3/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/restful%E9%A3%8E%E6%A0%BC%E8%AE%BE%E8%AE%A1%E6%8E%A5%E5%8F%A3/","path":"restful风格设计接口/","title":"restful 风格设计接口"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>restful 风格设计接口 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/restful%E9%A3%8E%E6%A0%BC%E8%AE%BE%E8%AE%A1%E6%8E%A5%E5%8F%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="restful 风格设计接口 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          restful 风格设计接口
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-07 21:23:01" itemprop="dateCreated datePublished" datetime="2020-12-07T21:23:01+08:00">2020-12-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>按 resful 风格设计接口: 按资源来设置接口的请求地址, 通过不同的请求类型来区分要对这个资源进行什么操作</p>
+<p>get 语义是获取数据</p>
+<p>post 语义是添加信息</p>
+<p>delete 语义是删除数据</p>
+<p>put 语义是更新数据（是更新这个数据的【所有信息】）</p>
+<p>patch 语义是更新数据（是更新数据的【部分信息】）</p>
+<p>假如要做注册</p>
+<p>请求类型: post</p>
+<p>请求地址: ‘&#x2F;users’ (必须表示的是资源)</p>
+<p>假如要做登录</p>
+<p>请求类型: post (因为登录之后服务器的变化就添加了一个 session)</p>
+<p>请求地址: ‘&#x2F;sessions’</p>
+<p>假如要做退出登录</p>
+<p>请求类型: delete</p>
+<p>请求地址: ‘&#x2F;sessions&#x2F;id’ (退出登录就是服务器删除 session)</p>
+<p>假如要判断用户有没有登录</p>
+<p>请求类型: get</p>
+<p>请求地址 ‘&#x2F;sessions’</p>
+<p>总结: restful 风格 api</p>
+<ol>
+<li><p>我们使用一个能够表示资源的地址(资源是数据库里的一条数据, 或是数组里的一个元素, 或者文件夹中的一个文件)</p>
+</li>
+<li><p>我们通过不同的请求类型(get, post, delete, put, patch), 对这个地址对应的资源进行 CRUL, 让后端代码根据不同的请求类型, 对数据做不同的操作</p>
+</li>
+</ol>
+<pre class="language-javascript" data-language="javascript"><code class="language-javascript"><span class="token comment">/**
+ * 路由处理
+ * 最终这里我们只配置路由, 不实现对应回调函数的具体代码(放到controllers文件夹中)
+ * 按 restful 风格设计接口:
+ * 按资源来设计我们的接口的请求地址， 通过不同的请求类型，来区分要对这个资源进行什么操作
+ * 示例:
+ * '/gamerooms/998' 对应998这个房间号
+ * // 获取房间的信息
+ * router.get('/gamerooms/998', handler001)
+ * // 删除该房间
+ * router.delete('/gamerooms/998, handler002)
+ * // 修改房间信息
+ * router.put('/gamerooms/998, handler003)
+ * // 添加新房间
+ * router.post('/gamerooms', handler004)
+ *
+ * // get 语义是获取数据
+ * // delete 语义是删除数据
+ * // put 语义是更新数据(是更新这个数据的【所有信息】)
+ * // patch 语义是更数据(是更【新部分信息】)
+ */</span>
+<span class="token keyword">const</span> express <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"express"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> gameRoomController <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"../controllers/gameRoomController.js"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> friendController <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"../controllers/friendController.js"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> userController <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"../controllers/userController.js"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> router <span class="token operator">=</span> <span class="token punctuation">(</span>module<span class="token punctuation">.</span>exports <span class="token operator">=</span> express<span class="token punctuation">.</span><span class="token function">Router</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 注册</span>
+router<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/users"</span><span class="token punctuation">,</span> userController<span class="token punctuation">.</span>postSignUp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 登陆</span>
+router<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/session"</span><span class="token punctuation">,</span> userController<span class="token punctuation">.</span>postSignIn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 游戏房间</span>
+router<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/gamerooms"</span><span class="token punctuation">,</span> gameRoomController<span class="token punctuation">.</span>postGameRooms<span class="token punctuation">)</span><span class="token punctuation">;</span>
+router<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"/gamerooms"</span><span class="token punctuation">,</span> gameRoomController<span class="token punctuation">.</span>getGameRooms<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 搜索用户, 和获取好友</span>
+router<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"/users"</span><span class="token punctuation">,</span> userController<span class="token punctuation">.</span>getUsers<span class="token punctuation">)</span><span class="token punctuation">;</span>
+router<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"/friends"</span><span class="token punctuation">,</span> friendController<span class="token punctuation">.</span>getFriends<span class="token punctuation">)</span><span class="token punctuation">;</span>
+router<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/friends"</span><span class="token punctuation">,</span> friendController<span class="token punctuation">.</span>postFirends<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * 游戏房间创建，删除，修改，查询
+ */</span>
+<span class="token comment">// router.post('/gamerooms', gameRoomController.postGameRooms)</span>
+<span class="token comment">// router.get('/gamerooms', gameRoomController.getGameRooms)</span>
+
+<span class="token comment">/**
+ * 游戏记录，查询游戏记录，删除游戏记录，修改记录， 添加记录
+ */</span>
+<span class="token comment">// 假设游戏记录地址是: /gamerecords/10002   (包含: 游戏房间号，玩家，游戏时间)</span>
+
+<span class="token comment">// 获取一条游戏记录详细信息</span>
+<span class="token comment">// router.get('/gamerecords/10002', xxxx001)</span>
+
+<span class="token comment">// 删除这条游戏记录信息</span>
+<span class="token comment">// router.delete('/gamerecords/10002', xxxx002)</span>
+
+<span class="token comment">// 修改记录(想修改游戏的所有信息： 房间号，玩家, 游戏时间)</span>
+<span class="token comment">// router.put('/gamerecords/10002', xxxx003)</span>
+
+<span class="token comment">// 修改记录(只想修改房间号)</span>
+<span class="token comment">// router.patch('/gamerecords/10002', xxxx04)</span>
+
+<span class="token comment">// 添加一条游戏记录</span>
+<span class="token comment">// router.post('/gamerecords/10002', xxxx05)</span>
+
+<span class="token comment">// 获取所有游戏记录(也可能包含分页)</span>
+<span class="token comment">// router.get('/gamerecords', xxxx07)</span>
+
+<span class="token comment">// 对于前端来说 restful api 有没有开发难度:</span>
+<span class="token comment">// $.ajax(&#123;</span>
+<span class="token comment">//   url: '',</span>
+<span class="token comment">//   // type: 'delete',</span>
+<span class="token comment">//   type: 'put',</span>
+<span class="token comment">//   data: &#123;&#125;,</span>
+<span class="token comment">//   success: function () &#123;</span>
+
+<span class="token comment">//   &#125;</span>
+<span class="token comment">// &#125;)</span>
+
+<span class="token comment">// users/10002</span>
+<span class="token comment">// 假如要做注册：</span>
+<span class="token comment">// 请求类型: post</span>
+<span class="token comment">// 请求地址: '/users'   (必需表示的是资源)</span>
+
+<span class="token comment">// 假如要做登陆:</span>
+<span class="token comment">// 请求类型: post</span>
+<span class="token comment">// 请求地址: /sessions    // 因为登陆其实是添加的 session</span>
+
+<span class="token comment">// 假如退出登陆</span>
+<span class="token comment">// 请求类型: delete</span>
+<span class="token comment">// 请求地址: /sessions/id    // 退出登陆，服务器是要删除session</span>
+
+<span class="token comment">// 假如要判断用户有没有登陆</span>
+<span class="token comment">// 请求类型: get</span>
+<span class="token comment">// 请求地址: /sessions</span>
+
+<span class="token comment">// '/deluser'</span>
+<span class="token comment">// '/getuser'</span>
+
+<span class="token comment">// 总结: restful 风格 api</span>
+<span class="token comment">// 1. 我们使用一个能够表示资源的地址(资源是数据库里的一条数据,或者数组里的一个元素,或者文件夹中的一个文件)</span>
+<span class="token comment">// 2. 我们通过不同的请求类型(get, post, delete, put, patch), 对这个地址对应的资源</span>
+<span class="token comment">// 进行CRUD, 让后端代码根据不同的请求类型，对数据做不同的操作。</span>
+
+<span class="token comment">// 我遵循的风格: javascrtip standard style</span>
+<span class="token comment">// function xxx () &#123;</span>
+<span class="token comment">//   var aa = 11;</span>
+<span class="token comment">// &#125;</span></code></pre>
+
+<pre class="language-php" data-language="php"><code class="language-php"></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/restful/" rel="tag"><i class="fa fa-tag"></i> restful</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/WebSocket/" rel="prev" title="WebSocket">
+                  <i class="fa fa-chevron-left"></i> WebSocket
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/MySQL/cmake%E5%AE%89%E8%A3%85mysql%E5%8F%82%E6%95%B0%E5%A4%A7%E5%85%A8/" rel="next" title="cmake安装mysql参数">
+                  cmake安装mysql参数 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="单小括号 ()()：等同&#96;&#96; ，命令组。括号中的命令将会新开一个子 shell 顺序执行，所以括号中的变量不能够被脚本余下的部分使用。括号中多个命令之间用分号隔开，最后一个命令可以没有分号，各命令和括号之间不必有空格。 可以使用$获取()中的标准输出，$() array&#x3D;(a b c d) 用于初始化数组 {}{}和()一样可以将多个命令组合在一起，使用分号隔开，批量执行，区别在于：1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(){}(())[][[]]">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/()%7B%7D(())[][[]]/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="单小括号 ()()：等同&#96;&#96; ，命令组。括号中的命令将会新开一个子 shell 顺序执行，所以括号中的变量不能够被脚本余下的部分使用。括号中多个命令之间用分号隔开，最后一个命令可以没有分号，各命令和括号之间不必有空格。 可以使用$获取()中的标准输出，$() array&#x3D;(a b c d) 用于初始化数组 {}{}和()一样可以将多个命令组合在一起，使用分号隔开，批量执行，区别在于：1.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T14:22:09.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="shell">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/()%7B%7D(())[][[]]/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/()%7B%7D(())[][[]]/","path":"运维/基础/shell脚本编程/(){}(())[][[]]/","title":"(){}(())[][[]]"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>(){}(())[][[]] | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E5%B0%8F%E6%8B%AC%E5%8F%B7"><span class="nav-number">1.</span> <span class="nav-text">单小括号 ()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">{}</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95"><span class="nav-number">2.1.</span> <span class="nav-text">扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8C%96%E9%87%8D%E5%A4%8D%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">2.2.</span> <span class="nav-text">简化重复字符串</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E6%9B%BF%E6%8D%A2"><span class="nav-number">2.3.</span> <span class="nav-text">变量替换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E6%B5%8B%E8%AF%95"><span class="nav-number">2.4.</span> <span class="nav-text">变量测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8C%E5%B0%8F%E6%8B%AC%E5%8F%B7"><span class="nav-number">3.</span> <span class="nav-text">双小括号 (())</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%B8%AD%E6%8B%AC%E5%8F%B7"><span class="nav-number">4.</span> <span class="nav-text">单中括号 []</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%AD%89%E5%90%8C-test"><span class="nav-number">4.1.</span> <span class="nav-text">1. 等同 test</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8C%E4%B8%AD%E6%8B%AC%E5%8F%B7"><span class="nav-number">5.</span> <span class="nav-text">双中括号 [[]]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E6%9F%90%E4%BA%9B%E7%BB%86%E6%9E%9D%E6%9C%AB%E8%8A%82"><span class="nav-number">5.1.</span> <span class="nav-text">[[]]不需要注意某些细枝末节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">5.2.</span> <span class="nav-text">[[]]支持逻辑运算符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">5.3.</span> <span class="nav-text">[[]]支持正则表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/()%7B%7D(())[][[]]/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="(){}(())[][[]] | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          (){}(())[][[]]
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:22:09" itemprop="dateCreated datePublished" datetime="2020-12-09T22:22:09+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">shell脚本编程</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="单小括号"><a href="#单小括号" class="headerlink" title="单小括号 ()"></a>单小括号 ()</h2><p>()：等同`` ，命令组。括号中的命令将会新开一个子 shell 顺序执行，所以括号中的变量不能够被脚本余下的部分使用。括号中多个命令之间用分号隔开，最后一个命令可以没有分号，各命令和括号之间不必有空格。</p>
+<p>可以使用$获取()中的标准输出，$()</p>
+<p>array&#x3D;(a b c d) 用于初始化数组</p>
+<h2 id=""><a href="#" class="headerlink" title="{}"></a>{}</h2><p>{}和()一样可以将多个命令组合在一起，使用分号隔开，批量执行，区别在于：<br>1.()是新开进程，{}在当前进程<br>2.()和命令之间不需要空格，{}左边和命令之间必须要有空格<br>3.()中最后一个命令可以不加分号，{}中所有命令都要加分号 4.$搭配()可以获取()的返回值；$搭配{}是用来解析变量，这点和 php 一样</p>
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>bash 支持{a,b,c}这样的扩展，比如 a{d,c,b}e 会被扩展成 ade ace abe</p>
+<p>类似还有：<code>cp filename&#123;,bak&#125;</code></p>
+<p>等同于 ：<code>cp filename filename.bak</code></p>
+<h3 id="简化重复字符串"><a href="#简化重复字符串" class="headerlink" title="简化重复字符串"></a>简化重复字符串</h3><p>{} 可以实现打印重复字符串的简化形式</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># touch &#123;0..9&#125;.log</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ls</span>
+<span class="token number">0</span>.log  <span class="token number">1</span>.log  <span class="token number">2</span>.log  <span class="token number">3</span>.log  <span class="token number">4</span>.log  <span class="token number">5</span>.log  <span class="token number">6</span>.log  <span class="token number">7</span>.log  <span class="token number">8</span>.log  <span class="token number">9</span>.log
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ls &#123;4..7&#125;.log</span>
+<span class="token number">4</span>.log  <span class="token number">5</span>.log  <span class="token number">6</span>.log  <span class="token number">7</span>.log
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ls &#123;0..9..2&#125;*</span>
+<span class="token number">0</span>.log  <span class="token number">2</span>.log  <span class="token number">4</span>.log  <span class="token number">6</span>.log  <span class="token number">8</span>.log
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ls &#123;1,4,6&#125;.log</span>
+<span class="token number">1</span>.log  <span class="token number">4</span>.log  <span class="token number">6</span>.log
+<span class="token comment"># 关闭和开启&#123;&#125;的扩展功能</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># echo $-</span>
+himBH
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># set +B</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># echo $-</span>
+himH
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ls &#123;1,4,6&#125;.log</span>
+ls: cannot access <span class="token punctuation">&#123;</span><span class="token number">1,4</span>,6<span class="token punctuation">&#125;</span>.log: No such <span class="token function">file</span> or directory
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># set -B</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ls &#123;1,4,6&#125;.log</span>
+<span class="token number">1</span>.log  <span class="token number">4</span>.log  <span class="token number">6</span>.log</code></pre>
+
+<p>补充：批量创建文件是用{}，批量显示文件使用[]</p>
+<h3 id="变量替换"><a href="#变量替换" class="headerlink" title="变量替换"></a>变量替换</h3><h3 id="变量测试"><a href="#变量测试" class="headerlink" title="变量测试"></a>变量测试</h3><h2 id="双小括号"><a href="#双小括号" class="headerlink" title="双小括号 (())"></a>双小括号 (())</h2><p>将数学运算表达式放在(())中，表达式可以有一个，也可以由多个，多个表达式用逗号分割，(())的执行结果取决于最后一个表达式的值</p>
+<p>可以使用$获取(())命令的执行结果</p>
+<h2 id="单中括号"><a href="#单中括号" class="headerlink" title="单中括号 []"></a>单中括号 []</h2><p>[]有两种用法：一是等同 test； 二是算数运算$[],等同于$(())<br>关于 test 和[]，推荐使用[]； 关于$[]和$(())，推荐使用$(())</p>
+<h3 id="1-等同-test"><a href="#1-等同-test" class="headerlink" title="1. 等同 test"></a>1. 等同 test</h3><p>等同于 test 命令，通常和 if 语句一起使用，在”[]”的内部和数据之间必须使用空格；否则判断式会报错。</p>
+<p>test 和[]中可用的比较运算符只有&#x3D;&#x3D;和!&#x3D;，两者都是用来比较字符串的，不可用于整数比较，整数比较只能使用-eq、-gt 这种形式。</p>
+<p>具体参数参考<a href="./test.md">test.md</a></p>
+<h2 id="双中括号"><a href="#双中括号" class="headerlink" title="双中括号 [[]]"></a>双中括号 [[]]</h2><p>[[]]是shell内置关键字，它和test类似，也用来检测某个条件是否成立。<br>test能做到的，[[]]也能做到，而且做的更好，test 做不到的，[[]]还能做到。可以认为[[]]是 test 的升级版，对细节进行了优化，并扩展了一些功能。</p>
+<p>[[]]的用法</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token punctuation">[</span> expression <span class="token punctuation">]</span><span class="token punctuation">]</span></code></pre>
+
+<p>当[[]]判断expression成立时，退出状态0，否则为非0值，注意[[]]和 expression 之间的空格，这两个空格是必须的，否则会导致语法错误。</p>
+<h3 id="不需要注意某些细枝末节"><a href="#不需要注意某些细枝末节" class="headerlink" title="[[]]不需要注意某些细枝末节"></a>[[]]不需要注意某些细枝末节</h3><p>[[]]是shell内置关键字，不是命令，在使用时没有给函数传递参数的过程，所以test命令的某些注意事项在[[]]中不存在了，具体包括：</p>
+<ul>
+<li>不需要把变量名用””包裹起来，即使变量是空值，也不会出错</li>
+<li>不需要、也不能对&gt;、&lt;进行转义，转义后会出错</li>
+</ul>
+<h3 id="支持逻辑运算符"><a href="#支持逻辑运算符" class="headerlink" title="[[]]支持逻辑运算符"></a>[[]]支持逻辑运算符</h3><p>[[]]剔除了 test 命令的-o 和-a 选项，只能使用||和&amp;&amp;</p>
+<h3 id="支持正则表达式"><a href="#支持正则表达式" class="headerlink" title="[[]]支持正则表达式"></a>[[]]支持正则表达式</h3><p>在[[]]中，可以使用&#x3D;~来检测字符串是否符合某个正则表达式，他的用法为：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span><span class="token punctuation">[</span> str <span class="token operator">=~</span> regex <span class="token punctuation">]</span><span class="token punctuation">]</span></code></pre>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>[[]]完全可以替换[]，但是[[]]对数字的比较仍然不友好，所有，当 if 判断条件时，用(())来处理整型数字，当使用正则表达式或通配符使用[[]]，其它情况一般使用 [ ]</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/shell/" rel="tag"><i class="fa fa-tag"></i> shell</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/ANSI%E8%BD%AC%E4%B9%89%E5%BA%8F%E5%88%97/" rel="prev" title="ANSI转义序列">
+                  <i class="fa fa-chevron-left"></i> ANSI转义序列
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/shell%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/%E4%BF%A1%E5%8F%B7%20signal/" rel="next" title="信号 signal">
+                  信号 signal <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

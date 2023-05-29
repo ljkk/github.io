@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="virsh 能实现的，virt-manger 都能实现 常用子命令： help               # 打印基本帮助信息 attach-device      # 使用XML文件中的设备定义在虚拟机中添加设备 attach-disk        # 在虚拟机中附加新磁盘设备 attach-interface   # 在虚拟机中附加新网络接口 create             # 从">
+<meta property="og:type" content="article">
+<meta property="og:title" content="virsh">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virsh/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="virsh 能实现的，virt-manger 都能实现 常用子命令： help               # 打印基本帮助信息 attach-device      # 使用XML文件中的设备定义在虚拟机中添加设备 attach-disk        # 在虚拟机中附加新磁盘设备 attach-interface   # 在虚拟机中附加新网络接口 create             # 从">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T15:43:00.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="kvm">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virsh/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virsh/","path":"运维/虚拟化和KVM/virsh/","title":"virsh"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>virsh | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">1.</span> <span class="nav-text">管理存储池</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-dir-%E7%9A%84-pool"><span class="nav-number">1.1.</span> <span class="nav-text">基于 dir 的 pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-fs-%E7%9A%84-pool"><span class="nav-number">1.2.</span> <span class="nav-text">基于 fs 的 pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-disk-%E7%9A%84-pool"><span class="nav-number">1.3.</span> <span class="nav-text">基于 disk 的 pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-LVM-%E7%9A%84-pool"><span class="nav-number">1.4.</span> <span class="nav-text">基于 LVM 的 pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-NFS-%E7%9A%84-pool"><span class="nav-number">1.5.</span> <span class="nav-text">基于 NFS 的 pool</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">2.</span> <span class="nav-text">管理存储卷</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%9B%AE%E5%BD%95%E7%9A%84-pool-%E7%9A%84-volume-%E7%AE%A1%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">基于目录的 pool 的 volume 管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-LVM-%E7%9A%84-pool-%E7%9A%84-volume-%E7%AE%A1%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">基于 LVM 的 pool 的 volume 管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%8B%E9%9A%86%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">2.3.</span> <span class="nav-text">克隆存储卷</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%B7%BB%E5%8A%A0%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">2.4.</span> <span class="nav-text">向虚拟机添加存储卷</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virsh/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="virsh | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          virsh
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:43:00" itemprop="dateCreated datePublished" datetime="2020-12-09T23:43:00+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/" itemprop="url" rel="index"><span itemprop="name">虚拟化和KVM</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>virsh 能实现的，virt-manger 都能实现</p>
+<p>常用子命令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">help</span>               <span class="token comment"># 打印基本帮助信息</span>
+attach-device      <span class="token comment"># 使用XML文件中的设备定义在虚拟机中添加设备</span>
+attach-disk        <span class="token comment"># 在虚拟机中附加新磁盘设备</span>
+attach-interface   <span class="token comment"># 在虚拟机中附加新网络接口</span>
+create             <span class="token comment"># 从 XML 配置文件生成虚拟机并启动新虚拟机</span>
+define             <span class="token comment"># 为虚拟机输出XML配置文件</span>
+destroy            <span class="token comment"># 强制虚拟机停止</span>
+detach-device      <span class="token comment"># 从虚拟机中分离设备,使用同样的XML 描述作为命令</span>
+attach-device
+detach-disk        <span class="token comment"># 从虚拟机中分离磁盘设备</span>
+detach-interface   <span class="token comment"># 从虚拟机中分离网络接口</span>
+domblkstat         <span class="token comment"># 显示正在运行的虚拟机的块设备统计</span>
+domid              <span class="token comment"># 显示虚拟机ID</span>
+domifstat          <span class="token comment"># 显示正在运行的虚拟机的网络接口统计</span>
+dominfo            <span class="token comment"># 显示虚拟机信息</span>
+domname            <span class="token comment"># 显示虚拟机名称</span>
+domstate           <span class="token comment"># 显示虚以机状态</span>
+domuuid            <span class="token comment"># 显示虚拟机UUID</span>
+dumpxml            <span class="token comment"># 输出虚拟机 XML配置文件</span>
+list               <span class="token comment"># 列出所有虚拟机</span>
+migrate            <span class="token comment"># 将虚拟机迁移到另一台主机中</span>
+nodeinfo           <span class="token comment"># 有关管理程序的输出信息</span>
+quit               <span class="token comment"># 退出这个互动终端</span>
+<span class="token function">reboot</span>             <span class="token comment"># 重新启动虚拟机</span>
+restore            <span class="token comment"># 恢复以前保存在文件中的虚拟机</span>
+resume             <span class="token comment"># 恢复暂停的虚拟机</span>
+save               <span class="token comment"># 将虚拟机当前状态保存到某个文件中</span>
+setmaxmem          <span class="token comment"># 为管理程序设定内存上限</span>
+setmem             <span class="token comment"># 为虚拟机设定分配的内存</span>
+setvcpus           <span class="token comment"># 修改为虚拟机分配的虚拟CPU数目</span>
+<span class="token function">shutdown</span>           <span class="token comment"># 关闭某个虚拟机</span>
+start              <span class="token comment"># 启动未激活的虚拟机</span>
+<span class="token function">suspend</span>            <span class="token comment"># 暂停虚拟机</span>
+undefine           <span class="token comment"># 删除与虚拟机关联的所有文件</span>
+vcpupin            <span class="token comment"># 控制虚拟机的虚拟CPU亲和性</span>
+version            <span class="token comment"># 显示virsh版</span></code></pre>
+
+<p>查看帮助：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token builtin class-name">help</span>				<span class="token comment"># virsh帮助</span>
+<span class="token function">virsh</span> <span class="token builtin class-name">help</span> COMMAND		<span class="token comment"># virsh子命令帮助</span></code></pre>
+
+<h2 id="管理存储池"><a href="#管理存储池" class="headerlink" title="管理存储池"></a>管理存储池</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># virsh help pool</span>
+
+find-storage-pool-sources-as	<span class="token comment"># 通过参数查找存储池源 find potential storage pool sources</span>
+find-storage-pool-sources		<span class="token comment"># 通过XML文档查找存储池源找到潜在存储池源</span>
+pool-autostart          		<span class="token comment"># 自动启动某个池</span>
+pool-build          			<span class="token comment"># 建立池</span>
+pool-create-as          		<span class="token comment"># 在一组变量中定义池</span>
+pool-create        		 		<span class="token comment"># 从一个XML文件中创建一个池</span>
+pool-define-as          		<span class="token comment"># 从一组变量中创建一个池</span>
+pool-define         			<span class="token comment"># 在一个XML文件中定义（但不启动）一个池或修改已经有池</span>
+pool-delete         			<span class="token comment"># 删除池</span>
+pool-destroy            		<span class="token comment"># 销毁（停止）池</span>
+pool-dumpxml           	 		<span class="token comment"># 将池信息保存到XML文件中的</span>
+pool-edit           			<span class="token comment"># 为存储池编辑XML配置</span>
+pool-info           			<span class="token comment"># 存储池信息</span>
+pool-list           			<span class="token comment"># 列出池</span>
+pool-name           			<span class="token comment"># 把一个池名称转换为池UUID</span>
+pool-refresh            		<span class="token comment"># 刷新池</span>
+pool-start          			<span class="token comment"># 启动一个（以前定义的）非活跃的池</span>
+pool-undefine           		<span class="token comment"># 取消定义一个不活跃的池</span>
+pool-uuid           			<span class="token comment"># 将池UUID转换为池名称</span>
+pool-event                      <span class="token comment"># Storage Pool Events</span>
+pool-capabilities               <span class="token comment"># storage pool capabilities</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># virsh help pool-create-as</span>
+
+<span class="token function">virsh</span> pool-create-as <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token operator">&lt;</span>type<span class="token operator">></span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
+
+每一个存储池都对应一个xml配置文件，其中的标签和下面的option都有对应
+OPTIONS：
+<span class="token punctuation">[</span>--name<span class="token punctuation">]</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  						<span class="token comment"># 储存池名称</span>
+<span class="token punctuation">[</span>--type<span class="token punctuation">]</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  						<span class="token comment"># 储存池类型</span>
+--print-xml 							<span class="token comment"># 打印xml文档</span>
+--source-host <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 底层存储的源主机</span>
+--source-path <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 底层存储的源路径</span>
+--source-dev <span class="token operator">&lt;</span>string<span class="token operator">></span>  					<span class="token comment"># 用于底层存储的源设备</span>
+--source-name <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 底层存储的源名称</span>
+<span class="token parameter variable">--target</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  						<span class="token comment"># 底层存储的目标</span>
+--source-format <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 底层存储格式</span>
+--auth-type <span class="token operator">&lt;</span>string<span class="token operator">></span>  					<span class="token comment"># 用于底层存储的认证类型</span>
+--auth-username <span class="token operator">&lt;</span>string<span class="token operator">></span> 	 			<span class="token comment"># 用于底层存储的认证用户名</span>
+--secret-usage <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 用于底层存储的认证秘密用法</span>
+--secret-uuid <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 用于底层存储的秘密UUID</span>
+--adapter-name <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 用于基础存储的适配器名称</span>
+--adapter-wwnn <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 用于底层存储的适配器wwnn</span>
+--adapter-wwpn <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 用于底层存储的适配器wwpn</span>
+--adapter-parent <span class="token operator">&lt;</span>string<span class="token operator">></span>  				<span class="token comment"># 用于底层vHBA存储的适配器父scsi_hostN</span>
+--adapter-parent-wwnn <span class="token operator">&lt;</span>string<span class="token operator">></span>  		<span class="token comment"># 用于底层vHBA存储的适配器父scsi_hostN wwnn</span>
+--adapter-parent-wwpn <span class="token operator">&lt;</span>string<span class="token operator">></span>  		<span class="token comment"># 用于底层vHBA存储的适配器父scsi_hostN wwpn</span>
+--adapter-parent-fabric-wwn <span class="token operator">&lt;</span>string<span class="token operator">></span>  	<span class="token comment"># 用于底层vHBA存储的适配器父scsi_hostN fabric_wwn</span>
+--source-protocol-ver <span class="token operator">&lt;</span>string<span class="token operator">></span>  		<span class="token comment"># nfsvers值NFS储存池挂载选项</span>
+<span class="token parameter variable">--build</span> 								<span class="token comment"># build the pool as normal</span>
+--no-overwrite  						<span class="token comment"># do not overwrite any existing data</span>
+--no-overwrite  						<span class="token comment"># overwrite any existing data</span></code></pre>
+
+<h3 id="基于-dir-的-pool"><a href="#基于-dir-的-pool" class="headerlink" title="基于 dir 的 pool"></a>基于 dir 的 pool</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 创建存储池 vm_images_dir</span>
+<span class="token function">virsh</span> pool-define-as vm_images_dir <span class="token function">dir</span> <span class="token parameter variable">--target</span> <span class="token string">"/data/vm_images"</span>
+<span class="token comment"># 2. /data/vm_images目录如果没有提前创建，可以使用pool-build自动创建</span>
+<span class="token function">virsh</span> pool-build vm_images_dir
+<span class="token comment"># 3. 启动存储池</span>
+<span class="token function">virsh</span> pool-start vm_images_dir
+<span class="token comment"># 4. 设置存储池自动启动</span>
+<span class="token function">virsh</span> pool-autostart vm_images_dir
+<span class="token comment"># 5. 停止存储池，删除之前必须先停止</span>
+<span class="token function">virsh</span> pool-destroy <span class="token parameter variable">--pool</span> vm_images_dir
+<span class="token comment"># 6. 删除存储池</span>
+<span class="token function">virsh</span> pool-delete <span class="token parameter variable">--pool</span> vm_images_dir		<span class="token comment"># 删除数据</span>
+<span class="token function">virsh</span> pool-undefine <span class="token parameter variable">--pool</span> vm_images_dir	<span class="token comment"># 删除配置</span></code></pre>
+
+<h3 id="基于-fs-的-pool"><a href="#基于-fs-的-pool" class="headerlink" title="基于 fs 的 pool"></a>基于 fs 的 pool</h3><p>基于已经创建文件系统的分区</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 准备分区并创建文件系统</span>
+<span class="token function">fdisk</span> /dev/sdb
+mkfs.ext4 /dev/sdb6
+<span class="token comment"># 2. 准备存储池的挂载点目录,如果没有创建，创建存储池后执行`virsh pool-build vm_images_fs`会自动生成</span>
+<span class="token function">mkdir</span> /vm_images
+<span class="token comment"># 3. 创建存储池 vm_images_fs</span>
+<span class="token function">virsh</span> pool-define-as vm_images_fs fs --source-dev <span class="token string">"/dev/sdb6"</span> <span class="token parameter variable">--target</span> <span class="token string">"/vm_images"</span>
+	<span class="token comment"># --source-dev：块设备名</span>
+	<span class="token comment"># --target：mount到的目录名，libvirtd 会自动mount</span>
+<span class="token comment"># 4、5、6 启动、自动启动，停止、删除等操作所有类型的对于所有类型的存储池都一样，这里就不重复了</span></code></pre>
+
+<h3 id="基于-disk-的-pool"><a href="#基于-disk-的-pool" class="headerlink" title="基于 disk 的 pool"></a>基于 disk 的 pool</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 准备工作：确认/dev/sdb磁盘的格式为gpt</span>
+<span class="token comment"># 2. 创建存储池</span>
+<span class="token function">virsh</span> pool-define-as vm_images_disk disk --source-dev <span class="token string">"/dev/sdb"</span> --source-format gpt  <span class="token parameter variable">--target</span> <span class="token string">"/dev"</span>
+<span class="token comment"># 或者直接编辑xml配置文件</span>
+<span class="token operator">&lt;</span>pool <span class="token assign-left variable">type</span><span class="token operator">=</span><span class="token string">'disk'</span><span class="token operator">></span>
+	<span class="token operator">&lt;</span>name<span class="token operator">></span>vm_images_disk<span class="token operator">&lt;</span>/name<span class="token operator">></span>
+	<span class="token operator">&lt;</span>source<span class="token operator">></span>
+		<span class="token operator">&lt;</span>device <span class="token assign-left variable">path</span><span class="token operator">=</span><span class="token string">'/dev/sdb'</span>/<span class="token operator">></span>
+		<span class="token operator">&lt;</span>format <span class="token assign-left variable">type</span><span class="token operator">=</span><span class="token string">'gpt'</span>/<span class="token operator">></span>
+	<span class="token operator">&lt;</span>/source<span class="token operator">></span>
+	<span class="token operator">&lt;</span>target<span class="token operator">></span>
+		<span class="token operator">&lt;</span>path<span class="token operator">></span>/dev<span class="token operator">&lt;</span>/path<span class="token operator">></span>
+	<span class="token operator">&lt;</span>/target<span class="token operator">></span>
+<span class="token operator">&lt;</span>/pool<span class="token operator">></span>
+<span class="token comment"># 通过xml配置文件创建存储池</span>
+<span class="token function">virsh</span> pool-define vm_images_disk.xml</code></pre>
+
+<h3 id="基于-LVM-的-pool"><a href="#基于-LVM-的-pool" class="headerlink" title="基于 LVM 的 pool"></a>基于 LVM 的 pool</h3><p>没有卷组，直接创建存储池：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> pool-define-as vm_images_lvm logical --source-dev<span class="token operator">=</span>/dev/sdb
+<span class="token function">virsh</span> pool-build vm_images_lvm</code></pre>
+
+<p>基于已有卷组，创建存储池（推荐）：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> pool-define-as vm_images_lvm logical --source-name<span class="token operator">=</span>vm_images_lvm</code></pre>
+
+<h3 id="基于-NFS-的-pool"><a href="#基于-NFS-的-pool" class="headerlink" title="基于 NFS 的 pool"></a>基于 NFS 的 pool</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在宿主机执行：</span>
+<span class="token function">virsh</span> pool-define-as vm_images_nfs netfs <span class="token punctuation">\</span>
+--source-host <span class="token number">10.0</span>.0.18 --source-path /data/kvmdata <span class="token parameter variable">--target</span> /data/vm_images_nfs</code></pre>
+
+<h2 id="管理存储卷"><a href="#管理存储卷" class="headerlink" title="管理存储卷"></a>管理存储卷</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># virsh help volume</span>
+
+vol-clone           <span class="token comment"># 克隆卷</span>
+vol-create-as       <span class="token comment"># 通过一组参数创建卷</span>
+vol-create          <span class="token comment"># 通过XML文件创建卷</span>
+vol-create-from     <span class="token comment"># 通过输入的其他卷创建—个新的卷</span>
+vol-delete          <span class="token comment"># 删除一个卷</span>
+vol-download        <span class="token comment"># 下载卷的内容到一个文件</span>
+vol-dumpxml         <span class="token comment"># 保存卷信息的信息到xML文件中</span>
+vol-info            <span class="token comment"># 存储卷的信息</span>
+vol-key         	<span class="token comment"># 根据卷名或路径返回卷的key</span>
+vol-list            <span class="token comment"># 列出卷</span>
+vol-name            <span class="token comment"># 根据卷的key或路径返回卷名</span>
+vol-path            <span class="token comment"># 根据卷名或key返回卷的路径</span>
+vol-pool            <span class="token comment"># 根据卷的key或路径返回存储池</span>
+vol-resize          <span class="token comment"># 调整卷大小</span>
+vol-upload          <span class="token comment"># 上传文件内容到一个卷</span>
+vol-wipe            <span class="token comment"># wipe ─个卷</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># virsh help vol-create-as</span>
+
+<span class="token function">virsh</span> vol-create-as <span class="token operator">&lt;</span>pool<span class="token operator">></span> <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token operator">&lt;</span>capacity<span class="token operator">></span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
+
+OPTIONS
+<span class="token punctuation">[</span>--pool<span class="token punctuation">]</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  pool name
+<span class="token punctuation">[</span>--name<span class="token punctuation">]</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  name of the volume
+<span class="token punctuation">[</span>--capacity<span class="token punctuation">]</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  size of the vol, as scaled integer <span class="token punctuation">(</span>default bytes<span class="token punctuation">)</span>
+<span class="token parameter variable">--allocation</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  initial allocation size, as scaled integer <span class="token punctuation">(</span>default bytes<span class="token punctuation">)</span>
+<span class="token parameter variable">--format</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  <span class="token function">file</span> <span class="token function">format</span> <span class="token builtin class-name">type</span> raw,bochs,qcow,qcow2,qed,vmdk
+--backing-vol <span class="token operator">&lt;</span>string<span class="token operator">></span>  the backing volume <span class="token keyword">if</span> taking a snapshot
+--backing-vol-format <span class="token operator">&lt;</span>string<span class="token operator">></span>  <span class="token function">format</span> of backing volume <span class="token keyword">if</span> taking a snapshot
+--prealloc-metadata  preallocate metadata <span class="token punctuation">(</span>for qcow2 instead of full allocation<span class="token punctuation">)</span>
+--print-xml      print XML document, but don't define/create</code></pre>
+
+<p>基于文件系统的存储池，创建其中的存储卷，可以使用 <code>touch</code>、<code>mkdir</code>、<code>qemu-img create</code>等命令，这些命令只能创建特定的存储卷，例如<code>touch</code>创建 raw 格式的文件，<code>mkdir</code>创建目录，<code>qemu-img create</code>创建磁盘镜像。</p>
+<p>基于磁盘的存储池，创建其中的存储卷，也有对应命令，例如 disk 格式的存储池，使用<code>fdisk</code>创建分区；logical 格式的存储池，使用<code>lvcreate</code>，等等</p>
+<p><code>virsh vol-create-as</code> 配置项丰富，可以给各种类型的存储池，创建各种格式的存储卷，可以说相当于上述各种命令的合体</p>
+<h3 id="基于目录的-pool-的-volume-管理"><a href="#基于目录的-pool-的-volume-管理" class="headerlink" title="基于目录的 pool 的 volume 管理"></a>基于目录的 pool 的 volume 管理</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建</span>
+<span class="token function">virsh</span> vol-create-as vm_images_dir test1.qcow2 1g <span class="token parameter variable">--format</span> qcow2
+<span class="token comment"># 删除</span>
+<span class="token function">virsh</span> vol-delete test1.qcow2 vm_images_dir</code></pre>
+
+<h3 id="基于-LVM-的-pool-的-volume-管理"><a href="#基于-LVM-的-pool-的-volume-管理" class="headerlink" title="基于 LVM 的 pool 的 volume 管理"></a>基于 LVM 的 pool 的 volume 管理</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建</span>
+<span class="token function">virsh</span> vol-create-as vm_images_lvm lvvol1 10g
+<span class="token comment"># 删除</span>
+<span class="token function">virsh</span> vol-delete lvvol1 vm_images_lvm</code></pre>
+
+<h3 id="克隆存储卷"><a href="#克隆存储卷" class="headerlink" title="克隆存储卷"></a>克隆存储卷</h3><p>克隆比直接 cp 复制文件要好</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> vol-clone <span class="token operator">&lt;</span>vol<span class="token operator">></span> <span class="token operator">&lt;</span>newname<span class="token operator">></span> <span class="token punctuation">[</span>--pool <span class="token operator">&lt;</span>string<span class="token operator">></span><span class="token punctuation">]</span> <span class="token punctuation">[</span>--prealloc-metadata<span class="token punctuation">]</span> <span class="token punctuation">[</span>--reflink<span class="token punctuation">]</span></code></pre>
+
+<h3 id="向虚拟机添加存储卷"><a href="#向虚拟机添加存储卷" class="headerlink" title="向虚拟机添加存储卷"></a>向虚拟机添加存储卷</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> attach-disk <span class="token operator">&lt;</span>domain<span class="token operator">></span> <span class="token operator">&lt;</span>source<span class="token operator">></span> <span class="token operator">&lt;</span>target<span class="token operator">></span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span>
+
+<span class="token function">virsh</span> attach-disk <span class="token punctuation">\</span>
+<span class="token parameter variable">--domain</span> centos7 <span class="token parameter variable">--sourcetype</span> block <span class="token parameter variable">--source</span> /dev/vm_images_lvm/lvvol1 <span class="token parameter variable">--target</span> vdb</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/kvm/" rel="tag"><i class="fa fa-tag"></i> kvm</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/qemu-img/" rel="prev" title="qemu-img">
+                  <i class="fa fa-chevron-left"></i> qemu-img
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virt-install/" rel="next" title="virt-install">
+                  virt-install <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

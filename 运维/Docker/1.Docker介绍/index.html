@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="docker 的主要目标：一次封装，到处运行 容器和虚拟机技术比较：   容器内的应用直接运行在宿主机的内核之上，容器并没有自己的内核，也不需要虚拟硬件，相当轻量化 容器间是互相隔离，每个容器内都有一个属于自己的独立文件系统、进程空间、网络空间、用户空间等，所以在同一个宿主机上的多个容器之间彼此不会相互影响  docker 的组成docker 官网：http:&#x2F;&#x2F;www.docker.com帮助文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker介绍">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.Docker%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="docker 的主要目标：一次封装，到处运行 容器和虚拟机技术比较：   容器内的应用直接运行在宿主机的内核之上，容器并没有自己的内核，也不需要虚拟硬件，相当轻量化 容器间是互相隔离，每个容器内都有一个属于自己的独立文件系统、进程空间、网络空间、用户空间等，所以在同一个宿主机上的多个容器之间彼此不会相互影响  docker 的组成docker 官网：http:&#x2F;&#x2F;www.docker.com帮助文">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605680745496.png">
+<meta property="article:published_time" content="2021-01-08T03:26:43.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.486Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1605680745496.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.Docker%E4%BB%8B%E7%BB%8D/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.Docker%E4%BB%8B%E7%BB%8D/","path":"运维/Docker/1.Docker介绍/","title":"docker介绍"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>docker介绍 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">1.</span> <span class="nav-text">docker 的组成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#namespace"><span class="nav-number">2.</span> <span class="nav-text">namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cgroups"><span class="nav-number">3.</span> <span class="nav-text">Cgroups</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF"><span class="nav-number">4.</span> <span class="nav-text">容器核心技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E8%A7%84%E8%8C%83"><span class="nav-number">4.1.</span> <span class="nav-text">容器规范</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8-runtime"><span class="nav-number">4.2.</span> <span class="nav-text">容器 runtime</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7"><span class="nav-number">4.3.</span> <span class="nav-text">容器管理工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E5%AE%9A%E4%B9%89%E5%B7%A5%E5%85%B7"><span class="nav-number">4.4.</span> <span class="nav-text">容器定义工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93-Registry"><span class="nav-number">4.5.</span> <span class="nav-text">镜像仓库 Registry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E7%BC%96%E6%8E%92%E5%B7%A5%E5%85%B7"><span class="nav-number">4.6.</span> <span class="nav-text">容器编排工具</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.Docker%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="docker介绍 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker介绍
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 11:26:43" itemprop="dateCreated datePublished" datetime="2021-01-08T11:26:43+08:00">2021-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>docker 的主要目标：一次封装，到处运行</p>
+<p>容器和虚拟机技术比较：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605680745496.png"></p>
+<ul>
+<li>容器内的应用直接运行在宿主机的内核之上，容器并没有自己的内核，也不需要虚拟硬件，相当轻量化</li>
+<li>容器间是互相隔离，每个容器内都有一个属于自己的独立文件系统、进程空间、网络空间、用户空间等，所以在同一个宿主机上的多个容器之间彼此不会相互影响</li>
+</ul>
+<h2 id="docker-的组成"><a href="#docker-的组成" class="headerlink" title="docker 的组成"></a>docker 的组成</h2><p>docker 官网：<a target="_blank" rel="noopener" href="http://www.docker.com/">http://www.docker.com</a><br>帮助文档：<a target="_blank" rel="noopener" href="https://docs.docker.com/">https://docs.docker.com/</a><br>docker 镜像：<a target="_blank" rel="noopener" href="https://hub.docker.com/">https://hub.docker.com/</a><br>docker 中文网站：<a target="_blank" rel="noopener" href="http://www.docker.org.cn/">http://www.docker.org.cn/</a></p>
+<p><strong>镜像和容器：</strong></p>
+<p>镜像可以理解为是一个模板，创建实例使用的模板，本质就是一些程序文件的合集<br>容器是从镜像生成对外提供服务的一个或一组服务，本质就是将镜像中的程序启动后生成的进程</p>
+<h2 id="namespace"><a href="#namespace" class="headerlink" title="namespace"></a>namespace</h2><p>命名空间，linux 底层概念，在内核层实现，容器使用 namespce 技术实现容器间相互隔离</p>
+<ul>
+<li>mnt namespace：隔离根，即 chroot 技术。提供磁盘挂载点和文件系统的隔离能力</li>
+<li>ipc namespace：隔离进程间通信。提供进程间通信的隔离能力，包括信号量，消息队列和共享内存</li>
+<li>uts namespace：隔离系统信息。提供内核、主机名和域名隔离能力</li>
+<li>pid namespace：隔离进程号。提供进程隔离能力</li>
+<li>net namespace：隔离网络。提供网络隔离能力，包括网络设备，网络栈，端口等</li>
+<li>user namespce：隔离用户。提供用户隔离能力，包括用户和组</li>
+</ul>
+<h2 id="Cgroups"><a href="#Cgroups" class="headerlink" title="Cgroups"></a>Cgroups</h2><p>Cgroups：Control Groups</p>
+<p>Cgroups 最主要的作用，就是限制一个进程组能够使用的资源上限，包括 CPU、内存、磁盘、网络带宽等等。此外，还能够对进程进行优先级设置，资源的计量以及资源的控制（比如 将进程挂起和恢复等操作）</p>
+<p>利用 Cgroups，宿主机可以对容器进行资源分配限制，比如 CPU、内存等</p>
+<h2 id="容器核心技术"><a href="#容器核心技术" class="headerlink" title="容器核心技术"></a>容器核心技术</h2><h3 id="容器规范"><a href="#容器规范" class="headerlink" title="容器规范"></a>容器规范</h3><p>容器除了 docker，还有 rkt、Pouch 等，所有容器都要遵守标准的容器规范，这个规范由一个叫 OCI 的组织定，目前 OCI 一共发布了两个规范，分别是 <strong>runtime spec</strong> 和 <strong>image fortmat spec</strong>，只要遵守这两个规范，就可以保证容器的可移植性和相互可操作性。</p>
+<h3 id="容器-runtime"><a href="#容器-runtime" class="headerlink" title="容器 runtime"></a>容器 runtime</h3><p>runtime 是真正运行容器的地方，因此为了运行不同的容器，runtime 需要和操作系统内核紧密合作、相互支持，以便为容器提供相应的运行环境</p>
+<p>runtime 类型：lxc、libcontainer、runc、rkt</p>
+<p>docker 早期的 runtime 类型是 lxc，现在是 runc</p>
+<h3 id="容器管理工具"><a href="#容器管理工具" class="headerlink" title="容器管理工具"></a>容器管理工具</h3><p>管理工具连接 runtime 与用户，对用户提供图形或命令方式操作，然后管理工具将用户操作传递给 runtime 执行</p>
+<ul>
+<li>lxc 的 管理工具是 lxc</li>
+<li>rkt 的 管理工具是 rkt cli</li>
+<li>runc 的管理工具是 docker engine，docker engine 包含 daemon 和 cli 两部分额，大家经常提到的 docker 就是 docker engine</li>
+</ul>
+<h3 id="容器定义工具"><a href="#容器定义工具" class="headerlink" title="容器定义工具"></a>容器定义工具</h3><p>容器定义工具允许用户定义容器的属性和内容，以方便容器能够被保存、共享和重建</p>
+<p>docker image：是 docker 容器的模板，runtime 依据 docker image 创建容器</p>
+<p>dockerfile：包含 N 个命令的文本文件，通过 dockerfile 创建出 docker image</p>
+<h3 id="镜像仓库-Registry"><a href="#镜像仓库-Registry" class="headerlink" title="镜像仓库 Registry"></a>镜像仓库 Registry</h3><ul>
+<li>docker hub：docker 官方的公共仓库，已经保存了大量的常用镜像，可以方便大家直接使用</li>
+<li>阿里云、网易等第三方镜像的公共仓库</li>
+<li>image registry：docker 官方提供的私有仓库部署工具，无 web 管理界面,目前使用较少</li>
+<li>harbor：vmware 提供的自带 web 界面自带认证功能的镜像私有仓库，目前有很多公司使用</li>
+</ul>
+<h3 id="容器编排工具"><a href="#容器编排工具" class="headerlink" title="容器编排工具"></a>容器编排工具</h3><ul>
+<li>docker compose：docker 官方实现单机的容器的编排工具</li>
+<li>docker swarm：docker 官方开发的容器编排引擎</li>
+<li>Mesos+Marathon：Mesos 是 Apache 下的开源分布式资源管理框架,它被称为是分布式系统的内核。Mesos 最初是由加州大学伯克利分校的 AMPLab 开发的,后在 Twitter 得到广泛使用。通用的集群组员调度平台,mesos(资源分配)与 marathon(容器编排平台)一起提供容器编排引擎功能</li>
+<li>Kubernetes：google 主导开发的容器编排引擎，内部项目为 Borg，且其同时支持 docker 和 CoreOS，当前已成为容器编排工具事实上的标准</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/alpine-nginx/" rel="prev" title="alpine-nginx">
+                  <i class="fa fa-chevron-left"></i> alpine-nginx
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/1.1.docker%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/" rel="next" title="docker安装">
+                  docker安装 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

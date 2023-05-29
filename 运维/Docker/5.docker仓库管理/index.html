@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="docker 仓库分为公有云仓库 和 私有云仓库 公有云仓库：  官方 阿里云等第三方仓库，推荐  私有云仓库：  docker registory docker harbor，推荐  阿里云 docker 仓库 访问凭证 命名空间 镜像仓库  范例： # 1. 浏览器的登录阿里云，创建命名空间107，镜像仓库可以创建也可以不创建，如果不创建，push的时候会自动创建 # 2. 登录阿里云，交互式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker仓库管理">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/5.docker%E4%BB%93%E5%BA%93%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="docker 仓库分为公有云仓库 和 私有云仓库 公有云仓库：  官方 阿里云等第三方仓库，推荐  私有云仓库：  docker registory docker harbor，推荐  阿里云 docker 仓库 访问凭证 命名空间 镜像仓库  范例： # 1. 浏览器的登录阿里云，创建命名空间107，镜像仓库可以创建也可以不创建，如果不创建，push的时候会自动创建 # 2. 登录阿里云，交互式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1606200537850.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1606219992986.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1606227845071.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1606227877823.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1606445045953.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1607528920165.png">
+<meta property="article:published_time" content="2021-01-08T03:28:19.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.486Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1606200537850.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/5.docker%E4%BB%93%E5%BA%93%E7%AE%A1%E7%90%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/5.docker%E4%BB%93%E5%BA%93%E7%AE%A1%E7%90%86/","path":"运维/Docker/5.docker仓库管理/","title":"docker仓库管理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>docker仓库管理 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%BF%E9%87%8C%E4%BA%91-docker-%E4%BB%93%E5%BA%93"><span class="nav-number">1.</span> <span class="nav-text">阿里云 docker 仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A7%81%E6%9C%89%E4%BA%91%E5%8D%95%E6%9C%BA%E4%BB%93%E5%BA%93-Docker-Registry"><span class="nav-number">2.</span> <span class="nav-text">私有云单机仓库 Docker Registry</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="nav-number">2.1.</span> <span class="nav-text">服务端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. 生成证书</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%88%9B%E5%BB%BA%E6%8E%88%E6%9D%83%E7%9A%84-registry-%E7%94%A8%E6%88%B7%E5%92%8C%E5%AF%86%E7%A0%81"><span class="nav-number">2.1.2.</span> <span class="nav-text">2.创建授权的 registry 用户和密码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%90%AF%E5%8A%A8%E5%AE%B9%E5%99%A8"><span class="nav-number">2.1.3.</span> <span class="nav-text">3. 启动容器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.2.</span> <span class="nav-text">客户端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%B7%BB%E5%8A%A0-hosts"><span class="nav-number">2.2.1.</span> <span class="nav-text">1. 添加 hosts</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E4%BF%AE%E6%94%B9-daemon-json-%E5%B9%B6%E9%87%8D%E5%90%AF-docker"><span class="nav-number">2.2.2.</span> <span class="nav-text">2. 修改 daemon.json 并重启 docker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E7%99%BB%E9%99%86"><span class="nav-number">2.2.3.</span> <span class="nav-text">3. 登陆</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E4%B8%8A%E4%BC%A0-amp-%E4%B8%8B%E8%BD%BD"><span class="nav-number">2.2.4.</span> <span class="nav-text">4. 上传&amp;下载</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-%E4%B9%8B%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%93%E5%BA%93-Harbor"><span class="nav-number">3.</span> <span class="nav-text">Docker 之分布式仓库 Harbor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-harbor-%E4%BB%93%E5%BA%93"><span class="nav-number">3.1.</span> <span class="nav-text">配置 harbor 仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-docker-%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">3.2.</span> <span class="nav-text">配置 docker 客户端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#harbor-%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">3.3.</span> <span class="nav-text">harbor 高可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#harbor-%E9%85%8D%E7%BD%AE-https"><span class="nav-number">3.4.</span> <span class="nav-text">harbor 配置 https</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/5.docker%E4%BB%93%E5%BA%93%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="docker仓库管理 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker仓库管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 11:28:19" itemprop="dateCreated datePublished" datetime="2021-01-08T11:28:19+08:00">2021-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>docker 仓库分为公有云仓库 和 私有云仓库</p>
+<p>公有云仓库：</p>
+<ul>
+<li>官方</li>
+<li>阿里云等第三方仓库，推荐</li>
+</ul>
+<p>私有云仓库：</p>
+<ul>
+<li>docker registory</li>
+<li>docker harbor，推荐</li>
+</ul>
+<h2 id="阿里云-docker-仓库"><a href="#阿里云-docker-仓库" class="headerlink" title="阿里云 docker 仓库"></a>阿里云 docker 仓库</h2><ol>
+<li>访问凭证</li>
+<li>命名空间</li>
+<li>镜像仓库</li>
+</ol>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 浏览器的登录阿里云，创建命名空间107，镜像仓库可以创建也可以不创建，如果不创建，push的时候会自动创建</span>
+<span class="token comment"># 2. 登录阿里云，交互式，密码存储在~/.docker/config.json</span>
+<span class="token function">docker</span> login <span class="token parameter variable">--username</span><span class="token operator">=</span><span class="token number">1076956365</span>@qq.com registry.cn-beijing.aliyuncs.com
+<span class="token comment"># 3. 给镜像打标签，注意格式</span>
+<span class="token function">docker</span> tag nginx:1.22.1 registry.cn-beijing.aliyuncs.com/lujk/nginx:1.22.1
+<span class="token comment"># 4. 上传到阿里云的docker镜像仓库</span>
+<span class="token function">docker</span> push registry.cn-beijing.aliyuncs.com/lujk/nginx:1.22.1
+<span class="token comment"># 5. 刷新网站页面，如果没有看到镜像，可能是区域设置不对</span>
+<span class="token comment"># 6. 其他机器下载镜像</span>
+<span class="token function">docker</span> pull registry.cn-beijing.aliyuncs.com/lujk/nginx:1.22.1</code></pre>
+
+<h2 id="私有云单机仓库-Docker-Registry"><a href="#私有云单机仓库-Docker-Registry" class="headerlink" title="私有云单机仓库 Docker Registry"></a>私有云单机仓库 Docker Registry</h2><p>官方文档：<a target="_blank" rel="noopener" href="https://docs.docker.com/registry/">https://docs.docker.com/registry/</a></p>
+<p>部署文档：<a target="_blank" rel="noopener" href="https://github.com/docker/docs/blob/main/registry/deploying.md">https://github.com/docker/docs/blob/main/registry/deploying.md</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41605937/article/details/122367707">https://blog.csdn.net/weixin_41605937/article/details/122367707</a></p>
+<h3 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h3><h4 id="1-生成证书"><a href="#1-生成证书" class="headerlink" title="1. 生成证书"></a>1. 生成证书</h4><p>一路回车就可以</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">$ openssl req <span class="token parameter variable">-new</span> <span class="token parameter variable">-x509</span> <span class="token parameter variable">-days</span> <span class="token number">3650</span> <span class="token parameter variable">-nodes</span> <span class="token parameter variable">-out</span> ./ssl/certs/reg.cntv.local.crt <span class="token parameter variable">-keyout</span> ./ssl/private/reg.cntv.local.key</code></pre>
+
+<h4 id="2-创建授权的-registry-用户和密码"><a href="#2-创建授权的-registry-用户和密码" class="headerlink" title="2.创建授权的 registry 用户和密码"></a>2.创建授权的 registry 用户和密码</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 创建授权用户密码使用目录</span>
+root@lujinkai-pc:~$ <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /etc/docker/auth
+
+<span class="token comment"># 2. 创建registry用户，用于上传和下载镜像</span>
+<span class="token punctuation">[</span>root@484288 ~<span class="token punctuation">]</span>$ htpasswd <span class="token parameter variable">-Bbn</span> ops <span class="token number">123456</span>. <span class="token operator">></span> /etc/docker/auth/registry
+
+<span class="token punctuation">[</span>root@484288 ~<span class="token punctuation">]</span>$ <span class="token function">cat</span> /etc/docker/auth/registry
+ops:<span class="token variable">$2y</span><span class="token variable">$05</span><span class="token variable">$zvMWW6tjQriMEKNinHyL</span>.uPsvSYfR9iYWROMAvwrA7AfRy1K0SUTC</code></pre>
+
+<p>创建用户还可以使用如下命令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">docker</span> run <span class="token punctuation">\</span>
+  <span class="token parameter variable">--entrypoint</span> htpasswd <span class="token punctuation">\</span>
+  registry:2 <span class="token parameter variable">-Bbn</span> ops <span class="token number">123456</span>. <span class="token operator">></span> /etc/docker/auth/registry</code></pre>
+
+<h4 id="3-启动容器"><a href="#3-启动容器" class="headerlink" title="3. 启动容器"></a>3. 启动容器</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 指定443端口</span>
+$ <span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+      <span class="token parameter variable">--name</span> registry <span class="token punctuation">\</span>
+      <span class="token parameter variable">-e</span> <span class="token assign-left variable">REGISTRY_HTTP_ADDR</span><span class="token operator">=</span><span class="token number">0.0</span>.0.0:443 <span class="token punctuation">\</span>
+      <span class="token parameter variable">-p</span> <span class="token number">443</span>:443 <span class="token punctuation">\</span>
+      registry:2
+
+<span class="token comment"># 或者：默认的5000端口</span>
+$ <span class="token function">docker</span> run <span class="token parameter variable">-d</span>   <span class="token punctuation">\</span>
+    <span class="token parameter variable">-p</span> <span class="token number">5000</span>:5000   <span class="token punctuation">\</span>
+    <span class="token parameter variable">--restart</span><span class="token operator">=</span>always   <span class="token punctuation">\</span>
+    <span class="token parameter variable">--name</span> registry   <span class="token punctuation">\</span>
+    <span class="token parameter variable">-v</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token builtin class-name">pwd</span><span class="token variable">)</span></span>"</span>/ssl:/ssl   <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token assign-left variable">REGISTRY_HTTP_TLS_CERTIFICATE</span><span class="token operator">=</span>/ssl/certs/reg.cntv.local.crt   <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token assign-left variable">REGISTRY_HTTP_TLS_KEY</span><span class="token operator">=</span>/ssl/private/reg.cntv.local.key   <span class="token punctuation">\</span>
+    <span class="token parameter variable">-v</span> /etc/docker/auth:/auth <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token string">"REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm"</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token assign-left variable">REGISTRY_AUTH_HTPASSWD_PATH</span><span class="token operator">=</span>/auth/registry <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> <span class="token string">"REGISTRY_AUTH=htpasswd"</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-v</span> /data/registry:/var/lib/registry <span class="token punctuation">\</span>
+    registry:2</code></pre>
+
+<p>api：</p>
+<pre class="language-none"><code class="language-none">Path:        &quot;&#x2F;v2&#x2F;&quot;,
+Path:        &quot;&#x2F;v2&#x2F;&#123;name:&quot; + reference.NameRegexp.String() + &quot;&#125;&#x2F;tags&#x2F;list&quot;,
+Path:        &quot;&#x2F;v2&#x2F;&#123;name:&quot; + reference.NameRegexp.String() + &quot;&#125;&#x2F;manifests&#x2F;&#123;reference:&quot; + reference.TagRegexp.String() + &quot;|&quot; + digest.DigestRegexp.String() + &quot;&#125;&quot;,
+Path:        &quot;&#x2F;v2&#x2F;&#123;name:&quot; + reference.NameRegexp.String() + &quot;&#125;&#x2F;blobs&#x2F;&#123;digest:&quot; + digest.DigestRegexp.String() + &quot;&#125;&quot;,
+Path:        &quot;&#x2F;v2&#x2F;&#123;name:&quot; + reference.NameRegexp.String() + &quot;&#125;&#x2F;blobs&#x2F;uploads&#x2F;&quot;,
+Path:        &quot;&#x2F;v2&#x2F;&#123;name:&quot; + reference.NameRegexp.String() + &quot;&#125;&#x2F;blobs&#x2F;uploads&#x2F;&#123;uuid:[a-zA-Z0-9-_.&#x3D;]+&#125;&quot;,
+Path:        &quot;&#x2F;v2&#x2F;_catalog&quot;,</code></pre>
+
+<p>查询、删除镜像：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#查询镜像</span>
+<span class="token function">curl</span>  <span class="token operator">&lt;</span>仓库地址<span class="token operator">></span>/v2/_catalog
+
+<span class="token comment">#查询镜像tag(版本)</span>
+<span class="token function">curl</span>  <span class="token operator">&lt;</span>仓库地址<span class="token operator">></span>/v2/<span class="token operator">&lt;</span>镜像名<span class="token operator">></span>/tags/list
+
+<span class="token comment">#删除镜像API</span>
+<span class="token function">curl</span> <span class="token parameter variable">-I</span> <span class="token parameter variable">-X</span> DELETE <span class="token string">"&lt;仓库地址>/v2/&lt;镜像名>/manifests/&lt;镜像digest_hash>"</span>
+
+<span class="token comment">#获取镜像digest_hash</span>
+<span class="token function">curl</span>  <span class="token operator">&lt;</span>仓库地址<span class="token operator">></span>/v2/<span class="token operator">&lt;</span>镜像名<span class="token operator">></span>/manifests/<span class="token operator">&lt;</span>tag<span class="token operator">></span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--header</span> <span class="token string">"Accept: application/vnd.docker.distribution.manifest.v2+json"</span></code></pre>
+
+<h3 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h3><h4 id="1-添加-hosts"><a href="#1-添加-hosts" class="headerlink" title="1. 添加 hosts"></a>1. 添加 hosts</h4><pre class="language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">cat</span> /etc/hosts
+<span class="token punctuation">..</span>.
+<span class="token number">192.168</span>.117.138 reg.cntv.local</code></pre>
+
+<h4 id="2-修改-daemon-json-并重启-docker"><a href="#2-修改-daemon-json-并重启-docker" class="headerlink" title="2. 修改 daemon.json 并重启 docker"></a>2. 修改 daemon.json 并重启 docker</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将https://reg.cntv.local添加到insecure-registries</span>
+$ <span class="token function">cat</span> /etc/docker/daemon.json
+<span class="token punctuation">&#123;</span>
+  <span class="token string">"registry-mirrors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token string">"https://3417nt4m.mirror.aliyuncs.com"</span><span class="token punctuation">]</span>,
+  <span class="token string">"insecure-registries"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token string">"https://reg.cntv.local:5000"</span><span class="token punctuation">]</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>注意：修改 daemon.json 后需要重启 docker.service</p>
+<h4 id="3-登陆"><a href="#3-登陆" class="headerlink" title="3. 登陆"></a>3. 登陆</h4><pre class="language-none"><code class="language-none">docker login -u ops -p 123456. reg.cntv.local:5000</code></pre>
+
+<h4 id="4-上传-amp-下载"><a href="#4-上传-amp-下载" class="headerlink" title="4. 上传&amp;下载"></a>4. 上传&amp;下载</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 上传</span>
+$ <span class="token function">docker</span> image tag alpine:3.17 reg.cntv.local:5000/alpine:3.17
+$ <span class="token function">docker</span> push reg.cntv.local:5000/alpine:3.17
+
+<span class="token comment"># 下载</span>
+$ <span class="token function">docker</span> pull reg.cntv.local:5000/alpine:3.17</code></pre>
+
+<h2 id="Docker-之分布式仓库-Harbor"><a href="#Docker-之分布式仓库-Harbor" class="headerlink" title="Docker 之分布式仓库 Harbor"></a>Docker 之分布式仓库 Harbor</h2><p><strong>harbor 功能介绍：</strong></p>
+<ul>
+<li>基于角色的访问控制</li>
+<li>镜像复制</li>
+<li>图形化用户界面</li>
+<li>审计管理</li>
+<li>国际化</li>
+<li>resful api</li>
+<li>部署简单</li>
+</ul>
+<p><strong>harbor 组成：</strong></p>
+<p>harbor 是由很多容器组成实现完整功能</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1606200537850.png"></p>
+<ul>
+<li>proxy：对应启动组件 nginx。它是一个 nginx 反向代理，代理 notary client（镜像认证）、docker client（镜像上传下载等）和浏览器的访问请求（core service）给后端的各服务</li>
+<li>UI（Core Service）：对应启动组件 harbor-ui。底层数据存储使用 mysql 数据库，主要提供了四个子功能：<ul>
+<li>UI：一个 web 管理页面 ui</li>
+<li>API：Harbor 暴露的 API 服务</li>
+<li>Auth：用户认证服务，decode 后的 token 中的用户信息在这里进行认证；auth 后端可以接 db、ldap、uaa 三种认证实现</li>
+<li>Token 服务（上图中未体现）：负责根据用户在每个 project 中的 role 来为每一个 docker push&#x2F;pull 命令发布一个 token，如果从 docker client 发送给 registry 的请求没有带 token，registry 会重定向请求到 token 服务创建 token</li>
+</ul>
+</li>
+<li>registry：对应启动组件 registry。负责存储镜像文件，和处理镜像的 pull&#x2F;push 命令。Harbor 对镜像进行强制的访问控制，Registry 会将客户端的每个 pull、push 请求转发到 token 服务来获取有效的 token</li>
+<li>admin service：对应启动组件 harbor-adminserver。是系统的配置管理中心附带检查存储用量，ui 和 jobserver 启动时候需要加载 adminserver 的配置</li>
+<li>job service：对应启动组件 harbor-jobservice。负责镜像复制工作的，他和 registry 通信，从一个 registry pull 镜像然后 push 到另一个 registry，并记录 job_log</li>
+<li>log collector：对应启动组件 harbor-log。日志汇总组件，通过 docker 的 log-driver 把日志汇总到一起</li>
+<li>db：对应启动组件 harbor-db，负责存储 project、 user、 role、replication、image_scan、access 等的 metadata 数据</li>
+</ul>
+<h3 id="配置-harbor-仓库"><a href="#配置-harbor-仓库" class="headerlink" title="配置 harbor 仓库"></a>配置 harbor 仓库</h3><p><img data-src="//img.to2b.cn/blog/ljk/1606219992986.png"></p>
+<p>两台 harbor 服务器 10.0.0.118 和 10.0.0.119 均按照以下步骤配置：</p>
+<ol>
+<li>安装 docker</li>
+<li>安装 docker compose，docker compose 必须先于 harbor 安装，否则会报错</li>
+<li>下载 Harbor 安装包并解压缩</li>
+<li>编辑配置文件 harbor.yml，旧版本是 harbor.cfg</li>
+<li>运行 harbor 安装脚本</li>
+<li>实现开机自动启动 harbor</li>
+<li>登录 harbor 主机网站</li>
+<li>建立项目</li>
+<li>修改 harbor 配置</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 安装docker</span>
+$ <span class="token function">sudo</span> <span class="token function">apt-get</span> update
+$ <span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> <span class="token punctuation">\</span>
+    apt-transport-https <span class="token punctuation">\</span>
+    ca-certificates <span class="token punctuation">\</span>
+    <span class="token function">curl</span> <span class="token punctuation">\</span>
+    gnupg-agent <span class="token punctuation">\</span>
+    software-properties-common
+$ <span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg <span class="token operator">|</span> <span class="token function">sudo</span> apt-key <span class="token function">add</span> -
+$ <span class="token function">sudo</span> add-apt-repository <span class="token punctuation">\</span>
+    <span class="token string">"deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu \
+    <span class="token variable"><span class="token variable">$(</span>lsb_release <span class="token parameter variable">-cs</span><span class="token variable">)</span></span> \
+    stable"</span>
+$ <span class="token function">sudo</span> <span class="token function">apt-get</span> update
+$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> docker-ce
+
+<span class="token comment"># 以上是直接安装最新版本，推荐安装时指定版本</span>
+$ <span class="token function">apt-cache</span> madison docker-ce
+$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> docker-ce<span class="token operator">=</span><span class="token operator">&lt;</span>VERSION_STRING<span class="token operator">></span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 2. 安装docker compose</span>
+root@u1:~<span class="token comment"># apt -y install python3-pip	# 为了方便，直接安装pip</span>
+root@u1:~<span class="token comment"># pip3 install docker-compose</span>
+root@u1:~<span class="token comment"># docker-compose --version</span>
+<span class="token function">docker-compose</span> version <span class="token number">1.27</span>.4, build unknown</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 3. 下载Harbor安装包并解压缩</span>
+<span class="token comment"># 可以下载在线安装包或者完整的离线安装包，推荐下载离线包</span>
+<span class="token comment"># 下载网址：https://github.com/goharbor/harbor/releases</span>
+<span class="token comment"># 推荐使用迅雷下载：harbor-offline-installer-v1.10.6.tgz</span>
+root@u1:/usr/local/src<span class="token comment"># tar zxvf harbor-offline-installer-v1.10.6.tgz</span>
+root@u1:/usr/local/src<span class="token comment"># cd harbor/</span>
+root@u1:/usr/local/src/harbor<span class="token comment"># ll</span>
+total <span class="token number">700264</span>
+drwxr-xr-x <span class="token number">2</span> root root      <span class="token number">4096</span> Nov <span class="token number">24</span> <span class="token number">13</span>:29 ./
+drwxr-xr-x <span class="token number">3</span> root root      <span class="token number">4096</span> Nov <span class="token number">24</span> <span class="token number">13</span>:29 <span class="token punctuation">..</span>/
+-rw-r--r-- <span class="token number">1</span> root root      <span class="token number">3398</span> Nov <span class="token number">17</span> 03:58 common.sh
+-rw-r--r-- <span class="token number">1</span> root root <span class="token number">717021676</span> Nov <span class="token number">17</span> 03:59 harbor.v1.10.6.tar.gz
+-rw-r--r-- <span class="token number">1</span> root root      <span class="token number">5882</span> Nov <span class="token number">17</span> 03:58 harbor.yml
+-rwxr-xr-x <span class="token number">1</span> root root      <span class="token number">2284</span> Nov <span class="token number">17</span> 03:58 install.sh*
+-rw-r--r-- <span class="token number">1</span> root root     <span class="token number">11347</span> Nov <span class="token number">17</span> 03:58 LICENSE
+-rwxr-xr-x <span class="token number">1</span> root root      <span class="token number">1749</span> Nov <span class="token number">17</span> 03:58 prepare*</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 4. 编辑配置文件 harbor.yml</span>
+root@u1:/usr/local/src/harbor<span class="token comment"># vim harbor.yml</span>
+<span class="token comment">#只需要修改下面两行</span>
+hostname: <span class="token number">10.0</span>.0.118 <span class="token comment"># 修改此行,指向当前主机IP 或 FQDN</span>
+harbor_admin_password: <span class="token number">123456</span> <span class="token comment"># 修改此行指定harbor登录用户admin的密码</span>
+
+<span class="token comment"># 不需要https，注释以下内容</span>
+<span class="token comment"># https:</span>
+<span class="token comment">#   # https port for harbor, default is 443</span>
+<span class="token comment">#   port: 443</span>
+<span class="token comment">#   # The path of cert and key files for nginx</span>
+<span class="token comment">#   certificate: /your/certificate/path</span>
+<span class="token comment">#   private_key: /your/private/key/path</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 5. 运行 harbor 安装脚本</span>
+root@u1:/usr/local/src<span class="token comment"># mv harbor /usr/local/</span>
+root@u1:/usr/local/src<span class="token comment"># cd /usr/local/harbor/</span>
+root@u1:/usr/local/src<span class="token comment"># ./prepare</span>
+<span class="token punctuation">..</span>.
+root@u1:/usr/local/src<span class="token comment"># ./install.sh</span>
+<span class="token punctuation">..</span>.</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 6. 实现开机自动启动 harbor</span>
+root@u1:~<span class="token comment"># vim /lib/systemd/system/harbor.service</span>
+<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>Harbor
+<span class="token assign-left variable">After</span><span class="token operator">=</span>docker.service systemd-networkd.service systemd-resolved.service
+<span class="token assign-left variable">Requires</span><span class="token operator">=</span>docker.service
+<span class="token assign-left variable">Documentation</span><span class="token operator">=</span>http://github.com/vmware/harbor
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
+<span class="token assign-left variable">Restart</span><span class="token operator">=</span>on-failure
+<span class="token assign-left variable">RestartSec</span><span class="token operator">=</span><span class="token number">5</span>
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/local/bin/docker-compose <span class="token parameter variable">-f</span> usr/local/harbor/docker-compose.yml up
+<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/usr/local/bin/docker-compose <span class="token parameter variable">-f</span> usr/local/harbor/docker-compose.yml down
+
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
+
+root@u1:~<span class="token comment"># systemctl daemon-reload</span>
+root@u1:~<span class="token comment"># systemctl enable --now harbor.service</span>
+Created symlink /etc/systemd/system/multi-user.target.wants/harbor.service → /lib/systemd/system/harbor.service.</code></pre>
+
+<ol start="7">
+<li>登录 harbor 主机网站 <code>http://10.0.0.118</code></li>
+</ol>
+<p><img data-src="//img.to2b.cn/blog/ljk/1606227845071.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1606227877823.png"></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 9. 修改harbor配置</span>
+<span class="token comment"># 后期如果需要修改harbor配置</span>
+<span class="token number">1</span>.修改 harbor.yml 文件
+<span class="token number">2</span>.停止harbor: systemctl stop harbor.service
+<span class="token number">3</span>.执行prepare
+<span class="token number">4</span>.启动harbor：sysytemcrl start harbor.service</code></pre>
+
+<h3 id="配置-docker-客户端"><a href="#配置-docker-客户端" class="headerlink" title="配置 docker 客户端"></a>配置 docker 客户端</h3><p>客户端 10.0.0.117</p>
+<ol>
+<li>安装 docker</li>
+<li>登录 harbor</li>
+<li>给本地镜像大标签并上传到 harbor</li>
+<li>下载 harbor 的镜像</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 安装docker</span>
+略<span class="token punctuation">..</span>.</code></pre>
+
+<ol start="2">
+<li>建立项目</li>
+</ol>
+<p><img data-src="//img.to2b.cn/blog/ljk/1606445045953.png"></p>
+<p>项目可以设置为“公开”，这样不用登陆就可以 pull，但是要想 push 还是得登陆</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 3. 登录harbor.两种方法，命令行或者配置文件</span>
+<span class="token comment"># 方法一：命令行</span>
+root@u3:~<span class="token comment"># vim /usr/lib/systemd/system/docker.service</span>
+<span class="token punctuation">..</span>.
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/bin/dockerd <span class="token parameter variable">-H</span> fd:// <span class="token parameter variable">--containerd</span><span class="token operator">=</span>/run/containerd/containerd.sock --insecure-registry <span class="token number">10.0</span>.0.118 --insecure-registry <span class="token number">10.0</span>.0.119
+<span class="token punctuation">..</span>.
+<span class="token comment"># 方法二：配置文件,推荐</span>
+root@u3:~<span class="token comment"># vim /etc/docker/daemon.json</span>
+<span class="token punctuation">&#123;</span>
+        <span class="token string">"registry-mirrors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token string">"https://3417nt4m.mirror.aliyuncs.com"</span><span class="token punctuation">]</span>,
+        <span class="token string">"insecure-registries"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token string">"10.0.0.118"</span>, <span class="token string">"10.0.0.119"</span><span class="token punctuation">]</span>
+<span class="token punctuation">&#125;</span>
+root@u3:~<span class="token comment"># systemctl restart docker.service</span>
+root@u3:~<span class="token comment"># docker login 10.0.0.118</span>
+Username: admin
+Password:
+WARNING<span class="token operator">!</span> Your password will be stored unencrypted <span class="token keyword">in</span> /root/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/<span class="token comment">#credentials-store</span>
+
+Login Succeeded</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 3. 给本地镜像大标签并上传到harbor</span>
+<span class="token comment"># 修改 images 的名称，不修改成指定格式无法将镜像上传到 harbor 仓库</span>
+<span class="token comment"># 格式：Harbor主机IP/项目名/image名字:版本</span>
+root@u3:~<span class="token comment"># docker tag alpine:latest 10.0.0.118/library/alpine-base:3.12</span>
+root@u3:~<span class="token comment"># docker push 10.0.0.118/library/alpine-base:3.12</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 4. 下载harbor的镜像</span>
+<span class="token comment"># 另开一台机器，安装docker，daemon.json设置insecure-registries，就可以直接下载镜像</span>
+root@u4:~<span class="token comment"># docker image pull 10.0.0.118/library/alpine-base:3.12</span></code></pre>
+
+<h3 id="harbor-高可用"><a href="#harbor-高可用" class="headerlink" title="harbor 高可用"></a>harbor 高可用</h3><p><img data-src="//img.to2b.cn/blog/ljk/1607528920165.png"></p>
+<p>实现 harbor 有两种方式：共享存储 和 镜像复制，这里只学习后者，可以通过 web 界面直接配置镜像复制</p>
+<p>前面配置了两台 harbor 仓库，10.0.0.118 和 10.0.0.119，但是只使用了一台，这里使用另一台组成双向复制</p>
+<p>注意：不是主从，而是双向复制，通过负载均衡器将请求分流</p>
+<p>h1：10.0.0.118<br>h2：10.0.0.119</p>
+<ol>
+<li><p>确保 h1 和 h2 中有相同的项目</p>
+</li>
+<li><p>h1 和 h2 均新建仓库，目标分别为对方</p>
+<p>复制模式选择 push-based</p>
+</li>
+<li><p>h1 和 h2 均新建复制，目标分别为对方</p>
+</li>
+<li><p>测试，分别在 h1 和 h2 上传（注意上传前先登录 harbor）然后删除，都能同步成功</p>
+</li>
+</ol>
+<h3 id="harbor-配置-https"><a href="#harbor-配置-https" class="headerlink" title="harbor 配置 https"></a>harbor 配置 https</h3><p>harbor 默认使用 http，可以配置 https，不过我认为没有这个必要</p>
+<p>在前面配置好 harbor 仓库的基础上，执行以下操作：</p>
+<ol>
+<li><p>配置服务端</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@u1:~<span class="token comment"># mkdir -p /root/.rnd</span>
+root@u1:~<span class="token comment"># mkdir -p /usr/local/harbor/certs</span>
+root@u1:~<span class="token comment"># cd /usr/local/harbor/certs</span>
+root@u1:/usr/local/harbor/certs<span class="token comment"># ls</span>
+<span class="token comment"># 创建私有CA</span>
+root@u1:/usr/local/harbor/certs<span class="token comment"># openssl req -newkey rsa:1024 -nodes -sha256 -keyout ca.key -x509 -subj "/CN=ca.ljk.org" -days 3650 -out ca.crt</span>
+Generating a RSA private key
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+++++
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+++++
+writing new private key to <span class="token string">'ca.key'</span>
+-----
+root@u1:/usr/local/harbor/certs<span class="token comment"># ls</span>
+ca.crt  ca.key
+<span class="token comment"># 生成harbor主机的证书申请</span>
+root@u1:/usr/local/harbor/certs<span class="token comment"># openssl req -newkey rsa:1024 -nodes -sha256 -subj "/CN=harbor.ljk.org" -keyout harbor.ljk.org.key -out harbor.ljk.org.csr</span>
+Generating a RSA private key
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+++++
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+++++
+writing new private key to <span class="token string">'harbor.ljk.org.key'</span>
+-----
+root@u1:/usr/local/harbor/certs<span class="token comment"># ls</span>
+ca.crt  ca.key  harbor.ljk.org.csr  harbor.ljk.org.key
+<span class="token comment"># 给harbor主机颁发证书</span>
+root@u1:/usr/local/harbor/certs<span class="token comment"># openssl x509 -req -in harbor.ljk.org.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out harbor.ljk.org.crt</span>
+Signature ok
+<span class="token assign-left variable">subject</span><span class="token operator">=</span>CN <span class="token operator">=</span> harbor.ljk.org
+Getting CA Private Key
+root@u1:/usr/local/harbor/certs<span class="token comment"># tree</span>
+<span class="token builtin class-name">.</span>
+├── ca.crt
+├── ca.key
+├── ca.srl
+├── harbor.ljk.org.crt
+├── harbor.ljk.org.csr
+└── harbor.ljk.org.key
+
+<span class="token number">0</span> directories, <span class="token number">6</span> files
+root@u1:/usr/local/harbor/certs<span class="token comment"># vim ../harbor.yml</span>
+hostname: harbor.ljk.org	<span class="token comment"># 此行需改为域名</span>
+https:
+  <span class="token comment"># https port for harbor, default is 443</span>
+  port: <span class="token number">443</span>
+  <span class="token comment"># The path of cert and key files for nginx</span>
+  certificate: /usr/local/harbor/certs/harbor.ljk.org.crt
+  private_key: /usr/local/harbor/certs/harbor.ljk.org.key
+<span class="token punctuation">..</span>.
+root@u1:/usr/local/harbor/certs<span class="token comment"># cd ..</span>
+root@u1:/usr/local/harbor<span class="token comment"># systemctl stop harbor.service 	# 这一步要等挺久</span>
+root@u1:/usr/local/harbor<span class="token comment"># ./prepare</span>
+root@u1:/usr/local/harbor<span class="token comment"># ./install.sh</span>
+root@u1:/usr/local/harbor<span class="token comment"># systemctl start harbor.service</span></code></pre>
+
+<p>访问：<a target="_blank" rel="noopener" href="https://10.0.0.118/">https://10.0.0.118</a></p>
+</li>
+<li><p>配置客户端</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@u3:~<span class="token comment"># echo '10.0.0.118 harbor.ljk.org' >> /etc/hosts</span>
+
+<span class="token comment"># 因为是自建证书，所以harbor规定，客户端也下载一份，位于/etc/docker/certs.d/harbor.ljk.org</span>
+<span class="token comment"># 其实，只需要harbor.ljk.org.crt即可，这里为了方便，全部拷贝过来</span>
+root@u3:~<span class="token comment"># scp lujinkai@harbor.ljk.org:/usr/local/harbor/certs/* /etc/docker/certs.d/harbor.ljk.org/</span>
+
+<span class="token comment"># 登录成功</span>
+root@u3:~<span class="token comment"># docker login harbor.ljk.org</span>
+
+<span class="token comment"># 上传镜像</span>
+root@u3:~<span class="token comment"># docker image push harbor.ljk.org/library/alpine:v1</span></code></pre></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/4.docker%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/" rel="prev" title="docker网络管理">
+                  <i class="fa fa-chevron-left"></i> docker网络管理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/7.docker%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6/" rel="next" title="docker资源限制">
+                  docker资源限制 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

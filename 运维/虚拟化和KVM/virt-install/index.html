@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="从指定安装源创建新虚拟机 virt-install --name NAME --memory MB STORAGE INSTALL [options]   –help：帮助信息 –version：版本信息 –connect URI：通过 libvirt URI 连接到虚拟机管理程序（hypervisor）  通用选项： -n NAME, –name NAME 客户机实例名称  –memory ME">
+<meta property="og:type" content="article">
+<meta property="og:title" content="virt-install">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virt-install/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="从指定安装源创建新虚拟机 virt-install --name NAME --memory MB STORAGE INSTALL [options]   –help：帮助信息 –version：版本信息 –connect URI：通过 libvirt URI 连接到虚拟机管理程序（hypervisor）  通用选项： -n NAME, –name NAME 客户机实例名称  –memory ME">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T15:43:12.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="kvm">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virt-install/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virt-install/","path":"运维/虚拟化和KVM/virt-install/","title":"virt-install"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>virt-install | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E9%80%89%E9%A1%B9%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">通用选项：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95%E9%80%89%E9%A1%B9%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">安装方法选项：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OS-%E9%80%89%E9%A1%B9%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">OS 选项：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%80%89%E9%A1%B9%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">设备选项：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E6%9C%BA%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9%EF%BC%9A"><span class="nav-number">5.</span> <span class="nav-text">客户机配置选项：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96%E5%B9%B3%E5%8F%B0%E9%80%89%E9%A1%B9%EF%BC%9A"><span class="nav-number">6.</span> <span class="nav-text">虚拟化平台选项：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E5%AE%83%E9%80%89%E9%A1%B9%EF%BC%9A"><span class="nav-number">7.</span> <span class="nav-text">其它选项：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">8.</span> <span class="nav-text">最后</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virt-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="virt-install | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          virt-install
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:43:12" itemprop="dateCreated datePublished" datetime="2020-12-09T23:43:12+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/" itemprop="url" rel="index"><span itemprop="name">虚拟化和KVM</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>从指定安装源创建新虚拟机</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">virt-install <span class="token parameter variable">--name</span> NAME <span class="token parameter variable">--memory</span> MB STORAGE INSTALL <span class="token punctuation">[</span>options<span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li>–help：帮助信息</li>
+<li>–version：版本信息</li>
+<li>–connect URI：通过 libvirt URI 连接到虚拟机管理程序（hypervisor）</li>
+</ul>
+<h2 id="通用选项："><a href="#通用选项：" class="headerlink" title="通用选项："></a>通用选项：</h2><ul>
+<li><p>-n NAME, –name NAME 客户机实例名称</p>
+</li>
+<li><p>–memory MEMORY：配置虚拟机内存分配，默认 m 为单位</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--memory</span> <span class="token number">1024</span> <span class="token punctuation">(</span>in MiB<span class="token punctuation">)</span>
+<span class="token parameter variable">--memory</span> <span class="token assign-left variable">memory</span><span class="token operator">=</span><span class="token number">1024</span>,currentMemory<span class="token operator">=</span><span class="token number">512</span></code></pre>
+</li>
+<li><p>–vcpus VCPUS：为虚拟机配置的 vcpus 数</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--vcpus</span> <span class="token number">5</span>
+<span class="token parameter variable">--vcpus</span> <span class="token number">5</span>,maxvcpus<span class="token operator">=</span><span class="token number">10</span>,cpuset<span class="token operator">=</span><span class="token number">1</span>-4,6,8
+<span class="token parameter variable">--vcpus</span> <span class="token assign-left variable">sockets</span><span class="token operator">=</span><span class="token number">2</span>,cores<span class="token operator">=</span><span class="token number">4</span>,threads<span class="token operator">=</span><span class="token number">2</span></code></pre>
+</li>
+<li><p>–cpu CPU：CPU 型号及功能</p>
+</li>
+<li><p>–metadata METADATA：配置客户机元数据</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--metadata</span> <span class="token assign-left variable">name</span><span class="token operator">=</span>foo,title<span class="token operator">=</span><span class="token string">"My pretty title"</span>,uuid<span class="token operator">=</span><span class="token punctuation">..</span>.
+<span class="token parameter variable">--metadata</span> <span class="token assign-left variable">description</span><span class="token operator">=</span><span class="token string">"My nice long description"</span></code></pre></li>
+</ul>
+<h2 id="安装方法选项："><a href="#安装方法选项：" class="headerlink" title="安装方法选项："></a>安装方法选项：</h2><ul>
+<li><p>–cdrom CDROM：光驱安装介质，用不到</p>
+</li>
+<li><p>-l | –location LOCATION：安装源，常用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nfs:host:/path
+http://host/path
+ftp://host/path</code></pre>
+</li>
+<li><p>–pxe：使用 PXE 协议从网络引导</p>
+</li>
+<li><p>–import：在已有的磁盘镜像中构建客户机</p>
+</li>
+<li><p>-x | –extra-args EXTRA_ARGS：将附加参数添加到由 –location 引导的内核中</p>
+</li>
+<li><p>–initrd-inject INITRD_INJECT：添加指定文件到由 –location 指定的 initrd 根中</p>
+</li>
+<li><p>–boot BOOT：配置客户机引导设置</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--boot</span> hd,cdrom,menu<span class="token operator">=</span>on				<span class="token comment"># hd是harddisk，cdrom是光盘</span>
+<span class="token parameter variable">--boot</span> <span class="token assign-left variable">init</span><span class="token operator">=</span>/sbin/init <span class="token punctuation">(</span>针对容器<span class="token punctuation">)</span></code></pre>
+</li>
+<li><p>–idmap IDMAP：为 LXC 容器启用用户名称空间</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--idmap</span> <span class="token assign-left variable">uid_start</span><span class="token operator">=</span><span class="token number">0</span>,uid_target<span class="token operator">=</span><span class="token number">1000</span>,uid_count<span class="token operator">=</span><span class="token number">10</span></code></pre>
+</li>
+<li><p>–unattended [UNATTENDED]：Perform an unattended installation</p>
+</li>
+<li><p>–install INSTALL：Specify fine grained install options</p>
+</li>
+</ul>
+<h2 id="OS-选项："><a href="#OS-选项：" class="headerlink" title="OS 选项："></a>OS 选项：</h2><ul>
+<li>–os-variant OS_VARIANT：在其中安装 OS 变体的虚拟机，比如:’fedora18’、’rhel6’、’winxp’ 等等</li>
+</ul>
+<h2 id="设备选项："><a href="#设备选项：" class="headerlink" title="设备选项："></a>设备选项：</h2><ul>
+<li><p>–disk DISK：指定存储的各种选项</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--disk</span> <span class="token assign-left variable">size</span><span class="token operator">=</span><span class="token number">10</span> <span class="token punctuation">(</span>在默认位置创建 10GiB 镜像<span class="token punctuation">)</span>
+<span class="token parameter variable">--disk</span> /my/existing/disk,cache<span class="token operator">=</span>none
+<span class="token parameter variable">--disk</span> <span class="token assign-left variable">device</span><span class="token operator">=</span>cdrom,bus<span class="token operator">=</span>scsi
+<span class="token parameter variable">--disk</span><span class="token operator">=</span>?
+
+<span class="token parameter variable">--disk</span> <span class="token assign-left variable">path</span><span class="token operator">=</span>/var/lib/libvirt/images/centos7-pxe1.qcow2,bus<span class="token operator">=</span>virtio
+<span class="token parameter variable">--disk</span> <span class="token assign-left variable">path</span><span class="token operator">=</span>/dev/vm_images_lvm/lv2,bus<span class="token operator">=</span>virtio</code></pre>
+</li>
+<li><p>-w | –network NETWORK：配置客户机网络接口</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--network</span> <span class="token assign-left variable">bridge</span><span class="token operator">=</span>mybr0
+<span class="token parameter variable">--network</span> <span class="token assign-left variable">network</span><span class="token operator">=</span>my_libvirt_virtual_net
+<span class="token parameter variable">--network</span> <span class="token assign-left variable">network</span><span class="token operator">=</span>mynet,model<span class="token operator">=</span>virtio,mac<span class="token operator">=</span>00:11<span class="token punctuation">..</span>.
+<span class="token parameter variable">--network</span> none
+<span class="token parameter variable">--network</span> <span class="token builtin class-name">help</span></code></pre>
+</li>
+<li><p>–graphics GRAPHICS：配置虚拟机显示设置</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--graphics</span> spice
+<span class="token parameter variable">--graphics</span> vnc,port<span class="token operator">=</span><span class="token number">5901</span>,listen<span class="token operator">=</span><span class="token number">0.0</span>.0.0
+<span class="token parameter variable">--graphics</span> none</code></pre>
+</li>
+<li><p>–controller CONTROLLER：配置虚拟机控制程序设备</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--controller</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>usb,model<span class="token operator">=</span>qemu-xhci
+<span class="token parameter variable">--controller</span> virtio-scsi</code></pre>
+</li>
+<li><p>–input INPUT：配置客户机输入设备</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--input</span> tablet
+<span class="token parameter variable">--input</span> keyboard,bus<span class="token operator">=</span>usb</code></pre>
+</li>
+<li><p>–serial SERIAL：配置客户机串口设备</p>
+</li>
+<li><p>–parallel PARALLEL：配置客户机并口设备</p>
+</li>
+<li><p>–channel CHANNEL：配置客户机通信通道</p>
+</li>
+<li><p>–console CONSOLE：配置文本控制台连接主机与客户机</p>
+</li>
+<li><p>–hostdev HOSTDEV：配置物理 USB&#x2F;PCI 等主机设备与客户机共享</p>
+</li>
+<li><p>–filesystem FILESYSTEM：传递主机目录到客户机</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--filesystem</span> /my/source/dir,/dir/in/guest
+<span class="token parameter variable">--filesystem</span> template_name,/,type<span class="token operator">=</span>template</code></pre>
+</li>
+<li><p>–sound [SOUND]：配置客户机声音设备仿真</p>
+</li>
+<li><p>–watchdog WATCHDOG：配置客户机 watchdog 设备</p>
+</li>
+<li><p>–video VIDEO：配置客户机视频硬件</p>
+</li>
+<li><p>–smartcard SMARTCARD：配置客户机智能卡设备</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--smartcard</span> <span class="token assign-left variable">mode</span><span class="token operator">=</span>passthrough</code></pre>
+</li>
+<li><p>–redirdev REDIRDEV：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--redirdev</span> usb,type<span class="token operator">=</span>tcp,server<span class="token operator">=</span><span class="token number">192.168</span>.1.1:4000</code></pre>
+</li>
+<li><p>–memballoon MEMBALLOON：配置客户机 memballoon 设备</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--memballoon</span> <span class="token assign-left variable">model</span><span class="token operator">=</span>virtio</code></pre>
+</li>
+<li><p>–tpm TPM：配置客户机 TPM 设备</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--tpm</span> /dev/tpm</code></pre>
+</li>
+<li><p>–rng RNG：Configure a guest RNG device</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--rng</span> /dev/urandom</code></pre>
+</li>
+<li><p>–panic PANIC：配置客户机 panic 设备</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--panic</span> default</code></pre>
+</li>
+<li><p>–memdev MEMDEV：Configure a guest memory device</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--memdev</span> dimm,target.size<span class="token operator">=</span><span class="token number">1024</span></code></pre>
+</li>
+<li><p>–vsock VSOCK：Configure guest vsock sockets</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--vsock</span> <span class="token assign-left variable">cid.auto</span><span class="token operator">=</span>yes
+<span class="token parameter variable">--vsock</span> <span class="token assign-left variable">cid.address</span><span class="token operator">=</span><span class="token number">7</span></code></pre></li>
+</ul>
+<h2 id="客户机配置选项："><a href="#客户机配置选项：" class="headerlink" title="客户机配置选项："></a>客户机配置选项：</h2><ul>
+<li><p>–iothreads IOTHREADS：Set domain <iothreads> and <iothreadids> configuration</p>
+</li>
+<li><p>–seclabel | –security SECLABEL：Set domain seclabel configuration</p>
+</li>
+<li><p>–cputune CPUTUNE：Tune CPU parameters for the domain process</p>
+</li>
+<li><p>–numatune NUMATUNE：为域进程调整 NUMA 策略</p>
+</li>
+<li><p>–memtune MEMTUNE：为域进程调整内存策略</p>
+</li>
+<li><p>–blkiotune BLKIOTUNE：为域进程调整 blkio 策略。</p>
+</li>
+<li><p>–memorybacking MEMORYBACKING：为域进程设置内存后备策略</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--memorybacking</span> <span class="token assign-left variable">hugepages</span><span class="token operator">=</span>on</code></pre>
+</li>
+<li><p>–features FEATURES：Set domain <features> XML</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--features</span> <span class="token assign-left variable">acpi</span><span class="token operator">=</span>off
+<span class="token parameter variable">--features</span> <span class="token assign-left variable">apic</span><span class="token operator">=</span>on,apic.eoi<span class="token operator">=</span>on</code></pre>
+</li>
+<li><p>–clock CLOCK：设置域 <clock> XML</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--clock</span> <span class="token assign-left variable">offset</span><span class="token operator">=</span>localtime,rtc_tickpolicy<span class="token operator">=</span>catchup</code></pre>
+</li>
+<li><p>–pm PM：配置 VM 电源管理功能</p>
+</li>
+<li><p>–events EVENTS：配置 VM 生命周期管理策略</p>
+</li>
+<li><p>–resource RESOURCE：配置 VM 资源分区(cgroups)</p>
+</li>
+<li><p>–sysinfo SYSINFO：Configure SMBIOS System Information</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--sysinfo</span> <span class="token function">host</span>
+<span class="token parameter variable">--sysinfo</span> <span class="token assign-left variable">bios.vendor</span><span class="token operator">=</span>MyVendor,bios.version<span class="token operator">=</span><span class="token number">1.2</span>.3,<span class="token punctuation">..</span>.</code></pre>
+</li>
+<li><p>–qemu-commandline QEMU_COMMANDLINE：Pass arguments directly to the qemu emulator</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">--qemu-commandline<span class="token operator">=</span><span class="token string">'-display gtk,gl=on'</span>
+--qemu-commandline <span class="token assign-left variable">env</span><span class="token operator">=</span><span class="token environment constant">DISPLAY</span><span class="token operator">=</span>:0.1</code></pre>
+</li>
+<li><p>–launchSecurity | -launchsecurity LAUNCHSECURITY：Configure VM launch security (e.g. SEV memory encryption)</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--launchSecurity</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>sev,cbitpos<span class="token operator">=</span><span class="token number">47</span>,reducedPhysBits<span class="token operator">=</span><span class="token number">1</span>,policy<span class="token operator">=</span>0x0001,dhCert<span class="token operator">=</span>BASE64CERT
+<span class="token parameter variable">--launchSecurity</span> sev</code></pre></li>
+</ul>
+<h2 id="虚拟化平台选项："><a href="#虚拟化平台选项：" class="headerlink" title="虚拟化平台选项："></a>虚拟化平台选项：</h2><ul>
+<li>-v, –hvm：这个客户机应该是一个全虚拟化客户机</li>
+<li>-p, –paravirt：这个客户机应该是一个半虚拟化客户机</li>
+<li>–container：这个客户机应该是一个容器客户机</li>
+<li>–virt-type VIRT_TYPE：要使用的管理程序名称 (kvm, qemu, xen, …)</li>
+<li>–arch ARCH：模拟 CPU 架构</li>
+<li>–machine MACHINE：机器类型为仿真类型，要模拟的机器类型</li>
+</ul>
+<h2 id="其它选项："><a href="#其它选项：" class="headerlink" title="其它选项："></a>其它选项：</h2><ul>
+<li><p>–autostart：主机启动时自动启动域。</p>
+</li>
+<li><p>–transient：Create a transient domain.</p>
+</li>
+<li><p>–destroy-on-exit：Force power off the domain when the console viewer is closed.</p>
+</li>
+<li><p>–wait [WAIT]：请等待数分钟以便完成安装</p>
+</li>
+<li><p>–noautoconsole：不要自动尝试连接到客户端控制台</p>
+</li>
+<li><p>–noreboot：安装完成后不启动客户机</p>
+</li>
+<li><p>–print-xml [XMLONLY]：打印生成的 XML 域，而不是创建客户机。</p>
+</li>
+<li><p>–dry-run：运行安装程序，但不创建设备或定义客户机。</p>
+</li>
+<li><p>–check CHECK：启用或禁用验证检查</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--check</span> <span class="token assign-left variable">path_in_use</span><span class="token operator">=</span>off
+<span class="token parameter variable">--check</span> <span class="token assign-left variable">all</span><span class="token operator">=</span>off</code></pre>
+</li>
+<li><p>-q, –quiet：禁止无错误输出</p>
+</li>
+<li><p>-d, –debug：输入故障排除信息</p>
+</li>
+</ul>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>使用 ‘–option&#x3D;?’ 或 ‘–option help’ 来查看可用的子选项<br>请参考 man 手册，以便了解示例和完整的选项语法。</p>
+<p>例如：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ <span class="token function">sudo</span> virt-install <span class="token parameter variable">--network</span> <span class="token builtin class-name">help</span>
+<span class="token parameter variable">--network</span> options:
+  clearxml
+  address.base
+  address.bus
+  address.controller
+  address.cssid
+  address.devno
+  address.domain
+  address.function
+  address.iobase
+  address.irq
+  address.multifunction
+  address.port
+  address.reg
+  address.slot
+  address.ssid
+  address.target
+  address.type
+  address.unit
+  address.zpci.fid
+  address.zpci.uid
+  alias.name
+  boot.loadparm
+  boot.order
+  bridge
+  driver.ats
+  driver.iommu
+  driver.name
+  driver.queues
+  filterref.filter
+  link.state
+  mac
+  mac.address
+  model
+  model.type
+  mtu.size
+  network
+  rom.bar
+  rom.file
+  <span class="token builtin class-name">source</span>
+  source.mode
+  source.path
+  source.portgroup
+  source.type
+  target.dev
+  trustGuestRxFilters
+  <span class="token builtin class-name">type</span>
+  virtualport.parameters.instanceid
+  virtualport.parameters.interfaceid
+  virtualport.parameters.managerid
+  virtualport.parameters.profileid
+  virtualport.parameters.typeid
+  virtualport.parameters.typeidversion
+  virtualport.type
+</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ <span class="token function">man</span> virt-install
+<span class="token punctuation">..</span>.
+内容太多
+<span class="token punctuation">..</span>.
+/--network 	<span class="token comment"># 搜索对应的内容</span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/kvm/" rel="tag"><i class="fa fa-tag"></i> kvm</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virsh/" rel="prev" title="virsh">
+                  <i class="fa fa-chevron-left"></i> virsh
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E9%98%B2%E7%81%AB%E5%A2%99/nft/" rel="next" title="nft">
+                  nft <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

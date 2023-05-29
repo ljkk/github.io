@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="SonarQube 是一个用于代码质量管理的开放平台，通过插件机制，SonarQube 可以集成不同的测试工具，代码分析工具，以及持续集成工具，例如 Hudson&#x2F;Jenkins 等 官网：https:&#x2F;&#x2F;www.sonarqube.org&#x2F; 部署 SonarQube略…  jenkins 服务器部署扫描器 sonar-scanner官方文档： https:&#x2F;&#x2F;docs.sonarqub">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SonarQube">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/SonarQube/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="SonarQube 是一个用于代码质量管理的开放平台，通过插件机制，SonarQube 可以集成不同的测试工具，代码分析工具，以及持续集成工具，例如 Hudson&#x2F;Jenkins 等 官网：https:&#x2F;&#x2F;www.sonarqube.org&#x2F; 部署 SonarQube略…  jenkins 服务器部署扫描器 sonar-scanner官方文档： https:&#x2F;&#x2F;docs.sonarqub">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614681385194.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614699497744.png">
+<meta property="article:published_time" content="2021-03-01T02:31:11.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.494Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="SonarQube">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1614681385194.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/SonarQube/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/SonarQube/","path":"运维/Jenkins与Gitlab/SonarQube/","title":"SonarQube"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SonarQube | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2-SonarQube"><span class="nav-number">1.</span> <span class="nav-text">部署 SonarQube</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jenkins-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%83%A8%E7%BD%B2%E6%89%AB%E6%8F%8F%E5%99%A8-sonar-scanner"><span class="nav-number">2.</span> <span class="nav-text">jenkins 服务器部署扫描器 sonar-scanner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2-sonar-scanner"><span class="nav-number">2.1.</span> <span class="nav-text">部署 sonar-scanner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">准备测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E6%BA%90%E4%BB%A3%E7%A0%81%E7%9B%AE%E5%BD%95%E6%89%A7%E8%A1%8C%E6%89%AB%E6%8F%8F"><span class="nav-number">2.3.</span> <span class="nav-text">在源代码目录执行扫描</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jenkins-%E6%89%A7%E8%A1%8C%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F"><span class="nav-number">3.</span> <span class="nav-text">jenkins 执行代码扫描</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/SonarQube/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SonarQube | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SonarQube
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-01 10:31:11" itemprop="dateCreated datePublished" datetime="2021-03-01T10:31:11+08:00">2021-03-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/" itemprop="url" rel="index"><span itemprop="name">Jenkins与Gitlab</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>SonarQube 是一个用于代码质量管理的开放平台，通过插件机制，SonarQube 可以集成不同的测试<br>工具，代码分析工具，以及持续集成工具，例如 Hudson&#x2F;Jenkins 等</p>
+<p>官网：<a target="_blank" rel="noopener" href="https://www.sonarqube.org/">https://www.sonarqube.org/</a></p>
+<h2 id="部署-SonarQube"><a href="#部署-SonarQube" class="headerlink" title="部署 SonarQube"></a>部署 SonarQube</h2><p>略…</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614681385194.png"></p>
+<h2 id="jenkins-服务器部署扫描器-sonar-scanner"><a href="#jenkins-服务器部署扫描器-sonar-scanner" class="headerlink" title="jenkins 服务器部署扫描器 sonar-scanner"></a>jenkins 服务器部署扫描器 sonar-scanner</h2><p>官方文档： <a target="_blank" rel="noopener" href="https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/">https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/</a></p>
+<h3 id="部署-sonar-scanner"><a href="#部署-sonar-scanner" class="headerlink" title="部署 sonar-scanner"></a>部署 sonar-scanner</h3><p>顾名思义，扫描器的具体工作就是扫描代码，sonarqube 通过调用扫描器 sonar-scanner 进行代码质量分析</p>
+<p>下载地址： <a target="_blank" rel="noopener" href="https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/">https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$unzip</span> sonar-scanner-cli-4.6.0.2311.zip
+<span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$mv</span> sonar-scanner-4.6.0.2311/ /usr/local/sonar-scanner
+<span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$vim</span> /usr/local/sonar-scanner/conf/sonar-scanner.properties
+<span class="token assign-left variable">sonar.host.url</span><span class="token operator">=</span>http://10.0.1.102:9000	<span class="token comment"># 指向sonarqube服务器的地址</span>
+<span class="token assign-left variable">sonar.sourceEncoding</span><span class="token operator">=</span>UTF-8		<span class="token comment"># Default source code encoding</span></code></pre>
+
+<h3 id="准备测试代码"><a href="#准备测试代码" class="headerlink" title="准备测试代码"></a>准备测试代码</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$unzip</span> sonar-examples-master.zip ^C
+<span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$cd</span> sonar-examples-master/projects/languages/php/php-sonar-runner
+<span class="token punctuation">[</span>root@jenkins php-sonar-runner<span class="token punctuation">]</span><span class="token variable">$ll</span>
+total <span class="token number">24</span>
+drwxr-xr-x <span class="token number">3</span> root root <span class="token number">4096</span> Mar  <span class="token number">2</span> <span class="token number">23</span>:30 ./
+drwxr-xr-x <span class="token number">4</span> root root <span class="token number">4096</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> <span class="token punctuation">..</span>/
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">453</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> README.md
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">331</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> sonar-project.properties
+drwxr-xr-x <span class="token number">2</span> root root <span class="token number">4096</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> src/
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">272</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> validation.txt
+<span class="token punctuation">[</span>root@jenkins php-sonar-runner<span class="token punctuation">]</span><span class="token variable">$cat</span> sonar-project.properties 	<span class="token comment"># 确保有这个文件</span>
+<span class="token comment"># Required metadata</span>
+<span class="token assign-left variable">sonar.projectKey</span><span class="token operator">=</span>org.sonarqube:php-simple-sq-scanner
+<span class="token assign-left variable">sonar.projectName</span><span class="token operator">=</span>PHP :: Simple Project :: SonarQube Scanner
+<span class="token assign-left variable">sonar.projectVersion</span><span class="token operator">=</span><span class="token number">1.0</span>
+
+<span class="token comment"># Comma-separated paths to directories with sources (required)</span>
+<span class="token assign-left variable">sonar.sources</span><span class="token operator">=</span>src
+
+<span class="token comment"># Language</span>
+<span class="token assign-left variable">sonar.language</span><span class="token operator">=</span>php
+
+<span class="token comment"># Encoding of the source files</span>
+<span class="token assign-left variable">sonar.sourceEncoding</span><span class="token operator">=</span>UTF-8</code></pre>
+
+<h3 id="在源代码目录执行扫描"><a href="#在源代码目录执行扫描" class="headerlink" title="在源代码目录执行扫描"></a>在源代码目录执行扫描</h3><p>在 sonar-project.properties 这个文件的目录下，执行 sonar-scanner 即可：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@jenkins php-sonar-runner<span class="token punctuation">]</span><span class="token variable">$ll</span>
+total <span class="token number">24</span>
+drwxr-xr-x <span class="token number">3</span> root root <span class="token number">4096</span> Mar  <span class="token number">2</span> <span class="token number">23</span>:30 ./
+drwxr-xr-x <span class="token number">4</span> root root <span class="token number">4096</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> <span class="token punctuation">..</span>/
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">453</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> README.md
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">331</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> sonar-project.properties
+drwxr-xr-x <span class="token number">2</span> root root <span class="token number">4096</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> src/	<span class="token comment"># 代码</span>
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">272</span> Jul <span class="token number">25</span>  <span class="token number">2016</span> validation.txt
+<span class="token punctuation">[</span>root@jenkins php-sonar-runner<span class="token punctuation">]</span>$
+<span class="token punctuation">[</span>root@jenkins php-sonar-runner<span class="token punctuation">]</span>$/usr/local/sonar-scanner/bin/sonar-scanner	<span class="token comment"># 测试</span>
+INFO: Scanner configuration file: /usr/local/sonar-scanner/conf/sonar-scanner.properties
+INFO: Project root configuration file: /usr/local/src/sonar-examples-master/projects/languages/php/php-sonar-runner/sonar-project.properties
+INFO: SonarScanner <span class="token number">4.6</span>.0.2311
+INFO: Java <span class="token number">11.0</span>.10 Oracle Corporation <span class="token punctuation">(</span><span class="token number">64</span>-bit<span class="token punctuation">)</span>
+INFO: Linux <span class="token number">4.15</span>.0-136-generic amd64
+INFO: User cache: /root/.sonar/cache
+INFO: Scanner configuration file: /usr/local/sonar-scanner/conf/sonar-scanner.properties
+INFO: Project root configuration file: /usr/local/src/sonar-examples-master/projects/languages/php/php-sonar-runner/sonar-project.properties
+INFO: Analyzing on SonarQube server <span class="token number">7.9</span>.5
+INFO: Default locale: <span class="token string">"en_US"</span>, <span class="token builtin class-name">source</span> code encoding: <span class="token string">"UTF-8"</span>
+INFO: Load global settings
+INFO: Load global settings <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>225ms
+INFO: Server id: 3B6AA649-AXfye5RyEWrAjeeRmPxd
+INFO: User cache: /root/.sonar/cache
+INFO: Load/download plugins
+INFO: Load plugins index
+INFO: Load plugins index <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>126ms
+INFO: Plugin <span class="token punctuation">[</span>l10nzh<span class="token punctuation">]</span> defines <span class="token string">'l10nen'</span> as base plugin. This metadata can be removed from manifest of l10n plugins since version <span class="token number">5.2</span>.
+INFO: Load/download plugins <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>3633ms
+INFO: Process project properties
+INFO: Execute project builders
+INFO: Execute project builders <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>18ms
+INFO: Project key: org.sonarqube:php-simple-sq-scanner
+INFO: Base dir: /usr/local/src/sonar-examples-master/projects/languages/php/php-sonar-runner
+INFO: Working dir: /usr/local/src/sonar-examples-master/projects/languages/php/php-sonar-runner/.scannerwork
+INFO: Load project settings <span class="token keyword">for</span> component key: <span class="token string">'org.sonarqube:php-simple-sq-scanner'</span>
+INFO: Load quality profiles
+INFO: Load quality profiles <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>293ms
+INFO: Load active rules
+INFO: Load active rules <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>3061ms
+WARN: SCM provider autodetection failed. Please use <span class="token string">"sonar.scm.provider"</span> to define SCM of your project, or disable the SCM Sensor <span class="token keyword">in</span> the project settings.
+INFO: Indexing files<span class="token punctuation">..</span>.
+INFO: Project configuration:
+INFO: Load project repositories
+INFO: Load project repositories <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>19ms
+INFO: <span class="token number">1</span> <span class="token function">file</span> indexed
+INFO: Quality profile <span class="token keyword">for</span> php: Sonar way
+INFO: ------------- Run sensors on module PHP :: Simple Project :: SonarQube Scanner
+INFO: Load metrics repository
+INFO: Load metrics repository <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>134ms
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by net.sf.cglib.core.ReflectUtils<span class="token variable">$1</span> <span class="token punctuation">(</span>file:/root/.sonar/cache/866bb1adbf016ea515620f1aaa15ec53/sonar-javascript-plugin.jar<span class="token punctuation">)</span> to method java.lang.ClassLoader.defineClass<span class="token punctuation">(</span>java.lang.String,byte<span class="token punctuation">[</span><span class="token punctuation">]</span>,int,int,java.security.ProtectionDomain<span class="token punctuation">)</span>
+WARNING: Please consider reporting this to the maintainers of net.sf.cglib.core.ReflectUtils<span class="token variable">$1</span>
+WARNING: Use --illegal-access<span class="token operator">=</span>warn to <span class="token builtin class-name">enable</span> warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied <span class="token keyword">in</span> a future release
+INFO: Sensor JaCoCo XML Report Importer <span class="token punctuation">[</span>jacoco<span class="token punctuation">]</span>
+INFO: Sensor JaCoCo XML Report Importer <span class="token punctuation">[</span>jacoco<span class="token punctuation">]</span> <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>12ms
+INFO: Sensor JavaXmlSensor <span class="token punctuation">[</span>java<span class="token punctuation">]</span>
+INFO: Sensor JavaXmlSensor <span class="token punctuation">[</span>java<span class="token punctuation">]</span> <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>7ms
+INFO: Sensor HTML <span class="token punctuation">[</span>web<span class="token punctuation">]</span>
+INFO: Sensor HTML <span class="token punctuation">[</span>web<span class="token punctuation">]</span> <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>144ms
+INFO: Sensor PHP sensor <span class="token punctuation">[</span>php<span class="token punctuation">]</span>
+INFO: <span class="token number">1</span> <span class="token builtin class-name">source</span> files to be analyzed
+INFO: <span class="token number">1</span>/1 <span class="token builtin class-name">source</span> files have been analyzed
+INFO: No PHPUnit <span class="token builtin class-name">test</span> report provided <span class="token punctuation">(</span>see <span class="token string">'sonar.php.tests.reportPath'</span> property<span class="token punctuation">)</span>
+INFO: No PHPUnit coverage reports provided <span class="token punctuation">(</span>see <span class="token string">'sonar.php.coverage.reportPaths'</span> property<span class="token punctuation">)</span>
+INFO: Sensor PHP sensor <span class="token punctuation">[</span>php<span class="token punctuation">]</span> <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>1652ms
+INFO: Sensor Analyzer <span class="token keyword">for</span> <span class="token string">"php.ini"</span> files <span class="token punctuation">[</span>php<span class="token punctuation">]</span>
+INFO: Sensor Analyzer <span class="token keyword">for</span> <span class="token string">"php.ini"</span> files <span class="token punctuation">[</span>php<span class="token punctuation">]</span> <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>26ms
+INFO: ------------- Run sensors on project
+INFO: Sensor Zero Coverage Sensor
+INFO: Sensor Zero Coverage Sensor <span class="token punctuation">(</span>done<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token assign-left variable">time</span><span class="token operator">=</span>21ms
+INFO: No SCM system was detected. You can use the <span class="token string">'sonar.scm.provider'</span> property to explicitly specify it.
+INFO: Calculating CPD <span class="token keyword">for</span> <span class="token number">1</span> <span class="token function">file</span>
+INFO: CPD calculation finished
+INFO: Analysis report generated <span class="token keyword">in</span> 189ms, <span class="token function">dir</span> <span class="token assign-left variable">size</span><span class="token operator">=</span><span class="token number">83</span> KB
+INFO: Analysis report compressed <span class="token keyword">in</span> 17ms, <span class="token function">zip</span> <span class="token assign-left variable">size</span><span class="token operator">=</span><span class="token number">14</span> KB
+INFO: Analysis report uploaded <span class="token keyword">in</span> 1437ms
+INFO: ANALYSIS SUCCESSFUL, you can browse http://10.0.1.102:9000/dashboard?id<span class="token operator">=</span>org.sonarqube%3Aphp-simple-sq-scanner
+INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+INFO: More about the report processing at http://10.0.1.102:9000/api/ce/task?id<span class="token operator">=</span>AXfzlFbUEMwg_dNR3M3w
+INFO: Analysis total time: <span class="token number">13.302</span> s
+INFO: ------------------------------------------------------------------------
+INFO: EXECUTION SUCCESS
+INFO: ------------------------------------------------------------------------
+INFO: Total time: <span class="token number">21</span>.257s
+INFO: Final Memory: 8M/40M
+INFO: ------------------------------------------------------------------------
+<span class="token punctuation">[</span>root@jenkins php-sonar-runner<span class="token punctuation">]</span>$</code></pre>
+
+<p>web 看测试结果：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614699497744.png"></p>
+<h2 id="jenkins-执行代码扫描"><a href="#jenkins-执行代码扫描" class="headerlink" title="jenkins 执行代码扫描"></a>jenkins 执行代码扫描</h2><p>上面是命令行执行 sonar-scanner 命令进行测试，可以结合 jenkins 进行测试，无非就是将命令写到脚本里，让 jenkins 自动执行</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/SonarQube/" rel="tag"><i class="fa fa-tag"></i> SonarQube</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/Jenkins/" rel="prev" title="Jenkins">
+                  <i class="fa fa-chevron-left"></i> Jenkins
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/postgresql/" rel="next" title="postgresql">
+                  postgresql <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

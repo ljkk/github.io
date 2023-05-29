@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="bit比特、位，量度信息的最小单位，状态为 0 和 1 B(Byte)字节，1B &#x3D; 8bit KB千字节，1KB &#x3D; 1024B MB兆字节 为什么 32 位 cpu 只支持 4G 内存?准确的说是 cpu 的地址总线位宽为 32 位的时候最大只能支持 4G 的寻址 寻址就是 CPU 最大能查找多大范围的地址。CPU 的寻址以字节为单位 （字节是最小可寻址单位） 32 位 C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bit B(byte) KB">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/bit%20B(byte)%20KB/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="bit比特、位，量度信息的最小单位，状态为 0 和 1 B(Byte)字节，1B &#x3D; 8bit KB千字节，1KB &#x3D; 1024B MB兆字节 为什么 32 位 cpu 只支持 4G 内存?准确的说是 cpu 的地址总线位宽为 32 位的时候最大只能支持 4G 的寻址 寻址就是 CPU 最大能查找多大范围的地址。CPU 的寻址以字节为单位 （字节是最小可寻址单位） 32 位 C">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T14:04:47.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="内存">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/bit%20B(byte)%20KB/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/bit%20B(byte)%20KB/","path":"运维/基础/bit B(byte) KB/","title":"bit B(byte) KB"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>bit B(byte) KB | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#bit"><span class="nav-number">1.</span> <span class="nav-text">bit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-Byte"><span class="nav-number">2.</span> <span class="nav-text">B(Byte)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KB"><span class="nav-number">3.</span> <span class="nav-text">KB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MB"><span class="nav-number">4.</span> <span class="nav-text">MB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-32-%E4%BD%8D-cpu-%E5%8F%AA%E6%94%AF%E6%8C%81-4G-%E5%86%85%E5%AD%98"><span class="nav-number">5.</span> <span class="nav-text">为什么 32 位 cpu 只支持 4G 内存?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E8%AF%AD%E8%A8%80%E4%B8%AD%E5%90%84%E4%B8%AA%E5%8F%98%E9%87%8F%E5%8D%A0%E7%94%A8%E7%9A%84%E5%86%85%E5%AD%98%E5%A4%A7%E5%B0%8F"><span class="nav-number">6.</span> <span class="nav-text">C 语言中各个变量占用的内存大小</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/bit%20B(byte)%20KB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="bit B(byte) KB | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          bit B(byte) KB
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:04:47" itemprop="dateCreated datePublished" datetime="2020-12-09T22:04:47+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="bit"><a href="#bit" class="headerlink" title="bit"></a>bit</h2><p>比特、位，量度信息的最小单位，状态为 0 和 1</p>
+<h2 id="B-Byte"><a href="#B-Byte" class="headerlink" title="B(Byte)"></a>B(Byte)</h2><p>字节，1B &#x3D; 8bit</p>
+<h2 id="KB"><a href="#KB" class="headerlink" title="KB"></a>KB</h2><p>千字节，1KB &#x3D; 1024B</p>
+<h2 id="MB"><a href="#MB" class="headerlink" title="MB"></a>MB</h2><p>兆字节</p>
+<h2 id="为什么-32-位-cpu-只支持-4G-内存"><a href="#为什么-32-位-cpu-只支持-4G-内存" class="headerlink" title="为什么 32 位 cpu 只支持 4G 内存?"></a>为什么 32 位 cpu 只支持 4G 内存?</h2><p>准确的说是 cpu 的地址总线位宽为 32 位的时候最大只能支持 4G 的寻址</p>
+<p>寻址就是 CPU 最大能查找多大范围的地址。CPU 的寻址以字节为单位 （字节是最小可寻址单位）</p>
+<p>32 位 CPU 一次只能处理 32 位的数据（就是 4 个字节），2 的 32 次方 bit&#x3D;4G，所以 32 位 CPU 支持的最大寻址空间就是 4G（不考虑使用 PAE——物理地址扩展技术），如果插了一根 8G 的内存条，超过 4G 的内存部分跟不用不到</p>
+<h2 id="C-语言中各个变量占用的内存大小"><a href="#C-语言中各个变量占用的内存大小" class="headerlink" title="C 语言中各个变量占用的内存大小"></a>C 语言中各个变量占用的内存大小</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/sinan1995/article/details/79577106">https://blog.csdn.net/sinan1995/article/details/79577106</a></p>
+<ul>
+<li><p>16 位编译器</p>
+<pre class="language-none"><code class="language-none">char&#x2F;unsigned char ：1字节
+char*：2字节
+short int：2字节
+int&#x2F;unsigned int：2字节
+long int：4字节
+float：4字节
+double：8字节</code></pre>
+</li>
+<li><p>32 位编译器</p>
+<pre class="language-none"><code class="language-none">char&#x2F;unsigned char ：1字节
+char*：4字节
+short int：2字节
+int&#x2F;unsigned int：4字节
+long int：4字节
+float：4字节
+double：8字节
+long long：8字节
+long double：12字节</code></pre>
+</li>
+<li><p>64 位编译器</p>
+<pre class="language-none"><code class="language-none">char&#x2F;unsigned char ：1字节
+char*：8字节
+short int：2字节
+int&#x2F;unsigned int：4字节
+long int：8字节
+float：4字节
+double：8字节
+long long：8字节
+long double：16字节</code></pre></li>
+</ul>
+<p><code>int</code> 占用四字节，32 位，范围 <code>-2^31 \~ 2^31-1</code>，而 <code>long int</code> 根据编译器不同，表示的范围从 32 位到 64 位，它可以保证至少 32 位。</p>
+<p><code>long int</code> 不是标准的 64 位整型，而<code>long long </code> 是，它在所有的编译器中都表示 64 位整型，表示范围 <code>-2^63 ~ 2^63-1</code></p>
+<p>关于 __int64：<br>在 C&#x2F;C++中，64 为整型一直是一种没有确定规范的数据类型。现今主流的编译器中，对 64 为整型的支持也是标准不一，形态各异。一般来说，64 位整型的定义方式有 long long 和__int64 两种(VC 还支持_int64)，而输出到标准输出方式有 printf(“%lld”,a)，printf(“%I64d”,a)，和 cout &lt;&lt; a 三种方式。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/sinat_38972110/article/details/82117072">关于 float 和 double 的表示范围和精度：</a></p>
+<p>float: 1bit(符号) + 8bit(指数位) + 23bit(尾数位)<br>double: 1bit(符号) + 11bit(指数位) + 52bit(尾数位)</p>
+<p><font color=red>浮点数值 &#x3D; (符号)(1.尾数) * (2)^(带符号的指数)</font><br>上述公式的 1 和 2 就是这么规定的，不必太在意</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E5%AD%98/" rel="tag"><i class="fa fa-tag"></i> 内存</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/Python/%E5%9F%BA%E7%A1%80/%E5%A4%9A%E4%BB%BB%E5%8A%A1/" rel="prev" title="多任务">
+                  <i class="fa fa-chevron-left"></i> 多任务
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/Linux%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8%E5%92%8C%E5%B8%AE%E5%8A%A9/" rel="next" title="Linux基础入门和帮助">
+                  Linux基础入门和帮助 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

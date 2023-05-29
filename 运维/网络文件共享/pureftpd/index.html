@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="pure-ftpd.conf：# 限制所有用户在其主目录中，change root directory（更改根目录），参考chroot命令 ChrootEveryone               yes # 如果前一个指令被设置为了 &quot;no&quot;，下面组的成员(GID)就不受主目录的限制了。而其他的用户还是会被限制在自己的主目录里。如果你不想把任何用户限制在自己的主目录里，只要注释掉 ChrootE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pureftpd">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/pureftpd/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="pure-ftpd.conf：# 限制所有用户在其主目录中，change root directory（更改根目录），参考chroot命令 ChrootEveryone               yes # 如果前一个指令被设置为了 &quot;no&quot;，下面组的成员(GID)就不受主目录的限制了。而其他的用户还是会被限制在自己的主目录里。如果你不想把任何用户限制在自己的主目录里，只要注释掉 ChrootE">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T15:40:12.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="pureftpd">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/pureftpd/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/pureftpd/","path":"运维/网络文件共享/pureftpd/","title":"pureftpd"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>pureftpd | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#pure-ftpd-conf%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">pure-ftpd.conf：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-pw"><span class="nav-number">2.1.</span> <span class="nav-text">pure-pw</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-pwconvert"><span class="nav-number">2.2.</span> <span class="nav-text">pure-pwconvert</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-statsdecode"><span class="nav-number">2.3.</span> <span class="nav-text">pure-statsdecode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-authd"><span class="nav-number">2.4.</span> <span class="nav-text">pure-authd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-certd"><span class="nav-number">2.5.</span> <span class="nav-text">pure-certd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-ftpd"><span class="nav-number">2.6.</span> <span class="nav-text">pure-ftpd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-ftpwho"><span class="nav-number">2.7.</span> <span class="nav-text">pure-ftpwho</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-mrtginfo"><span class="nav-number">2.8.</span> <span class="nav-text">pure-mrtginfo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-quotacheck"><span class="nav-number">2.9.</span> <span class="nav-text">pure-quotacheck</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pure-uploadscript"><span class="nav-number">2.10.</span> <span class="nav-text">pure-uploadscript</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/pureftpd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="pureftpd | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          pureftpd
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:40:12" itemprop="dateCreated datePublished" datetime="2020-12-09T23:40:12+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">网络文件共享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="pure-ftpd-conf："><a href="#pure-ftpd-conf：" class="headerlink" title="pure-ftpd.conf："></a>pure-ftpd.conf：</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 限制所有用户在其主目录中，change root directory（更改根目录），参考chroot命令</span>
+ChrootEveryone               <span class="token function">yes</span>
+<span class="token comment"># 如果前一个指令被设置为了 "no"，下面组的成员(GID)就不受主目录的限制了。而其他的用户还是会被限制在自己的主目录里。如果你不想把任何用户限制在自己的主目录里，只要注释掉 ChrootEveryone 和 TrustedGID 就可以了</span>
+<span class="token comment"># TrustedGID                   100</span>
+BrokenClientsCompatibility   no	<span class="token comment"># 兼容ie等比较非正规化的ftp客户端</span>
+MaxClientsNumber             <span class="token number">50</span>	<span class="token comment"># 服务器总共允许同时连接的最大用户数</span>
+Daemonize                    <span class="token function">yes</span>	<span class="token comment"># 做为守护(doemon)进程运行(Fork in background)</span>
+<span class="token comment"># 同一IP允许同时连接的用户数（Maximum number of sim clients with the same IP address）</span>
+MaxClientsPerIP              <span class="token number">8</span>
+VerboseLog                   no		<span class="token comment"># 如果你要记录所有的客户命令，设置这个指令为 "yes"</span>
+DisplayDotFiles              <span class="token function">yes</span>	<span class="token comment"># 即使客户端没有发送 '-a' 选项也列出隐藏文件</span>
+AnonymousOnly                no		<span class="token comment"># 是否只让匿名用户登录</span>
+NoAnonymous                  no		<span class="token comment"># 不允许匿名连接，仅允许认证用户使用</span>
+SyslogFacility               <span class="token function">ftp</span>	<span class="token comment"># 缺省的facility 是 "ftp"。 "none" 将禁止日志</span>
+<span class="token comment"># 定制用户登陆后的显示信息（Display fortune cookies）</span>
+<span class="token comment"># FortunesFile                 /usr/share/fortune/zippy</span>
+<span class="token comment"># 在日志文件中不解析主机名。日志没那么详细的话，就使用更少的带宽。在一个访问量很大的站点中，设置这个指令为 "yes" ，如果你没有一个能工作的DNS的话</span>
+DontResolve                  <span class="token function">yes</span>
+MaxIdleTime                  <span class="token number">15</span>	<span class="token comment"># 客户端允许的最大的空闲时间（分钟，缺省15分钟）</span>
+<span class="token comment"># LDAPConfigFile	/etc/pureftpd-ldap.conf	# LDAP配置文件 (参考README.LDAP)</span>
+<span class="token comment"># MySQLConfigFile	/etc/pureftpd-mysql.conf # MySQL配置文件 (参考README.MySQL)</span>
+<span class="token comment"># PGSQLConfigFile	/etc/pureftpd-pgsql.conf	# Postgres配置文件 (参考README.PGSQL)</span>
+<span class="token comment"># PureDB	/etc/pureftpd.pdb # PureDB用户数据库 (参考README.Virtual-Users)</span>
+<span class="token comment"># ExtAuth	/var/run/ftpd.sock # pure-authd 的socket 路径(参考README.Authentication-Modules)</span>
+<span class="token comment"># 如果你要启用 PAM 认证方式, 去掉下面行的注释</span>
+<span class="token comment"># PAMAuthentication            yes</span>
+<span class="token comment"># 如果你要启用 简单的 Unix系统 认证方式(/etc/passwd), 去掉下面行的注释，就是允许系统用户登录</span>
+<span class="token comment"># UnixAuthentication           yes</span>
+<span class="token comment"># 'ls' 命令的递归限制。第一个参数给出文件显示的最大数目。第二个参数给出最大的子目录深度</span>
+LimitRecursion               <span class="token number">10000</span> <span class="token number">8</span>
+AnonymousCanCreateDirs       no	<span class="token comment"># 允许匿名用户创建新目录</span>
+<span class="token comment"># 如果系统被 loaded 超过下面的值，匿名用户会被禁止下载</span>
+MaxLoad                      <span class="token number">4</span>
+<span class="token comment"># PassivePortRange             30000 50000	# 被动连接响应的端口范围</span>
+<span class="token comment"># ForcePassiveIP               192.168.0.1	# 强制一个IP地址使用被动响应</span>
+<span class="token comment"># AnonymousRatio               1 10		# 匿名用户的上传/下载的比率</span>
+<span class="token comment"># UserRatio                    1 10		# 所有用户的上传/下载的比率</span>
+<span class="token comment"># 不接受所属者是 "ftp" 的文件的下载。例如：那些匿名用户上传后未被本地管理员验证的文件</span>
+AntiWarez                    <span class="token function">yes</span>
+<span class="token comment"># Bind                         127.0.0.1,21	# 服务监听的IP 地址和端口。(缺省是所有IP地址和21端口)</span>
+<span class="token comment"># AnonymousBandwidth           8	# 匿名用户的最大带宽（KB/s）</span>
+<span class="token comment"># UserBandwidth                8	# 所有用户的最大带宽（KB/s），包括匿名用户</span>
+<span class="token comment"># 新建目录及文件的属性掩码值：&lt;文件掩码>:&lt;目录掩码>，如果不放心，就直接设置177:077</span>
+Umask                        <span class="token number">133</span>:022
+MinUID                       <span class="token number">100</span>	<span class="token comment"># 认证用户允许登陆的最小组ID（UID）</span>
+AllowUserFXP                 no		<span class="token comment"># 仅允许认证用户进行 FXP 传输</span>
+AllowAnonymousFXP            no		<span class="token comment"># 对匿名用户和非匿名用户允许进行匿名 FXP 传输</span>
+<span class="token comment"># 用户不能删除和写点文件（以 '.' 开头的文件），即使用户是文件的所有者也不行</span>
+ProhibitDotFilesWrite        no
+<span class="token comment"># 禁止读点文件（文件名以 '.' 开头的文件）</span>
+ProhibitDotFilesRead         no
+<span class="token comment"># 永不覆盖文件。当上传的文件，其文件名已经存在时，自动重命名，如： file.1, file.2, file.3, ...</span>
+AutoRename                   no
+AnonymousCantUpload          no		<span class="token comment"># 不接受匿名用户上传新文件( no = 允许上传)</span>
+<span class="token comment"># 仅允许来自以下IP地址的非匿名用户连接。你可以使用这个指令来打开几个公网IP来提供匿名FTP，而保留一个私有的防火墙保护的IP来进行远程管理。你还可以只允许一内网地址进行认证，而在另外一个IP上提供纯匿名的FTP服务。</span>
+<span class="token comment"># TrustedIP                    10.1.1.1</span>
+<span class="token comment"># 如果你要为日志每一行添加 PID   去掉下面行的注释。</span>
+<span class="token comment"># LogPID                       yes</span>
+
+<span class="token comment"># 使用类似于 Apache的格式创建一个额外的日志文件，如：</span>
+<span class="token comment"># fw.c9x.org - jedi [13/Dec/1975:19:36:39] "GET /ftp/linux.tar.bz2" 200 21809338</span>
+<span class="token comment"># 这个日志文件能被 www 流量分析器处理</span>
+<span class="token comment"># AltLog                       clf:/var/log/pureftpd.log</span>
+<span class="token comment"># 使用优化过的格式为统计报告创建一个额外的日志文件</span>
+<span class="token comment"># AltLog                       stats:/var/log/pureftpd.log</span>
+<span class="token comment"># 使用标准的W3C格式创建一个额外的日志文件。（与大部分的商业日志分析器兼容）</span>
+<span class="token comment"># AltLog                       w3c:/var/log/pureftpd.log</span>
+<span class="token comment"># NoChmod                      yes	# 不接受 chmod 命令。用户不能更改他们文件的属性</span>
+<span class="token comment"># KeepAllFiles                 yes	# 允许用户恢复和上传文件，却不允许删除他们</span>
+<span class="token comment"># CreateHomeDir                yes	# 用户主目录不存在的话，自动创建</span>
+<span class="token comment"># 启用虚拟的磁盘限额。第一个数字是最大的文件数，第二个数字是最大的总的文件大小(单位：Mb)，所以，1000:10 就是限制每一个用户只能使用 1000 个文件，共10Mb</span>
+<span class="token comment"># Quota                        1000:10</span>
+<span class="token comment"># 如果你的 pure-ftpd 编译时加入了独立服务器( standalone 支持，你能够改变 pid 文件的位置。缺省位置是 /var/run/pure-ftpd.pid</span>
+<span class="token comment"># PIDFile                      /var/run/pure-ftpd.pid</span>
+
+<span class="token comment"># 如果你的pure-ftpd编译时加入了pure-uploadscrīpt支持，这个指令将会使pure-ftpd发送关于新上传的情况信息到/var/run/pure-ftpd.upload.pipe，这样 pure-uploadscrīpt就能读然后调用一个脚本去处理新的上传</span>
+<span class="token comment"># CallUploadScript             yes</span>
+<span class="token comment"># 这个选项对允许匿名上传的服务器是有用的。当 /var/ftp 在 /var 里时，需要保留一定磁盘空间来保护日志文件。当所在磁盘分区使用超过百分之 X 时，将不在接受新的上传</span>
+MaxDiskUsage                   <span class="token number">99</span>
+<span class="token comment"># NoRename                     yes	# 如果你不想要你的用户重命名文件的话，就设置为 'yes'</span>
+<span class="token comment"># 如果你所有的用户都有基本的Unix知识的话，这个特性将没什么用了。不过，如果你是一个主机提供商的话，启用它</span>
+CustomerProof                <span class="token function">yes</span>
+<span class="token comment"># 每一个用户的并发限制。只有在添加了 --with-peruserlimits 编译选项进行编译后，这个指令才起作用。(大部分的二进制的发布版本就是例子)，格式是 : &lt;每一个用户最大允许的进程>:&lt;最大的匿名用户进程>，例如： 3:20 意思是同一个认证用户最大可以有3个同时活动的进程。而且同时最多只能有20个匿名用户进程</span>
+<span class="token comment"># PerUserLimits                3:20</span>
+
+<span class="token comment"># NoTruncate                   yes</span>
+<span class="token comment"># TLS                          1</span>
+<span class="token comment"># TLSCipherSuite               HIGH</span>
+<span class="token comment"># CertFile                     /etc/ssl/private/pure-ftpd.pem</span>
+<span class="token comment"># CertFileAndKey               "/etc/pure-ftpd.pem" "/etc/pure-ftpd.key"</span>
+<span class="token comment"># ExtCert                      /var/run/ftpd-certs.sock</span>
+<span class="token comment"># IPV4Only                     yes</span>
+<span class="token comment"># IPV6Only                     yes</span></code></pre>
+
+<p>请注意：LDAPConfigFile, MySQLConfigFile, PAMAuthentication 和 UnixAuthentication 这些指令只能被使用一次，不过，他们能被混合在一起用。例如：如果你使用了 MySQLConfigFile 和 UnixAuthentication，那么 SQL 服务器将被访问。如果因为用户名未找到而使 SQL 认证失败的话，就会在&#x2F;etc&#x2F;passwd 和 &#x2F;etc&#x2F;shadow 中尝试另外一种认证，如果因为密码错误而使 SQL 认证失败的话，认证就会在此结束了。认证方式由它们被给出来的顺序而被链接了起来</p>
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:/usr/local/pureftpd$ ll bin/ sbin/
+bin/:
+总用量 <span class="token number">100</span>
+drwxr-xr-x <span class="token number">2</span> root root  <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 ./
+drwxr-xr-x <span class="token number">6</span> root root  <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 <span class="token punctuation">..</span>/
+-rwxr-xr-x <span class="token number">1</span> root root <span class="token number">50248</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-pw*
+-rwxr-xr-x <span class="token number">1</span> root root <span class="token number">17400</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-pwconvert*
+-rwxr-xr-x <span class="token number">1</span> root root <span class="token number">17416</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-statsdecode*
+
+sbin/:
+总用量 <span class="token number">364</span>
+drwxr-xr-x <span class="token number">2</span> root root   <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 ./
+drwxr-xr-x <span class="token number">6</span> root root   <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 <span class="token punctuation">..</span>/
+-rwxr-xr-x <span class="token number">1</span> root root  <span class="token number">17200</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-authd*
+-rwxr-xr-x <span class="token number">1</span> root root  <span class="token number">28320</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-certd*
+-rwxr-xr-x <span class="token number">1</span> root root <span class="token number">213928</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-ftpd*
+-rwxr-xr-x <span class="token number">1</span> root root  <span class="token number">17248</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-ftpwho*
+-rwxr-xr-x <span class="token number">1</span> root root  <span class="token number">17424</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-mrtginfo*
+-rwxr-xr-x <span class="token number">1</span> root root  <span class="token number">27768</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-quotacheck*
+-rwxr-xr-x <span class="token number">1</span> root root  <span class="token number">27904</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-uploadscript*
+lujinkai@Z510:
+lujinkai@Z510:/usr/local/pureftpd$ ll share/man/man8/
+总用量 <span class="token number">84</span>
+drwxr-xr-x <span class="token number">2</span> root root  <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 ./
+drwxr-xr-x <span class="token number">3</span> root root  <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 <span class="token punctuation">..</span>/
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">4146</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-authd.8
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">2889</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-certd.8
+-rw-r--r-- <span class="token number">1</span> root root <span class="token number">29533</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-ftpd.8
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">2425</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-ftpwho.8
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">2101</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-mrtginfo.8
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">3280</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-pw.8
+-rw-r--r-- <span class="token number">1</span> root root   <span class="token number">781</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-pwconvert.8
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">2164</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-quotacheck.8
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">1125</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-statsdecode.8
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">4156</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:04 pure-uploadscript.8
+</code></pre>
+
+<h3 id="pure-pw"><a href="#pure-pw" class="headerlink" title="pure-pw"></a>pure-pw</h3><p>Manage virtual users files for Pure-FTPd.</p>
+<p>Virtual users is a simple mechanism to store a list of users, with their password, name, uid, directory, etc. It’s just like &#x2F;etc&#x2F;passwd. But it’s not &#x2F;etc&#x2F;passwd. It’s a different file, only for FTP.<br>It means that you can easily create FTP-only accounts without messing your system accounts.<br>Additionnaly, virtual users files can store individual quotas, ratios, bandwidth, etc. System accounts can’t do this.<br>Thousands of virtual users can share the same system user, as long as they all are chrooted, and they have their own home directory.</p>
+<h3 id="pure-pwconvert"><a href="#pure-pwconvert" class="headerlink" title="pure-pwconvert"></a>pure-pwconvert</h3><p>Generate a virtual users file from system accounts.</p>
+<p>This program scans system accounts (&#x2F;etc&#x2F;passwd) and outputs a FTP virtual users list, suitable to the pure-pw command.</p>
+<h3 id="pure-statsdecode"><a href="#pure-statsdecode" class="headerlink" title="pure-statsdecode"></a>pure-statsdecode</h3><p>Show human-readable dates from a “stats” logfile.</p>
+<p>This program decodes Pure-FTPd’s “stats” log files and converts timestamps into human-readable dates.</p>
+<h3 id="pure-authd"><a href="#pure-authd" class="headerlink" title="pure-authd"></a>pure-authd</h3><p>External authentication agent for Pure-FTPd</p>
+<p>pure-authd is a daemon that forks an authentication program, waits for an authentication reply, and feed them to an application server.<br>pure-authd listens to a local Unix socket. A new connection to that socket should feed pure-authd the following structure:<br>​ account:xxx<br>​ password:xxx<br>​ localhost:xxx<br>​ localport:xxx<br>​ peer:xxx</p>
+<h3 id="pure-certd"><a href="#pure-certd" class="headerlink" title="pure-certd"></a>pure-certd</h3><p>TLS certificate agent for Pure-FTPd.</p>
+<p>pure-certd is a daemon that forks an authentication program, waits for a certificate path as a reply, and returns it to an application server.<br>pure-certd listens to a local Unix socket. A new connection to that socket should send pure-authd the following structure:<br>sni_name:xxx end<br>These content is passed to the authentication program, as an environment variable:<br>CERTD_SNI_NAME<br>The authentication program should take appropriate actions to select a TLS certificate, and reply to the standard output with the fol‐lowing format:<br>action:strict cert_file:&#x2F;path&#x2F;to&#x2F;cert.pem key_file:&#x2F;path&#x2F;to&#x2F;cert.pem end</p>
+<h3 id="pure-ftpd"><a href="#pure-ftpd" class="headerlink" title="pure-ftpd"></a>pure-ftpd</h3><p>simple File Transfer Protocol server</p>
+<p>Pure-FTPd is a small, simple server for the old and hairy File Transfer Protocol, designed to use less resources than older servers,be smaller and very secure, and to never execute any external program.<br>It support most-used features and commands of FTP (including many modern extensions), and leaves out everything which is deprecated,meaningless, insecure, or correlates with trouble.<br>IPv6 is fully supported.</p>
+<h3 id="pure-ftpwho"><a href="#pure-ftpwho" class="headerlink" title="pure-ftpwho"></a>pure-ftpwho</h3><p>Report current FTP sessions.</p>
+<p>pure-ftpwho shows current Pure-FTPd client sessions. Only the system administrator may run this. Output can be text (default), HTML, XML data and parser-optimized. The server has to be compiled with –with-ftpwho to support this command.</p>
+<h3 id="pure-mrtginfo"><a href="#pure-mrtginfo" class="headerlink" title="pure-mrtginfo"></a>pure-mrtginfo</h3><p>provide an MRTG-graphable user count for ftpd.</p>
+<p>Pure-Mrtginfo counts the number of clients currently connected to ftpd(8) and output the format in a format graphable by MRTG.</p>
+<h3 id="pure-quotacheck"><a href="#pure-quotacheck" class="headerlink" title="pure-quotacheck"></a>pure-quotacheck</h3><p>Update virtual quota files for Pure-FTPd.</p>
+<p>pure-quotacheck create a .ftpquota file in the specified directory.<br>This file contains the current file and size of the directory, and it is used by Pure-FTPd when virtual quotas are enabled.<br>It’s recommended to periodically run pure-quotacheck for every user, in crontabs.</p>
+<h3 id="pure-uploadscript"><a href="#pure-uploadscript" class="headerlink" title="pure-uploadscript"></a>pure-uploadscript</h3><p>Automatically run an external program after a successful upload.</p>
+<p>If Pure-FTPd is compiled with –with-uploadscript (default in binary distributions), and if the -o (or –uploadscript) is passed to the server, a named pipe called &#x2F;var&#x2F;run&#x2F;pure-ftpd.upload.pipe is created. You will also notice an important file called &#x2F;var&#x2F;run&#x2F;pure-ftpd.upload.lock, used for locking.<br>After a successful upload, the file name is written to the pipe.<br>pure-uploadscript reads this pipe to automatically run any program or script to process the newly uploaded file.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/pureftpd/" rel="tag"><i class="fa fa-tag"></i> pureftpd</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E6%9C%8D%E5%8A%A1/" rel="prev" title="文件共享服务">
+                  <i class="fa fa-chevron-left"></i> 文件共享服务
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/LVS/LVS/" rel="next" title="LVS">
+                  LVS <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

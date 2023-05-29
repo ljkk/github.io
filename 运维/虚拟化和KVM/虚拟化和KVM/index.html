@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="虚拟化基础Hypervisor Hyperisor 是一种运行在基础物理服务器和操作系统之间的中间软件层，其可以允许多个操作系统和应用共享底层的内存、CPU、磁盘等物理硬件，也可以叫做 VMM（vritual machine moitor），即 虚拟机监视器 Hypervisor 是所有虚拟化技术的核心,非中断地支持多工作负载迁移的能力是 Hypervisor 的基本功能,当服务器启动并执行 Hy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟化和KVM">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="虚拟化基础Hypervisor Hyperisor 是一种运行在基础物理服务器和操作系统之间的中间软件层，其可以允许多个操作系统和应用共享底层的内存、CPU、磁盘等物理硬件，也可以叫做 VMM（vritual machine moitor），即 虚拟机监视器 Hypervisor 是所有虚拟化技术的核心,非中断地支持多工作负载迁移的能力是 Hypervisor 的基本功能,当服务器启动并执行 Hy">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604731710496.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604733842976.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604733918601.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1610267352052.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1610267374788.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614168890933.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604735745767.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604736440428.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604736735407.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604749854253.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604972341007.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604972371669.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604973329811.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604973449546.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604973998582.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1604989585145.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605619798709.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605618457482.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605616246298.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605578835894.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605625062472.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605625176480.png">
+<meta property="article:published_time" content="2020-12-09T15:42:34.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="kvm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1604731710496.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/","path":"运维/虚拟化和KVM/虚拟化和KVM/","title":"虚拟化和KVM"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>虚拟化和KVM | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">虚拟化基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hypervisor"><span class="nav-number">1.1.</span> <span class="nav-text">Hypervisor</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Hypervisor-%E5%88%86%E7%B1%BB"><span class="nav-number">1.1.1.</span> <span class="nav-text">Hypervisor 分类</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E5%88%86%E7%B1%BB"><span class="nav-number">1.2.</span> <span class="nav-text">虚拟化技术分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E5%99%A8-x2F-%E8%BD%AF%E4%BB%B6%E4%BB%BF%E7%9C%9F"><span class="nav-number">1.2.1.</span> <span class="nav-text">模拟器 &#x2F; 软件仿真</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%A8%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.2.2.</span> <span class="nav-text">全虚拟化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E8%BE%85%E5%8A%A9%E7%9A%84%E5%85%A8%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">软件辅助的全虚拟化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%BE%85%E5%8A%A9%E7%9A%84%E5%AE%8C%E5%85%A8%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">硬件辅助的完全虚拟化</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%8A%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">半虚拟化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%91%E8%AE%A1%E7%AE%97"><span class="nav-number">1.3.</span> <span class="nav-text">云计算</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E4%B9%8B-KVM-%E6%9E%B6%E6%9E%84%E5%92%8C%E9%83%A8%E7%BD%B2"><span class="nav-number">2.</span> <span class="nav-text">虚拟化技术之 KVM 架构和部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#KVM-%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">KVM 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RHEL-CentOS-%E8%99%9A%E6%8B%9F%E8%AE%BE%E5%A4%87%E4%B8%89%E7%A7%8D%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">RHEL(CentOS)虚拟设备三种工作模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KVM-%E9%9B%86%E4%B8%AD%E7%AE%A1%E7%90%86%E5%92%8C%E6%8E%A7%E5%88%B6"><span class="nav-number">2.3.</span> <span class="nav-text">KVM 集中管理和控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-KVM-%E5%B7%A5%E5%85%B7%E5%8C%85"><span class="nav-number">2.4.</span> <span class="nav-text">安装 KVM 工具包</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#libvirt-%E5%8C%85%E5%8A%9F%E8%83%BD"><span class="nav-number">2.4.1.</span> <span class="nav-text">libvirt 包功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-KVM-%E7%9B%B8%E5%85%B3%E5%8C%85"><span class="nav-number">2.4.2.</span> <span class="nav-text">安装 KVM 相关包</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">3.</span> <span class="nav-text">创建虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#virt-install-%E5%91%BD%E4%BB%A4"><span class="nav-number">3.1.</span> <span class="nav-text">virt-install 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#qemu-img-%E5%91%BD%E4%BB%A4"><span class="nav-number">3.2.</span> <span class="nav-text">qemu-img 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8C%83%E4%BE%8B%EF%BC%9Avirt-install-amp-PXE"><span class="nav-number">3.3.</span> <span class="nav-text">范例：virt-install &amp; PXE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8C%83%E4%BE%8B%EF%BC%9A%E5%9F%BA%E4%BA%8E%E7%8E%B0%E6%9C%89%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%A3%81%E7%9B%98%E4%B8%BA%E6%A8%A1%E7%89%88%E5%88%9B%E5%BB%BA%E6%96%B0%E7%9A%84%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">3.4.</span> <span class="nav-text">范例：基于现有虚拟机磁盘为模版创建新的虚拟机</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">4.</span> <span class="nav-text">管理虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%8D%8A%E8%99%9A%E6%8B%9F%E5%8C%96%E9%A9%B1%E5%8A%A8-virtio"><span class="nav-number">4.1.</span> <span class="nav-text">使用半虚拟化驱动 virtio</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#virtio-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">4.1.1.</span> <span class="nav-text">virtio 工作原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#virtio-%E9%A9%B1%E5%8A%A8%E5%AE%89%E8%A3%85"><span class="nav-number">4.1.2.</span> <span class="nav-text">virtio 驱动安装</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%B8%8E%E9%85%8D%E7%BD%AE-QEMU-guest-agent"><span class="nav-number">4.2.</span> <span class="nav-text">安装与配置 QEMU guest agent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE-SPICE-agent"><span class="nav-number">4.3.</span> <span class="nav-text">安装和配置 SPICE agent</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#libvirt-%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">5.</span> <span class="nav-text">libvirt 管理虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#virsh-%E5%91%BD%E4%BB%A4"><span class="nav-number">5.1.</span> <span class="nav-text">virsh 命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">存储管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">6.1.</span> <span class="nav-text">存储池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">6.2.</span> <span class="nav-text">存储卷</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#qcow2-%E5%92%8C-lv"><span class="nav-number">6.2.1.</span> <span class="nav-text">qcow2 和 lv</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A6%BB%E7%BA%BF%E5%B7%A5%E5%85%B7"><span class="nav-number">6.3.</span> <span class="nav-text">离线工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A6%BB%E7%BA%BF%E5%B7%A5%E5%85%B7%E5%BA%94%E7%94%A8"><span class="nav-number">6.3.1.</span> <span class="nav-text">离线工具应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#guestfs"><span class="nav-number">6.3.2.</span> <span class="nav-text">guestfs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%A6%BB%E7%BA%BF%E5%B7%A5%E5%85%B7"><span class="nav-number">6.3.3.</span> <span class="nav-text">其他离线工具</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86"><span class="nav-number">7.</span> <span class="nav-text">网络管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nmcli-%E5%AE%9E%E7%8E%B0%E7%BD%91%E6%A1%A5"><span class="nav-number">7.1.</span> <span class="nav-text">nmcli 实现网桥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#qemu-kvm-%E6%94%AF%E6%8C%81%E7%9A%84%E7%BD%91%E7%BB%9C"><span class="nav-number">7.2.</span> <span class="nav-text">qemu-kvm 支持的网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E7%BD%91%E7%BB%9C%E6%9E%B6%E6%9E%84"><span class="nav-number">7.3.</span> <span class="nav-text">默认网络架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BD%91%E6%A1%A5%E6%9E%B6%E6%9E%84"><span class="nav-number">7.4.</span> <span class="nav-text">自定义网桥架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84%E9%9A%94%E7%A6%BB%E7%9A%84%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C"><span class="nav-number">7.5.</span> <span class="nav-text">用户自定义的隔离的虚拟网络</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B"><span class="nav-number">8.</span> <span class="nav-text">实战案例</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="虚拟化和KVM | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          虚拟化和KVM
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:42:34" itemprop="dateCreated datePublished" datetime="2020-12-09T23:42:34+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/" itemprop="url" rel="index"><span itemprop="name">虚拟化和KVM</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="虚拟化基础"><a href="#虚拟化基础" class="headerlink" title="虚拟化基础"></a>虚拟化基础</h2><h3 id="Hypervisor"><a href="#Hypervisor" class="headerlink" title="Hypervisor"></a>Hypervisor</h3><ul>
+<li>Hyperisor 是一种运行在基础物理服务器和操作系统之间的中间软件层，其可以允许多个操作系统和应用共享底层的内存、CPU、磁盘等物理硬件，也可以叫做 <strong>VMM</strong>（vritual machine moitor），即 <strong>虚拟机监视器</strong></li>
+<li>Hypervisor 是所有虚拟化技术的核心,非中断地支持多工作负载迁移的能力是 Hypervisor 的基本功能,当服务器启动并执行 Hypervisor 时,它会给每一台虚拟机分配适量的内存、CPU、网络和磁盘,并加载所有虚拟机的客户操作系统</li>
+</ul>
+<p>X86 CPU 的保护环：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604731710496.png"></p>
+<h4 id="Hypervisor-分类"><a href="#Hypervisor-分类" class="headerlink" title="Hypervisor 分类"></a>Hypervisor 分类</h4><ul>
+<li>裸金属型</li>
+<li>宿主型</li>
+</ul>
+<h3 id="虚拟化技术分类"><a href="#虚拟化技术分类" class="headerlink" title="虚拟化技术分类"></a>虚拟化技术分类</h3><h4 id="模拟器-x2F-软件仿真"><a href="#模拟器-x2F-软件仿真" class="headerlink" title="模拟器 &#x2F; 软件仿真"></a>模拟器 &#x2F; 软件仿真</h4><p>通过软件模拟完整的硬件环境来虚拟化来宾平台，可以模拟 X86、ARM 、PowerPC 等多种 CPU</p>
+<p>性能比较低</p>
+<p>产品或方案：QEMU</p>
+<h4 id="全虚拟化"><a href="#全虚拟化" class="headerlink" title="全虚拟化"></a>全虚拟化</h4><p>全虚拟化不做 CPU 和内存模拟，只对 CPU 和内存做相应的分配等操作</p>
+<h5 id="软件辅助的全虚拟化"><a href="#软件辅助的全虚拟化" class="headerlink" title="软件辅助的全虚拟化"></a>软件辅助的全虚拟化</h5><p>在 Intel 等 CPU 厂商还没有发布 x86 CPU 虚拟化技术之前，完全虚拟化都是通过软件辅助的方式来实现的</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604733842976.png"></p>
+<h5 id="硬件辅助的完全虚拟化"><a href="#硬件辅助的完全虚拟化" class="headerlink" title="硬件辅助的完全虚拟化"></a>硬件辅助的完全虚拟化</h5><p>2005 年 Intel 提出并开发了由 CPU 直接支持的虚拟化技术，CPU 可以明确的分辨出来自 GuestOS 的特权指令，并针对 GuestOS 进行特权操作，而不会影响到 HostOS。</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604733918601.png"></p>
+<p>将虚拟化模块加载到 HostOS 的内核中,例如:KVM。<br>KVM 通过在 HostOS 内核中加载 KVM Kernel Module 来将 HostOS 转换成为一个 VMM。所以此时 VMM 可以看作是 HostOS，反之亦然。</p>
+<h4 id="半虚拟化"><a href="#半虚拟化" class="headerlink" title="半虚拟化"></a>半虚拟化</h4><p>半虚拟化要求 guest OS 知道自己运行在虚拟化环境中，因此 guest OS 的系统架构必须和宿主机的系统架构相同，并且要求对 guest OS 的内核做相应的修改。</p>
+<p>如果不修改内核而实现半虚拟化，可以在每一个 GuestOS 中安装半虚拟化软件，如 VMTools、RHEVTools。</p>
+<h3 id="云计算"><a href="#云计算" class="headerlink" title="云计算"></a>云计算</h3><p>美国国家标准与技术研究院（NIST）定义：</p>
+<blockquote>
+<p>云计算是一种按使用量付费的模式，这种模式提供可用的、便捷的、按需的网络访问， 进入可配置的计算资源共享池（资源包括网络，服务器，存储，应用软件，服务），这些资源能够被快速提供，只需投入很少的管理工作，或与服务供应商进行很少的交互</p>
+</blockquote>
+<ul>
+<li>公有云：阿里云、腾讯云等，个人都可以付费使用，不需要关心底层硬件，但是数据安全需要考虑</li>
+<li>私有云：在自己公司内部或 IDC 自建 Openstack、VMware 等环境</li>
+<li>混合云：既要使用公有云，又要使用私有云，即自己的私有云的部分业务和公有云有交接，这部分称为混合云</li>
+</ul>
+<p>云计算分层：SaaS、PaaS、IaaS</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1610267352052.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1610267374788.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614168890933.png"></p>
+<ul>
+<li>IaaS：按需创建主机</li>
+<li>PaaS：按需创建应用程序并部署应用程序</li>
+</ul>
+<p>虚拟化和云计算：</p>
+<p>云计算是一种服务模式，虚拟化是一种技术；</p>
+<p>虚拟化是云计算的重要支撑技术。</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="center">虚拟化</th>
+<th align="center">云</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">定义</td>
+<td align="center">技术</td>
+<td align="center">方法</td>
+</tr>
+<tr>
+<td align="left">目的</td>
+<td align="center">从 1 个物理硬件系统创建多个模拟环境</td>
+<td align="center">汇聚并自动化分配虚拟资源以供按需使用</td>
+</tr>
+<tr>
+<td align="left">用途</td>
+<td align="center">针对具体用途为特定用户提供打包资源</td>
+<td align="center">针对多种用途为用户群组提供不同资源</td>
+</tr>
+<tr>
+<td align="left">配置</td>
+<td align="center">基于镜像</td>
+<td align="center">基于模板</td>
+</tr>
+<tr>
+<td align="left">使用寿命</td>
+<td align="center">数年（长期）</td>
+<td align="center">数小时至数月（短期）</td>
+</tr>
+<tr>
+<td align="left">成本</td>
+<td align="center">资本支出（CAPEX）高、运营支出（OPEX）低</td>
+<td align="center">私有云：CAPEX 高、OPEX 低 公共云：CAPEX 低、OPEX 高</td>
+</tr>
+<tr>
+<td align="left">可扩展性</td>
+<td align="center">纵向扩展</td>
+<td align="center">横向扩展</td>
+</tr>
+<tr>
+<td align="left">工作负载</td>
+<td align="center">有状态</td>
+<td align="center">无状态</td>
+</tr>
+<tr>
+<td align="left">租赁</td>
+<td align="center">单一租户</td>
+<td align="center">多个租户</td>
+</tr>
+</tbody></table>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.redhat.com/zh/topics/cloud-computing/cloud-vs-virtualization">https://www.redhat.com/zh/topics/cloud-computing/cloud-vs-virtualization</a></p>
+<h2 id="虚拟化技术之-KVM-架构和部署"><a href="#虚拟化技术之-KVM-架构和部署" class="headerlink" title="虚拟化技术之 KVM 架构和部署"></a>虚拟化技术之 KVM 架构和部署</h2><h3 id="KVM-架构"><a href="#KVM-架构" class="headerlink" title="KVM 架构"></a>KVM 架构</h3><ul>
+<li><p>kvm 只提供了三个模块：kvm.ko、kvm_intel.ko、kvm_amd.ko，后两个模块是根据物理主机的 CPU 所属厂家自动匹配的</p>
+</li>
+<li><p>kvm 开发团队借用了 qemu 代码，并作了一些修改，形成了一套工具，也就是 qemu-kvm</p>
+</li>
+<li><p>&#x2F;dev&#x2F;kvm 设备是 kvm 虚拟出来的一个设备文件</p>
+</li>
+<li><p>&#x2F;dev&#x2F;kvm 只是 kvm 内核模块提供给用户空间的一个接口，这个接口被 qemu-kvm 调用，通过 ioctl 系统调用就可以给用户提供一个工具用以创建，删除，管理虚拟机等</p>
+</li>
+</ul>
+<p><strong>KVM 体系结构：</strong></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604735745767.png"></p>
+<ul>
+<li>KVM：初始化 CPU 硬件，打开虚拟机模式，负责 CPU、内存、中断控制器、时钟。由内核模块 kvm_xxx.ko 实现，工作在 Hypervisor，设备&#x2F;dev&#x2F;kvm，是一个字符设备，在用户空间可以通过 ioctl()系统调用来完成 KVM 创建、启动、为 VM 分配内存、读写 VCPU（虚拟 CPU）的寄存器、向 CPU 注入中断、时钟等管理功能</li>
+<li>QEMU：工作在用户空间，主要用于实现模拟 IO 设备，如显卡、网卡、硬盘等，qemu-kvm 进程，用于实现一个虚拟机实例</li>
+<li>libvirt：后文详细介绍</li>
+</ul>
+<p><strong>KVM 模块载入后的系统的运行模式：</strong></p>
+<img data-src="//img.to2b.cn/blog/ljk/1604736440428.png" style="zoom:150%;" />
+
+<ul>
+<li>内核模式：GuestOS 执行 I&#x2F;O 类操作，或其他的特殊指令的操作；又称为“来宾-内核”模式</li>
+<li>用户模式：代表 GuestOS 请求 I&#x2F;O 类操作</li>
+<li>来宾模式：GuestOS 的非 I&#x2F;O 类操作；有被称为“来宾-用户“模式，称作虚拟机的用户模式更贴切</li>
+</ul>
+<p><strong>KVM 的组件：</strong></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604736735407.png"></p>
+<p><strong>KVM 功能：</strong></p>
+<ul>
+<li>支持 CPU 和 Memory 超分(Overcommit)</li>
+<li>支持半虚拟化 I&#x2F;O (virtio)</li>
+<li>支持热插拔 (cpu、块设备、网络设备等)</li>
+<li>支持对称多处理(Symmetric Multi-Processing 缩写为 SMP )</li>
+<li>支持实时迁移(Live Migration)</li>
+<li>支持 PCI 设备直接分配和 单根 I&#x2F;O 虚拟化 (SR-IOV)</li>
+<li>支持内核同页合并 (KSM )</li>
+<li>支持 NUMA (Non-Uniform Memory Access 非一致存储访问结构 )</li>
+</ul>
+<p><strong>QEMU：</strong></p>
+<p>Qemu 是纯软件实现的虚拟化模拟器，几乎可以模拟任何硬件设备，能够模拟一台能够独立运行操作系统的虚拟机，因为 Qemu 是纯软件实现的，所有的指令都要经 Qemu，性能非常低，所以，在生产环境中，大多数的做法都是配合 KVM 来完成虚拟化工作，KVM 完成复杂及要求比较高的设备虚拟化，而 Qemu 完成像鼠标、键盘等设备的虚拟化。</p>
+<p><strong>KVM 和 Xen：</strong></p>
+<p>总的来说，Xen 性能更高，但是 KVM 更简单易用，所以 KVM 更流行</p>
+<p>目前在各大公有云厂商新购买的虚拟机基本运行在 KVM 环境下,就连早期一直使用 Xen 的 AWS 也在 2017 年开始逐渐转换到 KVM 环境</p>
+<h3 id="RHEL-CentOS-虚拟设备三种工作模式"><a href="#RHEL-CentOS-虚拟设备三种工作模式" class="headerlink" title="RHEL(CentOS)虚拟设备三种工作模式"></a>RHEL(CentOS)虚拟设备三种工作模式</h3><p>Red Hat Enterprise Linux 7 的虚拟化功能为虚拟机提供了三种不同形式的系统设备。这些硬件设备都被显示为物理连接到虚拟机，但设备的驱动以不同方式工作。这三种形式包括：</p>
+<ul>
+<li>虚拟和仿真设备</li>
+<li>半虚拟化设备</li>
+<li>物理共享设备</li>
+</ul>
+<p><strong>虚拟和仿真设备：</strong></p>
+<p>完全使用软件实现的虚拟化设备</p>
+<p><strong>半虚拟化设备：</strong></p>
+<ul>
+<li>KVM 为虚拟机提供准虚拟化设备，它使用 Virtio API 作为 VMM 和 GuestOS 的中间层</li>
+<li>virtio 设备由两部分组成：主机设备和客机驱动。半虚拟化设备驱动允许 GuestOS 访问 HostOS 上的物理设备</li>
+<li>半虚拟化设备的驱动必须安装在客机操作系统上</li>
+<li>当虚拟机运行大小需要密集 I&#x2F;O 操作的应用程序时，推荐使用半虚拟化设备,而不是使用仿真设备</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash">半虚拟化网络设备：virtio-net
+半虚拟化块设备：virtio-blk
+半虚拟化控制器设备：virtio-scsi
+半虚拟化时钟：
+半虚拟化串口设备：virtio-serial
+气球设备：virtio-balloon
+半虚拟化随机数字生成器：virtio-rng
+半虚拟化图形卡：</code></pre>
+
+<p><strong>透传物理主机设备：</strong></p>
+<p>特定硬件平台允许虚拟机直接访问多种硬件设备及组件。在虚拟化中,此操作被称为“设备分配 ”(device assignment)。设备分配又被称作 “传递 ”(passthrough)</p>
+<pre class="language-none"><code class="language-none">VFIO 设备分配：
+USB 传递：
+SR-IOV：
+NPIV：</code></pre>
+
+<h3 id="KVM-集中管理和控制"><a href="#KVM-集中管理和控制" class="headerlink" title="KVM 集中管理和控制"></a>KVM 集中管理和控制</h3><ul>
+<li>oVirt：功能强大，Redhat 虚拟化管理平台 RHEV 的开源版</li>
+<li>WebVirtMgr：virt-manager 的 Web 模式的替代品</li>
+<li>OpenStack：最主流的开源虚拟化管理平台</li>
+<li>Proxmox virtualization environment：简称 PVE，开源免费的基于 linux 的企业级虚拟化方案，可以认为是简化版的 OpenStack</li>
+</ul>
+<p>重点学习 OpenStack 和 PVE</p>
+<h3 id="安装-KVM-工具包"><a href="#安装-KVM-工具包" class="headerlink" title="安装 KVM 工具包"></a>安装 KVM 工具包</h3><ul>
+<li>qemu-kvm：为 kvm 提供底层仿真支持</li>
+<li>libvirt-daemon：libvirtd 守护进程，管理虚拟机</li>
+<li>libvirt-client：用户端软件，提供客户端管理命令</li>
+<li>libvirt-daemon-driver-qemu：libvirtd 连接 qemu 的驱动</li>
+<li>libvirt：提供统一 API，是使用最多的 KVM 虚拟化管理工具，通过 libvirt 调用 KVM 创建虚拟机，其不但能管理 KVM，还能管理 VMware、Xen、Hyper-V、virtualBox 等虚拟化方案</li>
+<li>virt-manager：图形界面管理工具，其底层是调用 libvirt API 来完成对虚拟机的各种操作</li>
+<li>virt-install：虚拟机命令行安装工具</li>
+<li>virsh：基于 libvirt API 创建的命令行工具，它可以作为图形化的 virt-manager 应用的备选工具。</li>
+<li>virt-viewer：通过 VNC 和 SPICE 协议显示虚拟机器图形控制台的最小工具。该工具来自 virtviewer 程序包</li>
+<li>cockpit：CentOS8 专门提供的基于 Web 的虚拟机管理界面</li>
+</ul>
+<h4 id="libvirt-包功能"><a href="#libvirt-包功能" class="headerlink" title="libvirt 包功能"></a>libvirt 包功能</h4><p>libvirt 程序包提供：</p>
+<ol>
+<li>一个稳定的通用层来安全地管理主机上的虚拟机</li>
+<li>一个管理本地系统和联网主机的通用接口</li>
+</ol>
+<p>Libvirt API 是相对独立与 VMM 的虚拟化应用程序接口，在 VMM 支持的情况下，调用 Libvirt API 进行部署、创建、修改、监测、控制、迁移以及停止虚拟机等操作。</p>
+<p>尽管 libvirt 可同时访问多个主机，但 API 只限于单节点操作。</p>
+<p>libvirt 主要的功能是管理单节点主机，列举、监测和使用管理节点上的可用资源，其中包括 CPU、内存、储存、网络和非一致性内存访问(NUMA)分区。</p>
+<p>virt-manager 与 virsh 是基于 Libvirt API 构建的高级管理工具。管理工具可以位于独立于主机的物理机上，并通过安全协议和主机进行交流。</p>
+<p><strong>libvirt 结构图：</strong></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604749854253.png"></p>
+<h4 id="安装-KVM-相关包"><a href="#安装-KVM-相关包" class="headerlink" title="安装 KVM 相关包"></a>安装 KVM 相关包</h4><ul>
+<li>CentOS</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token parameter variable">-y</span> <span class="token function">install</span> qemu-kvm libvirt virt-manager virt-install  virt-viewer
+systemctl start <span class="token parameter variable">--now</span> libvirtd
+
+<span class="token comment"># CentOS 8 还提供基于Web的虚拟机管理方式</span>
+yum <span class="token parameter variable">-y</span> <span class="token function">install</span> cockpit</code></pre>
+
+<ul>
+<li>Ubuntu</li>
+</ul>
+<p>官方文档：<a target="_blank" rel="noopener" href="https://ubuntu.com/server/docs/virtualization-libvirt">https://ubuntu.com/server/docs/virtualization-libvirt</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># kvm-ok 验证是否支持kvm,只有Ubuntu支持,CentOS 不支持</span>
+<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> qemu-kvm virt-manager libvirt-daemon-system</code></pre>
+
+<h2 id="创建虚拟机"><a href="#创建虚拟机" class="headerlink" title="创建虚拟机"></a>创建虚拟机</h2><p>三种方式：</p>
+<ol>
+<li>virt-manger 工具交互式安装</li>
+<li>virt-install 命令安装</li>
+<li>基于现有虚拟机磁盘为模版创建新的虚拟机</li>
+</ol>
+<p>重点掌握 virt-install 命令配合 PXE 自动实现自动安装系统</p>
+<h3 id="virt-install-命令"><a href="#virt-install-命令" class="headerlink" title="virt-install 命令"></a>virt-install 命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">virt-install <span class="token parameter variable">--help</span></code></pre>
+
+<p>virt-install 的选项很多，需要好好研究，但是这里就不一一列举了</p>
+<h3 id="qemu-img-命令"><a href="#qemu-img-命令" class="headerlink" title="qemu-img 命令"></a>qemu-img 命令</h3><p>利用 qemu-img 命令创建虚拟磁盘，注意: qemu-img create 会覆盖原文件，所以要先检查是否有同名文件存在</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> qemu-img create <span class="token parameter variable">-f</span> qcow2 /var/lib/libvirt/images/centos7-pxe1.qcow2 20G</code></pre>
+
+<h3 id="范例：virt-install-amp-PXE"><a href="#范例：virt-install-amp-PXE" class="headerlink" title="范例：virt-install &amp; PXE"></a>范例：virt-install &amp; PXE</h3><p>HostOS：ubuntu20.04 （物理机）</p>
+<p>GuestOS：Centos7</p>
+<ol>
+<li><p>配置 PXE 环境，参考前面的笔记</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">install</span>
+xconfig <span class="token parameter variable">--startxonboot</span>
+keyboard <span class="token parameter variable">--vckeymap</span><span class="token operator">=</span>us <span class="token parameter variable">--xlayouts</span><span class="token operator">=</span><span class="token string">'us'</span>
+lang en_US.UTF-8
+rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$1</span><span class="token variable">$YyodG</span>.X7<span class="token variable">$LzhHqxWONgSh0NBoC730o0</span>
+url <span class="token parameter variable">--url</span><span class="token operator">=</span><span class="token string">"http://10.0.0.1/centos/7/os/x86_64"</span>
+auth <span class="token parameter variable">--useshadow</span> <span class="token parameter variable">--passalgo</span><span class="token operator">=</span>sha512
+text
+firstboot <span class="token parameter variable">--enable</span>
+selinux <span class="token parameter variable">--disabled</span>
+skipx
+services <span class="token parameter variable">--disabled</span><span class="token operator">=</span><span class="token string">"chronyd"</span>
+ignoredisk --only-use<span class="token operator">=</span>vda
+firewall <span class="token parameter variable">--disabled</span>
+network <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--device</span><span class="token operator">=</span>eth0
+network <span class="token parameter variable">--hostname</span><span class="token operator">=</span>c7
+<span class="token function">reboot</span>
+timezone Asia/Shanghai <span class="token parameter variable">--nontp</span>
+bootloader <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">"net.ifnames=0"</span> <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr --boot-drive<span class="token operator">=</span>vda
+zerombr
+clearpart <span class="token parameter variable">--all</span> <span class="token parameter variable">--initlabel</span>
+part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>vda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">300</span>
+part pv.01 <span class="token parameter variable">--size</span> <span class="token number">1</span> <span class="token parameter variable">--grow</span>
+volgroup volgrp pv.01
+logvol swap <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>swap <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"swap"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">2048</span>
+logvol / <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--grow</span>
+%post
+<span class="token function">useradd</span> lujinkai
+%end
+%packages
+@^minimal
+@core
+%end</code></pre>
+</li>
+<li><p>qemu-img 命令创建虚拟磁盘</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> qemu-img create <span class="token parameter variable">-f</span> qcow2 /var/lib/libvirt/images/centos7-pxe1.qcow2 20G</code></pre>
+</li>
+<li><p>virt-install 命令安装</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> virt-install <span class="token punctuation">\</span>
+--virt-type kvm <span class="token punctuation">\</span>
+<span class="token parameter variable">--name</span> centos7-pxe1 <span class="token punctuation">\</span>
+<span class="token parameter variable">--memory</span> <span class="token number">2048</span> <span class="token punctuation">\</span>
+<span class="token parameter variable">--vcpus</span> <span class="token number">1</span> <span class="token punctuation">\</span>
+<span class="token parameter variable">--disk</span> <span class="token assign-left variable">path</span><span class="token operator">=</span>/var/lib/libvirt/images/centos7-pxe1.qcow2,bus<span class="token operator">=</span>virtio <span class="token punctuation">\</span>
+<span class="token parameter variable">--network</span> <span class="token assign-left variable">network</span><span class="token operator">=</span>default <span class="token punctuation">\</span>
+<span class="token parameter variable">--graphics</span> vnc,listen<span class="token operator">=</span><span class="token number">0.0</span>.0.0 <span class="token punctuation">\</span>
+<span class="token parameter variable">--location</span><span class="token operator">=</span>/usr/local/src/CentOS-7-x86_64-Minimal-2003.iso <span class="token punctuation">\</span>
+--extra-args<span class="token operator">=</span><span class="token string">"ks=http://10.0.0.1/ks/centos7.cfg"</span></code></pre>
+
+<p><font color=red>注意：</font> –disk 的 bus 选项一定要指定，因为默认 bus&#x3D;scsi，而这里直接在 ubutu 物理机中安装，硬盘是 sata，可以指定 bus&#x3D;sata，不过这样是全虚拟化，而指定 bus&#x3D;virtio 是半虚拟化，性能更好</p>
+</li>
+<li><p>安装成功，初始化配置，这里只说一点：</p>
+<p>关于 ssh 连接慢的问题，宿主机 ubuntu 修改&#x2F;etc&#x2F;ssh&#x2F;ssh_conf：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">GSSAPIAuthentication no
+
+ServerAliveInterval <span class="token number">55</span>
+ServerAliveCountMax <span class="token number">9</span>
+</code></pre>
+
+<p>来宾机 centos 修改&#x2F;etc&#x2F;ssh&#x2F;sshd_conf：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">UseDNS no	<span class="token comment"># 跳过dns验证</span></code></pre></li>
+</ol>
+<h3 id="范例：基于现有虚拟机磁盘为模版创建新的虚拟机"><a href="#范例：基于现有虚拟机磁盘为模版创建新的虚拟机" class="headerlink" title="范例：基于现有虚拟机磁盘为模版创建新的虚拟机"></a>范例：基于现有虚拟机磁盘为模版创建新的虚拟机</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 先复制</span>
+lujinkai@Z510:~$ <span class="token builtin class-name">cd</span> /var/lib/libvirt/images/
+lujinkai@Z510:/var/lib/libvirt/images$ <span class="token function">sudo</span> <span class="token function">cp</span> centos7-pxe1.qcow2 centos7-pxe3.qcow2
+<span class="token comment"># 然后创建</span>
+lujinkai@Z510:/var/lib/libvirt/images$ <span class="token function">sudo</span> virt-install <span class="token punctuation">\</span>
+<span class="token operator">></span> --virt-type kvm <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--name</span> centos7-pxe3 <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--memory</span> <span class="token number">2048</span> <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--vcpus</span> <span class="token number">1</span> <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--disk</span> <span class="token assign-left variable">bus</span><span class="token operator">=</span>virtio,path<span class="token operator">=</span>/var/lib/libvirt/images/centos7-pxe3.qcow2 <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--network</span> <span class="token assign-left variable">network</span><span class="token operator">=</span>default,model<span class="token operator">=</span>virtio <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--graphics</span> vnc,listen<span class="token operator">=</span><span class="token number">0.0</span>.0.0 <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--noautoconsole</span> <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--autostart</span> <span class="token punctuation">\</span>
+<span class="token operator">></span> <span class="token parameter variable">--boot</span> hd
+WARNING  未检测到操作系统，虚拟机性能可能会受到影响。使用 --os-variant 选项指定操作系统以获得最佳性能。
+
+开始安装<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>
+域创建完成。</code></pre>
+
+<p>这样相当于直接拷贝镜像，开机后会发现 ip 冲突，需要手动修改 ip，不过 MAC 没有冲突</p>
+<h2 id="管理虚拟机"><a href="#管理虚拟机" class="headerlink" title="管理虚拟机"></a>管理虚拟机</h2><h3 id="使用半虚拟化驱动-virtio"><a href="#使用半虚拟化驱动-virtio" class="headerlink" title="使用半虚拟化驱动 virtio"></a>使用半虚拟化驱动 virtio</h3><p>为了提高内存、硬盘、网络的性能，需要支持半虚拟化</p>
+<h4 id="virtio-工作原理"><a href="#virtio-工作原理" class="headerlink" title="virtio 工作原理"></a>virtio 工作原理</h4><p>virtio 是一种 I&#x2F;O 半虚拟化解决方案,是一套通用 I&#x2F;O 设备虚拟化的程序，是对半虚拟化 Hypervisor 中的一组通用 I&#x2F;O 设备的抽象，提供了一套上层应用与各 Hypervisor 虚拟化设备（KVM，Xen，VMware）之间的通信框架和编程接口，减少跨平台所带来的兼容性问题，大大提高驱动程序开发效率，windows 系统需要单独安装 virtio 驱 动，linux 系统自带 virtio 驱动</p>
+<img data-src="//img.to2b.cn/blog/ljk/1604972341007.png" style="zoom: 50%;" />
+
+<img data-src="//img.to2b.cn/blog/ljk/1604972371669.png" style="zoom:50%;" />
+
+<img data-src="//img.to2b.cn/blog/ljk/1604973329811.png" style="zoom: 67%;" />
+
+<p>virtio 使用 virtqueue 来实现 I&#x2F;O 机制，每个 virtqueue 就是一个承载大量数据的队列，具体使用多少个队列取决于需求，例如,virtio 网络驱动程序(virtio-net)使用两个队列(一个用于接受，另一个用于发送)，而 virtio 块驱动程序(virtio-blk)仅使用一个队列</p>
+<img data-src="//img.to2b.cn/blog/ljk/1604973449546.png" style="zoom:;" />
+
+<p>使用统一的 virtio 接口，可以支持多种硬件设备：</p>
+<ul>
+<li>不同的虚拟设备和不同的虚拟机可以有不同的前端驱动</li>
+<li>不同的硬件设备可以有不同的后端驱动</li>
+<li>两者之间的交互遵循 virtio 的标准</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604973998582.png"></p>
+<h4 id="virtio-驱动安装"><a href="#virtio-驱动安装" class="headerlink" title="virtio 驱动安装"></a>virtio 驱动安装</h4><p>Linux 自带，Windows 需要额外安装</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 如果有红帽的RHN订阅,可以从以下位置下载virtio-win包</span>
+https://rhn.redhat.com/rhn/software/packages/details/Overview.do?pid<span class="token operator">=</span><span class="token number">868414</span>
+<span class="token comment"># 从社区获得</span>
+http://www.linux-kvm.org/page/Downloads
+https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html</code></pre>
+
+<h3 id="安装与配置-QEMU-guest-agent"><a href="#安装与配置-QEMU-guest-agent" class="headerlink" title="安装与配置 QEMU guest agent"></a>安装与配置 QEMU guest agent</h3><p>在 GuestOS（VM）中安装 QEMU guest agent，HostOS 就可以调用 libvirt 向 VM 发送命令，例如：“冻结”、“释放文件系统、虚拟 CPU 的热添加及移除等</p>
+<ul>
+<li>RHEL&#x2F;CentOS 中有相应的安装包：qemu-guest-agent-xxx.rpm</li>
+<li>Windows 需要手工安装</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token function">install</span> qemu-guest-agent.x86_64
+<span class="token comment"># 启动</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start qemu-guest-agent.service</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token function">shutdown</span> <span class="token parameter variable">--mode</span><span class="token operator">=</span>agen	<span class="token comment"># 比--mode=acpi更加安全地关闭操作系统</span>
+<span class="token function">virsh</span> snapshot-create <span class="token parameter variable">-quiesce</span>	<span class="token comment"># 在创建快照之前面,将缓存的内容刷入到磁盘</span>
+<span class="token function">virsh</span> domfsfreeze	<span class="token comment"># 静默文件系统</span>
+<span class="token function">virsh</span> domfsthaw		<span class="token comment"># 恢复静默的文件系统</span>
+<span class="token function">virsh</span> domfstrim		<span class="token comment"># 让虚拟机trim文件系统</span>
+<span class="token function">virsh</span> domtime		<span class="token comment"># 获得虚拟机的时间</span>
+<span class="token function">virsh</span> setvcpus		<span class="token comment"># 配置虚拟机的vCPU</span>
+<span class="token function">virsh</span> domifaddr <span class="token parameter variable">--source</span> agent	<span class="token comment"># 查询虚拟机的IP地址</span>
+<span class="token function">virsh</span> domfsinfo		<span class="token comment"># 显示虚拟机的文件系统列表</span>
+<span class="token function">virsh</span> set-user-password <span class="token comment"># 设置虚拟机用户的密码</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ <span class="token function">virsh</span> domfsinfo centos7-pxe1
+ Mountpoint   Name   Type   Target
+------------------------------------
+ /            dm-0   ext4   vda
+ /boot        vda1   ext4   vda
+
+lujinkai@Z510:~$ <span class="token function">virsh</span> domifaddr <span class="token parameter variable">--source</span> agent centos7-pxe1
+ Name       MAC address          Protocol     Address
+-------------------------------------------------------------------------------
+ lo         00:00:00:00:00:00    ipv4         <span class="token number">127.0</span>.0.1/8
+ -          -                    ipv6         ::1/128
+ eth0       <span class="token number">52</span>:54:00:5b:08:5d    ipv4         <span class="token number">10.0</span>.0.71/24
+ -          -                    ipv6         fe80::5054:ff:fe5b:85d/64</code></pre>
+
+<h3 id="安装和配置-SPICE-agent"><a href="#安装和配置-SPICE-agent" class="headerlink" title="安装和配置 SPICE agent"></a>安装和配置 SPICE agent</h3><p>在 VM 操作系统中安装 SPICE client、SPICE agent 可以让 virt-manager 等图形应用程序更加流畅</p>
+<ul>
+<li>在 virt-manager 中调整窗口尺寸，SPICE agent 自动调整 X 会话的分辨率</li>
+<li>在 Host 与 Guest 之间复制与粘贴</li>
+<li>防止鼠标拖尾等</li>
+</ul>
+<h2 id="libvirt-管理虚拟机"><a href="#libvirt-管理虚拟机" class="headerlink" title="libvirt 管理虚拟机"></a>libvirt 管理虚拟机</h2><p>主要通过 virsh 和 virst-manager 这两个工具调用 libvirt 来实现虚拟机的管理</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1604989585145.png"></p>
+<p><strong>注意: 如果 libvirtd 服务意外关闭，将导致相关工具，如 virt-manager 和 virsh 等无法和虚拟机连接，但虚拟机仍会正常运行</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">systemctl start libvirtd.service</code></pre>
+
+<h3 id="virsh-命令"><a href="#virsh-命令" class="headerlink" title="virsh 命令"></a>virsh 命令</h3><p>virsh 可以认为是 virt-manager 的命令行工具</p>
+<p>两种工作模式：交互式和非交互式，重点掌握非交互式</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token parameter variable">--help</span>	<span class="token comment"># 查看帮助</span>
+<span class="token function">virsh</span> <span class="token builtin class-name">help</span> <span class="token builtin class-name">command</span>	<span class="token comment"># 查看子命令帮助</span></code></pre>
+
+<ul>
+<li>启动和关闭虚拟机</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> list						<span class="token comment"># 查看运行中的虚拟机</span>
+<span class="token function">virsh</span> list <span class="token parameter variable">--all</span>				<span class="token comment"># 查看所有虚拟机</span>
+<span class="token function">virsh</span> start     				<span class="token comment"># 启动虚拟机</span>
+<span class="token function">virsh</span> <span class="token function">shutdown</span>      			<span class="token comment"># 关闭虚拟机</span></code></pre>
+
+<ul>
+<li>暂停和恢复虚拟机</li>
+</ul>
+<p>暂停时，将内存、寄存器，缓存等全部状态保存到硬盘<br>恢复时，将保存下来的数据读取回去，所以就能按原来的状态运行了</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token function">suspend</span>		<span class="token comment"># 暂停虚拟机</span>
+<span class="token function">virsh</span> resume		<span class="token comment"># 回复虚拟机</span></code></pre>
+
+<ul>
+<li>配置虚拟机开机自启动：</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> autostart centos7-pxe1</code></pre>
+
+<ul>
+<li>查看虚拟机配置：</li>
+</ul>
+<p>每个虚拟机的配置默认存放在 &#x2F;etc&#x2F;libvirt&#x2F;qemu 目录下的 xml 文件中</p>
+<p>查看虚拟机配置：相当于查看 &#x2F;etc&#x2F;libvirt&#x2F;qemu&#x2F;centos7-pxe1.xml 文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> dumpxml <span class="token parameter variable">--domain</span> centos7-pxe1</code></pre>
+
+<ul>
+<li>删除虚拟机配置：</li>
+</ul>
+<p>删除虚拟机配置（qemu&#x2F;xxx.xml），但是不删除磁盘文件（images&#x2F;xxx.qcow2）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> undefine centos7-pxe1</code></pre>
+
+<h2 id="存储管理"><a href="#存储管理" class="headerlink" title="存储管理"></a>存储管理</h2><p>KVM 中，存储主要有两个概念：</p>
+<ol>
+<li>存储池</li>
+<li>存储卷</li>
+</ol>
+<h3 id="存储池"><a href="#存储池" class="headerlink" title="存储池"></a>存储池</h3><p>libvirt 以存储池的形式对存储进行统一管理，简化操作</p>
+<p>存储池有很多种类型，这取决于存储池是基于什么“介质”创建的，以下是存储池支持的“介质”，分为两种：文件系统 和 磁盘：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 文件系统：</span>
+dir：文件系统目录，就是一个目录
+fs：预格式化设备，就是一个创建了文件系统的分区，例如：/dev/sdb6
+netfs：网络导出的目录，例如 nfs、samba
+
+<span class="token comment"># 磁盘：</span>
+disk：物理磁盘设备，直接读写硬盘设备，例如： /dev/sdb
+scsi：本地SCSI存储，例如：host0（/sys/class/scsi_host/host0）
+iscsi：网络共享iSCSI存储
+logical：LVM卷组，最常用，推荐
+
+<span class="token comment"># 不太清楚文件系统还是磁盘：</span>
+gluster：Gluster 文件系统
+mpath：多路径设备枚举器
+rbd:RADOS 设备块/Ceph
+sheepdog：Sheepdog文件系统，分布式文件系统
+zfs：ZFS pool</code></pre>
+
+<h3 id="存储卷"><a href="#存储卷" class="headerlink" title="存储卷"></a>存储卷</h3><p><img data-src="//img.to2b.cn/blog/ljk/1605619798709.png"></p>
+<p>存储卷在存储池中，存储卷的类型取决于存储池的类型：</p>
+<p>如果存储池基于文件系统，其中的存储卷就是文件，例如 dir、fs、netfs；<br>如果存储池是基于磁盘，其中的存储卷就是其对应的数据块，例如 logical 对应逻辑卷、disk 对应分区；</p>
+<h4 id="qcow2-和-lv"><a href="#qcow2-和-lv" class="headerlink" title="qcow2 和 lv"></a>qcow2 和 lv</h4><p>稀疏文件：从表现形式上来看，当 ls 和 du 命令查看文件，显示的大小不一样，那这个文件就是稀疏文件</p>
+<p>虚拟机可以安装在不同的介质上，重点掌握两种：磁盘镜像 和 逻辑卷</p>
+<ul>
+<li>磁盘镜像</li>
+</ul>
+<p>磁盘镜像就是个文件，可以存储在各种文件系统中</p>
+<p>磁盘镜像的格式有好几种，最常用的是 qcow2 格式，qcow2 格式的镜像文件功能丰富，支持如快照、压缩及加密等功能，缺点就是性能不太好</p>
+<p>上文创建虚拟机用的就是磁盘镜像</p>
+<ul>
+<li>逻辑卷</li>
+</ul>
+<p>虚拟机直接安装在磁盘，性能最好，LVM 性能稍差，但是更加灵活，所以推荐 LVM，将虚拟机安装在逻辑卷中</p>
+<p>使用 virt-manager 将虚拟机安装在逻辑卷，关键点在 step 4，选择自定义的存储，即选择逻辑卷</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605618457482.png"></p>
+<p>安装完后启动可能会报错，重启 libvirt 就好了</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605616246298.png"></p>
+<p>virt-install 安装虚拟机到逻辑卷，和前面安装虚拟机到磁盘镜像中的区别就是–disk 选项，其他都一样：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--disk</span> <span class="token assign-left variable">path</span><span class="token operator">=</span>/dev/vm_images_lvm/lv2,bus<span class="token operator">=</span>virtio <span class="token punctuation">\</span></code></pre>
+
+<h3 id="离线工具"><a href="#离线工具" class="headerlink" title="离线工具"></a>离线工具</h3><p>不启动虚拟机的情况下，直接访问管理虚拟机对应的磁盘，即离线访问</p>
+<h4 id="离线工具应用"><a href="#离线工具应用" class="headerlink" title="离线工具应用"></a>离线工具应用</h4><ul>
+<li>拯救和修复客户无法启动或需要更改启动配置的虚拟机</li>
+<li>准备新的磁盘映像，其中包含文件、目录、文件系统、分区、逻辑卷和其他选项</li>
+<li>查看或下载虚拟机磁盘中的文件；编辑或上传文件到虚拟机磁盘</li>
+<li>通过克隆和修改模板来部署虚拟机</li>
+<li>读取或写入虚拟机配置</li>
+<li>监控虚拟机的磁盘使用情况</li>
+</ul>
+<h4 id="guestfs"><a href="#guestfs" class="headerlink" title="guestfs"></a>guestfs</h4><p>guestfish 是一个基于 libguestfs API 的交互 shell</p>
+<p>libguestfs 提供了一个简单地访问虚机磁盘镜像文件的方法，即使是在虚拟机无法启动的情况下</p>
+<p>libguestfs 是由一组丰富的工具集组成，可以让管理员访问虚机文件，甚至调整和挽救文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">dnf <span class="token parameter variable">-y</span> <span class="token function">install</span> libguestfs-tools
+
+<span class="token comment"># 查看虚拟机的磁盘文件</span>
+<span class="token function">virsh</span> domblklist centos7
+
+<span class="token comment"># 只读方式打开虚拟磁盘，选项-i可以实现自动探查后进行自动挂载</span>
+guestfish <span class="token parameter variable">--ro</span> <span class="token parameter variable">-a</span> /var/lib/libvirt/images/centos7.qcow2 <span class="token parameter variable">-i</span>		<span class="token comment"># 交互式</span>
+
+<span class="token comment"># 读写方式打开虚拟磁盘</span>
+guestfish <span class="token parameter variable">-d</span> centos7 <span class="token parameter variable">-i</span>		<span class="token comment"># 交互式</span>
+</code></pre>
+
+<h4 id="其他离线工具"><a href="#其他离线工具" class="headerlink" title="其他离线工具"></a>其他离线工具</h4><pre class="language-bash" data-language="bash"><code class="language-bash">virt-df 			<span class="token comment"># 监视磁盘使用</span>
+virt-resize 		<span class="token comment"># 离线调整虚拟磁盘大小</span>
+virt-inspector 		<span class="token comment"># 虚拟机检视</span>
+virt-win-reg 		<span class="token comment"># Windows注册表读取和修改</span>
+virt-sysprep 		<span class="token comment"># 虚拟机设置重置</span></code></pre>
+
+<h2 id="网络管理"><a href="#网络管理" class="headerlink" title="网络管理"></a>网络管理</h2><p>官方文档：<a target="_blank" rel="noopener" href="https://wiki.libvirt.org/page/VirtualNetworking">https://wiki.libvirt.org/page/VirtualNetworking</a></p>
+<h3 id="nmcli-实现网桥"><a href="#nmcli-实现网桥" class="headerlink" title="nmcli 实现网桥"></a>nmcli 实现网桥</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建网桥</span>
+nmcli connection <span class="token function">add</span> <span class="token builtin class-name">type</span> bridge con-name br0 ifname br0
+nmcli connection modify br0 ipv4.addresses <span class="token number">10.0</span>.0.100/24 ipv4.method manual
+nmcli connection reload
+nmcli connection up br0
+
+<span class="token comment">#加入物理网卡</span>
+nmcli con <span class="token function">add</span> <span class="token builtin class-name">type</span> bridge-slave con-name br0-port0 ifname eth0 master br0
+nmcli con <span class="token function">add</span> <span class="token builtin class-name">type</span> bridge-slave con-name br0-port1 ifname eth1 master br0
+nmcli connection reload
+nmcli con up br0-port0
+nmcli con up br0-port1</code></pre>
+
+<h3 id="qemu-kvm-支持的网络"><a href="#qemu-kvm-支持的网络" class="headerlink" title="qemu-kvm 支持的网络"></a>qemu-kvm 支持的网络</h3><h3 id="默认网络架构"><a href="#默认网络架构" class="headerlink" title="默认网络架构"></a>默认网络架构</h3><p>默认虚拟机网络配置为 NAT 模式，相当于 wmware 的 ANT 模式</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605578835894.png"></p>
+<h3 id="自定义网桥架构"><a href="#自定义网桥架构" class="headerlink" title="自定义网桥架构"></a>自定义网桥架构</h3><p>自定义网桥架构：桥接网络可以让运行在宿主机上的虚拟机使用和宿主机相同网段的 IP，并且可以从外部直接访问到虚拟机，目前企业中大部分场景都使用桥接网络</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605625062472.png"></p>
+<p>网桥（或者交换机）一定是有网卡接口的，给网卡接口配置 ip，才能实现桥接的功能，默认的 nat 模式下，虚拟网桥 virbr0 的网卡接口是 virbr0-nic；自定义网桥架构中，网卡接口是 eth0</p>
+<p><code>ip a</code>显示 nat 模式下，virbr0-nic 没有 ip，自定义网桥模式下，eth0 没有 ip，而虚拟网桥 virbr0 和 virbr1 显示有 ip，这时为什么呢？ 我猜这是因为虽然我们常说给网卡配置 ip，但其实 ip 是配置在内核的，所以不论显示在哪里，都是网桥的 ip，形式不重要</p>
+<h3 id="用户自定义的隔离的虚拟网络"><a href="#用户自定义的隔离的虚拟网络" class="headerlink" title="用户自定义的隔离的虚拟网络"></a>用户自定义的隔离的虚拟网络</h3><p><img data-src="//img.to2b.cn/blog/ljk/1605625176480.png"></p>
+<h2 id="实战案例"><a href="#实战案例" class="headerlink" title="实战案例"></a>实战案例</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/kvm/" rel="tag"><i class="fa fa-tag"></i> kvm</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/LVS/LVS/" rel="prev" title="LVS">
+                  <i class="fa fa-chevron-left"></i> LVS
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/qemu-img/" rel="next" title="qemu-img">
+                  qemu-img <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="当不知道应答文件怎么写的时候，可以先手动安装一遍，然后参考其 anaconda-ks.cfg 文件 以下所有的用户密码都是 ljkk CentOS 6install text reboot url --url&#x3D;http:&#x2F;&#x2F;10.0.0.8&#x2F;centos&#x2F;6&#x2F;os&#x2F;x86_64&#x2F; lang en_US.UTF-8 keyboard us network --onboot yes --device">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS6、7、8kickstart应答文件">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/CentOS6%E3%80%817%E3%80%818kickstart%E5%BA%94%E7%AD%94%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="当不知道应答文件怎么写的时候，可以先手动安装一遍，然后参考其 anaconda-ks.cfg 文件 以下所有的用户密码都是 ljkk CentOS 6install text reboot url --url&#x3D;http:&#x2F;&#x2F;10.0.0.8&#x2F;centos&#x2F;6&#x2F;os&#x2F;x86_64&#x2F; lang en_US.UTF-8 keyboard us network --onboot yes --device">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T15:08:52.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="PXE">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/CentOS6%E3%80%817%E3%80%818kickstart%E5%BA%94%E7%AD%94%E6%96%87%E4%BB%B6/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/CentOS6%E3%80%817%E3%80%818kickstart%E5%BA%94%E7%AD%94%E6%96%87%E4%BB%B6/","path":"运维/运维自动化/系统部署/CentOS6、7、8kickstart应答文件/","title":"CentOS6、7、8kickstart应答文件"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CentOS6、7、8kickstart应答文件 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CentOS-6"><span class="nav-number">1.</span> <span class="nav-text">CentOS 6</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CentOS-7"><span class="nav-number">2.</span> <span class="nav-text">CentOS 7</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CentOS-8"><span class="nav-number">3.</span> <span class="nav-text">CentOS 8</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kvm-%E8%87%AA%E5%8A%A8%E5%BA%94%E7%AD%94%E6%96%87%E4%BB%B6-centos7"><span class="nav-number">4.</span> <span class="nav-text">kvm 自动应答文件(centos7)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kvm-%E5%AE%89%E8%A3%85%E5%9C%A8%E9%80%BB%E8%BE%91%E5%8D%B7"><span class="nav-number">4.1.</span> <span class="nav-text">kvm 安装在逻辑卷</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/CentOS6%E3%80%817%E3%80%818kickstart%E5%BA%94%E7%AD%94%E6%96%87%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CentOS6、7、8kickstart应答文件 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS6、7、8kickstart应答文件
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:08:52" itemprop="dateCreated datePublished" datetime="2020-12-09T23:08:52+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">运维自动化</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/" itemprop="url" rel="index"><span itemprop="name">系统部署</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>当不知道应答文件怎么写的时候，可以先手动安装一遍，然后参考其 anaconda-ks.cfg 文件</p>
+<p>以下所有的用户密码都是 ljkk</p>
+<h2 id="CentOS-6"><a href="#CentOS-6" class="headerlink" title="CentOS 6"></a>CentOS 6</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">install</span>
+text
+<span class="token function">reboot</span>
+url <span class="token parameter variable">--url</span><span class="token operator">=</span>http://10.0.0.8/centos/6/os/x86_64/
+lang en_US.UTF-8
+keyboard us
+network <span class="token parameter variable">--onboot</span> <span class="token function">yes</span> <span class="token parameter variable">--device</span> eth0 <span class="token parameter variable">--bootproto</span> dhcp <span class="token parameter variable">--noipv6</span>
+rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$6</span><span class="token variable">$CTxlVPMx</span>.O7NW6To<span class="token variable">$Ahp5HPWLJgKZguGM0</span>/48EBGmfo/6wLwiUIHkpHdM9g4TOt6onfiy1Xk1FlMMpJIsp4guQfp5OLLOdLs5rSGmX1
+authconfig <span class="token parameter variable">--enableshadow</span> <span class="token parameter variable">--passalgo</span><span class="token operator">=</span>sha512
+firewall <span class="token parameter variable">--disabled</span>
+selinux <span class="token parameter variable">--disabled</span>
+timezone Asia/Shanghai
+bootloader <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr <span class="token parameter variable">--driveorder</span><span class="token operator">=</span>sda <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">"crashkernel=auto rhgb quiet"</span>
+zerombr
+clearpart <span class="token parameter variable">--all</span> <span class="token parameter variable">--initlabel</span>
+part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>sda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1024</span>
+part pv.01 <span class="token parameter variable">--size</span> <span class="token number">1</span> <span class="token parameter variable">--grow</span>
+volgroup volgrp pv.01
+logvol swap <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>swap <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"swap"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">2048</span>
+logvol /data <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>data <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">51200</span>
+logvol / <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--grow</span>
+%packages
+@core
+@server-policy
+@workstation-policy
+autofs
+vim-enhanced
+%end
+%post
+<span class="token function">useradd</span> lujinkai
+<span class="token builtin class-name">echo</span> <span class="token number">123456</span> <span class="token operator">|</span> <span class="token function">passwd</span> <span class="token parameter variable">--stdin</span> lujinkai <span class="token operator">&amp;></span> /dev/null
+<span class="token function">mkdir</span> /etc/yum.repos.d/bak
+<span class="token function">mv</span> /etc/yum.repos.d/* /etc/yum.repos.d/bak
+<span class="token function">cat</span> <span class="token operator">></span> /etc/yum.repos.d/base.repo <span class="token operator">&lt;&lt;</span><span class="token string">EOF
+[base]
+name=base
+baseurl=file:///misc/cd
+gpgcheck=0
+EOF</span>
+%end</code></pre>
+
+<h2 id="CentOS-7"><a href="#CentOS-7" class="headerlink" title="CentOS 7"></a>CentOS 7</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">install</span>
+xconfig <span class="token parameter variable">--startxonboot</span>
+keyboard <span class="token parameter variable">--vckeymap</span><span class="token operator">=</span>us <span class="token parameter variable">--xlayouts</span><span class="token operator">=</span><span class="token string">'us'</span>
+rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$1</span><span class="token variable">$YyodG</span>.X7<span class="token variable">$LzhHqxWONgSh0NBoC730o0</span>
+url <span class="token parameter variable">--url</span><span class="token operator">=</span><span class="token string">"http://10.0.0.8/centos/7/os/x86_64"</span>
+lang en_US
+auth <span class="token parameter variable">--useshadow</span> <span class="token parameter variable">--passalgo</span><span class="token operator">=</span>sha512
+text
+firstboot <span class="token parameter variable">--enable</span>
+selinux <span class="token parameter variable">--disabled</span>
+skipx
+services <span class="token parameter variable">--disabled</span><span class="token operator">=</span><span class="token string">"chronyd"</span>
+ignoredisk --only-use<span class="token operator">=</span>sda
+firewall <span class="token parameter variable">--disabled</span>
+network <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--device</span><span class="token operator">=</span>eth0
+network <span class="token parameter variable">--hostname</span><span class="token operator">=</span>centos7.magedu.org
+<span class="token function">reboot</span>
+timezone Asia/Shanghai <span class="token parameter variable">--nontp</span>
+bootloader <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">"net.ifnames=0"</span> <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr --boot-drive<span class="token operator">=</span>sda
+zerombr
+clearpart <span class="token parameter variable">--all</span> <span class="token parameter variable">--initlabel</span>
+part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>sda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1024</span>
+part pv.01 <span class="token parameter variable">--size</span> <span class="token number">1</span> <span class="token parameter variable">--grow</span>
+volgroup volgrp pv.01
+logvol swap <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>swap <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"swap"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">2048</span>
+logvol /data <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>data <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">51200</span>
+logvol / <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--grow</span>
+%post
+<span class="token function">useradd</span> lujinkai
+%end
+%packages
+@core
+%end</code></pre>
+
+<h2 id="CentOS-8"><a href="#CentOS-8" class="headerlink" title="CentOS 8"></a>CentOS 8</h2><pre class="language-bash" data-language="bash"><code class="language-bash">ignoredisk --only-use<span class="token operator">=</span>sda
+zerombr
+text
+<span class="token function">reboot</span>
+clearpart <span class="token parameter variable">--all</span> <span class="token parameter variable">--initlabel</span>
+selinux <span class="token parameter variable">--disabled</span>
+firewall <span class="token parameter variable">--disabled</span>
+url <span class="token parameter variable">--url</span><span class="token operator">=</span>http://10.0.0.8/centos/8/os/x86_64/
+keyboard <span class="token parameter variable">--vckeymap</span><span class="token operator">=</span>us <span class="token parameter variable">--xlayouts</span><span class="token operator">=</span><span class="token string">'us'</span>
+lang en_US.UTF-8
+network <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--device</span><span class="token operator">=</span>eth0 <span class="token parameter variable">--ipv6</span><span class="token operator">=</span>auto <span class="token parameter variable">--activate</span>
+bootloader <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">"net.ifnames=0"</span> <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr --boot-drive<span class="token operator">=</span>sda
+network <span class="token parameter variable">--hostname</span><span class="token operator">=</span>centos8.magedu.org
+rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$6</span><span class="token variable">$CTxlVPMx</span>.O7NW6To<span class="token variable">$Ahp5HPWLJgKZguGM0</span>/48EBGmfo/6wLwiUIHkpHdM9g4TOt6onfiy1Xk1FlMMpJIsp4guQfp5OLLOdLs5rSGmX1
+firstboot <span class="token parameter variable">--enable</span>
+skipx
+services <span class="token parameter variable">--disabled</span><span class="token operator">=</span><span class="token string">"chronyd"</span>
+timezone Asia/Shanghai <span class="token parameter variable">--isUtc</span> <span class="token parameter variable">--nontp</span>
+user <span class="token parameter variable">--name</span><span class="token operator">=</span>lujinkai <span class="token parameter variable">--password</span><span class="token operator">=</span><span class="token variable">$6</span><span class="token variable">$CTxlVPMx</span>.O7NW6To<span class="token variable">$Ahp5HPWLJgKZguGM0</span>/48EBGmfo/6wLwiUIHkpHdM9g4TOt6onfiy1Xk1FlMMpJIsp4guQfp5OLLOdLs5rSGmX1 <span class="token parameter variable">--iscrypted</span> <span class="token parameter variable">--gecos</span><span class="token operator">=</span><span class="token string">"lujinkai"</span>
+part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>sda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1024</span>
+part pv.01 <span class="token parameter variable">--size</span> <span class="token number">1</span> <span class="token parameter variable">--grow</span>
+volgroup volgrp pv.01
+logvol swap <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>swap <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"swap"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">2048</span>
+logvol /data <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>data <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">51200</span>
+logvol / <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--grow</span>
+%packages
+@^minimal-environment
+kexec-tools
+%end
+%addon com_redhat_kdump <span class="token parameter variable">--enable</span> --reserve-mb<span class="token operator">=</span><span class="token string">'auto'</span>
+%end
+%anaconda
+pwpolicy root <span class="token parameter variable">--minlen</span><span class="token operator">=</span><span class="token number">6</span> <span class="token parameter variable">--minquality</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--notstrict</span> <span class="token parameter variable">--nochanges</span> <span class="token parameter variable">--notempty</span>
+pwpolicy user <span class="token parameter variable">--minlen</span><span class="token operator">=</span><span class="token number">6</span> <span class="token parameter variable">--minquality</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--notstrict</span> <span class="token parameter variable">--nochanges</span> <span class="token parameter variable">--emptyok</span>
+pwpolicy luks <span class="token parameter variable">--minlen</span><span class="token operator">=</span><span class="token number">6</span> <span class="token parameter variable">--minquality</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--notstrict</span> <span class="token parameter variable">--nochanges</span> <span class="token parameter variable">--notempty</span>
+%end</code></pre>
+
+<h2 id="kvm-自动应答文件-centos7"><a href="#kvm-自动应答文件-centos7" class="headerlink" title="kvm 自动应答文件(centos7)"></a>kvm 自动应答文件(centos7)</h2><p>系统安装完后，在家目录会有两个 cfg 文件，original-ks.cfg 是自己编辑的自动应答文件，anaconda-ks.cfg 是系统根据 original-ks.cfg 自动生成的应答文件</p>
+<ul>
+<li>original-ks.cfg</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">install</span>
+xconfig <span class="token parameter variable">--startxonboot</span>
+keyboard <span class="token parameter variable">--vckeymap</span><span class="token operator">=</span>us <span class="token parameter variable">--xlayouts</span><span class="token operator">=</span><span class="token string">'us'</span>
+lang en_US.UTF-8
+rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$1</span><span class="token variable">$YyodG</span>.X7<span class="token variable">$LzhHqxWONgSh0NBoC730o0</span>
+url <span class="token parameter variable">--url</span><span class="token operator">=</span><span class="token string">"http://10.0.0.1/centos/7/os/x86_64"</span>
+auth <span class="token parameter variable">--useshadow</span> <span class="token parameter variable">--passalgo</span><span class="token operator">=</span>sha512
+text
+firstboot <span class="token parameter variable">--enable</span>
+selinux <span class="token parameter variable">--disabled</span>
+skipx
+services <span class="token parameter variable">--disabled</span><span class="token operator">=</span><span class="token string">"chronyd"</span>
+ignoredisk --only-use<span class="token operator">=</span>vda
+firewall <span class="token parameter variable">--disabled</span>
+network <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--device</span><span class="token operator">=</span>eth0
+network <span class="token parameter variable">--hostname</span><span class="token operator">=</span>c7
+<span class="token function">reboot</span>
+timezone Asia/Shanghai <span class="token parameter variable">--nontp</span>
+bootloader <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">"net.ifnames=0"</span> <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr --boot-drive<span class="token operator">=</span>vda
+zerombr
+clearpart <span class="token parameter variable">--all</span> <span class="token parameter variable">--initlabel</span>
+part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>vda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">300</span>
+part pv.01 <span class="token parameter variable">--size</span> <span class="token number">1</span> <span class="token parameter variable">--grow</span>
+volgroup volgrp pv.01
+logvol swap <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>swap <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"swap"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">2048</span>
+logvol / <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--grow</span>
+%post
+<span class="token function">useradd</span> lujinkai
+%end
+%packages
+@^minimal
+@core
+%end</code></pre>
+
+<ul>
+<li>anaconda-ks.cfg</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#version=DEVEL</span>
+<span class="token comment"># System authorization information</span>
+auth <span class="token parameter variable">--useshadow</span> <span class="token parameter variable">--passalgo</span><span class="token operator">=</span>sha512
+<span class="token comment"># Install OS instead of upgrade</span>
+<span class="token function">install</span>
+<span class="token comment"># Use text mode install</span>
+text
+<span class="token comment"># Firewall configuration</span>
+firewall <span class="token parameter variable">--disabled</span>
+<span class="token comment"># Run the Setup Agent on first boot</span>
+firstboot <span class="token parameter variable">--enable</span>
+ignoredisk --only-use<span class="token operator">=</span>vda
+<span class="token comment"># Keyboard layouts</span>
+keyboard <span class="token parameter variable">--vckeymap</span><span class="token operator">=</span>us <span class="token parameter variable">--xlayouts</span><span class="token operator">=</span><span class="token string">'us'</span>
+<span class="token comment"># System language</span>
+lang en_US.UTF-8
+
+<span class="token comment"># Network information</span>
+network  <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--device</span><span class="token operator">=</span>eth0 <span class="token parameter variable">--activate</span>
+network  <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--hostname</span><span class="token operator">=</span>c7
+<span class="token comment"># Reboot after installation</span>
+<span class="token function">reboot</span>
+<span class="token comment"># Use network installation</span>
+url <span class="token parameter variable">--url</span><span class="token operator">=</span><span class="token string">"http://10.0.0.1/centos/7/os/x86_64"</span>
+<span class="token comment"># Root password</span>
+rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$1</span><span class="token variable">$YyodG</span>.X7<span class="token variable">$LzhHqxWONgSh0NBoC730o0</span>
+<span class="token comment"># SELinux configuration</span>
+selinux <span class="token parameter variable">--disabled</span>
+<span class="token comment"># System services</span>
+services <span class="token parameter variable">--disabled</span><span class="token operator">=</span><span class="token string">"chronyd"</span>
+<span class="token comment"># Do not configure the X Window System</span>
+skipx
+<span class="token comment"># System timezone</span>
+timezone Asia/Shanghai <span class="token parameter variable">--nontp</span>
+<span class="token comment"># X Window System configuration information</span>
+xconfig  <span class="token parameter variable">--startxonboot</span>
+<span class="token comment"># System bootloader configuration</span>
+bootloader <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">"net.ifnames=0 crashkernel=auto"</span> <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr --boot-drive<span class="token operator">=</span>vda
+<span class="token comment"># Clear the Master Boot Record</span>
+zerombr
+<span class="token comment"># Partition clearing information</span>
+clearpart <span class="token parameter variable">--all</span> <span class="token parameter variable">--initlabel</span>
+<span class="token comment"># Disk partitioning information</span>
+part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>vda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">300</span>
+part pv.60 <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"lvmpv"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">20179</span>
+volgroup volgrp <span class="token parameter variable">--pesize</span><span class="token operator">=</span><span class="token number">4096</span> pv.60
+logvol /  <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--grow</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp
+logvol swap  <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"swap"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">2048</span> <span class="token parameter variable">--name</span><span class="token operator">=</span>swap <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp
+
+%post
+<span class="token function">useradd</span> lujinkai
+%end
+
+%packages
+@^minimal
+@core
+kexec-tools
+
+%end
+
+%addon com_redhat_kdump <span class="token parameter variable">--enable</span> --reserve-mb<span class="token operator">=</span><span class="token string">'auto'</span>
+
+%end</code></pre>
+
+<h3 id="kvm-安装在逻辑卷"><a href="#kvm-安装在逻辑卷" class="headerlink" title="kvm 安装在逻辑卷"></a>kvm 安装在逻辑卷</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#version=DEVEL</span>
+<span class="token comment"># System authorization information</span>
+auth <span class="token parameter variable">--enableshadow</span> <span class="token parameter variable">--passalgo</span><span class="token operator">=</span>sha512
+<span class="token comment"># Use CDROM installation media</span>
+cdrom
+<span class="token comment"># Use graphical install</span>
+graphical
+<span class="token comment"># Run the Setup Agent on first boot</span>
+firstboot <span class="token parameter variable">--enable</span>
+ignoredisk --only-use<span class="token operator">=</span>vda
+<span class="token comment"># Keyboard layouts</span>
+keyboard <span class="token parameter variable">--vckeymap</span><span class="token operator">=</span>us <span class="token parameter variable">--xlayouts</span><span class="token operator">=</span><span class="token string">'us'</span>
+<span class="token comment"># System language</span>
+lang en_US.UTF-8
+
+<span class="token comment"># Network information</span>
+network  <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--device</span><span class="token operator">=</span>eth0 <span class="token parameter variable">--ipv6</span><span class="token operator">=</span>auto <span class="token parameter variable">--activate</span>
+network  <span class="token parameter variable">--hostname</span><span class="token operator">=</span>localhost.localdomain
+
+<span class="token comment"># Root password</span>
+rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$6</span><span class="token variable">$FyziLpCibU</span>/RQPqp<span class="token variable">$G56mBV90w0lM1xVCK6Bwsg4ANZd</span>/Gj8hKsENU3mfQAPoqBevdCyw.Dw88OkOHBUxpIoq7Zi.NQ6890l5Otzev.
+<span class="token comment"># System services</span>
+services <span class="token parameter variable">--disabled</span><span class="token operator">=</span><span class="token string">"chronyd"</span>
+<span class="token comment"># System timezone</span>
+timezone Asia/Shanghai <span class="token parameter variable">--isUtc</span> <span class="token parameter variable">--nontp</span>
+user <span class="token parameter variable">--name</span><span class="token operator">=</span>lujinkai <span class="token parameter variable">--password</span><span class="token operator">=</span><span class="token variable">$6</span><span class="token variable">$oKgYyszaGm2rHnk</span>/<span class="token variable">$cDyAFysw5bhQTT18sGCREat6ZkIfo9</span>/BlluiPlWmAfTk/48x9KukRepXoRelKqiA9tjRYFcWEmHivHjl2TOrR0 <span class="token parameter variable">--iscrypted</span> <span class="token parameter variable">--gecos</span><span class="token operator">=</span><span class="token string">"lujinkai"</span>
+<span class="token comment"># System bootloader configuration</span>
+bootloader <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">" crashkernel=auto"</span> <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr --boot-drive<span class="token operator">=</span>vda
+<span class="token comment"># Partition clearing information</span>
+clearpart <span class="token parameter variable">--none</span> <span class="token parameter variable">--initlabel</span>
+<span class="token comment"># Disk partitioning information</span>
+part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>vda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">300</span>
+part pv.428 <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"lvmpv"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>vda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">4819</span>
+volgroup centos <span class="token parameter variable">--pesize</span><span class="token operator">=</span><span class="token number">4096</span> pv.428
+logvol /  <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">4816</span> <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--vgname</span><span class="token operator">=</span>centos
+
+%packages
+@^minimal
+@core
+kexec-tools
+
+%end
+
+%addon com_redhat_kdump <span class="token parameter variable">--enable</span> --reserve-mb<span class="token operator">=</span><span class="token string">'auto'</span>
+
+%end
+
+%anaconda
+pwpolicy root <span class="token parameter variable">--minlen</span><span class="token operator">=</span><span class="token number">6</span> <span class="token parameter variable">--minquality</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--notstrict</span> <span class="token parameter variable">--nochanges</span> <span class="token parameter variable">--notempty</span>
+pwpolicy user <span class="token parameter variable">--minlen</span><span class="token operator">=</span><span class="token number">6</span> <span class="token parameter variable">--minquality</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--notstrict</span> <span class="token parameter variable">--nochanges</span> <span class="token parameter variable">--emptyok</span>
+pwpolicy luks <span class="token parameter variable">--minlen</span><span class="token operator">=</span><span class="token number">6</span> <span class="token parameter variable">--minquality</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--notstrict</span> <span class="token parameter variable">--nochanges</span> <span class="token parameter variable">--notempty</span>
+%end</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/PXE/" rel="tag"><i class="fa fa-tag"></i> PXE</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/" rel="prev" title="系统部署">
+                  <i class="fa fa-chevron-left"></i> 系统部署
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/system-config-kickstart/" rel="next" title="system-config-kickstart">
+                  system-config-kickstart <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

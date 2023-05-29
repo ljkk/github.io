@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="https:&#x2F;&#x2F;segmentfault.com&#x2F;a&#x2F;1190000041634906 了解概念 类型形参（Type parameter） 类型实参（Type argument） 类型形参列表（Type parameter list） 类型约束（Type constraint） 实例化（Instantiations） 泛型类型（Generic type） 泛型接收器（Generic receive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="go中的泛型">
+<meta property="og:url" content="http://blog.lujinkai.cn/Golang/go%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="https:&#x2F;&#x2F;segmentfault.com&#x2F;a&#x2F;1190000041634906 了解概念 类型形参（Type parameter） 类型实参（Type argument） 类型形参列表（Type parameter list） 类型约束（Type constraint） 实例化（Instantiations） 泛型类型（Generic type） 泛型接收器（Generic receive">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/lujinkai/1672892619535.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/lujinkai/1672899644005.png">
+<meta property="article:published_time" content="2023-02-23T06:16:56.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.470Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/lujinkai/1672892619535.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/Golang/go%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/Golang/go%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B/","path":"Golang/go中的泛型/","title":"go中的泛型"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>go中的泛型 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">了解概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF"><span class="nav-number">1.1.</span> <span class="nav-text">几种常见错误</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%9B%E5%9E%8B-receiver"><span class="nav-number">2.</span> <span class="nav-text">泛型 receiver</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%A4%E6%96%AD%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">动态判断变量类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%9B%E5%9E%8B%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">泛型函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E6%9B%B4%E5%8A%A0%E5%A4%8D%E6%9D%82"><span class="nav-number">4.</span> <span class="nav-text">接口更加复杂</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E5%BA%95%E5%B1%82%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.1.</span> <span class="nav-text">~ 指定底层类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E6%96%B9%E6%B3%95%E9%9B%86%EF%BC%88Method-set%EF%BC%89%E5%88%B0%E7%B1%BB%E5%9E%8B%E9%9B%86%EF%BC%88Type-set%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">从方法集（Method set）到类型集（Type set）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0%EF%BC%88implement%EF%BC%89%E5%AE%9A%E4%B9%89%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">4.2.1.</span> <span class="nav-text">接口实现（implement）定义的变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E7%9A%84%E4%BA%A4%E9%9B%86"><span class="nav-number">4.2.2.</span> <span class="nav-text">类型的交集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#interface-%E5%92%8C-any"><span class="nav-number">4.2.3.</span> <span class="nav-text">interface{} 和 any</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#comparable%EF%BC%88%E5%8F%AF%E6%AF%94%E8%BE%83%EF%BC%89%E5%92%8C-%E5%8F%AF%E6%8E%92%E5%BA%8F%EF%BC%88ordered%EF%BC%89"><span class="nav-number">4.2.4.</span> <span class="nav-text">comparable（可比较）和 可排序（ordered）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E7%9A%84%E4%B8%A4%E7%A7%8D%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.3.</span> <span class="nav-text">接口的两种类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%8E%A5%E5%8F%A3%EF%BC%88Basic-interface%EF%BC%89"><span class="nav-number">4.3.1.</span> <span class="nav-text">基本接口（Basic interface）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%8E%A5%E5%8F%A3%EF%BC%88General-interface%EF%BC%89"><span class="nav-number">4.3.2.</span> <span class="nav-text">一般接口（General interface）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%9B%E5%9E%8B%E6%8E%A5%E5%8F%A3"><span class="nav-number">4.4.</span> <span class="nav-text">泛型接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E5%AE%9A%E4%B9%89%E7%9A%84%E7%A7%8D%E7%A7%8D%E9%99%90%E5%88%B6%E8%A7%84%E5%88%99"><span class="nav-number">4.5.</span> <span class="nav-text">接口定义的种种限制规则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/Golang/go%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="go中的泛型 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          go中的泛型
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-02-23 14:16:56" itemprop="dateCreated datePublished" datetime="2023-02-23T14:16:56+08:00">2023-02-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000041634906">https://segmentfault.com/a/1190000041634906</a></p>
+<h2 id="了解概念"><a href="#了解概念" class="headerlink" title="了解概念"></a>了解概念</h2><ul>
+<li>类型形参（Type parameter）</li>
+<li>类型实参（Type argument）</li>
+<li>类型形参列表（Type parameter list）</li>
+<li>类型约束（Type constraint）</li>
+<li>实例化（Instantiations）</li>
+<li>泛型类型（Generic type）</li>
+<li>泛型接收器（Generic receiver）</li>
+<li>泛型函数（Generic function）</li>
+</ul>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MySlice<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T
+
+<span class="token keyword">type</span> MyMap<span class="token punctuation">[</span>K <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token builtin">int</span><span class="token punctuation">,</span> V <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">float64</span><span class="token punctuation">]</span> <span class="token keyword">map</span><span class="token punctuation">[</span>K<span class="token punctuation">]</span>V
+
+<span class="token keyword">type</span> MyStruct<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">]</span> <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+    Name <span class="token builtin">string</span>
+    Data T
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> IPrintData<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">]</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">Print</span><span class="token punctuation">(</span>data T<span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> MyChan<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">]</span> <span class="token keyword">chan</span> T
+
+<span class="token comment">// 类型形参可以互相套用</span>
+<span class="token keyword">type</span> WowStruct<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">float32</span><span class="token punctuation">,</span> S <span class="token punctuation">[</span><span class="token punctuation">]</span>T<span class="token punctuation">]</span> <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+    Data     S
+    MaxValue T
+    MinValue T
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/lujinkai/1672892619535.png"></p>
+<p><strong>任何泛型类型都必须传入类型实参实例化才可以使用：</strong></p>
+<pre class="language-none"><code class="language-none">m :&#x3D; MyMap[string, int]&#123;&quot;a&quot;: 1, &quot;b&quot;: 2&#125;</code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/lujinkai/1672899644005.png"></p>
+<p><strong>注意：匿名结构体不支持泛型</strong></p>
+<h3 id="几种常见错误"><a href="#几种常见错误" class="headerlink" title="几种常见错误"></a>几种常见错误</h3><p>1、定义泛型类型的时候，<strong>基础类型不能只有类型形参</strong>。如下：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> CommonType<span class="token punctuation">[</span>T <span class="token builtin">int</span><span class="token operator">|</span><span class="token builtin">string</span><span class="token operator">|</span><span class="token builtin">float32</span><span class="token punctuation">]</span> T			<span class="token comment">// 错误</span></code></pre>
+
+<p>2、当类型约束的一些写法会被编译器误认为是表达式时会报错。如下：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> NewType<span class="token punctuation">[</span>T <span class="token operator">*</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T				<span class="token comment">// 错误。T *int会被编译器误认为是表达式 T乘以int，而不是int指针</span>
+<span class="token keyword">type</span> NewType2<span class="token punctuation">[</span>T <span class="token operator">*</span><span class="token builtin">int</span><span class="token operator">|</span><span class="token operator">*</span><span class="token builtin">float64</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T		<span class="token comment">// 错误。和上面一样，这里不光*被会认为是乘号，| 还会被认为是按位或操作</span></code></pre>
+
+<p>为了避免这种误解，解决办法就是给类型约束包上 <code>interface&#123;&#125;</code> 或加上逗号消除歧义</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> NewType<span class="token punctuation">[</span>T <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token operator">*</span><span class="token builtin">int</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T
+<span class="token keyword">type</span> NewType2<span class="token punctuation">[</span>T <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token operator">*</span><span class="token builtin">int</span><span class="token operator">|</span><span class="token operator">*</span><span class="token builtin">float64</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T</code></pre>
+
+<h2 id="泛型-receiver"><a href="#泛型-receiver" class="headerlink" title="泛型 receiver"></a>泛型 receiver</h2><p>单纯的泛型类型实际上对开发来说用处并不大，但泛型类型和泛型 receiver 相结合，就有了非常大的实用性。</p>
+<p>我们知道，定义了新的普通类型之后可以给类型添加方法。那么可以给泛型类型添加方法吗？答案自然是可以的，如下：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MySlice<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">float32</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span>s MySlice<span class="token punctuation">[</span>T<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token function">Sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span> T <span class="token punctuation">&#123;</span>
+    <span class="token keyword">var</span> sum T
+    <span class="token keyword">for</span> <span class="token boolean">_</span><span class="token punctuation">,</span> value <span class="token operator">:=</span> <span class="token keyword">range</span> s <span class="token punctuation">&#123;</span>
+        sum <span class="token operator">+=</span> value
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> sum
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">//</span>
+<span class="token keyword">var</span> s MySlice<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span><span class="token punctuation">&#123;</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">&#125;</span>
+fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span><span class="token function">Sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 输出：10</span>
+
+<span class="token keyword">var</span> s2 MySlice<span class="token punctuation">[</span><span class="token builtin">float32</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">float32</span><span class="token punctuation">&#123;</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">,</span> <span class="token number">4.0</span><span class="token punctuation">&#125;</span>
+fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span>s2<span class="token punctuation">.</span><span class="token function">Sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 输出：10.0</span></code></pre>
+
+<h3 id="动态判断变量类型"><a href="#动态判断变量类型" class="headerlink" title="动态判断变量类型"></a>动态判断变量类型</h3><p>使用接口的时候经常会用到<strong>类型断言</strong>或 <strong><code>type swith</code></strong> 来确定接口具体的类型，然后对不同类型做出不同的处理，如：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">var</span> i <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span> <span class="token operator">=</span> <span class="token number">123</span>
+i<span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token comment">// 类型断言</span>
+
+<span class="token comment">// type switch</span>
+<span class="token keyword">switch</span> i<span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword">type</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">case</span> <span class="token builtin">int</span><span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token keyword">case</span> <span class="token builtin">string</span><span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token keyword">default</span><span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>但是，对于 <code>valut T</code> 这样通过类型形参定义的变量，不能使用<strong>类型断言</strong>或 <strong><code>type swith</code></strong> 判断具体类型。</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>q <span class="token operator">*</span>Queue<span class="token punctuation">[</span>T<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token function">Put</span><span class="token punctuation">(</span>value T<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    value<span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token comment">// 错误。泛型类型定义的变量不能使用类型断言</span>
+
+    <span class="token comment">// 错误。不允许使用type switch 来判断 value 的具体类型</span>
+    <span class="token keyword">switch</span> value<span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword">type</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">case</span> <span class="token builtin">int</span><span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token keyword">case</span> <span class="token builtin">string</span><span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token keyword">default</span><span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// ...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>可以通过反射机制达到目的：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token punctuation">(</span>receiver Queue<span class="token punctuation">[</span>T<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token function">Put</span><span class="token punctuation">(</span>value T<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// Printf() 可输出变量value的类型(底层就是通过反射实现的)</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"%T"</span><span class="token punctuation">,</span> value<span class="token punctuation">)</span>
+
+    <span class="token comment">// 通过反射可以动态获得变量value的类型从而分情况处理</span>
+    v <span class="token operator">:=</span> reflect<span class="token punctuation">.</span><span class="token function">ValueOf</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+
+    <span class="token keyword">switch</span> v<span class="token punctuation">.</span><span class="token function">Kind</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">case</span> reflect<span class="token punctuation">.</span>Int<span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token keyword">case</span> reflect<span class="token punctuation">.</span>String<span class="token punctuation">:</span>
+        <span class="token comment">// do something</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// ...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>这看起来达到了我们的目的，可是当你写出上面这样的代码时候就出现了一个问题：</p>
+<blockquote>
+<p>你为了避免使用反射而选择了泛型，结果到头来又为了一些功能在在泛型中使用反射</p>
+</blockquote>
+<p>当出现这种情况的时候你可能需要重新思考一下，自己的需求是不是真的需要用泛型（毕竟泛型机制本身就很复杂了，再加上反射的复杂度，增加的复杂度并不一定值得）</p>
+<h2 id="泛型函数"><a href="#泛型函数" class="headerlink" title="泛型函数"></a>泛型函数</h2><p>示例：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> Add<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">float64</span><span class="token punctuation">]</span><span class="token punctuation">(</span>a T<span class="token punctuation">,</span> b T<span class="token punctuation">)</span> T <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> b
+<span class="token punctuation">&#125;</span>
+
+Add<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">)</span> 				<span class="token comment">// 传入类型实参int，计算结果为 3</span>
+Add<span class="token punctuation">[</span><span class="token builtin">float32</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">)</span> 		<span class="token comment">// 传入类型实参float32, 计算结果为 3.0</span>
+
+<span class="token comment">// Go还支持类型实参的自动推导</span>
+<span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>  			<span class="token comment">// 1，2是int类型，编译请自动推导出类型实参T是int</span>
+<span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">)</span> 		<span class="token comment">// 1.0, 2.0 是浮点，编译请自动推导出类型实参T是float32</span></code></pre>
+
+<p>注意：</p>
+<ol>
+<li>匿名函数不支持泛型</li>
+<li>虽然函数支持泛型，但是方法不支持泛型</li>
+</ol>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> A <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 不支持泛型方法</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>receiver A<span class="token punctuation">)</span> Add<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">float64</span><span class="token punctuation">]</span><span class="token punctuation">(</span>a T<span class="token punctuation">,</span> b T<span class="token punctuation">)</span> T <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> b
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>如果要想在方法中使用泛型的话，可以通过 receiver 间接实现：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> A<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">float64</span><span class="token punctuation">]</span> <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 方法可以使用类型定义中的形参 T</span>
+<span class="token keyword">func</span> <span class="token punctuation">(</span>receiver A<span class="token punctuation">[</span>T<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token function">Add</span><span class="token punctuation">(</span>a T<span class="token punctuation">,</span> b T<span class="token punctuation">)</span> T <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> b
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 用法：</span>
+<span class="token keyword">var</span> a A<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span>
+a<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+<span class="token keyword">var</span> aa A<span class="token punctuation">[</span><span class="token builtin">float32</span><span class="token punctuation">]</span>
+aa<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">)</span></code></pre>
+
+<h2 id="接口更加复杂"><a href="#接口更加复杂" class="headerlink" title="接口更加复杂"></a>接口更加复杂</h2><p>有时候使用泛型编程时，我们会书写长长的类型约束，如下：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token comment">// 一个可以容纳所有int,uint以及浮点类型的泛型切片</span>
+<span class="token keyword">type</span> Slice<span class="token punctuation">[</span>T <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">int8</span> <span class="token operator">|</span> <span class="token builtin">int16</span> <span class="token operator">|</span> <span class="token builtin">int32</span> <span class="token operator">|</span> <span class="token builtin">int64</span> <span class="token operator">|</span> <span class="token builtin">uint</span> <span class="token operator">|</span> <span class="token builtin">uint8</span> <span class="token operator">|</span> <span class="token builtin">uint16</span> <span class="token operator">|</span> <span class="token builtin">uint32</span> <span class="token operator">|</span> <span class="token builtin">uint64</span> <span class="token operator">|</span> <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">float64</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T</code></pre>
+
+<p>理所当然，这种写法是我们无法忍受也难以维护的，而 Go 支持将类型约束单独拿出来定义到接口中，从而让代码更容易维护：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> IntUintFloat <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">int8</span> <span class="token operator">|</span> <span class="token builtin">int16</span> <span class="token operator">|</span> <span class="token builtin">int32</span> <span class="token operator">|</span> <span class="token builtin">int64</span> <span class="token operator">|</span> <span class="token builtin">uint</span> <span class="token operator">|</span> <span class="token builtin">uint8</span> <span class="token operator">|</span> <span class="token builtin">uint16</span> <span class="token operator">|</span> <span class="token builtin">uint32</span> <span class="token operator">|</span> <span class="token builtin">uint64</span> <span class="token operator">|</span> <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">float64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Slice<span class="token punctuation">[</span>T IntUintFloat<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T</code></pre>
+
+<p>这段代码把类型约束给单独拿出来，写入了接口类型 <code>IntUintFloat</code> 当中。需要指定类型约束的时候直接使用接口 <code>IntUintFloat</code> 即可。</p>
+<p>不过这样的代码依旧不好维护，而接口和接口、接口和普通类型之间也是可以通过 <code>|</code> 进行组合：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> Int <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token builtin">int8</span> <span class="token operator">|</span> <span class="token builtin">int16</span> <span class="token operator">|</span> <span class="token builtin">int32</span> <span class="token operator">|</span> <span class="token builtin">int64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Uint <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin">uint</span> <span class="token operator">|</span> <span class="token builtin">uint8</span> <span class="token operator">|</span> <span class="token builtin">uint16</span> <span class="token operator">|</span> <span class="token builtin">uint32</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Float <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin">float32</span> <span class="token operator">|</span> <span class="token builtin">float64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Slice<span class="token punctuation">[</span>T Int <span class="token operator">|</span> Uint <span class="token operator">|</span> Float<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T  	<span class="token comment">// 使用 '|' 将多个接口类型组合</span></code></pre>
+
+<p>或者：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> SliceElement <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    Int <span class="token operator">|</span> Uint <span class="token operator">|</span> Float <span class="token operator">|</span> <span class="token builtin">string</span> 		<span class="token comment">// 组合了三个接口类型并额外增加了一个 string 类型</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Slice<span class="token punctuation">[</span>T SliceElement<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T</code></pre>
+
+<h3 id="指定底层类型"><a href="#指定底层类型" class="headerlink" title="~ 指定底层类型"></a><code>~</code> 指定底层类型</h3><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">var</span> s1 Slice<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> 		<span class="token comment">// 正确</span>
+
+<span class="token keyword">type</span> MyInt <span class="token builtin">int</span>
+<span class="token keyword">var</span> s2 Slice<span class="token punctuation">[</span>MyInt<span class="token punctuation">]</span> 	<span class="token comment">// ✗ 错误。MyInt类型底层类型是int但并不是int类型，不符合 Slice[T] 的类型约束</span></code></pre>
+
+<p>这里发生错误的原因是，泛型类型 <code>Slice[T]</code> 允许的是 <code>int</code> 作为类型实参，而不是 <code>MyInt</code> （虽然 <code>MyInt</code> 类型底层类型是 <code>int</code> ，但它依旧不是 <code>int</code> 类型）。</p>
+<p>为了从根本上解决这个问题，Go 新增了一个符号 <code>~</code> ，在类型约束中使用类似 <code>~int</code> 这种写法的话，就代表着不光是 <code>int</code> ，所有以 <code>int</code> 为底层类型的类型也都可用于实例化。</p>
+<p>使用 <code>~</code> 对代码进行改写之后如下：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> Int <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">int8</span> <span class="token operator">|</span> ~<span class="token builtin">int16</span> <span class="token operator">|</span> ~<span class="token builtin">int32</span> <span class="token operator">|</span> ~<span class="token builtin">int64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Uint <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">uint</span> <span class="token operator">|</span> ~<span class="token builtin">uint8</span> <span class="token operator">|</span> ~<span class="token builtin">uint16</span> <span class="token operator">|</span> ~<span class="token builtin">uint32</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">type</span> Float <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">float32</span> <span class="token operator">|</span> ~<span class="token builtin">float64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Slice<span class="token punctuation">[</span>T Int <span class="token operator">|</span> Uint <span class="token operator">|</span> Float<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T
+
+<span class="token keyword">var</span> s Slice<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> 		<span class="token comment">// 正确</span>
+
+<span class="token keyword">type</span> MyInt <span class="token builtin">int</span>
+<span class="token keyword">var</span> s2 Slice<span class="token punctuation">[</span>MyInt<span class="token punctuation">]</span>  	<span class="token comment">// MyInt底层类型是int，所以可以用于实例化</span>
+
+<span class="token keyword">type</span> MyMyInt MyInt
+<span class="token keyword">var</span> s3 Slice<span class="token punctuation">[</span>MyMyInt<span class="token punctuation">]</span>  	<span class="token comment">// 正确。MyMyInt 虽然基于 MyInt ，但底层类型也是int，所以也能用于实例化</span>
+
+<span class="token keyword">type</span> MyFloat32 <span class="token builtin">float32</span>  <span class="token comment">// 正确</span>
+<span class="token keyword">var</span> s4 Slice<span class="token punctuation">[</span>MyFloat32<span class="token punctuation">]</span></code></pre>
+
+<p><strong>限制：</strong>使用 <code>~</code> 时有一定的限制：</p>
+<ul>
+<li><code>~</code>后面的类型不能为接口</li>
+<li><code>~</code>后面的类型必须为基本类型</li>
+</ul>
+<h3 id="从方法集（Method-set）到类型集（Type-set）"><a href="#从方法集（Method-set）到类型集（Type-set）" class="headerlink" title="从方法集（Method set）到类型集（Type set）"></a>从方法集（Method set）到类型集（Type set）</h3><p>上面的例子中，我们学习到了一种接口的全新写法，而这种写法在 Go1.18 之前是不存在的。这意味着 Go 语言中 <code>接口(interface)</code> 这个概念发生了非常大的变化。</p>
+<p>在 Go1.18 之前，Go 官方对 接口（interface）的定义是：接口是一个方法集（method set）。</p>
+<p>从 Go1.18 开始，接口的定义正式更改为了 类型集(Type set)。</p>
+<h4 id="接口实现（implement）定义的变化"><a href="#接口实现（implement）定义的变化" class="headerlink" title="接口实现（implement）定义的变化"></a>接口实现（implement）定义的变化</h4><p>既然接口定义发生了变化，那么从 Go1.18 开始 接口实现（implement） 的定义自然也发生了变化。</p>
+<p>当满足以下条件时，我们可以说 类型 <code>T</code> 实现了接口 <code>I</code> ：</p>
+<ul>
+<li><code>T</code> 不是接口时：类型 <code>T</code> 是接口 <code>I</code> 代表的类型集中的一个成员</li>
+<li><code>T</code> 是接口时： <code>T</code> 接口代表的类型集是 <code>I</code> 代表的类型集的子集</li>
+</ul>
+<h4 id="类型的交集"><a href="#类型的交集" class="headerlink" title="类型的交集"></a>类型的交集</h4><p>如果一个接口有多个类型的定义，取它们之间的 <strong>交集</strong></p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> AllInt <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">int8</span> <span class="token operator">|</span> ~<span class="token builtin">int16</span> <span class="token operator">|</span> ~<span class="token builtin">int32</span> <span class="token operator">|</span> ~<span class="token builtin">int64</span> <span class="token operator">|</span> ~<span class="token builtin">uint</span> <span class="token operator">|</span> ~<span class="token builtin">uint8</span> <span class="token operator">|</span> ~<span class="token builtin">uint16</span> <span class="token operator">|</span> ~<span class="token builtin">uint32</span> <span class="token operator">|</span> ~<span class="token builtin">uint32</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Uint <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">uint</span> <span class="token operator">|</span> ~<span class="token builtin">uint8</span> <span class="token operator">|</span> ~<span class="token builtin">uint16</span> <span class="token operator">|</span> ~<span class="token builtin">uint32</span> <span class="token operator">|</span> ~<span class="token builtin">uint64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> A <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span> <span class="token comment">// 接口A代表的类型集是 AllInt 和 Uint 的交集</span>
+    AllInt
+    Uint
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> B <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span> <span class="token comment">// 接口B代表的类型集是 AllInt 和 ~int 的交集</span>
+    AllInt
+    ~<span class="token builtin">int</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>上面的例子中：</p>
+<ul>
+<li>接口<code>A</code>代表的是<code>AllInt</code>与<code>Uint</code>的<strong>交集</strong>，即：<code>~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64</code></li>
+<li>接口<code>B</code>代表的是<code>AllInt</code>与<code>~int</code>的交集，即：<code>~int</code></li>
+</ul>
+<h4 id="interface-和-any"><a href="#interface-和-any" class="headerlink" title="interface{} 和 any"></a><code>interface&#123;&#125;</code> 和 <code>any</code></h4><p>Go1.18 开始接口的定义发生了改变，所以 interface{} 的定义也发生了一些变更：</p>
+<blockquote>
+<p>空接口代表了所有类型的集合</p>
+</blockquote>
+<p>所以，对于 Go1.18 之后的空接口应该这样理解：</p>
+<ol>
+<li><p>虽然空接口内没有写入任何的类型，但它代表的是所有类型的集合，而非一个 空集</p>
+</li>
+<li><p>类型约束中指定 空接口 的意思是指定一个包含所有类型的集合，并不是类型约束限制了只能使用 空接口 来做类型形参</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token comment">// 空接口代表所有类型的集合。写入类型约束意味着所有类型都可拿来做类型实参</span>
+<span class="token keyword">type</span> Slice<span class="token punctuation">[</span>T <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T
+
+<span class="token keyword">var</span> s1 Slice<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span>    <span class="token comment">// 正确</span>
+<span class="token keyword">var</span> s2 Slice<span class="token punctuation">[</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">]</span>  <span class="token comment">// 正确</span>
+<span class="token keyword">var</span> s3 Slice<span class="token punctuation">[</span><span class="token keyword">chan</span> <span class="token builtin">int</span><span class="token punctuation">]</span>  <span class="token comment">// 正确</span>
+<span class="token keyword">var</span> s4 Slice<span class="token punctuation">[</span><span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span>  <span class="token comment">// 正确</span></code></pre></li>
+</ol>
+<p>因为空接口是一个包含了所有类型的类型集，所以我们经常会用到它。于是，Go1.18 开始提供了一个和空接口 <code>interface&#123;&#125;</code> 等价的新关键词 <code>any</code> ，用来使代码更简单：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> Slice<span class="token punctuation">[</span>T any<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>T <span class="token comment">// 代码等价于 type Slice[T interface&#123;&#125;] []T</span></code></pre>
+
+<h4 id="comparable（可比较）和-可排序（ordered）"><a href="#comparable（可比较）和-可排序（ordered）" class="headerlink" title="comparable（可比较）和 可排序（ordered）"></a>comparable（可比较）和 可排序（ordered）</h4><p>对于一些数据类型，我们需要在类型约束中限制只接受能 <code>!=</code> 和<code>==</code>对比的类型，如 <code>map</code>：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token comment">// 错误。因为 map 中键的类型必须是可进行 != 和 == 比较的类型</span>
+<span class="token keyword">type</span> MyMap<span class="token punctuation">[</span>K any<span class="token punctuation">,</span> V any<span class="token punctuation">]</span> <span class="token keyword">map</span><span class="token punctuation">[</span>K<span class="token punctuation">]</span>V</code></pre>
+
+<p>所以 Go 直接内置了一个叫 <code>comparable</code> 的接口，它代表了所有可用 <code>!=</code> 以及 <code>==</code> 对比的类型：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MyMap<span class="token punctuation">[</span>KEY comparable<span class="token punctuation">,</span> VALUE any<span class="token punctuation">]</span> <span class="token keyword">map</span><span class="token punctuation">[</span>KEY<span class="token punctuation">]</span>VALUE		<span class="token comment">// 正确</span></code></pre>
+
+<p>注意：可比较指的是可以执行<code>!=</code> 和 <code>==</code> 操作，并没有确保这个类型可以执行大小比较（<code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code>）</p>
+<p>而可进行大小比较的类型被称为 <code>Orderd</code> 。目前 Go 并没有像 <code>comparable</code> 这样直接内置对应的关键词，所以想要的话需要自己来定义相关接口，比如我们可以参考<code>golang.org/x/exp/constraints</code> 如何定义：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token comment">// Ordered 代表所有可比大小排序的类型</span>
+<span class="token keyword">type</span> Ordered <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    Integer <span class="token operator">|</span> Float <span class="token operator">|</span> ~<span class="token builtin">string</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Integer <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    Signed <span class="token operator">|</span> Unsigned
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Signed <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">int8</span> <span class="token operator">|</span> ~<span class="token builtin">int16</span> <span class="token operator">|</span> ~<span class="token builtin">int32</span> <span class="token operator">|</span> ~<span class="token builtin">int64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Unsigned <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">uint</span> <span class="token operator">|</span> ~<span class="token builtin">uint8</span> <span class="token operator">|</span> ~<span class="token builtin">uint16</span> <span class="token operator">|</span> ~<span class="token builtin">uint32</span> <span class="token operator">|</span> ~<span class="token builtin">uint64</span> <span class="token operator">|</span> ~<span class="token builtin">uintptr</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Float <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">float32</span> <span class="token operator">|</span> ~<span class="token builtin">float64</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<blockquote>
+<p>这里虽然可以直接使用官方包 <a target="_blank" rel="noopener" href="https://link.segmentfault.com/?enc=P0HRXEwG15JMJtcVCjX90A==.zP8q/S8qIgxQlp9ykQOilYmr6bHwh/7BvIwS7s0TVMbFpitq+YUuMxP4w0jzbW+B">golang.org&#x2F;x&#x2F;exp&#x2F;constraints</a> ，但因为这个包属于实验性质的 x 包，今后可能会发生非常大变动，所以并不推荐直接使用</p>
+</blockquote>
+<h3 id="接口的两种类型"><a href="#接口的两种类型" class="headerlink" title="接口的两种类型"></a>接口的两种类型</h3><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> ReadWriter <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">string</span> <span class="token operator">|</span> ~<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">rune</span>
+
+    <span class="token function">Read</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span>
+    <span class="token function">Write</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>我们用类型集的概念来理解这个接口的意思：</p>
+<p>接口类型 <code>ReadWriter</code> 代表了一个类型集合，所有以 <code>string</code> 或 <code>[]rune</code> 为底层类型，并且实现了 <code>Read()</code> <code>Write()</code> 这两个方法的类型都在 <code>ReadWriter</code> 代表的类型集当中。</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token comment">// 类型 StringReadWriter 实现了接口 Readwriter</span>
+<span class="token keyword">type</span> StringReadWriter <span class="token builtin">string</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span>s StringReadWriter<span class="token punctuation">)</span> <span class="token function">Read</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span>s StringReadWriter<span class="token punctuation">)</span> <span class="token function">Write</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+ <span class="token comment">// ...</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">//  类型BytesReadWriter 没有实现接口 Readwriter</span>
+<span class="token keyword">type</span> BytesReadWriter <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span>s BytesReadWriter<span class="token punctuation">)</span> <span class="token function">Read</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+ <span class="token operator">...</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span>s BytesReadWriter<span class="token punctuation">)</span> <span class="token function">Write</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+ <span class="token operator">...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>现在，定义一个 <code>ReadWriter</code> 类型的接口变量，接口变量赋值的时候不光要考虑到方法的实现，还必须考虑到具体底层类型，心智负担太大。为了解决这个问题也为了保持 Go 语言的兼容性，Go1.18 开始将接口分为了两种类型：</p>
+<ul>
+<li>基本类型（Basic interface）</li>
+<li>一般接口（General interface）</li>
+</ul>
+<h4 id="基本接口（Basic-interface）"><a href="#基本接口（Basic-interface）" class="headerlink" title="基本接口（Basic interface）"></a>基本接口（Basic interface）</h4><p>接口定义中如果只有方法的话，那么这种接口被称为**基本接口(Basic interface)**。这种接口就是 Go1.18 之前的接口，用法也基本和 Go1.18 之前保持一致。基本接口大致可以用于如下几个地方：</p>
+<ul>
+<li><p>定义接口变量并赋值</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MyError <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>		<span class="token comment">// 接口中只有方法，所以是基本接口</span>
+	    <span class="token function">Error</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">string</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 用法和Go1.18之前保持一致</span>
+err <span class="token operator">:=</span> MyError</code></pre>
+</li>
+<li><p>用在类型约束中</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MySlice<span class="token punctuation">[</span>T io<span class="token punctuation">.</span>Reader <span class="token operator">|</span> io<span class="token punctuation">.</span>Writer<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>Slice</code></pre></li>
+</ul>
+<h4 id="一般接口（General-interface）"><a href="#一般接口（General-interface）" class="headerlink" title="一般接口（General interface）"></a>一般接口（General interface）</h4><p>接口中有类型的话，这种接口被称为 <strong>一般接口(General interface)</strong> ，如下例子都是一般接口：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> Uint <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span> 			<span class="token comment">// 接口 Uint 中有类型，所以是一般接口</span>
+    ~<span class="token builtin">uint</span> <span class="token operator">|</span> ~<span class="token builtin">uint8</span> <span class="token operator">|</span> ~<span class="token builtin">uint16</span> <span class="token operator">|</span> ~<span class="token builtin">uint32</span> <span class="token operator">|</span> ~<span class="token builtin">uint64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> ReadWriter <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>  	<span class="token comment">// ReadWriter 接口既有方法也有类型，所以是一般接口</span>
+    ~<span class="token builtin">string</span> <span class="token operator">|</span> ~<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">rune</span>
+
+    <span class="token function">Read</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span>
+    <span class="token function">Write</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>n <span class="token builtin">int</span><span class="token punctuation">,</span> err <span class="token builtin">error</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p><strong>一般接口类型不能用来定义变量，只能用于泛型的类型约束中。</strong>所以以下的用法是错误的：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> Uint <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">uint</span> <span class="token operator">|</span> ~<span class="token builtin">uint8</span> <span class="token operator">|</span> ~<span class="token builtin">uint16</span> <span class="token operator">|</span> ~<span class="token builtin">uint32</span> <span class="token operator">|</span> ~<span class="token builtin">uint64</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">var</span> uintInf Uint <span class="token comment">// 错误。Uint是一般接口，只能用于类型约束，不得用于变量定义</span></code></pre>
+
+<p>这一限制保证了一般接口的使用被限定在了泛型之中，不会影响到 Go1.18 之前的代码，同时也极大减少了书写代码时的心智负担。</p>
+<h3 id="泛型接口"><a href="#泛型接口" class="headerlink" title="泛型接口"></a>泛型接口</h3><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> DataProcessor<span class="token punctuation">[</span>T any<span class="token punctuation">]</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">Process</span><span class="token punctuation">(</span>oriData T<span class="token punctuation">)</span> <span class="token punctuation">(</span>newData T<span class="token punctuation">)</span>
+    <span class="token function">Save</span><span class="token punctuation">(</span>data T<span class="token punctuation">)</span> <span class="token builtin">error</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> DataProcessor2<span class="token punctuation">[</span>T any<span class="token punctuation">]</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token keyword">struct</span><span class="token punctuation">&#123;</span> Data any <span class="token punctuation">&#125;</span>
+
+    <span class="token function">Process</span><span class="token punctuation">(</span>data T<span class="token punctuation">)</span> <span class="token punctuation">(</span>newData T<span class="token punctuation">)</span>
+    <span class="token function">Save</span><span class="token punctuation">(</span>data T<span class="token punctuation">)</span> <span class="token builtin">error</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="接口定义的种种限制规则"><a href="#接口定义的种种限制规则" class="headerlink" title="接口定义的种种限制规则"></a>接口定义的种种限制规则</h3><p>Go1.18 从开始，在定义类型集(接口)的时候增加了非常多十分琐碎的限制规则，其中很多规则都在之前的内容中介绍过了，但剩下还有一些规则因为找不到好的地方介绍，所以在这里统一介绍下：</p>
+<ol>
+<li><p>用 <code>|</code> 连接多个类型的时候，类型之间不能有相交的部分(即必须是不交集)：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MyInt <span class="token builtin">int</span>
+
+<span class="token comment">// 错误，MyInt的底层类型是int,和 ~int 有相交的部分</span>
+<span class="token keyword">type</span> <span class="token boolean">_</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> MyInt
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>但是相交的类型中是接口的话，则不受这一限制：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MyInt <span class="token builtin">int</span>
+
+<span class="token keyword">type</span> <span class="token boolean">_</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> <span class="token keyword">interface</span><span class="token punctuation">&#123;</span> MyInt <span class="token punctuation">&#125;</span>  <span class="token comment">// 正确</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> <span class="token boolean">_</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">interface</span><span class="token punctuation">&#123;</span> ~<span class="token builtin">int</span> <span class="token punctuation">&#125;</span> <span class="token operator">|</span> MyInt <span class="token comment">// 也正确</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> <span class="token boolean">_</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">interface</span><span class="token punctuation">&#123;</span> ~<span class="token builtin">int</span> <span class="token punctuation">&#125;</span> <span class="token operator">|</span> <span class="token keyword">interface</span><span class="token punctuation">&#123;</span> MyInt <span class="token punctuation">&#125;</span>  <span class="token comment">// 也正确</span>
+<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>类型的并集中不能有类型形参</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> MyInf<span class="token punctuation">[</span>T ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">string</span><span class="token punctuation">]</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">float32</span> <span class="token operator">|</span> T  <span class="token comment">// 错误。T是类型形参</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> MyInf2<span class="token punctuation">[</span>T ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">string</span><span class="token punctuation">]</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    T  <span class="token comment">// 错误</span>
+<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>接口不能直接或间接地并入自己</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> Bad <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    Bad <span class="token comment">// 错误，接口不能直接并入自己</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Bad2 <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    Bad1
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">type</span> Bad1 <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    Bad2 <span class="token comment">// 错误，接口Bad1通过Bad2间接并入了自己</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Bad3 <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">string</span> <span class="token operator">|</span> Bad3 <span class="token comment">// 错误，通过类型的并集并入了自己</span>
+<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>接口的并集成员个数大于一的时候不能直接或间接并入 <code>comparable</code> 接口</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> OK <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    comparable <span class="token comment">// 正确。只有一个类型的时候可以使用 comparable</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Bad1 <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">int</span> <span class="token operator">|</span> comparable <span class="token comment">// 错误，类型并集不能直接并入 comparable 接口</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> CmpInf <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    comparable
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">type</span> Bad2 <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">chan</span> <span class="token builtin">int</span> <span class="token operator">|</span> CmpInf  <span class="token comment">// 错误，类型并集通过 CmpInf 间接并入了comparable</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">type</span> Bad3 <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">chan</span> <span class="token builtin">int</span> <span class="token operator">|</span> <span class="token keyword">interface</span><span class="token punctuation">&#123;</span>comparable<span class="token punctuation">&#125;</span>  <span class="token comment">// 理所当然，这样也是不行的</span>
+<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>带方法的接口（无论是基本接口还是一般接口），都不能写入接口的并集中：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> <span class="token boolean">_</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">string</span> <span class="token operator">|</span> <span class="token builtin">error</span> <span class="token comment">// 错误，error是带方法的接口(一般接口) 不能写入并集中</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> DataProcessor<span class="token punctuation">[</span>T any<span class="token punctuation">]</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">string</span> <span class="token operator">|</span> ~<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token builtin">byte</span>
+
+    <span class="token function">Process</span><span class="token punctuation">(</span>data T<span class="token punctuation">)</span> <span class="token punctuation">(</span>newData T<span class="token punctuation">)</span>
+    <span class="token function">Save</span><span class="token punctuation">(</span>data T<span class="token punctuation">)</span> <span class="token builtin">error</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 错误，实例化之后的 DataProcessor[string] 是带方法的一般接口，不能写入类型并集</span>
+<span class="token keyword">type</span> <span class="token boolean">_</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">string</span> <span class="token operator">|</span> DataProcessor<span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">type</span> Bad<span class="token punctuation">[</span>T any<span class="token punctuation">]</span> <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    ~<span class="token builtin">int</span> <span class="token operator">|</span> ~<span class="token builtin">string</span> <span class="token operator">|</span> DataProcessor<span class="token punctuation">[</span>T<span class="token punctuation">]</span>  <span class="token comment">// 也不行</span>
+<span class="token punctuation">&#125;</span></code></pre></li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>实际上推荐的使用场景也并没有那么广泛，对于泛型的使用，我们应该遵守下面的规则：</p>
+<p>泛型并不取代 Go1.18 之前用接口+反射实现的动态类型，在下面情景的时候非常适合使用泛型：当你需要针对不同类型书写同样的逻辑，使用泛型来简化代码是最好的 (比如你想写个队列，写个链表、栈、堆之类的数据结构）</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/golang/" rel="tag"><i class="fa fa-tag"></i> golang</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/Golang/map/" rel="prev" title="map">
+                  <i class="fa fa-chevron-left"></i> map
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/Golang/%E8%85%BE%E8%AE%AFgo%E5%AE%89%E5%85%A8%E6%8C%87%E5%8D%97/" rel="next" title="腾讯go安全指南">
+                  腾讯go安全指南 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

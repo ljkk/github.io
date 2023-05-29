@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="etcdctl is a command line client for etcd. The v3 API is used by default on master branch. For the v2 API, make sure to set environment variable ETCDCTL_API&#x3D;2. See also READMEv2. If using released ver">
+<meta property="og:type" content="article">
+<meta property="og:title" content="etcdctl">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/etcdctl/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="etcdctl is a command line client for etcd. The v3 API is used by default on master branch. For the v2 API, make sure to set environment variable ETCDCTL_API&#x3D;2. See also READMEv2. If using released ver">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-11T09:38:04.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/etcdctl/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/etcdctl/","path":"运维/Kubernetes/etcdctl/","title":"etcdctl"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>etcdctl | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Key-value-commands"><span class="nav-number">1.</span> <span class="nav-text">Key-value commands</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PUT-options-lt-key-gt-lt-value-gt"><span class="nav-number">1.1.</span> <span class="nav-text">PUT [options] &lt;key&gt; &lt;value&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options"><span class="nav-number">1.1.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output"><span class="nav-number">1.1.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples"><span class="nav-number">1.1.3.</span> <span class="nav-text">Examples</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remarks"><span class="nav-number">1.1.4.</span> <span class="nav-text">Remarks</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GET-options-lt-key-gt-range-end"><span class="nav-number">1.2.</span> <span class="nav-text">GET [options] &lt;key&gt; [range_end]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-1"><span class="nav-number">1.2.3.</span> <span class="nav-text">Examples</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remarks-1"><span class="nav-number">1.2.4.</span> <span class="nav-text">Remarks</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DEL-options-lt-key-gt-range-end"><span class="nav-number">1.3.</span> <span class="nav-text">DEL [options] &lt;key&gt; [range_end]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-2"><span class="nav-number">1.3.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-2"><span class="nav-number">1.3.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-2"><span class="nav-number">1.3.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TXN-options"><span class="nav-number">1.4.</span> <span class="nav-text">TXN [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-3"><span class="nav-number">1.4.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Input-Format"><span class="nav-number">1.4.2.</span> <span class="nav-text">Input Format</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-3"><span class="nav-number">1.4.3.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-3"><span class="nav-number">1.4.4.</span> <span class="nav-text">Examples</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remarks-2"><span class="nav-number">1.4.5.</span> <span class="nav-text">Remarks</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#COMPACTION-options-lt-revision-gt"><span class="nav-number">1.5.</span> <span class="nav-text">COMPACTION [options] &lt;revision&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-4"><span class="nav-number">1.5.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-4"><span class="nav-number">1.5.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example"><span class="nav-number">1.5.3.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WATCH-options-key-or-prefix-range-end-%E2%80%93-exec-command-arg1-arg2-%E2%80%A6"><span class="nav-number">1.6.</span> <span class="nav-text">WATCH [options] [key or prefix] [range_end] [–] [exec-command arg1 arg2 …]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-5"><span class="nav-number">1.6.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Input-format"><span class="nav-number">1.6.2.</span> <span class="nav-text">Input format</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-5"><span class="nav-number">1.6.3.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-4"><span class="nav-number">1.6.4.</span> <span class="nav-text">Examples</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Non-interactive"><span class="nav-number">1.6.4.1.</span> <span class="nav-text">Non-interactive</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Interactive"><span class="nav-number">1.6.4.2.</span> <span class="nav-text">Interactive</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LEASE-lt-subcommand-gt"><span class="nav-number">1.7.</span> <span class="nav-text">LEASE &lt;subcommand&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LEASE-GRANT-lt-ttl-gt"><span class="nav-number">1.8.</span> <span class="nav-text">LEASE GRANT &lt;ttl&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-6"><span class="nav-number">1.8.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-1"><span class="nav-number">1.8.2.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LEASE-REVOKE-lt-leaseID-gt"><span class="nav-number">1.9.</span> <span class="nav-text">LEASE REVOKE &lt;leaseID&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-7"><span class="nav-number">1.9.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-2"><span class="nav-number">1.9.2.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LEASE-TIMETOLIVE-lt-leaseID-gt-options"><span class="nav-number">1.10.</span> <span class="nav-text">LEASE TIMETOLIVE &lt;leaseID&gt; [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-6"><span class="nav-number">1.10.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-8"><span class="nav-number">1.10.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-3"><span class="nav-number">1.10.3.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LEASE-LIST"><span class="nav-number">1.11.</span> <span class="nav-text">LEASE LIST</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-9"><span class="nav-number">1.11.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-4"><span class="nav-number">1.11.2.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LEASE-KEEP-ALIVE-lt-leaseID-gt"><span class="nav-number">1.12.</span> <span class="nav-text">LEASE KEEP-ALIVE &lt;leaseID&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-10"><span class="nav-number">1.12.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-5"><span class="nav-number">1.12.2.</span> <span class="nav-text">Example</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cluster-maintenance-commands"><span class="nav-number">2.</span> <span class="nav-text">Cluster maintenance commands</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MEMBER-lt-subcommand-gt"><span class="nav-number">2.1.</span> <span class="nav-text">MEMBER &lt;subcommand&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MEMBER-ADD-lt-memberName-gt-options"><span class="nav-number">2.2.</span> <span class="nav-text">MEMBER ADD &lt;memberName&gt; [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-7"><span class="nav-number">2.2.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-11"><span class="nav-number">2.2.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-6"><span class="nav-number">2.2.3.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MEMBER-UPDATE-lt-memberID-gt-options"><span class="nav-number">2.3.</span> <span class="nav-text">MEMBER UPDATE &lt;memberID&gt; [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-8"><span class="nav-number">2.3.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-12"><span class="nav-number">2.3.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-7"><span class="nav-number">2.3.3.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MEMBER-REMOVE-lt-memberID-gt"><span class="nav-number">2.4.</span> <span class="nav-text">MEMBER REMOVE &lt;memberID&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-13"><span class="nav-number">2.4.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-8"><span class="nav-number">2.4.2.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MEMBER-LIST"><span class="nav-number">2.5.</span> <span class="nav-text">MEMBER LIST</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-14"><span class="nav-number">2.5.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-5"><span class="nav-number">2.5.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ENDPOINT-lt-subcommand-gt"><span class="nav-number">2.6.</span> <span class="nav-text">ENDPOINT &lt;subcommand&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-9"><span class="nav-number">2.6.1.</span> <span class="nav-text">Options</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ENDPOINT-HEALTH"><span class="nav-number">2.7.</span> <span class="nav-text">ENDPOINT HEALTH</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-15"><span class="nav-number">2.7.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-9"><span class="nav-number">2.7.2.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ENDPOINT-STATUS"><span class="nav-number">2.8.</span> <span class="nav-text">ENDPOINT STATUS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-16"><span class="nav-number">2.8.1.</span> <span class="nav-text">Output</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Simple-format"><span class="nav-number">2.8.1.1.</span> <span class="nav-text">Simple format</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#JSON-format"><span class="nav-number">2.8.1.2.</span> <span class="nav-text">JSON format</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-6"><span class="nav-number">2.8.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ENDPOINT-HASHKV"><span class="nav-number">2.9.</span> <span class="nav-text">ENDPOINT HASHKV</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-17"><span class="nav-number">2.9.1.</span> <span class="nav-text">Output</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Simple-format-1"><span class="nav-number">2.9.1.1.</span> <span class="nav-text">Simple format</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#JSON-format-1"><span class="nav-number">2.9.1.2.</span> <span class="nav-text">JSON format</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-7"><span class="nav-number">2.9.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ALARM-lt-subcommand-gt"><span class="nav-number">2.10.</span> <span class="nav-text">ALARM &lt;subcommand&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ALARM-DISARM"><span class="nav-number">2.11.</span> <span class="nav-text">ALARM DISARM</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-18"><span class="nav-number">2.11.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-8"><span class="nav-number">2.11.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ALARM-LIST"><span class="nav-number">2.12.</span> <span class="nav-text">ALARM LIST</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-19"><span class="nav-number">2.12.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-9"><span class="nav-number">2.12.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DEFRAG-options"><span class="nav-number">2.13.</span> <span class="nav-text">DEFRAG [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-10"><span class="nav-number">2.13.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-20"><span class="nav-number">2.13.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-10"><span class="nav-number">2.13.3.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remarks-3"><span class="nav-number">2.13.4.</span> <span class="nav-text">Remarks</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SNAPSHOT-lt-subcommand-gt"><span class="nav-number">2.14.</span> <span class="nav-text">SNAPSHOT &lt;subcommand&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SNAPSHOT-SAVE-lt-filename-gt"><span class="nav-number">2.15.</span> <span class="nav-text">SNAPSHOT SAVE &lt;filename&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-21"><span class="nav-number">2.15.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-11"><span class="nav-number">2.15.2.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SNAPSHOT-RESTORE-options-lt-filename-gt"><span class="nav-number">2.16.</span> <span class="nav-text">SNAPSHOT RESTORE [options] &lt;filename&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-11"><span class="nav-number">2.16.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-22"><span class="nav-number">2.16.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-12"><span class="nav-number">2.16.3.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SNAPSHOT-STATUS-lt-filename-gt"><span class="nav-number">2.17.</span> <span class="nav-text">SNAPSHOT STATUS &lt;filename&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-23"><span class="nav-number">2.17.1.</span> <span class="nav-text">Output</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Simple-format-2"><span class="nav-number">2.17.1.1.</span> <span class="nav-text">Simple format</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#JSON-format-2"><span class="nav-number">2.17.1.2.</span> <span class="nav-text">JSON format</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-10"><span class="nav-number">2.17.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MOVE-LEADER-lt-hexadecimal-transferee-id-gt"><span class="nav-number">2.18.</span> <span class="nav-text">MOVE-LEADER &lt;hexadecimal-transferee-id&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-13"><span class="nav-number">2.18.1.</span> <span class="nav-text">Example</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Concurrency-commands"><span class="nav-number">3.</span> <span class="nav-text">Concurrency commands</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LOCK-options-lt-lockname-gt-command-arg1-arg2-%E2%80%A6"><span class="nav-number">3.1.</span> <span class="nav-text">LOCK [options] &lt;lockname&gt; [command arg1 arg2 …]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-12"><span class="nav-number">3.1.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-24"><span class="nav-number">3.1.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-14"><span class="nav-number">3.1.3.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remarks-4"><span class="nav-number">3.1.4.</span> <span class="nav-text">Remarks</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ELECT-options-lt-election-name-gt-proposal"><span class="nav-number">3.2.</span> <span class="nav-text">ELECT [options] &lt;election-name&gt; [proposal]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-13"><span class="nav-number">3.2.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-25"><span class="nav-number">3.2.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-15"><span class="nav-number">3.2.3.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remarks-5"><span class="nav-number">3.2.4.</span> <span class="nav-text">Remarks</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Authentication-commands"><span class="nav-number">4.</span> <span class="nav-text">Authentication commands</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AUTH-lt-enable-or-disable-gt"><span class="nav-number">4.1.</span> <span class="nav-text">AUTH &lt;enable or disable&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-26"><span class="nav-number">4.1.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-11"><span class="nav-number">4.1.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLE-lt-subcommand-gt"><span class="nav-number">4.2.</span> <span class="nav-text">ROLE &lt;subcommand&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLE-ADD-lt-role-name-gt"><span class="nav-number">4.3.</span> <span class="nav-text">ROLE ADD &lt;role name&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-27"><span class="nav-number">4.3.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-12"><span class="nav-number">4.3.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLE-GET-lt-role-name-gt"><span class="nav-number">4.4.</span> <span class="nav-text">ROLE GET &lt;role name&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-28"><span class="nav-number">4.4.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-13"><span class="nav-number">4.4.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLE-DELETE-lt-role-name-gt"><span class="nav-number">4.5.</span> <span class="nav-text">ROLE DELETE &lt;role name&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-29"><span class="nav-number">4.5.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-14"><span class="nav-number">4.5.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLE-LIST-lt-role-name-gt"><span class="nav-number">4.6.</span> <span class="nav-text">ROLE LIST &lt;role name&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-30"><span class="nav-number">4.6.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-15"><span class="nav-number">4.6.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLE-GRANT-PERMISSION-options-lt-role-name-gt-lt-permission-type-gt-lt-key-gt-endkey"><span class="nav-number">4.7.</span> <span class="nav-text">ROLE GRANT-PERMISSION [options] &lt;role name&gt; &lt;permission type&gt; &lt;key&gt; [endkey]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-14"><span class="nav-number">4.7.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-31"><span class="nav-number">4.7.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-16"><span class="nav-number">4.7.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLE-REVOKE-PERMISSION-lt-role-name-gt-lt-permission-type-gt-lt-key-gt-endkey"><span class="nav-number">4.8.</span> <span class="nav-text">ROLE REVOKE-PERMISSION &lt;role name&gt; &lt;permission type&gt; &lt;key&gt; [endkey]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-15"><span class="nav-number">4.8.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-32"><span class="nav-number">4.8.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-17"><span class="nav-number">4.8.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-lt-subcommand-gt"><span class="nav-number">4.9.</span> <span class="nav-text">USER &lt;subcommand&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-ADD-lt-user-name-or-user-password-gt-options"><span class="nav-number">4.10.</span> <span class="nav-text">USER ADD &lt;user name or user:password&gt; [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-16"><span class="nav-number">4.10.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-33"><span class="nav-number">4.10.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-18"><span class="nav-number">4.10.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-GET-lt-user-name-gt-options"><span class="nav-number">4.11.</span> <span class="nav-text">USER GET &lt;user name&gt; [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-17"><span class="nav-number">4.11.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-34"><span class="nav-number">4.11.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-19"><span class="nav-number">4.11.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-DELETE-lt-user-name-gt"><span class="nav-number">4.12.</span> <span class="nav-text">USER DELETE &lt;user name&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-35"><span class="nav-number">4.12.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-20"><span class="nav-number">4.12.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-LIST"><span class="nav-number">4.13.</span> <span class="nav-text">USER LIST</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-36"><span class="nav-number">4.13.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-21"><span class="nav-number">4.13.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-PASSWD-lt-user-name-gt-options"><span class="nav-number">4.14.</span> <span class="nav-text">USER PASSWD &lt;user name&gt; [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-18"><span class="nav-number">4.14.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-37"><span class="nav-number">4.14.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-22"><span class="nav-number">4.14.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-GRANT-ROLE-lt-user-name-gt-lt-role-name-gt"><span class="nav-number">4.15.</span> <span class="nav-text">USER GRANT-ROLE &lt;user name&gt; &lt;role name&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-38"><span class="nav-number">4.15.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-23"><span class="nav-number">4.15.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#USER-REVOKE-ROLE-lt-user-name-gt-lt-role-name-gt"><span class="nav-number">4.16.</span> <span class="nav-text">USER REVOKE-ROLE &lt;user name&gt; &lt;role name&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-39"><span class="nav-number">4.16.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-24"><span class="nav-number">4.16.2.</span> <span class="nav-text">Examples</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Utility-commands"><span class="nav-number">5.</span> <span class="nav-text">Utility commands</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MAKE-MIRROR-options-lt-destination-gt"><span class="nav-number">5.1.</span> <span class="nav-text">MAKE-MIRROR [options] &lt;destination&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-19"><span class="nav-number">5.1.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-40"><span class="nav-number">5.1.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-25"><span class="nav-number">5.1.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MIGRATE-options"><span class="nav-number">5.2.</span> <span class="nav-text">MIGRATE [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-20"><span class="nav-number">5.2.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-41"><span class="nav-number">5.2.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Default-transformer"><span class="nav-number">5.2.3.</span> <span class="nav-text">Default transformer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#User-provided-transformer"><span class="nav-number">5.2.4.</span> <span class="nav-text">User-provided transformer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-16"><span class="nav-number">5.2.5.</span> <span class="nav-text">Example</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VERSION"><span class="nav-number">5.3.</span> <span class="nav-text">VERSION</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-42"><span class="nav-number">5.3.1.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-26"><span class="nav-number">5.3.2.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CHECK-lt-subcommand-gt"><span class="nav-number">5.4.</span> <span class="nav-text">CHECK &lt;subcommand&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CHECK-PERF-options"><span class="nav-number">5.5.</span> <span class="nav-text">CHECK PERF [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-21"><span class="nav-number">5.5.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-43"><span class="nav-number">5.5.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-27"><span class="nav-number">5.5.3.</span> <span class="nav-text">Examples</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CHECK-DATASCALE-options"><span class="nav-number">5.6.</span> <span class="nav-text">CHECK DATASCALE [options]</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Options-22"><span class="nav-number">5.6.1.</span> <span class="nav-text">Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Output-44"><span class="nav-number">5.6.2.</span> <span class="nav-text">Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Examples-28"><span class="nav-number">5.6.3.</span> <span class="nav-text">Examples</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Exit-codes"><span class="nav-number">6.</span> <span class="nav-text">Exit codes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Output-formats"><span class="nav-number">7.</span> <span class="nav-text">Output formats</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Simple"><span class="nav-number">7.1.</span> <span class="nav-text">Simple</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JSON"><span class="nav-number">7.2.</span> <span class="nav-text">JSON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Protobuf"><span class="nav-number">7.3.</span> <span class="nav-text">Protobuf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fields"><span class="nav-number">7.4.</span> <span class="nav-text">Fields</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Compatibility-Support"><span class="nav-number">8.</span> <span class="nav-text">Compatibility Support</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-Compatibility"><span class="nav-number">8.1.</span> <span class="nav-text">Input Compatibility</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Output-Compatibility"><span class="nav-number">8.2.</span> <span class="nav-text">Output Compatibility</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TODO-compatibility-with-etcd-server"><span class="nav-number">8.3.</span> <span class="nav-text">TODO: compatibility with etcd server</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/etcdctl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="etcdctl | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          etcdctl
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-11 17:38:04" itemprop="dateCreated datePublished" datetime="2021-03-11T17:38:04+08:00">2021-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p><code>etcdctl</code> is a command line client for <a target="_blank" rel="noopener" href="https://github.com/coreos/etcd">etcd</a>.</p>
+<p>The v3 API is used by default on master branch. For the v2 API, make sure to set environment variable <code>ETCDCTL_API=2</code>. See also <a href="READMEv2.md">READMEv2</a>.</p>
+<p>If using released versions earlier than v3.4, set <code>ETCDCTL_API=3</code> to use v3 API.</p>
+<p>Global flags (e.g., <code>dial-timeout</code>, <code>--cacert</code>, <code>--cert</code>, <code>--key</code>) can be set with environment variables:</p>
+<pre class="language-none"><code class="language-none">ETCDCTL_DIAL_TIMEOUT&#x3D;3s
+ETCDCTL_CACERT&#x3D;&#x2F;tmp&#x2F;ca.pem
+ETCDCTL_CERT&#x3D;&#x2F;tmp&#x2F;cert.pem
+ETCDCTL_KEY&#x3D;&#x2F;tmp&#x2F;key.pem</code></pre>
+
+<p>Prefix flag strings with <code>ETCDCTL_</code>, convert all letters to upper-case, and replace dash(<code>-</code>) with underscore(<code>_</code>). Note that the environment variables with the prefix <code>ETCDCTL_</code> can only be used with the etcdctl global flags. Also, the environment variable <code>ETCDCTL_API</code> is a special case variable for etcdctl internal use only.</p>
+<h2 id="Key-value-commands"><a href="#Key-value-commands" class="headerlink" title="Key-value commands"></a>Key-value commands</h2><h3 id="PUT-options-lt-key-gt-lt-value-gt"><a href="#PUT-options-lt-key-gt-lt-value-gt" class="headerlink" title="PUT [options] &lt;key&gt; &lt;value&gt;"></a>PUT [options] &lt;key&gt; &lt;value&gt;</h3><p>PUT assigns the specified value with the specified key. If key already holds a value, it is overwritten.</p>
+<p>RPC: Put</p>
+<h4 id="Options"><a href="#Options" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>lease – lease ID (in hexadecimal) to attach to the key.</p>
+</li>
+<li><p>prev-kv – return the previous key-value pair before modification.</p>
+</li>
+<li><p>ignore-value – updates the key using its current value.</p>
+</li>
+<li><p>ignore-lease – updates the key using its current lease.</p>
+</li>
+</ul>
+<h4 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h4><p><code>OK</code></p>
+<h4 id="Examples"><a href="#Examples" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put foo bar <span class="token parameter variable">--lease</span><span class="token operator">=</span>1234abcd
+<span class="token comment"># OK</span>
+./etcdctl get foo
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+./etcdctl put foo --ignore-value <span class="token comment"># to detache lease</span>
+<span class="token comment"># OK</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put foo bar <span class="token parameter variable">--lease</span><span class="token operator">=</span>1234abcd
+<span class="token comment"># OK</span>
+./etcdctl put foo bar1 --ignore-lease <span class="token comment"># to use existing lease 1234abcd</span>
+<span class="token comment"># OK</span>
+./etcdctl get foo
+<span class="token comment"># foo</span>
+<span class="token comment"># bar1</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put foo bar1 --prev-kv
+<span class="token comment"># OK</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+./etcdctl get foo
+<span class="token comment"># foo</span>
+<span class="token comment"># bar1</span></code></pre>
+
+<h4 id="Remarks"><a href="#Remarks" class="headerlink" title="Remarks"></a>Remarks</h4><p>If &lt;value&gt; isn’t given as command line argument, this command tries to read the value from standard input.</p>
+<p>When &lt;value&gt; begins with ‘-‘, &lt;value&gt; is interpreted as a flag.<br>Insert ‘–’ for workaround:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put <span class="token operator">&lt;</span>key<span class="token operator">></span> -- <span class="token operator">&lt;</span>value<span class="token operator">></span>
+./etcdctl put -- <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>value<span class="token operator">></span></code></pre>
+
+<p>Providing &lt;value&gt; in a new line after using <code>carriage return</code> is not supported and etcdctl may hang in that case. For example, following case is not supported:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put <span class="token operator">&lt;</span>key<span class="token operator">></span><span class="token punctuation">\</span>r
+<span class="token operator">&lt;</span>value<span class="token operator">></span></code></pre>
+
+<p>A &lt;value&gt; can have multiple lines or spaces but it must be provided with a double-quote as demonstrated below:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put foo <span class="token string">"bar1 2 3"</span></code></pre>
+
+<h3 id="GET-options-lt-key-gt-range-end"><a href="#GET-options-lt-key-gt-range-end" class="headerlink" title="GET [options] &lt;key&gt; [range_end]"></a>GET [options] &lt;key&gt; [range_end]</h3><p>GET gets the key or a range of keys [key, range_end) if range_end is given.</p>
+<p>RPC: Range</p>
+<h4 id="Options-1"><a href="#Options-1" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>hex – print out key and value as hex encode string</p>
+</li>
+<li><p>limit – maximum number of results</p>
+</li>
+<li><p>prefix – get keys by matching prefix</p>
+</li>
+<li><p>order – order of results; ASCEND or DESCEND</p>
+</li>
+<li><p>sort-by – sort target; CREATE, KEY, MODIFY, VALUE, or VERSION</p>
+</li>
+<li><p>rev – specify the kv revision</p>
+</li>
+<li><p>print-value-only – print only value when used with write-out&#x3D;simple</p>
+</li>
+<li><p>consistency – Linearizable(l) or Serializable(s)</p>
+</li>
+<li><p>from-key – Get keys that are greater than or equal to the given key using byte compare</p>
+</li>
+<li><p>keys-only – Get only the keys</p>
+</li>
+</ul>
+<h4 id="Output-1"><a href="#Output-1" class="headerlink" title="Output"></a>Output</h4><p>&lt;key&gt;\n&lt;value&gt;\n&lt;next_key&gt;\n&lt;next_value&gt;…</p>
+<h4 id="Examples-1"><a href="#Examples-1" class="headerlink" title="Examples"></a>Examples</h4><p>First, populate etcd with some keys:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put foo bar
+<span class="token comment"># OK</span>
+./etcdctl put foo1 bar1
+<span class="token comment"># OK</span>
+./etcdctl put foo2 bar2
+<span class="token comment"># OK</span>
+./etcdctl put foo3 bar3
+<span class="token comment"># OK</span></code></pre>
+
+<p>Get the key named <code>foo</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl get foo
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span></code></pre>
+
+<p>Get all keys:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl get --from-key <span class="token string">''</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># foo1</span>
+<span class="token comment"># bar1</span>
+<span class="token comment"># foo2</span>
+<span class="token comment"># foo2</span>
+<span class="token comment"># foo3</span>
+<span class="token comment"># bar3</span></code></pre>
+
+<p>Get all keys with names greater than or equal to <code>foo1</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl get --from-key foo1
+<span class="token comment"># foo1</span>
+<span class="token comment"># bar1</span>
+<span class="token comment"># foo2</span>
+<span class="token comment"># bar2</span>
+<span class="token comment"># foo3</span>
+<span class="token comment"># bar3</span></code></pre>
+
+<p>Get keys with names greater than or equal to <code>foo1</code> and less than <code>foo3</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl get foo1 foo3
+<span class="token comment"># foo1</span>
+<span class="token comment"># bar1</span>
+<span class="token comment"># foo2</span>
+<span class="token comment"># bar2</span></code></pre>
+
+<h4 id="Remarks-1"><a href="#Remarks-1" class="headerlink" title="Remarks"></a>Remarks</h4><p>If any key or value contains non-printable characters or control characters, simple formatted output can be ambiguous due to new lines. To resolve this issue, set <code>--hex</code> to hex encode all strings.</p>
+<h3 id="DEL-options-lt-key-gt-range-end"><a href="#DEL-options-lt-key-gt-range-end" class="headerlink" title="DEL [options] &lt;key&gt; [range_end]"></a>DEL [options] &lt;key&gt; [range_end]</h3><p>Removes the specified key or range of keys [key, range_end) if range_end is given.</p>
+<p>RPC: DeleteRange</p>
+<h4 id="Options-2"><a href="#Options-2" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>prefix – delete keys by matching prefix</p>
+</li>
+<li><p>prev-kv – return deleted key-value pairs</p>
+</li>
+<li><p>from-key – delete keys that are greater than or equal to the given key using byte compare</p>
+</li>
+</ul>
+<h4 id="Output-2"><a href="#Output-2" class="headerlink" title="Output"></a>Output</h4><p>Prints the number of keys that were removed in decimal if DEL succeeded.</p>
+<h4 id="Examples-2"><a href="#Examples-2" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put foo bar
+<span class="token comment"># OK</span>
+./etcdctl del foo
+<span class="token comment"># 1</span>
+./etcdctl get foo</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put key val
+<span class="token comment"># OK</span>
+./etcdctl del --prev-kv key
+<span class="token comment"># 1</span>
+<span class="token comment"># key</span>
+<span class="token comment"># val</span>
+./etcdctl get key</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put a <span class="token number">123</span>
+<span class="token comment"># OK</span>
+./etcdctl put b <span class="token number">456</span>
+<span class="token comment"># OK</span>
+./etcdctl put z <span class="token number">789</span>
+<span class="token comment"># OK</span>
+./etcdctl del --from-key a
+<span class="token comment"># 3</span>
+./etcdctl get --from-key a</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl put zoo val
+<span class="token comment"># OK</span>
+./etcdctl put zoo1 val1
+<span class="token comment"># OK</span>
+./etcdctl put zoo2 val2
+<span class="token comment"># OK</span>
+./etcdctl del <span class="token parameter variable">--prefix</span> zoo
+<span class="token comment"># 3</span>
+./etcdctl get zoo2</code></pre>
+
+<h3 id="TXN-options"><a href="#TXN-options" class="headerlink" title="TXN [options]"></a>TXN [options]</h3><p>TXN reads multiple etcd requests from standard input and applies them as a single atomic transaction.<br>A transaction consists of list of conditions, a list of requests to apply if all the conditions are true, and a list of requests to apply if any condition is false.</p>
+<p>RPC: Txn</p>
+<h4 id="Options-3"><a href="#Options-3" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>hex – print out keys and values as hex encoded strings.</p>
+</li>
+<li><p>interactive – input transaction with interactive prompting.</p>
+</li>
+</ul>
+<h4 id="Input-Format"><a href="#Input-Format" class="headerlink" title="Input Format"></a>Input Format</h4><pre class="language-ebnf" data-language="ebnf"><code class="language-ebnf">&lt;<span class="token rule">Txn</span>> ::<span class="token operator">=</span> &lt;<span class="token rule">CMP</span>><span class="token operator">*</span> <span class="token string">"\n"</span> &lt;<span class="token rule">THEN</span>> <span class="token string">"\n"</span> &lt;<span class="token rule">ELSE</span>> <span class="token string">"\n"</span>
+&lt;<span class="token rule">CMP</span>> ::<span class="token operator">=</span> <span class="token punctuation">(</span>&lt;<span class="token rule">CMPCREATE</span>><span class="token operator">|</span>&lt;<span class="token rule">CMPMOD</span>><span class="token operator">|</span>&lt;<span class="token rule">CMPVAL</span>><span class="token operator">|</span>&lt;<span class="token rule">CMPVER</span>><span class="token operator">|</span>&lt;<span class="token rule">CMPLEASE</span>><span class="token punctuation">)</span> <span class="token string">"\n"</span>
+&lt;<span class="token rule">CMPOP</span>> ::<span class="token operator">=</span> <span class="token string">"&lt;"</span> <span class="token operator">|</span> <span class="token string">"="</span> <span class="token operator">|</span> <span class="token string">">"</span>
+&lt;<span class="token rule">CMPCREATE</span>> :<span class="token operator">=</span> <span class="token punctuation">(</span><span class="token string">"c"</span><span class="token operator">|</span><span class="token string">"create"</span><span class="token punctuation">)</span><span class="token string">"("</span>&lt;<span class="token rule">KEY</span>><span class="token string">")"</span> &lt;<span class="token rule">CMPOP</span>> &lt;<span class="token rule">REVISION</span>>
+&lt;<span class="token rule">CMPMOD</span>> ::<span class="token operator">=</span> <span class="token punctuation">(</span><span class="token string">"m"</span><span class="token operator">|</span><span class="token string">"mod"</span><span class="token punctuation">)</span><span class="token string">"("</span>&lt;<span class="token rule">KEY</span>><span class="token string">")"</span> &lt;<span class="token rule">CMPOP</span>> &lt;<span class="token rule">REVISION</span>>
+&lt;<span class="token rule">CMPVAL</span>> ::<span class="token operator">=</span> <span class="token punctuation">(</span><span class="token string">"val"</span><span class="token operator">|</span><span class="token string">"value"</span><span class="token punctuation">)</span><span class="token string">"("</span>&lt;<span class="token rule">KEY</span>><span class="token string">")"</span> &lt;<span class="token rule">CMPOP</span>> &lt;<span class="token rule">VALUE</span>>
+&lt;<span class="token rule">CMPVER</span>> ::<span class="token operator">=</span> <span class="token punctuation">(</span><span class="token string">"ver"</span><span class="token operator">|</span><span class="token string">"version"</span><span class="token punctuation">)</span><span class="token string">"("</span>&lt;<span class="token rule">KEY</span>><span class="token string">")"</span> &lt;<span class="token rule">CMPOP</span>> &lt;<span class="token rule">VERSION</span>>
+&lt;<span class="token rule">CMPLEASE</span>> ::<span class="token operator">=</span> <span class="token string">"lease("</span>&lt;<span class="token rule">KEY</span>><span class="token string">")"</span> &lt;<span class="token rule">CMPOP</span>> &lt;<span class="token rule">LEASE</span>>
+&lt;<span class="token rule">THEN</span>> ::<span class="token operator">=</span> &lt;<span class="token rule">OP</span>><span class="token operator">*</span>
+&lt;<span class="token rule">ELSE</span>> ::<span class="token operator">=</span> &lt;<span class="token rule">OP</span>><span class="token operator">*</span>
+&lt;<span class="token rule">OP</span>> ::<span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token rule">see put</span><span class="token punctuation">,</span> <span class="token rule">get</span><span class="token punctuation">,</span> <span class="token rule">del etcdctl command syntax</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token string">"\n"</span>
+&lt;<span class="token rule">KEY</span>> ::<span class="token operator">=</span> <span class="token punctuation">(</span>%<span class="token rule">q formatted string</span><span class="token punctuation">)</span>
+&lt;<span class="token rule">VALUE</span>> ::<span class="token operator">=</span> <span class="token punctuation">(</span>%<span class="token rule">q formatted string</span><span class="token punctuation">)</span>
+&lt;<span class="token rule">REVISION</span>> ::<span class="token operator">=</span> <span class="token string">"\"</span><span class="token string">"[0-9]+"</span>\<span class="token string">""</span>
+&lt;<span class="token rule">VERSION</span>> ::<span class="token operator">=</span> <span class="token string">"\"</span><span class="token string">"[0-9]+"</span>\<span class="token string">""</span>
+&lt;<span class="token rule">LEASE</span>> ::<span class="token operator">=</span> <span class="token string">"\"</span><span class="token string">"[0-9]+\"</span>"</code></pre>
+
+<h4 id="Output-3"><a href="#Output-3" class="headerlink" title="Output"></a>Output</h4><p><code>SUCCESS</code> if etcd processed the transaction success list, <code>FAILURE</code> if etcd processed the transaction failure list. Prints the output for each command in the executed request list, each separated by a blank line.</p>
+<h4 id="Examples-3"><a href="#Examples-3" class="headerlink" title="Examples"></a>Examples</h4><p>txn in interactive mode:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl txn <span class="token parameter variable">-i</span>
+<span class="token comment"># compares:</span>
+mod<span class="token punctuation">(</span><span class="token string">"key1"</span><span class="token punctuation">)</span> <span class="token operator">></span> <span class="token string">"0"</span>
+
+<span class="token comment"># success requests (get, put, delete):</span>
+put key1 <span class="token string">"overwrote-key1"</span>
+
+<span class="token comment"># failure requests (get, put, delete):</span>
+put key1 <span class="token string">"created-key1"</span>
+put key2 <span class="token string">"some extra key"</span>
+
+<span class="token comment"># FAILURE</span>
+
+<span class="token comment"># OK</span>
+
+<span class="token comment"># OK</span></code></pre>
+
+<p>txn in non-interactive mode:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl txn <span class="token operator">&lt;&lt;&lt;</span><span class="token string">'mod("key1") > "0"
+
+put key1 "overwrote-key1"
+
+put key1 "created-key1"
+put key2 "some extra key"
+
+'</span>
+
+<span class="token comment"># FAILURE</span>
+
+<span class="token comment"># OK</span>
+
+<span class="token comment"># OK</span></code></pre>
+
+<h4 id="Remarks-2"><a href="#Remarks-2" class="headerlink" title="Remarks"></a>Remarks</h4><p>When using multi-line values within a TXN command, newlines must be represented as <code>\n</code>. Literal newlines will cause parsing failures. This differs from other commands (such as PUT) where the shell will convert literal newlines for us. For example:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl txn <span class="token operator">&lt;&lt;&lt;</span><span class="token string">'mod("key1") > "0"
+
+put key1 "overwrote-key1"
+
+put key1 "created-key1"
+put key2 "this is\na multi-line\nvalue"
+
+'</span>
+
+<span class="token comment"># FAILURE</span>
+
+<span class="token comment"># OK</span>
+
+<span class="token comment"># OK</span></code></pre>
+
+<h3 id="COMPACTION-options-lt-revision-gt"><a href="#COMPACTION-options-lt-revision-gt" class="headerlink" title="COMPACTION [options] &lt;revision&gt;"></a>COMPACTION [options] &lt;revision&gt;</h3><p>COMPACTION discards all etcd event history prior to a given revision. Since etcd uses a multiversion concurrency control<br>model, it preserves all key updates as event history. When the event history up to some revision is no longer needed,<br>all superseded keys may be compacted away to reclaim storage space in the etcd backend database.</p>
+<p>RPC: Compact</p>
+<h4 id="Options-4"><a href="#Options-4" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>physical – ‘true’ to wait for compaction to physically remove all old revisions</li>
+</ul>
+<h4 id="Output-4"><a href="#Output-4" class="headerlink" title="Output"></a>Output</h4><p>Prints the compacted revision.</p>
+<h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl compaction <span class="token number">1234</span>
+<span class="token comment"># compacted revision 1234</span></code></pre>
+
+<h3 id="WATCH-options-key-or-prefix-range-end-–-exec-command-arg1-arg2-…"><a href="#WATCH-options-key-or-prefix-range-end-–-exec-command-arg1-arg2-…" class="headerlink" title="WATCH [options] [key or prefix] [range_end] [–] [exec-command arg1 arg2 …]"></a>WATCH [options] [key or prefix] [range_end] [–] [exec-command arg1 arg2 …]</h3><p>Watch watches events stream on keys or prefixes, [key or prefix, range_end) if range_end is given. The watch command runs until it encounters an error or is terminated by the user. If range_end is given, it must be lexicographically greater than key or “\x00”.</p>
+<p>RPC: Watch</p>
+<h4 id="Options-5"><a href="#Options-5" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>hex – print out key and value as hex encode string</p>
+</li>
+<li><p>interactive – begins an interactive watch session</p>
+</li>
+<li><p>prefix – watch on a prefix if prefix is set.</p>
+</li>
+<li><p>prev-kv – get the previous key-value pair before the event happens.</p>
+</li>
+<li><p>rev – the revision to start watching. Specifying a revision is useful for observing past events.</p>
+</li>
+</ul>
+<h4 id="Input-format"><a href="#Input-format" class="headerlink" title="Input format"></a>Input format</h4><p>Input is only accepted for interactive mode.</p>
+<pre class="language-none"><code class="language-none">watch [options] &lt;key or prefix&gt;\n</code></pre>
+
+<h4 id="Output-5"><a href="#Output-5" class="headerlink" title="Output"></a>Output</h4><p>&lt;event&gt;[\n&lt;old_key&gt;\n&lt;old_value&gt;]\n&lt;key&gt;\n&lt;value&gt;\n&lt;event&gt;\n&lt;next_key&gt;\n&lt;next_value&gt;\n…</p>
+<h4 id="Examples-4"><a href="#Examples-4" class="headerlink" title="Examples"></a>Examples</h4><h5 id="Non-interactive"><a href="#Non-interactive" class="headerlink" title="Non-interactive"></a>Non-interactive</h5><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token function">watch</span> foo
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">ETCDCTL_WATCH_KEY</span><span class="token operator">=</span>foo ./etcdctl <span class="token function">watch</span>
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span></code></pre>
+
+<p>Receive events and execute <code>echo watch event received</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token function">watch</span> foo -- <span class="token builtin class-name">echo</span> <span class="token function">watch</span> event received
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># watch event received</span></code></pre>
+
+<p>Watch response is set via <code>ETCD_WATCH_*</code> environmental variables:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token function">watch</span> foo -- <span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">"env | grep ETCD_WATCH_"</span>
+
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># ETCD_WATCH_REVISION=11</span>
+<span class="token comment"># ETCD_WATCH_KEY="foo"</span>
+<span class="token comment"># ETCD_WATCH_EVENT_TYPE="PUT"</span>
+<span class="token comment"># ETCD_WATCH_VALUE="bar"</span></code></pre>
+
+<p>Watch with environmental variables and execute <code>echo watch event received</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">ETCDCTL_WATCH_KEY</span><span class="token operator">=</span>foo
+./etcdctl <span class="token function">watch</span> -- <span class="token builtin class-name">echo</span> <span class="token function">watch</span> event received
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># watch event received</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">ETCDCTL_WATCH_KEY</span><span class="token operator">=</span>foo
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">ETCDCTL_WATCH_RANGE_END</span><span class="token operator">=</span>foox
+./etcdctl <span class="token function">watch</span> -- <span class="token builtin class-name">echo</span> <span class="token function">watch</span> event received
+<span class="token comment"># PUT</span>
+<span class="token comment"># fob</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># watch event received</span></code></pre>
+
+<h5 id="Interactive"><a href="#Interactive" class="headerlink" title="Interactive"></a>Interactive</h5><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token function">watch</span> <span class="token parameter variable">-i</span>
+<span class="token function">watch</span> foo
+<span class="token function">watch</span> foo
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span></code></pre>
+
+<p>Receive events and execute <code>echo watch event received</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token function">watch</span> <span class="token parameter variable">-i</span>
+<span class="token function">watch</span> foo -- <span class="token builtin class-name">echo</span> <span class="token function">watch</span> event received
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># watch event received</span></code></pre>
+
+<p>Watch with environmental variables and execute <code>echo watch event received</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">ETCDCTL_WATCH_KEY</span><span class="token operator">=</span>foo
+./etcdctl <span class="token function">watch</span> <span class="token parameter variable">-i</span>
+<span class="token function">watch</span> -- <span class="token builtin class-name">echo</span> <span class="token function">watch</span> event received
+<span class="token comment"># PUT</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># watch event received</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable">ETCDCTL_WATCH_KEY</span><span class="token operator">=</span>foo
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">ETCDCTL_WATCH_RANGE_END</span><span class="token operator">=</span>foox
+./etcdctl <span class="token function">watch</span> <span class="token parameter variable">-i</span>
+<span class="token function">watch</span> -- <span class="token builtin class-name">echo</span> <span class="token function">watch</span> event received
+<span class="token comment"># PUT</span>
+<span class="token comment"># fob</span>
+<span class="token comment"># bar</span>
+<span class="token comment"># watch event received</span></code></pre>
+
+<h3 id="LEASE-lt-subcommand-gt"><a href="#LEASE-lt-subcommand-gt" class="headerlink" title="LEASE &lt;subcommand&gt;"></a>LEASE &lt;subcommand&gt;</h3><p>LEASE provides commands for key lease management.</p>
+<h3 id="LEASE-GRANT-lt-ttl-gt"><a href="#LEASE-GRANT-lt-ttl-gt" class="headerlink" title="LEASE GRANT &lt;ttl&gt;"></a>LEASE GRANT &lt;ttl&gt;</h3><p>LEASE GRANT creates a fresh lease with a server-selected time-to-live in seconds<br>greater than or equal to the requested TTL value.</p>
+<p>RPC: LeaseGrant</p>
+<h4 id="Output-6"><a href="#Output-6" class="headerlink" title="Output"></a>Output</h4><p>Prints a message with the granted lease ID.</p>
+<h4 id="Example-1"><a href="#Example-1" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lease grant <span class="token number">60</span>
+<span class="token comment"># lease 32695410dcc0ca06 granted with TTL(60s)</span></code></pre>
+
+<h3 id="LEASE-REVOKE-lt-leaseID-gt"><a href="#LEASE-REVOKE-lt-leaseID-gt" class="headerlink" title="LEASE REVOKE &lt;leaseID&gt;"></a>LEASE REVOKE &lt;leaseID&gt;</h3><p>LEASE REVOKE destroys a given lease, deleting all attached keys.</p>
+<p>RPC: LeaseRevoke</p>
+<h4 id="Output-7"><a href="#Output-7" class="headerlink" title="Output"></a>Output</h4><p>Prints a message indicating the lease is revoked.</p>
+<h4 id="Example-2"><a href="#Example-2" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lease revoke 32695410dcc0ca06
+<span class="token comment"># lease 32695410dcc0ca06 revoked</span></code></pre>
+
+<h3 id="LEASE-TIMETOLIVE-lt-leaseID-gt-options"><a href="#LEASE-TIMETOLIVE-lt-leaseID-gt-options" class="headerlink" title="LEASE TIMETOLIVE &lt;leaseID&gt; [options]"></a>LEASE TIMETOLIVE &lt;leaseID&gt; [options]</h3><p>LEASE TIMETOLIVE retrieves the lease information with the given lease ID.</p>
+<p>RPC: LeaseTimeToLive</p>
+<h4 id="Options-6"><a href="#Options-6" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>keys – Get keys attached to this lease</li>
+</ul>
+<h4 id="Output-8"><a href="#Output-8" class="headerlink" title="Output"></a>Output</h4><p>Prints lease information.</p>
+<h4 id="Example-3"><a href="#Example-3" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lease grant <span class="token number">500</span>
+<span class="token comment"># lease 2d8257079fa1bc0c granted with TTL(500s)</span>
+
+./etcdctl put foo1 bar <span class="token parameter variable">--lease</span><span class="token operator">=</span>2d8257079fa1bc0c
+<span class="token comment"># OK</span>
+
+./etcdctl put foo2 bar <span class="token parameter variable">--lease</span><span class="token operator">=</span>2d8257079fa1bc0c
+<span class="token comment"># OK</span>
+
+./etcdctl lease timetolive 2d8257079fa1bc0c
+<span class="token comment"># lease 2d8257079fa1bc0c granted with TTL(500s), remaining(481s)</span>
+
+./etcdctl lease timetolive 2d8257079fa1bc0c <span class="token parameter variable">--keys</span>
+<span class="token comment"># lease 2d8257079fa1bc0c granted with TTL(500s), remaining(472s), attached keys([foo2 foo1])</span>
+
+./etcdctl lease timetolive 2d8257079fa1bc0c --write-out<span class="token operator">=</span>json
+<span class="token comment"># &#123;"cluster_id":17186838941855831277,"member_id":4845372305070271874,"revision":3,"raft_term":2,"id":3279279168933706764,"ttl":465,"granted-ttl":500,"keys":null&#125;</span>
+
+./etcdctl lease timetolive 2d8257079fa1bc0c --write-out<span class="token operator">=</span>json <span class="token parameter variable">--keys</span>
+<span class="token comment"># &#123;"cluster_id":17186838941855831277,"member_id":4845372305070271874,"revision":3,"raft_term":2,"id":3279279168933706764,"ttl":459,"granted-ttl":500,"keys":["Zm9vMQ==","Zm9vMg=="]&#125;</span>
+
+./etcdctl lease timetolive 2d8257079fa1bc0c
+<span class="token comment"># lease 2d8257079fa1bc0c already expired</span></code></pre>
+
+<h3 id="LEASE-LIST"><a href="#LEASE-LIST" class="headerlink" title="LEASE LIST"></a>LEASE LIST</h3><p>LEASE LIST lists all active leases.</p>
+<p>RPC: LeaseLeases</p>
+<h4 id="Output-9"><a href="#Output-9" class="headerlink" title="Output"></a>Output</h4><p>Prints a message with a list of active leases.</p>
+<h4 id="Example-4"><a href="#Example-4" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lease grant <span class="token number">60</span>
+<span class="token comment"># lease 32695410dcc0ca06 granted with TTL(60s)</span>
+
+./etcdctl lease list
+32695410dcc0ca06</code></pre>
+
+<h3 id="LEASE-KEEP-ALIVE-lt-leaseID-gt"><a href="#LEASE-KEEP-ALIVE-lt-leaseID-gt" class="headerlink" title="LEASE KEEP-ALIVE &lt;leaseID&gt;"></a>LEASE KEEP-ALIVE &lt;leaseID&gt;</h3><p>LEASE KEEP-ALIVE periodically refreshes a lease so it does not expire.</p>
+<p>RPC: LeaseKeepAlive</p>
+<h4 id="Output-10"><a href="#Output-10" class="headerlink" title="Output"></a>Output</h4><p>Prints a message for every keep alive sent or prints a message indicating the lease is gone.</p>
+<h4 id="Example-5"><a href="#Example-5" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lease keep-alive 32695410dcc0ca0
+<span class="token comment"># lease 32695410dcc0ca0 keepalived with TTL(100)</span>
+<span class="token comment"># lease 32695410dcc0ca0 keepalived with TTL(100)</span>
+<span class="token comment"># lease 32695410dcc0ca0 keepalived with TTL(100)</span>
+<span class="token punctuation">..</span>.</code></pre>
+
+<h2 id="Cluster-maintenance-commands"><a href="#Cluster-maintenance-commands" class="headerlink" title="Cluster maintenance commands"></a>Cluster maintenance commands</h2><h3 id="MEMBER-lt-subcommand-gt"><a href="#MEMBER-lt-subcommand-gt" class="headerlink" title="MEMBER &lt;subcommand&gt;"></a>MEMBER &lt;subcommand&gt;</h3><p>MEMBER provides commands for managing etcd cluster membership.</p>
+<h3 id="MEMBER-ADD-lt-memberName-gt-options"><a href="#MEMBER-ADD-lt-memberName-gt-options" class="headerlink" title="MEMBER ADD &lt;memberName&gt; [options]"></a>MEMBER ADD &lt;memberName&gt; [options]</h3><p>MEMBER ADD introduces a new member into the etcd cluster as a new peer.</p>
+<p>RPC: MemberAdd</p>
+<h4 id="Options-7"><a href="#Options-7" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>peer-urls – comma separated list of URLs to associate with the new member.</li>
+</ul>
+<h4 id="Output-11"><a href="#Output-11" class="headerlink" title="Output"></a>Output</h4><p>Prints the member ID of the new member and the cluster ID.</p>
+<h4 id="Example-6"><a href="#Example-6" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl member <span class="token function">add</span> newMember --peer-urls<span class="token operator">=</span>https://127.0.0.1:12345
+
+Member ced000fda4d05edf added to cluster 8c4281cc65c7b112
+
+<span class="token assign-left variable">ETCD_NAME</span><span class="token operator">=</span><span class="token string">"newMember"</span>
+<span class="token assign-left variable">ETCD_INITIAL_CLUSTER</span><span class="token operator">=</span><span class="token string">"newMember=https://127.0.0.1:12345,default=http://10.0.0.30:2380"</span>
+<span class="token assign-left variable">ETCD_INITIAL_CLUSTER_STATE</span><span class="token operator">=</span><span class="token string">"existing"</span></code></pre>
+
+<h3 id="MEMBER-UPDATE-lt-memberID-gt-options"><a href="#MEMBER-UPDATE-lt-memberID-gt-options" class="headerlink" title="MEMBER UPDATE &lt;memberID&gt; [options]"></a>MEMBER UPDATE &lt;memberID&gt; [options]</h3><p>MEMBER UPDATE sets the peer URLs for an existing member in the etcd cluster.</p>
+<p>RPC: MemberUpdate</p>
+<h4 id="Options-8"><a href="#Options-8" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>peer-urls – comma separated list of URLs to associate with the updated member.</li>
+</ul>
+<h4 id="Output-12"><a href="#Output-12" class="headerlink" title="Output"></a>Output</h4><p>Prints the member ID of the updated member and the cluster ID.</p>
+<h4 id="Example-7"><a href="#Example-7" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl member update 2be1eb8f84b7f63e --peer-urls<span class="token operator">=</span>https://127.0.0.1:11112
+<span class="token comment"># Member 2be1eb8f84b7f63e updated in cluster ef37ad9dc622a7c4</span></code></pre>
+
+<h3 id="MEMBER-REMOVE-lt-memberID-gt"><a href="#MEMBER-REMOVE-lt-memberID-gt" class="headerlink" title="MEMBER REMOVE &lt;memberID&gt;"></a>MEMBER REMOVE &lt;memberID&gt;</h3><p>MEMBER REMOVE removes a member of an etcd cluster from participating in cluster consensus.</p>
+<p>RPC: MemberRemove</p>
+<h4 id="Output-13"><a href="#Output-13" class="headerlink" title="Output"></a>Output</h4><p>Prints the member ID of the removed member and the cluster ID.</p>
+<h4 id="Example-8"><a href="#Example-8" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl member remove 2be1eb8f84b7f63e
+<span class="token comment"># Member 2be1eb8f84b7f63e removed from cluster ef37ad9dc622a7c4</span></code></pre>
+
+<h3 id="MEMBER-LIST"><a href="#MEMBER-LIST" class="headerlink" title="MEMBER LIST"></a>MEMBER LIST</h3><p>MEMBER LIST prints the member details for all members associated with an etcd cluster.</p>
+<p>RPC: MemberList</p>
+<h4 id="Output-14"><a href="#Output-14" class="headerlink" title="Output"></a>Output</h4><p>Prints a humanized table of the member IDs, statuses, names, peer addresses, and client addresses.</p>
+<h4 id="Examples-5"><a href="#Examples-5" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl member list
+<span class="token comment"># 8211f1d0f64f3269, started, infra1, http://127.0.0.1:12380, http://127.0.0.1:2379</span>
+<span class="token comment"># 91bc3c398fb3c146, started, infra2, http://127.0.0.1:22380, http://127.0.0.1:22379</span>
+<span class="token comment"># fd422379fda50e48, started, infra3, http://127.0.0.1:32380, http://127.0.0.1:32379</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">-w</span> json member list
+<span class="token comment"># &#123;"header":&#123;"cluster_id":17237436991929493444,"member_id":9372538179322589801,"raft_term":2&#125;,"members":[&#123;"ID":9372538179322589801,"name":"infra1","peerURLs":["http://127.0.0.1:12380"],"clientURLs":["http://127.0.0.1:2379"]&#125;,&#123;"ID":10501334649042878790,"name":"infra2","peerURLs":["http://127.0.0.1:22380"],"clientURLs":["http://127.0.0.1:22379"]&#125;,&#123;"ID":18249187646912138824,"name":"infra3","peerURLs":["http://127.0.0.1:32380"],"clientURLs":["http://127.0.0.1:32379"]&#125;]&#125;</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">-w</span> table member list
++------------------+---------+--------+------------------------+------------------------+
+<span class="token operator">|</span>        ID        <span class="token operator">|</span> STATUS  <span class="token operator">|</span>  NAME  <span class="token operator">|</span>       PEER ADDRS       <span class="token operator">|</span>      CLIENT ADDRS      <span class="token operator">|</span>
++------------------+---------+--------+------------------------+------------------------+
+<span class="token operator">|</span> 8211f1d0f64f3269 <span class="token operator">|</span> started <span class="token operator">|</span> infra1 <span class="token operator">|</span> http://127.0.0.1:12380 <span class="token operator">|</span> http://127.0.0.1:2379  <span class="token operator">|</span>
+<span class="token operator">|</span> 91bc3c398fb3c146 <span class="token operator">|</span> started <span class="token operator">|</span> infra2 <span class="token operator">|</span> http://127.0.0.1:22380 <span class="token operator">|</span> http://127.0.0.1:22379 <span class="token operator">|</span>
+<span class="token operator">|</span> fd422379fda50e48 <span class="token operator">|</span> started <span class="token operator">|</span> infra3 <span class="token operator">|</span> http://127.0.0.1:32380 <span class="token operator">|</span> http://127.0.0.1:32379 <span class="token operator">|</span>
++------------------+---------+--------+------------------------+------------------------+</code></pre>
+
+<h3 id="ENDPOINT-lt-subcommand-gt"><a href="#ENDPOINT-lt-subcommand-gt" class="headerlink" title="ENDPOINT &lt;subcommand&gt;"></a>ENDPOINT &lt;subcommand&gt;</h3><p>ENDPOINT provides commands for querying individual endpoints.</p>
+<h4 id="Options-9"><a href="#Options-9" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>cluster – fetch and use all endpoints from the etcd cluster member list</li>
+</ul>
+<h3 id="ENDPOINT-HEALTH"><a href="#ENDPOINT-HEALTH" class="headerlink" title="ENDPOINT HEALTH"></a>ENDPOINT HEALTH</h3><p>ENDPOINT HEALTH checks the health of the list of endpoints with respect to cluster. An endpoint is unhealthy<br>when it cannot participate in consensus with the rest of the cluster.</p>
+<h4 id="Output-15"><a href="#Output-15" class="headerlink" title="Output"></a>Output</h4><p>If an endpoint can participate in consensus, prints a message indicating the endpoint is healthy. If an endpoint fails to participate in consensus, prints a message indicating the endpoint is unhealthy.</p>
+<h4 id="Example-9"><a href="#Example-9" class="headerlink" title="Example"></a>Example</h4><p>Check the default endpoint’s health:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl endpoint health
+<span class="token comment"># 127.0.0.1:2379 is healthy: successfully committed proposal: took = 2.095242ms</span></code></pre>
+
+<p>Check all endpoints for the cluster associated with the default endpoint:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl endpoint <span class="token parameter variable">--cluster</span> health
+<span class="token comment"># http://127.0.0.1:2379 is healthy: successfully committed proposal: took = 1.060091ms</span>
+<span class="token comment"># http://127.0.0.1:22379 is healthy: successfully committed proposal: took = 903.138µs</span>
+<span class="token comment"># http://127.0.0.1:32379 is healthy: successfully committed proposal: took = 1.113848ms</span></code></pre>
+
+<h3 id="ENDPOINT-STATUS"><a href="#ENDPOINT-STATUS" class="headerlink" title="ENDPOINT STATUS"></a>ENDPOINT STATUS</h3><p>ENDPOINT STATUS queries the status of each endpoint in the given endpoint list.</p>
+<h4 id="Output-16"><a href="#Output-16" class="headerlink" title="Output"></a>Output</h4><h5 id="Simple-format"><a href="#Simple-format" class="headerlink" title="Simple format"></a>Simple format</h5><p>Prints a humanized table of each endpoint URL, ID, version, database size, leadership status, raft term, and raft status.</p>
+<h5 id="JSON-format"><a href="#JSON-format" class="headerlink" title="JSON format"></a>JSON format</h5><p>Prints a line of JSON encoding each endpoint URL, ID, version, database size, leadership status, raft term, and raft status.</p>
+<h4 id="Examples-6"><a href="#Examples-6" class="headerlink" title="Examples"></a>Examples</h4><p>Get the status for the default endpoint:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl endpoint status
+<span class="token comment"># 127.0.0.1:2379, 8211f1d0f64f3269, 3.0.0, 25 kB, false, 2, 63</span></code></pre>
+
+<p>Get the status for the default endpoint as JSON:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">-w</span> json endpoint status
+<span class="token comment"># [&#123;"Endpoint":"127.0.0.1:2379","Status":&#123;"header":&#123;"cluster_id":17237436991929493444,"member_id":9372538179322589801,"revision":2,"raft_term":2&#125;,"version":"3.0.0","dbSize":24576,"leader":18249187646912138824,"raftIndex":32623,"raftTerm":2&#125;&#125;]</span></code></pre>
+
+<p>Get the status for all endpoints in the cluster associated with the default endpoint:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">-w</span> table endpoint <span class="token parameter variable">--cluster</span> status
++------------------------+------------------+----------------+---------+-----------+-----------+------------+
+<span class="token operator">|</span>        ENDPOINT        <span class="token operator">|</span>        ID        <span class="token operator">|</span>    VERSION     <span class="token operator">|</span> DB SIZE <span class="token operator">|</span> IS LEADER <span class="token operator">|</span> RAFT <span class="token environment constant">TERM</span> <span class="token operator">|</span> RAFT INDEX <span class="token operator">|</span>
++------------------------+------------------+----------------+---------+-----------+-----------+------------+
+<span class="token operator">|</span> http://127.0.0.1:2379  <span class="token operator">|</span> 8211f1d0f64f3269 <span class="token operator">|</span> <span class="token number">3.2</span>.0-rc.1+git <span class="token operator">|</span>   <span class="token number">25</span> kB <span class="token operator">|</span>     <span class="token boolean">false</span> <span class="token operator">|</span>         <span class="token number">2</span> <span class="token operator">|</span>          <span class="token number">8</span> <span class="token operator">|</span>
+<span class="token operator">|</span> http://127.0.0.1:22379 <span class="token operator">|</span> 91bc3c398fb3c146 <span class="token operator">|</span> <span class="token number">3.2</span>.0-rc.1+git <span class="token operator">|</span>   <span class="token number">25</span> kB <span class="token operator">|</span>     <span class="token boolean">false</span> <span class="token operator">|</span>         <span class="token number">2</span> <span class="token operator">|</span>          <span class="token number">8</span> <span class="token operator">|</span>
+<span class="token operator">|</span> http://127.0.0.1:32379 <span class="token operator">|</span> fd422379fda50e48 <span class="token operator">|</span> <span class="token number">3.2</span>.0-rc.1+git <span class="token operator">|</span>   <span class="token number">25</span> kB <span class="token operator">|</span>      <span class="token boolean">true</span> <span class="token operator">|</span>         <span class="token number">2</span> <span class="token operator">|</span>          <span class="token number">8</span> <span class="token operator">|</span>
++------------------------+------------------+----------------+---------+-----------+-----------+------------+</code></pre>
+
+<h3 id="ENDPOINT-HASHKV"><a href="#ENDPOINT-HASHKV" class="headerlink" title="ENDPOINT HASHKV"></a>ENDPOINT HASHKV</h3><p>ENDPOINT HASHKV fetches the hash of the key-value store of an endpoint.</p>
+<h4 id="Output-17"><a href="#Output-17" class="headerlink" title="Output"></a>Output</h4><h5 id="Simple-format-1"><a href="#Simple-format-1" class="headerlink" title="Simple format"></a>Simple format</h5><p>Prints a humanized table of each endpoint URL and KV history hash.</p>
+<h5 id="JSON-format-1"><a href="#JSON-format-1" class="headerlink" title="JSON format"></a>JSON format</h5><p>Prints a line of JSON encoding each endpoint URL and KV history hash.</p>
+<h4 id="Examples-7"><a href="#Examples-7" class="headerlink" title="Examples"></a>Examples</h4><p>Get the hash for the default endpoint:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl endpoint hashkv
+<span class="token comment"># 127.0.0.1:2379, 1084519789</span></code></pre>
+
+<p>Get the status for the default endpoint as JSON:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">-w</span> json endpoint hashkv
+<span class="token comment"># [&#123;"Endpoint":"127.0.0.1:2379","Hash":&#123;"header":&#123;"cluster_id":14841639068965178418,"member_id":10276657743932975437,"revision":1,"raft_term":3&#125;,"hash":1084519789,"compact_revision":-1&#125;&#125;]</span></code></pre>
+
+<p>Get the status for all endpoints in the cluster associated with the default endpoint:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">-w</span> table endpoint <span class="token parameter variable">--cluster</span> hashkv
++------------------------+------------+
+<span class="token operator">|</span>        ENDPOINT        <span class="token operator">|</span>    HASH    <span class="token operator">|</span>
++------------------------+------------+
+<span class="token operator">|</span> http://127.0.0.1:2379  <span class="token operator">|</span> <span class="token number">1084519789</span> <span class="token operator">|</span>
+<span class="token operator">|</span> http://127.0.0.1:22379 <span class="token operator">|</span> <span class="token number">1084519789</span> <span class="token operator">|</span>
+<span class="token operator">|</span> http://127.0.0.1:32379 <span class="token operator">|</span> <span class="token number">1084519789</span> <span class="token operator">|</span>
++------------------------+------------+</code></pre>
+
+<h3 id="ALARM-lt-subcommand-gt"><a href="#ALARM-lt-subcommand-gt" class="headerlink" title="ALARM &lt;subcommand&gt;"></a>ALARM &lt;subcommand&gt;</h3><p>Provides alarm related commands</p>
+<h3 id="ALARM-DISARM"><a href="#ALARM-DISARM" class="headerlink" title="ALARM DISARM"></a>ALARM DISARM</h3><p><code>alarm disarm</code> Disarms all alarms</p>
+<p>RPC: Alarm</p>
+<h4 id="Output-18"><a href="#Output-18" class="headerlink" title="Output"></a>Output</h4><p><code>alarm:&lt;alarm type&gt;</code> if alarm is present and disarmed.</p>
+<h4 id="Examples-8"><a href="#Examples-8" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl alarm disarm</code></pre>
+
+<p>If NOSPACE alarm is present:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl alarm disarm
+<span class="token comment"># alarm:NOSPACE</span></code></pre>
+
+<h3 id="ALARM-LIST"><a href="#ALARM-LIST" class="headerlink" title="ALARM LIST"></a>ALARM LIST</h3><p><code>alarm list</code> lists all alarms.</p>
+<p>RPC: Alarm</p>
+<h4 id="Output-19"><a href="#Output-19" class="headerlink" title="Output"></a>Output</h4><p><code>alarm:&lt;alarm type&gt;</code> if alarm is present, empty string if no alarms present.</p>
+<h4 id="Examples-9"><a href="#Examples-9" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl alarm list</code></pre>
+
+<p>If NOSPACE alarm is present:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl alarm list
+<span class="token comment"># alarm:NOSPACE</span></code></pre>
+
+<h3 id="DEFRAG-options"><a href="#DEFRAG-options" class="headerlink" title="DEFRAG [options]"></a>DEFRAG [options]</h3><p>DEFRAG defragments the backend database file for a set of given endpoints while etcd is running, or directly defragments an etcd data directory while etcd is not running. When an etcd member reclaims storage space from deleted and compacted keys, the space is kept in a free list and the database file remains the same size. By defragmenting the database, the etcd member releases this free space back to the file system.</p>
+<p><strong>Note that defragmentation to a live member blocks the system from reading and writing data while rebuilding its states.</strong></p>
+<p><strong>Note that defragmentation request does not get replicated over cluster. That is, the request is only applied to the local node. Specify all members in <code>--endpoints</code> flag or <code>--cluster</code> flag to automatically find all cluster members.</strong></p>
+<h4 id="Options-10"><a href="#Options-10" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>data-dir – Optional. If present, defragments a data directory not in use by etcd.</li>
+</ul>
+<h4 id="Output-20"><a href="#Output-20" class="headerlink" title="Output"></a>Output</h4><p>For each endpoints, prints a message indicating whether the endpoint was successfully defragmented.</p>
+<h4 id="Example-10"><a href="#Example-10" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--endpoints</span><span class="token operator">=</span>localhost:2379,badendpoint:2379 defrag
+<span class="token comment"># Finished defragmenting etcd member[localhost:2379]</span>
+<span class="token comment"># Failed to defragment etcd member[badendpoint:2379] (grpc: timed out trying to connect)</span></code></pre>
+
+<p>Run defragment operations for all endpoints in the cluster associated with the default endpoint:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl defrag <span class="token parameter variable">--cluster</span>
+Finished defragmenting etcd member<span class="token punctuation">[</span>http://127.0.0.1:2379<span class="token punctuation">]</span>
+Finished defragmenting etcd member<span class="token punctuation">[</span>http://127.0.0.1:22379<span class="token punctuation">]</span>
+Finished defragmenting etcd member<span class="token punctuation">[</span>http://127.0.0.1:32379<span class="token punctuation">]</span></code></pre>
+
+<p>To defragment a data directory directly, use the <code>--data-dir</code> flag:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># Defragment while etcd is not running</span>
+./etcdctl defrag --data-dir default.etcd
+<span class="token comment"># success (exit status 0)</span>
+<span class="token comment"># Error: cannot open database at default.etcd/member/snap/db</span></code></pre>
+
+<h4 id="Remarks-3"><a href="#Remarks-3" class="headerlink" title="Remarks"></a>Remarks</h4><p>DEFRAG returns a zero exit code only if it succeeded defragmenting all given endpoints.</p>
+<h3 id="SNAPSHOT-lt-subcommand-gt"><a href="#SNAPSHOT-lt-subcommand-gt" class="headerlink" title="SNAPSHOT &lt;subcommand&gt;"></a>SNAPSHOT &lt;subcommand&gt;</h3><p>SNAPSHOT provides commands to restore a snapshot of a running etcd server into a fresh cluster.</p>
+<h3 id="SNAPSHOT-SAVE-lt-filename-gt"><a href="#SNAPSHOT-SAVE-lt-filename-gt" class="headerlink" title="SNAPSHOT SAVE &lt;filename&gt;"></a>SNAPSHOT SAVE &lt;filename&gt;</h3><p>SNAPSHOT SAVE writes a point-in-time snapshot of the etcd backend database to a file.</p>
+<h4 id="Output-21"><a href="#Output-21" class="headerlink" title="Output"></a>Output</h4><p>The backend snapshot is written to the given file path.</p>
+<h4 id="Example-11"><a href="#Example-11" class="headerlink" title="Example"></a>Example</h4><p>Save a snapshot to “snapshot.db”:</p>
+<pre class="language-none"><code class="language-none">.&#x2F;etcdctl snapshot save snapshot.db</code></pre>
+
+<h3 id="SNAPSHOT-RESTORE-options-lt-filename-gt"><a href="#SNAPSHOT-RESTORE-options-lt-filename-gt" class="headerlink" title="SNAPSHOT RESTORE [options] &lt;filename&gt;"></a>SNAPSHOT RESTORE [options] &lt;filename&gt;</h3><p>SNAPSHOT RESTORE creates an etcd data directory for an etcd cluster member from a backend database snapshot and a new cluster configuration. Restoring the snapshot into each member for a new cluster configuration will initialize a new etcd cluster preloaded by the snapshot data.</p>
+<h4 id="Options-11"><a href="#Options-11" class="headerlink" title="Options"></a>Options</h4><p>The snapshot restore options closely resemble to those used in the <code>etcd</code> command for defining a cluster.</p>
+<ul>
+<li><p>data-dir – Path to the data directory. Uses &lt;name&gt;.etcd if none given.</p>
+</li>
+<li><p>wal-dir – Path to the WAL directory. Uses data directory if none given.</p>
+</li>
+<li><p>initial-cluster – The initial cluster configuration for the restored etcd cluster.</p>
+</li>
+<li><p>initial-cluster-token – Initial cluster token for the restored etcd cluster.</p>
+</li>
+<li><p>initial-advertise-peer-urls – List of peer URLs for the member being restored.</p>
+</li>
+<li><p>name – Human-readable name for the etcd cluster member being restored.</p>
+</li>
+<li><p>skip-hash-check – Ignore snapshot integrity hash value (required if copied from data directory)</p>
+</li>
+</ul>
+<h4 id="Output-22"><a href="#Output-22" class="headerlink" title="Output"></a>Output</h4><p>A new etcd data directory initialized with the snapshot.</p>
+<h4 id="Example-12"><a href="#Example-12" class="headerlink" title="Example"></a>Example</h4><p>Save a snapshot, restore into a new 3 node cluster, and start the cluster:</p>
+<pre class="language-none"><code class="language-none">.&#x2F;etcdctl snapshot save snapshot.db
+
+# restore members
+bin&#x2F;etcdctl snapshot restore snapshot.db --initial-cluster-token etcd-cluster-1 --initial-advertise-peer-urls http:&#x2F;&#x2F;127.0.0.1:12380  --name sshot1 --initial-cluster &#39;sshot1&#x3D;http:&#x2F;&#x2F;127.0.0.1:12380,sshot2&#x3D;http:&#x2F;&#x2F;127.0.0.1:22380,sshot3&#x3D;http:&#x2F;&#x2F;127.0.0.1:32380&#39;
+bin&#x2F;etcdctl snapshot restore snapshot.db --initial-cluster-token etcd-cluster-1 --initial-advertise-peer-urls http:&#x2F;&#x2F;127.0.0.1:22380  --name sshot2 --initial-cluster &#39;sshot1&#x3D;http:&#x2F;&#x2F;127.0.0.1:12380,sshot2&#x3D;http:&#x2F;&#x2F;127.0.0.1:22380,sshot3&#x3D;http:&#x2F;&#x2F;127.0.0.1:32380&#39;
+bin&#x2F;etcdctl snapshot restore snapshot.db --initial-cluster-token etcd-cluster-1 --initial-advertise-peer-urls http:&#x2F;&#x2F;127.0.0.1:32380  --name sshot3 --initial-cluster &#39;sshot1&#x3D;http:&#x2F;&#x2F;127.0.0.1:12380,sshot2&#x3D;http:&#x2F;&#x2F;127.0.0.1:22380,sshot3&#x3D;http:&#x2F;&#x2F;127.0.0.1:32380&#39;
+
+# launch members
+bin&#x2F;etcd --name sshot1 --listen-client-urls http:&#x2F;&#x2F;127.0.0.1:2379 --advertise-client-urls http:&#x2F;&#x2F;127.0.0.1:2379 --listen-peer-urls http:&#x2F;&#x2F;127.0.0.1:12380 &amp;
+bin&#x2F;etcd --name sshot2 --listen-client-urls http:&#x2F;&#x2F;127.0.0.1:22379 --advertise-client-urls http:&#x2F;&#x2F;127.0.0.1:22379 --listen-peer-urls http:&#x2F;&#x2F;127.0.0.1:22380 &amp;
+bin&#x2F;etcd --name sshot3 --listen-client-urls http:&#x2F;&#x2F;127.0.0.1:32379 --advertise-client-urls http:&#x2F;&#x2F;127.0.0.1:32379 --listen-peer-urls http:&#x2F;&#x2F;127.0.0.1:32380 &amp;</code></pre>
+
+<h3 id="SNAPSHOT-STATUS-lt-filename-gt"><a href="#SNAPSHOT-STATUS-lt-filename-gt" class="headerlink" title="SNAPSHOT STATUS &lt;filename&gt;"></a>SNAPSHOT STATUS &lt;filename&gt;</h3><p>SNAPSHOT STATUS lists information about a given backend database snapshot file.</p>
+<h4 id="Output-23"><a href="#Output-23" class="headerlink" title="Output"></a>Output</h4><h5 id="Simple-format-2"><a href="#Simple-format-2" class="headerlink" title="Simple format"></a>Simple format</h5><p>Prints a humanized table of the database hash, revision, total keys, and size.</p>
+<h5 id="JSON-format-2"><a href="#JSON-format-2" class="headerlink" title="JSON format"></a>JSON format</h5><p>Prints a line of JSON encoding the database hash, revision, total keys, and size.</p>
+<h4 id="Examples-10"><a href="#Examples-10" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl snapshot status file.db
+<span class="token comment"># cf1550fb, 3, 3, 25 kB</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl -write-out<span class="token operator">=</span>json snapshot status file.db
+<span class="token comment"># &#123;"hash":3474280699,"revision":3,"totalKey":3,"totalSize":24576&#125;</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl -write-out<span class="token operator">=</span>table snapshot status file.db
++----------+----------+------------+------------+
+<span class="token operator">|</span>   HASH   <span class="token operator">|</span> REVISION <span class="token operator">|</span> TOTAL KEYS <span class="token operator">|</span> TOTAL SIZE <span class="token operator">|</span>
++----------+----------+------------+------------+
+<span class="token operator">|</span> cf1550fb <span class="token operator">|</span>        <span class="token number">3</span> <span class="token operator">|</span>          <span class="token number">3</span> <span class="token operator">|</span> <span class="token number">25</span> kB      <span class="token operator">|</span>
++----------+----------+------------+------------+</code></pre>
+
+<h3 id="MOVE-LEADER-lt-hexadecimal-transferee-id-gt"><a href="#MOVE-LEADER-lt-hexadecimal-transferee-id-gt" class="headerlink" title="MOVE-LEADER &lt;hexadecimal-transferee-id&gt;"></a>MOVE-LEADER &lt;hexadecimal-transferee-id&gt;</h3><p>MOVE-LEADER transfers leadership from the leader to another member in the cluster.</p>
+<h4 id="Example-13"><a href="#Example-13" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># to choose transferee</span>
+<span class="token assign-left variable">transferee_id</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span>./etcdctl <span class="token punctuation">\</span>
+  <span class="token parameter variable">--endpoints</span> localhost:2379,localhost:22379,localhost:32379 <span class="token punctuation">\</span>
+  endpoint status <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-m</span> <span class="token number">1</span> <span class="token string">"false"</span> <span class="token operator">|</span> <span class="token function">awk</span> -F<span class="token string">', '</span> <span class="token string">'&#123;print $2&#125;'</span><span class="token variable">)</span></span>
+<span class="token builtin class-name">echo</span> <span class="token variable">$&#123;transferee_id&#125;</span>
+<span class="token comment"># c89feb932daef420</span>
+
+<span class="token comment"># endpoints should include leader node</span>
+./etcdctl <span class="token parameter variable">--endpoints</span> <span class="token variable">$&#123;transferee_ep&#125;</span> move-leader <span class="token variable">$&#123;transferee_id&#125;</span>
+<span class="token comment"># Error:  no leader endpoint given at [localhost:22379 localhost:32379]</span>
+
+<span class="token comment"># request to leader with target node ID</span>
+./etcdctl <span class="token parameter variable">--endpoints</span> <span class="token variable">$&#123;leader_ep&#125;</span> move-leader <span class="token variable">$&#123;transferee_id&#125;</span>
+<span class="token comment"># Leadership transferred from 45ddc0e800e20b93 to c89feb932daef420</span></code></pre>
+
+<h2 id="Concurrency-commands"><a href="#Concurrency-commands" class="headerlink" title="Concurrency commands"></a>Concurrency commands</h2><h3 id="LOCK-options-lt-lockname-gt-command-arg1-arg2-…"><a href="#LOCK-options-lt-lockname-gt-command-arg1-arg2-…" class="headerlink" title="LOCK [options] &lt;lockname&gt; [command arg1 arg2 …]"></a>LOCK [options] &lt;lockname&gt; [command arg1 arg2 …]</h3><p>LOCK acquires a distributed mutex with a given name. Once the lock is acquired, it will be held until etcdctl is terminated.</p>
+<h4 id="Options-12"><a href="#Options-12" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>ttl - time out in seconds of lock session.</li>
+</ul>
+<h4 id="Output-24"><a href="#Output-24" class="headerlink" title="Output"></a>Output</h4><p>Once the lock is acquired but no command is given, the result for the GET on the unique lock holder key is displayed.</p>
+<p>If a command is given, it will be executed with environment variables <code>ETCD_LOCK_KEY</code> and <code>ETCD_LOCK_REV</code> set to the lock’s holder key and revision.</p>
+<h4 id="Example-14"><a href="#Example-14" class="headerlink" title="Example"></a>Example</h4><p>Acquire lock with standard output display:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lock mylock
+<span class="token comment"># mylock/1234534535445</span></code></pre>
+
+<p>Acquire lock and execute <code>echo lock acquired</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lock mylock <span class="token builtin class-name">echo</span> lock acquired
+<span class="token comment"># lock acquired</span></code></pre>
+
+<p>Acquire lock and execute <code>etcdctl put</code> command</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl lock mylock ./etcdctl put foo bar
+<span class="token comment"># OK</span></code></pre>
+
+<h4 id="Remarks-4"><a href="#Remarks-4" class="headerlink" title="Remarks"></a>Remarks</h4><p>LOCK returns a zero exit code only if it is terminated by a signal and releases the lock.</p>
+<p>If LOCK is abnormally terminated or fails to contact the cluster to release the lock, the lock will remain held until the lease expires. Progress may be delayed by up to the default lease length of 60 seconds.</p>
+<h3 id="ELECT-options-lt-election-name-gt-proposal"><a href="#ELECT-options-lt-election-name-gt-proposal" class="headerlink" title="ELECT [options] &lt;election-name&gt; [proposal]"></a>ELECT [options] &lt;election-name&gt; [proposal]</h3><p>ELECT participates on a named election. A node announces its candidacy in the election by providing<br>a proposal value. If a node wishes to observe the election, ELECT listens for new leaders values.<br>Whenever a leader is elected, its proposal is given as output.</p>
+<h4 id="Options-13"><a href="#Options-13" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>listen – observe the election.</li>
+</ul>
+<h4 id="Output-25"><a href="#Output-25" class="headerlink" title="Output"></a>Output</h4><ul>
+<li><p>If a candidate, ELECT displays the GET on the leader key once the node is elected election.</p>
+</li>
+<li><p>If observing, ELECT streams the result for a GET on the leader key for the current election and all future elections.</p>
+</li>
+</ul>
+<h4 id="Example-15"><a href="#Example-15" class="headerlink" title="Example"></a>Example</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl elect myelection foo
+<span class="token comment"># myelection/1456952310051373265</span>
+<span class="token comment"># foo</span></code></pre>
+
+<h4 id="Remarks-5"><a href="#Remarks-5" class="headerlink" title="Remarks"></a>Remarks</h4><p>ELECT returns a zero exit code only if it is terminated by a signal and can revoke its candidacy or leadership, if any.</p>
+<p>If a candidate is abnormally terminated, election rogress may be delayed by up to the default lease length of 60 seconds.</p>
+<h2 id="Authentication-commands"><a href="#Authentication-commands" class="headerlink" title="Authentication commands"></a>Authentication commands</h2><h3 id="AUTH-lt-enable-or-disable-gt"><a href="#AUTH-lt-enable-or-disable-gt" class="headerlink" title="AUTH &lt;enable or disable&gt;"></a>AUTH &lt;enable or disable&gt;</h3><p><code>auth enable</code> activates authentication on an etcd cluster and <code>auth disable</code> deactivates. When authentication is enabled, etcd checks all requests for appropriate authorization.</p>
+<p>RPC: AuthEnable&#x2F;AuthDisable</p>
+<h4 id="Output-26"><a href="#Output-26" class="headerlink" title="Output"></a>Output</h4><p><code>Authentication Enabled</code>.</p>
+<h4 id="Examples-11"><a href="#Examples-11" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl user <span class="token function">add</span> root
+<span class="token comment"># Password of root:#type password for root</span>
+<span class="token comment"># Type password of root again for confirmation:#re-type password for root</span>
+<span class="token comment"># User root created</span>
+./etcdctl user grant-role root root
+<span class="token comment"># Role root is granted to user root</span>
+./etcdctl user get root
+<span class="token comment"># User: root</span>
+<span class="token comment"># Roles: root</span>
+./etcdctl role <span class="token function">add</span> root
+<span class="token comment"># Role root created</span>
+./etcdctl role get root
+<span class="token comment"># Role root</span>
+<span class="token comment"># KV Read:</span>
+<span class="token comment"># KV Write:</span>
+./etcdctl auth <span class="token builtin class-name">enable</span>
+<span class="token comment"># Authentication Enabled</span></code></pre>
+
+<h3 id="ROLE-lt-subcommand-gt"><a href="#ROLE-lt-subcommand-gt" class="headerlink" title="ROLE &lt;subcommand&gt;"></a>ROLE &lt;subcommand&gt;</h3><p>ROLE is used to specify different roles which can be assigned to etcd user(s).</p>
+<h3 id="ROLE-ADD-lt-role-name-gt"><a href="#ROLE-ADD-lt-role-name-gt" class="headerlink" title="ROLE ADD &lt;role name&gt;"></a>ROLE ADD &lt;role name&gt;</h3><p><code>role add</code> creates a role.</p>
+<p>RPC: RoleAdd</p>
+<h4 id="Output-27"><a href="#Output-27" class="headerlink" title="Output"></a>Output</h4><p><code>Role &lt;role name&gt; created</code>.</p>
+<h4 id="Examples-12"><a href="#Examples-12" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 role <span class="token function">add</span> myrole
+<span class="token comment"># Role myrole created</span></code></pre>
+
+<h3 id="ROLE-GET-lt-role-name-gt"><a href="#ROLE-GET-lt-role-name-gt" class="headerlink" title="ROLE GET &lt;role name&gt;"></a>ROLE GET &lt;role name&gt;</h3><p><code>role get</code> lists detailed role information.</p>
+<p>RPC: RoleGet</p>
+<h4 id="Output-28"><a href="#Output-28" class="headerlink" title="Output"></a>Output</h4><p>Detailed role information.</p>
+<h4 id="Examples-13"><a href="#Examples-13" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 role get myrole
+<span class="token comment"># Role myrole</span>
+<span class="token comment"># KV Read:</span>
+<span class="token comment"># foo</span>
+<span class="token comment"># KV Write:</span>
+<span class="token comment"># foo</span></code></pre>
+
+<h3 id="ROLE-DELETE-lt-role-name-gt"><a href="#ROLE-DELETE-lt-role-name-gt" class="headerlink" title="ROLE DELETE &lt;role name&gt;"></a>ROLE DELETE &lt;role name&gt;</h3><p><code>role delete</code> deletes a role.</p>
+<p>RPC: RoleDelete</p>
+<h4 id="Output-29"><a href="#Output-29" class="headerlink" title="Output"></a>Output</h4><p><code>Role &lt;role name&gt; deleted</code>.</p>
+<h4 id="Examples-14"><a href="#Examples-14" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 role delete myrole
+<span class="token comment"># Role myrole deleted</span></code></pre>
+
+<h3 id="ROLE-LIST-lt-role-name-gt"><a href="#ROLE-LIST-lt-role-name-gt" class="headerlink" title="ROLE LIST &lt;role name&gt;"></a>ROLE LIST &lt;role name&gt;</h3><p><code>role list</code> lists all roles in etcd.</p>
+<p>RPC: RoleList</p>
+<h4 id="Output-30"><a href="#Output-30" class="headerlink" title="Output"></a>Output</h4><p>A role per line.</p>
+<h4 id="Examples-15"><a href="#Examples-15" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 role list
+<span class="token comment"># roleA</span>
+<span class="token comment"># roleB</span>
+<span class="token comment"># myrole</span></code></pre>
+
+<h3 id="ROLE-GRANT-PERMISSION-options-lt-role-name-gt-lt-permission-type-gt-lt-key-gt-endkey"><a href="#ROLE-GRANT-PERMISSION-options-lt-role-name-gt-lt-permission-type-gt-lt-key-gt-endkey" class="headerlink" title="ROLE GRANT-PERMISSION [options] &lt;role name&gt; &lt;permission type&gt; &lt;key&gt; [endkey]"></a>ROLE GRANT-PERMISSION [options] &lt;role name&gt; &lt;permission type&gt; &lt;key&gt; [endkey]</h3><p><code>role grant-permission</code> grants a key to a role.</p>
+<p>RPC: RoleGrantPermission</p>
+<h4 id="Options-14"><a href="#Options-14" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>from-key – grant a permission of keys that are greater than or equal to the given key using byte compare</p>
+</li>
+<li><p>prefix – grant a prefix permission</p>
+</li>
+</ul>
+<h4 id="Output-31"><a href="#Output-31" class="headerlink" title="Output"></a>Output</h4><p><code>Role &lt;role name&gt; updated</code>.</p>
+<h4 id="Examples-16"><a href="#Examples-16" class="headerlink" title="Examples"></a>Examples</h4><p>Grant read and write permission on the key <code>foo</code> to role <code>myrole</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 role grant-permission myrole readwrite foo
+<span class="token comment"># Role myrole updated</span></code></pre>
+
+<p>Grant read permission on the wildcard key pattern <code>foo/*</code> to role <code>myrole</code>:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 role grant-permission <span class="token parameter variable">--prefix</span> myrole readwrite foo/
+<span class="token comment"># Role myrole updated</span></code></pre>
+
+<h3 id="ROLE-REVOKE-PERMISSION-lt-role-name-gt-lt-permission-type-gt-lt-key-gt-endkey"><a href="#ROLE-REVOKE-PERMISSION-lt-role-name-gt-lt-permission-type-gt-lt-key-gt-endkey" class="headerlink" title="ROLE REVOKE-PERMISSION &lt;role name&gt; &lt;permission type&gt; &lt;key&gt; [endkey]"></a>ROLE REVOKE-PERMISSION &lt;role name&gt; &lt;permission type&gt; &lt;key&gt; [endkey]</h3><p><code>role revoke-permission</code> revokes a key from a role.</p>
+<p>RPC: RoleRevokePermission</p>
+<h4 id="Options-15"><a href="#Options-15" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>from-key – revoke a permission of keys that are greater than or equal to the given key using byte compare</p>
+</li>
+<li><p>prefix – revoke a prefix permission</p>
+</li>
+</ul>
+<h4 id="Output-32"><a href="#Output-32" class="headerlink" title="Output"></a>Output</h4><p><code>Permission of key &lt;key&gt; is revoked from role &lt;role name&gt;</code> for single key. <code>Permission of range [&lt;key&gt;, &lt;endkey&gt;) is revoked from role &lt;role name&gt;</code> for a key range. Exit code is zero.</p>
+<h4 id="Examples-17"><a href="#Examples-17" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 role revoke-permission myrole foo
+<span class="token comment"># Permission of key foo is revoked from role myrole</span></code></pre>
+
+<h3 id="USER-lt-subcommand-gt"><a href="#USER-lt-subcommand-gt" class="headerlink" title="USER &lt;subcommand&gt;"></a>USER &lt;subcommand&gt;</h3><p>USER provides commands for managing users of etcd.</p>
+<h3 id="USER-ADD-lt-user-name-or-user-password-gt-options"><a href="#USER-ADD-lt-user-name-or-user-password-gt-options" class="headerlink" title="USER ADD &lt;user name or user:password&gt; [options]"></a>USER ADD &lt;user name or user:password&gt; [options]</h3><p><code>user add</code> creates a user.</p>
+<p>RPC: UserAdd</p>
+<h4 id="Options-16"><a href="#Options-16" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>interactive – Read password from stdin instead of interactive terminal</li>
+</ul>
+<h4 id="Output-33"><a href="#Output-33" class="headerlink" title="Output"></a>Output</h4><p><code>User &lt;user name&gt; created</code>.</p>
+<h4 id="Examples-18"><a href="#Examples-18" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 user <span class="token function">add</span> myuser
+<span class="token comment"># Password of myuser: #type password for my user</span>
+<span class="token comment"># Type password of myuser again for confirmation:#re-type password for my user</span>
+<span class="token comment"># User myuser created</span></code></pre>
+
+<h3 id="USER-GET-lt-user-name-gt-options"><a href="#USER-GET-lt-user-name-gt-options" class="headerlink" title="USER GET &lt;user name&gt; [options]"></a>USER GET &lt;user name&gt; [options]</h3><p><code>user get</code> lists detailed user information.</p>
+<p>RPC: UserGet</p>
+<h4 id="Options-17"><a href="#Options-17" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>detail – Show permissions of roles granted to the user</li>
+</ul>
+<h4 id="Output-34"><a href="#Output-34" class="headerlink" title="Output"></a>Output</h4><p>Detailed user information.</p>
+<h4 id="Examples-19"><a href="#Examples-19" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 user get myuser
+<span class="token comment"># User: myuser</span>
+<span class="token comment"># Roles:</span></code></pre>
+
+<h3 id="USER-DELETE-lt-user-name-gt"><a href="#USER-DELETE-lt-user-name-gt" class="headerlink" title="USER DELETE &lt;user name&gt;"></a>USER DELETE &lt;user name&gt;</h3><p><code>user delete</code> deletes a user.</p>
+<p>RPC: UserDelete</p>
+<h4 id="Output-35"><a href="#Output-35" class="headerlink" title="Output"></a>Output</h4><p><code>User &lt;user name&gt; deleted</code>.</p>
+<h4 id="Examples-20"><a href="#Examples-20" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 user delete myuser
+<span class="token comment"># User myuser deleted</span></code></pre>
+
+<h3 id="USER-LIST"><a href="#USER-LIST" class="headerlink" title="USER LIST"></a>USER LIST</h3><p><code>user list</code> lists detailed user information.</p>
+<p>RPC: UserList</p>
+<h4 id="Output-36"><a href="#Output-36" class="headerlink" title="Output"></a>Output</h4><ul>
+<li>List of users, one per line.</li>
+</ul>
+<h4 id="Examples-21"><a href="#Examples-21" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 user list
+<span class="token comment"># user1</span>
+<span class="token comment"># user2</span>
+<span class="token comment"># myuser</span></code></pre>
+
+<h3 id="USER-PASSWD-lt-user-name-gt-options"><a href="#USER-PASSWD-lt-user-name-gt-options" class="headerlink" title="USER PASSWD &lt;user name&gt; [options]"></a>USER PASSWD &lt;user name&gt; [options]</h3><p><code>user passwd</code> changes a user’s password.</p>
+<p>RPC: UserChangePassword</p>
+<h4 id="Options-18"><a href="#Options-18" class="headerlink" title="Options"></a>Options</h4><ul>
+<li>interactive – if true, read password in interactive terminal</li>
+</ul>
+<h4 id="Output-37"><a href="#Output-37" class="headerlink" title="Output"></a>Output</h4><p><code>Password updated</code>.</p>
+<h4 id="Examples-22"><a href="#Examples-22" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 user <span class="token function">passwd</span> myuser
+<span class="token comment"># Password of myuser: #type new password for my user</span>
+<span class="token comment"># Type password of myuser again for confirmation: #re-type the new password for my user</span>
+<span class="token comment"># Password updated</span></code></pre>
+
+<h3 id="USER-GRANT-ROLE-lt-user-name-gt-lt-role-name-gt"><a href="#USER-GRANT-ROLE-lt-user-name-gt-lt-role-name-gt" class="headerlink" title="USER GRANT-ROLE &lt;user name&gt; &lt;role name&gt;"></a>USER GRANT-ROLE &lt;user name&gt; &lt;role name&gt;</h3><p><code>user grant-role</code> grants a role to a user</p>
+<p>RPC: UserGrantRole</p>
+<h4 id="Output-38"><a href="#Output-38" class="headerlink" title="Output"></a>Output</h4><p><code>Role &lt;role name&gt; is granted to user &lt;user name&gt;</code>.</p>
+<h4 id="Examples-23"><a href="#Examples-23" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 user grant-role userA roleA
+<span class="token comment"># Role roleA is granted to user userA</span></code></pre>
+
+<h3 id="USER-REVOKE-ROLE-lt-user-name-gt-lt-role-name-gt"><a href="#USER-REVOKE-ROLE-lt-user-name-gt-lt-role-name-gt" class="headerlink" title="USER REVOKE-ROLE &lt;user name&gt; &lt;role name&gt;"></a>USER REVOKE-ROLE &lt;user name&gt; &lt;role name&gt;</h3><p><code>user revoke-role</code> revokes a role from a user</p>
+<p>RPC: UserRevokeRole</p>
+<h4 id="Output-39"><a href="#Output-39" class="headerlink" title="Output"></a>Output</h4><p><code>Role &lt;role name&gt; is revoked from user &lt;user name&gt;</code>.</p>
+<h4 id="Examples-24"><a href="#Examples-24" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl <span class="token parameter variable">--user</span><span class="token operator">=</span>root:123 user revoke-role userA roleA
+<span class="token comment"># Role roleA is revoked from user userA</span></code></pre>
+
+<h2 id="Utility-commands"><a href="#Utility-commands" class="headerlink" title="Utility commands"></a>Utility commands</h2><h3 id="MAKE-MIRROR-options-lt-destination-gt"><a href="#MAKE-MIRROR-options-lt-destination-gt" class="headerlink" title="MAKE-MIRROR [options] &lt;destination&gt;"></a>MAKE-MIRROR [options] &lt;destination&gt;</h3><p><a href="./doc/mirror_maker.md">make-mirror</a> mirrors a key prefix in an etcd cluster to a destination etcd cluster.</p>
+<h4 id="Options-19"><a href="#Options-19" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>dest-cacert – TLS certificate authority file for destination cluster</p>
+</li>
+<li><p>dest-cert – TLS certificate file for destination cluster</p>
+</li>
+<li><p>dest-key – TLS key file for destination cluster</p>
+</li>
+<li><p>prefix – The key-value prefix to mirror</p>
+</li>
+<li><p>dest-prefix – The destination prefix to mirror a prefix to a different prefix in the destination cluster</p>
+</li>
+<li><p>no-dest-prefix – Mirror key-values to the root of the destination cluster</p>
+</li>
+<li><p>dest-insecure-transport – Disable transport security for client connections</p>
+</li>
+</ul>
+<h4 id="Output-40"><a href="#Output-40" class="headerlink" title="Output"></a>Output</h4><p>The approximate total number of keys transferred to the destination cluster, updated every 30 seconds.</p>
+<h4 id="Examples-25"><a href="#Examples-25" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-none"><code class="language-none">.&#x2F;etcdctl make-mirror mirror.example.com:2379
+# 10
+# 18</code></pre>
+
+<h3 id="MIGRATE-options"><a href="#MIGRATE-options" class="headerlink" title="MIGRATE [options]"></a>MIGRATE [options]</h3><p>Migrates keys in a v2 store to a v3 mvcc store. Users should run migration command for all members in the cluster.</p>
+<h4 id="Options-20"><a href="#Options-20" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>data-dir – Path to the data directory</p>
+</li>
+<li><p>wal-dir – Path to the WAL directory</p>
+</li>
+<li><p>transformer – Path to the user-provided transformer program (default if not provided)</p>
+</li>
+</ul>
+<h4 id="Output-41"><a href="#Output-41" class="headerlink" title="Output"></a>Output</h4><p>No output on success.</p>
+<h4 id="Default-transformer"><a href="#Default-transformer" class="headerlink" title="Default transformer"></a>Default transformer</h4><p>If user does not provide a transformer program, migrate command will use the default transformer. The default transformer transforms <code>storev2</code> formatted keys into <code>mvcc</code> formatted keys according to the following Go program:</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">transform</span><span class="token punctuation">(</span>n <span class="token operator">*</span>storev2<span class="token punctuation">.</span>Node<span class="token punctuation">)</span> <span class="token operator">*</span>mvccpb<span class="token punctuation">.</span>KeyValue <span class="token punctuation">&#123;</span>
+	<span class="token keyword">if</span> n<span class="token punctuation">.</span>Dir <span class="token punctuation">&#123;</span>
+		<span class="token keyword">return</span> <span class="token boolean">nil</span>
+	<span class="token punctuation">&#125;</span>
+	kv <span class="token operator">:=</span> <span class="token operator">&amp;</span>mvccpb<span class="token punctuation">.</span>KeyValue<span class="token punctuation">&#123;</span>
+		Key<span class="token punctuation">:</span>            <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>Key<span class="token punctuation">)</span><span class="token punctuation">,</span>
+		Value<span class="token punctuation">:</span>          <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>Value<span class="token punctuation">)</span><span class="token punctuation">,</span>
+		CreateRevision<span class="token punctuation">:</span> <span class="token function">int64</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>CreatedIndex<span class="token punctuation">)</span><span class="token punctuation">,</span>
+		ModRevision<span class="token punctuation">:</span>    <span class="token function">int64</span><span class="token punctuation">(</span>n<span class="token punctuation">.</span>ModifiedIndex<span class="token punctuation">)</span><span class="token punctuation">,</span>
+		Version<span class="token punctuation">:</span>        <span class="token number">1</span><span class="token punctuation">,</span>
+	<span class="token punctuation">&#125;</span>
+	<span class="token keyword">return</span> kv
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h4 id="User-provided-transformer"><a href="#User-provided-transformer" class="headerlink" title="User-provided transformer"></a>User-provided transformer</h4><p>Users can provide a customized 1:n transformer function that transforms a key from the v2 store to any number of keys in the mvcc store. The migration program writes JSON formatted <a href="../store/node_extern.go#L28-L37">v2 store keys</a> to the transformer program’s stdin, reads protobuf formatted <a href="../mvcc/mvccpb/kv.proto#L12-L29">mvcc keys</a> back from the transformer program’s stdout, and finishes migration by saving the transformed keys into the mvcc store.</p>
+<p>The provided transformer should read until EOF and flush the stdout before exiting to ensure data integrity.</p>
+<h4 id="Example-16"><a href="#Example-16" class="headerlink" title="Example"></a>Example</h4><pre class="language-none"><code class="language-none">.&#x2F;etcdctl migrate --data-dir&#x3D;&#x2F;var&#x2F;etcd --transformer&#x3D;k8s-transformer
+# finished transforming keys</code></pre>
+
+<h3 id="VERSION"><a href="#VERSION" class="headerlink" title="VERSION"></a>VERSION</h3><p>Prints the version of etcdctl.</p>
+<h4 id="Output-42"><a href="#Output-42" class="headerlink" title="Output"></a>Output</h4><p>Prints etcd version and API version.</p>
+<h4 id="Examples-26"><a href="#Examples-26" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl version
+<span class="token comment"># etcdctl version: 3.1.0-alpha.0+git</span>
+<span class="token comment"># API version: 3.1</span></code></pre>
+
+<h3 id="CHECK-lt-subcommand-gt"><a href="#CHECK-lt-subcommand-gt" class="headerlink" title="CHECK &lt;subcommand&gt;"></a>CHECK &lt;subcommand&gt;</h3><p>CHECK provides commands for checking properties of the etcd cluster.</p>
+<h3 id="CHECK-PERF-options"><a href="#CHECK-PERF-options" class="headerlink" title="CHECK PERF [options]"></a>CHECK PERF [options]</h3><p>CHECK PERF checks the performance of the etcd cluster for 60 seconds. Running the <code>check perf</code> often can create a large keyspace history which can be auto compacted and defragmented using the <code>--auto-compact</code> and <code>--auto-defrag</code> options as described below.</p>
+<p>RPC: CheckPerf</p>
+<h4 id="Options-21"><a href="#Options-21" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>load – the performance check’s workload model. Accepted workloads: s(small), m(medium), l(large), xl(xLarge)</p>
+</li>
+<li><p>prefix – the prefix for writing the performance check’s keys.</p>
+</li>
+<li><p>auto-compact – if true, compact storage with last revision after test is finished.</p>
+</li>
+<li><p>auto-defrag – if true, defragment storage after test is finished.</p>
+</li>
+</ul>
+<h4 id="Output-43"><a href="#Output-43" class="headerlink" title="Output"></a>Output</h4><p>Prints the result of performance check on different criteria like throughput. Also prints an overall status of the check as pass or fail.</p>
+<h4 id="Examples-27"><a href="#Examples-27" class="headerlink" title="Examples"></a>Examples</h4><p>Shows examples of both, pass and fail, status. The failure is due to the fact that a large workload was tried on a single node etcd cluster running on a laptop environment created for development and testing purpose.</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl check perf <span class="token parameter variable">--load</span><span class="token operator">=</span><span class="token string">"s"</span>
+<span class="token comment"># 60 / 60 Booooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo! 100.00%1m0s</span>
+<span class="token comment"># PASS: Throughput is 150 writes/s</span>
+<span class="token comment"># PASS: Slowest request took 0.087509s</span>
+<span class="token comment"># PASS: Stddev is 0.011084s</span>
+<span class="token comment"># PASS</span>
+./etcdctl check perf <span class="token parameter variable">--load</span><span class="token operator">=</span><span class="token string">"l"</span>
+<span class="token comment"># 60 / 60 Booooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo! 100.00%1m0s</span>
+<span class="token comment"># FAIL: Throughput too low: 6808 writes/s</span>
+<span class="token comment"># PASS: Slowest request took 0.228191s</span>
+<span class="token comment"># PASS: Stddev is 0.033547s</span>
+<span class="token comment"># FAIL</span></code></pre>
+
+<h3 id="CHECK-DATASCALE-options"><a href="#CHECK-DATASCALE-options" class="headerlink" title="CHECK DATASCALE [options]"></a>CHECK DATASCALE [options]</h3><p>CHECK DATASCALE checks the memory usage of holding data for different workloads on a given server endpoint. Running the <code>check datascale</code> often can create a large keyspace history which can be auto compacted and defragmented using the <code>--auto-compact</code> and <code>--auto-defrag</code> options as described below.</p>
+<p>RPC: CheckDatascale</p>
+<h4 id="Options-22"><a href="#Options-22" class="headerlink" title="Options"></a>Options</h4><ul>
+<li><p>load – the datascale check’s workload model. Accepted workloads: s(small), m(medium), l(large), xl(xLarge)</p>
+</li>
+<li><p>prefix – the prefix for writing the datascale check’s keys.</p>
+</li>
+<li><p>auto-compact – if true, compact storage with last revision after test is finished.</p>
+</li>
+<li><p>auto-defrag – if true, defragment storage after test is finished.</p>
+</li>
+</ul>
+<h4 id="Output-44"><a href="#Output-44" class="headerlink" title="Output"></a>Output</h4><p>Prints the system memory usage for a given workload. Also prints status of compact and defragment if related options are passed.</p>
+<h4 id="Examples-28"><a href="#Examples-28" class="headerlink" title="Examples"></a>Examples</h4><pre class="language-bash" data-language="bash"><code class="language-bash">./etcdctl check datascale <span class="token parameter variable">--load</span><span class="token operator">=</span><span class="token string">"s"</span> --auto-compact<span class="token operator">=</span>true --auto-defrag<span class="token operator">=</span>true
+<span class="token comment"># Start data scale check for work load [10000 key-value pairs, 1024 bytes per key-value, 50 concurrent clients].</span>
+<span class="token comment"># Compacting with revision 18346204</span>
+<span class="token comment"># Compacted with revision 18346204</span>
+<span class="token comment"># Defragmenting "127.0.0.1:2379"</span>
+<span class="token comment"># Defragmented "127.0.0.1:2379"</span>
+<span class="token comment"># PASS: Approximate system memory used : 64.30 MB.</span></code></pre>
+
+<h2 id="Exit-codes"><a href="#Exit-codes" class="headerlink" title="Exit codes"></a>Exit codes</h2><p>For all commands, a successful execution return a zero exit code. All failures will return non-zero exit codes.</p>
+<h2 id="Output-formats"><a href="#Output-formats" class="headerlink" title="Output formats"></a>Output formats</h2><p>All commands accept an output format by setting <code>-w</code> or <code>--write-out</code>. All commands default to the “simple” output format, which is meant to be human-readable. The simple format is listed in each command’s <code>Output</code> description since it is customized for each command. If a command has a corresponding RPC, it will respect all output formats.</p>
+<p>If a command fails, returning a non-zero exit code, an error string will be written to standard error regardless of output format.</p>
+<h3 id="Simple"><a href="#Simple" class="headerlink" title="Simple"></a>Simple</h3><p>A format meant to be easy to parse and human-readable. Specific to each command.</p>
+<h3 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h3><p>The JSON encoding of the command’s <a href="../etcdserver/etcdserverpb/rpc.proto">RPC response</a>. Since etcd’s RPCs use byte strings, the JSON output will encode keys and values in base64.</p>
+<p>Some commands without an RPC also support JSON; see the command’s <code>Output</code> description.</p>
+<h3 id="Protobuf"><a href="#Protobuf" class="headerlink" title="Protobuf"></a>Protobuf</h3><p>The protobuf encoding of the command’s <a href="../etcdserver/etcdserverpb/rpc.proto">RPC response</a>. If an RPC is streaming, the stream messages will be concetenated. If an RPC is not given for a command, the protobuf output is not defined.</p>
+<h3 id="Fields"><a href="#Fields" class="headerlink" title="Fields"></a>Fields</h3><p>An output format similar to JSON but meant to parse with coreutils. For an integer field named <code>Field</code>, it writes a line in the format <code>&quot;Field&quot; : %d</code> where <code>%d</code> is go’s integer formatting. For byte array fields, it writes <code>&quot;Field&quot; : %q</code> where <code>%q</code> is go’s quoted string formatting (e.g., <code>[]byte&#123;&#39;a&#39;, &#39;\n&#39;&#125;</code> is written as <code>&quot;a\n&quot;</code>).</p>
+<h2 id="Compatibility-Support"><a href="#Compatibility-Support" class="headerlink" title="Compatibility Support"></a>Compatibility Support</h2><p>etcdctl is still in its early stage. We try out best to ensure fully compatible releases, however we might break compatibility to fix bugs or improve commands. If we intend to release a version of etcdctl with backward incompatibilities, we will provide notice prior to release and have instructions on how to upgrade.</p>
+<h3 id="Input-Compatibility"><a href="#Input-Compatibility" class="headerlink" title="Input Compatibility"></a>Input Compatibility</h3><p>Input includes the command name, its flags, and its arguments. We ensure backward compatibility of the input of normal commands in non-interactive mode.</p>
+<h3 id="Output-Compatibility"><a href="#Output-Compatibility" class="headerlink" title="Output Compatibility"></a>Output Compatibility</h3><p>Output includes output from etcdctl and its exit code. etcdctl provides <code>simple</code> output format by default.<br>We ensure compatibility for the <code>simple</code> output format of normal commands in non-interactive mode. Currently, we do not ensure<br>backward compatibility for <code>JSON</code> format and the format in non-interactive mode. Currently, we do not ensure backward compatibility of utility commands.</p>
+<h3 id="TODO-compatibility-with-etcd-server"><a href="#TODO-compatibility-with-etcd-server" class="headerlink" title="TODO: compatibility with etcd server"></a>TODO: compatibility with etcd server</h3>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/service%E5%92%8Cingress/" rel="prev" title="service和ingress">
+                  <i class="fa fa-chevron-left"></i> service和ingress
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BD%91%E7%BB%9C%E7%AD%96%E7%95%A5/" rel="next" title="网络模型与网络策略">
+                  网络模型与网络策略 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="表达式求值中的类型转换CONCAT() 隐式转换CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。 mysql&gt; SELECT 1+&#39;1&#39;;         -&gt; 2 mysql&gt; SELECT CONCAT(2,&#39; test&#39;);         -&gt; &#39;2 test&#39;  如果想显式转换，请使用 CAST mysql&gt; SELECT 38.8, CAST(38.8 A">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql5.7内置函数和操作">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/mysql5.7%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0%E5%92%8C%E6%93%8D%E4%BD%9C/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="表达式求值中的类型转换CONCAT() 隐式转换CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。 mysql&gt; SELECT 1+&#39;1&#39;;         -&gt; 2 mysql&gt; SELECT CONCAT(2,&#39; test&#39;);         -&gt; &#39;2 test&#39;  如果想显式转换，请使用 CAST mysql&gt; SELECT 38.8, CAST(38.8 A">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-09-24T06:11:42.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.502Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/mysql5.7%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0%E5%92%8C%E6%93%8D%E4%BD%9C/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/mysql5.7%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0%E5%92%8C%E6%93%8D%E4%BD%9C/","path":"运维/MySQL/mysql5.7内置函数和操作/","title":"mysql5.7内置函数和操作"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql5.7内置函数和操作 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC%E4%B8%AD%E7%9A%84%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.</span> <span class="nav-text">表达式求值中的类型转换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CONCAT-%E9%9A%90%E5%BC%8F%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.1.</span> <span class="nav-text">CONCAT() 隐式转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E6%93%8D%E4%BD%9C"><span class="nav-number">1.2.</span> <span class="nav-text">比较操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%8E%E6%95%B0%E5%AD%97%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">1.3.</span> <span class="nav-text">字符串与数字的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E4%B9%8B%E9%97%B4%E6%AF%94%E8%BE%83"><span class="nav-number">1.4.</span> <span class="nav-text">浮点数之间比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">2.</span> <span class="nav-text">运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">2.1.</span> <span class="nav-text">运算符优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E5%87%BD%E6%95%B0%E5%92%8C%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">2.2.</span> <span class="nav-text">比较函数和运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#INTERVAL-N-N1-N2-N3-%E2%80%A6"><span class="nav-number">2.2.1.</span> <span class="nav-text">INTERVAL(N,N1,N2,N3,…)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IS-bool-value"><span class="nav-number">2.2.2.</span> <span class="nav-text">IS bool_value</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LEAST-value1-value2-%E2%80%A6"><span class="nav-number">2.2.3.</span> <span class="nav-text">LEAST(value1,value2,…)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#expr-LIKE-pattern"><span class="nav-number">2.2.4.</span> <span class="nav-text">expr LIKE pattern</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#STRCMP-expr1-expr2"><span class="nav-number">2.2.5.</span> <span class="nav-text">STRCMP(expr1,expr2)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">2.3.</span> <span class="nav-text">逻辑运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#NOT"><span class="nav-number">2.3.1.</span> <span class="nav-text">NOT,!</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AND-amp-amp"><span class="nav-number">2.3.2.</span> <span class="nav-text">AND,&amp;&amp;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OR"><span class="nav-number">2.3.3.</span> <span class="nav-text">OR,||</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#XOR"><span class="nav-number">2.3.4.</span> <span class="nav-text">XOR</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">2.4.</span> <span class="nav-text">分配运算符 :&#x3D;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">流程控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CASE"><span class="nav-number">3.0.1.</span> <span class="nav-text">CASE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IF-expr1-expr2-expr3"><span class="nav-number">3.0.2.</span> <span class="nav-text">IF(expr1,expr2,expr3)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IFNULL-expr1-expr2"><span class="nav-number">3.0.3.</span> <span class="nav-text">IFNULL(expr1,expr2)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NULLIF-expr1-expr2"><span class="nav-number">3.0.4.</span> <span class="nav-text">NULLIF(expr1,expr2)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E5%80%BC%E5%87%BD%E6%95%B0%E5%92%8C%E8%BF%90%E7%AE%97%E7%AC%A6-Numeric"><span class="nav-number">4.</span> <span class="nav-text">数值函数和运算符(Numeric)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">4.1.</span> <span class="nav-text">算术运算符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E5%87%BD%E6%95%B0"><span class="nav-number">4.2.</span> <span class="nav-text">数学函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CONV-N-from-base-to-base"><span class="nav-number">4.2.1.</span> <span class="nav-text">CONV(N,from_base,to_base)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#POW-X-Y"><span class="nav-number">4.2.2.</span> <span class="nav-text">POW(X,Y)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ROUND-X-ROUND-X-D"><span class="nav-number">4.2.3.</span> <span class="nav-text">ROUND(X), ROUND(X,D)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SIGN-X"><span class="nav-number">4.2.4.</span> <span class="nav-text">SIGN(X)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TRUNCATE-X-D"><span class="nav-number">4.2.5.</span> <span class="nav-text">TRUNCATE(X,D)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E5%92%8C%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0"><span class="nav-number">5.</span> <span class="nav-text">日期和时间函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#INTERVAL-%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">5.1.</span> <span class="nav-text">INTERVAL 运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E9%80%94"><span class="nav-number">5.1.1.</span> <span class="nav-text">用途</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E5%92%8C%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0-1"><span class="nav-number">5.2.</span> <span class="nav-text">日期和时间函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ADDDATE-date-INTERVAL-expr-unit-ADDDATE-expr-days"><span class="nav-number">5.2.1.</span> <span class="nav-text">ADDDATE(date,INTERVAL expr unit), ADDDATE(expr,days)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ADDTIME-expr1-expr2"><span class="nav-number">5.2.2.</span> <span class="nav-text">ADDTIME(expr1,expr2)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CURDATE"><span class="nav-number">5.2.3.</span> <span class="nav-text">CURDATE()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DATE-expr"><span class="nav-number">5.2.4.</span> <span class="nav-text">DATE(expr)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DATE-FORMAT-date-format"><span class="nav-number">5.2.5.</span> <span class="nav-text">DATE_FORMAT(date,format)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DATEDIFF-expr1-expr2"><span class="nav-number">5.2.6.</span> <span class="nav-text">DATEDIFF(expr1,expr2)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DAYOFMONTH-date"><span class="nav-number">5.2.7.</span> <span class="nav-text">DAYOFMONTH(date)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EXTRACT-unit-FROM-date"><span class="nav-number">5.2.8.</span> <span class="nav-text">EXTRACT(unit FROM date)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FROM-UNIXTIME-unix-timestamp-format"><span class="nav-number">5.2.9.</span> <span class="nav-text">FROM_UNIXTIME(unix_timestamp[,format])</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GET-FORMAT-DATE-TIME-DATETIME-%E2%80%98EUR%E2%80%99-%E2%80%99USA%E2%80%99-%E2%80%99JIS%E2%80%99-%E2%80%99ISO%E2%80%99-%E2%80%99INTERNAL%E2%80%99"><span class="nav-number">5.2.10.</span> <span class="nav-text">GET_FORMAT({DATE|TIME|DATETIME}, {‘EUR’|’USA’|’JIS’|’ISO’|’INTERNAL’})</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HOUR-time"><span class="nav-number">5.2.11.</span> <span class="nav-text">HOUR(time)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LAST-DAY-date"><span class="nav-number">5.2.12.</span> <span class="nav-text">LAST_DAY(date)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MAKEDATE-year-dayofyear"><span class="nav-number">5.2.13.</span> <span class="nav-text">MAKEDATE(year,dayofyear)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TIMESTAMP-expr-TIMESTAMP-expr1-expr2"><span class="nav-number">5.2.14.</span> <span class="nav-text">TIMESTAMP(expr), TIMESTAMP(expr1,expr2)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%87%BD%E6%95%B0%E5%92%8C%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">6.</span> <span class="nav-text">字符串函数和运算符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%BA%E5%88%B6%E8%BD%AC%E6%8D%A2%E5%87%BD%E6%95%B0%E5%92%8C%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">7.</span> <span class="nav-text">强制转换函数和运算符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BINARY-expr"><span class="nav-number">7.1.</span> <span class="nav-text">BINARY expr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAST-expr-AS-type"><span class="nav-number">7.2.</span> <span class="nav-text">CAST(expr AS type)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CONVERT-expr-USING-transcoding-name"><span class="nav-number">7.3.</span> <span class="nav-text">CONVERT(expr USING transcoding_name)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E5%87%BD%E6%95%B0%E5%92%8C%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">8.</span> <span class="nav-text">位函数和运算符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E5%92%8C%E5%8E%8B%E7%BC%A9%E5%87%BD%E6%95%B0"><span class="nav-number">9.</span> <span class="nav-text">加密和压缩函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E5%87%BD%E6%95%B0"><span class="nav-number">10.</span> <span class="nav-text">信息函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#json%E5%87%BD%E6%95%B0"><span class="nav-number">11.</span> <span class="nav-text">json函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E%E5%85%A8%E5%B1%80%E4%BA%8B%E5%8A%A1%E6%A0%87%E8%AF%86%E7%AC%A6-GTID-%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0"><span class="nav-number">12.</span> <span class="nav-text">与全局事务标识符(GTID)一起使用的函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0"><span class="nav-number">13.</span> <span class="nav-text">聚合函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%87%BD%E6%95%B0"><span class="nav-number">14.</span> <span class="nav-text">其他函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B2%BE%E7%A1%AE%E6%95%B0%E5%AD%A6"><span class="nav-number">15.</span> <span class="nav-text">精确数学</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/mysql5.7%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0%E5%92%8C%E6%93%8D%E4%BD%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql5.7内置函数和操作 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql5.7内置函数和操作
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-09-24 14:11:42" itemprop="dateCreated datePublished" datetime="2022-09-24T14:11:42+08:00">2022-09-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="表达式求值中的类型转换"><a href="#表达式求值中的类型转换" class="headerlink" title="表达式求值中的类型转换"></a>表达式求值中的类型转换</h2><h3 id="CONCAT-隐式转换"><a href="#CONCAT-隐式转换" class="headerlink" title="CONCAT() 隐式转换"></a>CONCAT() 隐式转换</h3><p>CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">mysql<span class="token operator">></span> SELECT <span class="token number">1</span>+<span class="token string">'1'</span><span class="token punctuation">;</span>
+        -<span class="token operator">></span> <span class="token number">2</span>
+mysql<span class="token operator">></span> SELECT CONCAT<span class="token punctuation">(</span><span class="token number">2</span>,<span class="token string">' test'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        -<span class="token operator">></span> <span class="token string">'2 test'</span></code></pre>
+
+<p>如果想显式转换，请使用 CAST</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">mysql<span class="token operator">></span> SELECT <span class="token number">38.8</span>, CAST<span class="token punctuation">(</span><span class="token number">38.8</span> AS CHAR<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        -<span class="token operator">></span> <span class="token number">38.8</span>, <span class="token string">'38.8'</span>
+mysql<span class="token operator">></span> SELECT <span class="token number">38.8</span>, CONCAT<span class="token punctuation">(</span><span class="token number">38.8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        -<span class="token operator">></span> <span class="token number">38.8</span>, <span class="token string">'38.8'</span></code></pre>
+
+<h3 id="比较操作"><a href="#比较操作" class="headerlink" title="比较操作"></a>比较操作</h3><ul>
+<li>NULL和任何数据进行对比，都返回NULL，除非使用&lt;&#x3D;&gt;运算符，&lt;&#x3D;&gt;相比&#x3D;，可以对NULL进行比较，两个NULL使用&lt;&#x3D;&gt;比较，返回true。</li>
+<li>如果比较操作中的两个参数都是字符串，则将它们作为字符串进行比较。</li>
+<li>如果两个参数都是整数，则将它们作为整数进行比较。</li>
+<li>十六进制如果不与数字进行比较，则将十六进制值视为二进制字符串。</li>
+<li>关于时间的比较需要将timestamp或datetime转成时间戳，但是我们约定：时间统统存储时间戳，避免比较时间的转换问题。</li>
+<li>如果其中一个参数是 decimal 类型，则比较依赖于另一个参数。如果另一个参数是 decimal 或 integer ，则将这些参数作为 decimal 进行比较; 如果另一个参数是浮点值，则将其作为浮点值进行比较。 </li>
+<li>除了以上情况，所有其他情况下，参数都作为浮点数(双精度)进行比较。例如，字符串和数值操作数的比较是作为浮点数的比较进行的。</li>
+</ul>
+<h3 id="字符串与数字的比较"><a href="#字符串与数字的比较" class="headerlink" title="字符串与数字的比较"></a>字符串与数字的比较</h3><ul>
+<li><p><strong>对于字符串与数字的比较，如果字符串上有索引，索引会失效</strong>，例如下例中，很多不同的字符串都可以转换为1，例如“1“、” 1“或者”1a“</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">SELECT * FROM tbl_name WHERE str_col&#x3D;1;</code></pre>
+</li>
+<li><p>对于大数字符串和大数之间的比较，应该要把大数转成字符串再进行比较</p>
+</li>
+<li><p>对于浮点数字符串和浮点数的比较，应该要把浮点数转成字符串再进行比较</p>
+</li>
+</ul>
+<h3 id="浮点数之间比较"><a href="#浮点数之间比较" class="headerlink" title="浮点数之间比较"></a>浮点数之间比较</h3><p>浮点数之间比较，不能用&#x3D;直接对比，应该先设置一个可接受的公差，例如同意精度在万分之一（0.0001）以内，它俩相等，那么ABS(a - b) &lt; 0.0001就认为a和b相等，同理：a - b &gt; 0.0001 可以认为a &gt; b，b - a &gt; 0.0001 可以认为a &lt; b</p>
+<h2 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h2><table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+<th align="left">Introduced</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/bit-functions.html#operator_bitwise-and"><code>&amp;</code></a></td>
+<td align="left">Bitwise AND</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_greater-than"><code>&gt;</code></a></td>
+<td align="left">Greater than operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/bit-functions.html#operator_right-shift"><code>&gt;&gt;</code></a></td>
+<td align="left">Right shift</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_greater-than-or-equal"><code>&gt;=</code></a></td>
+<td align="left">Greater than or equal operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_less-than"><code>&lt;</code></a></td>
+<td align="left">Less than operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_not-equal"><code>&lt;&gt;</code>, <code>!=</code></a></td>
+<td align="left">Not equal operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/bit-functions.html#operator_left-shift"><code>&lt;&lt;</code></a></td>
+<td align="left">Left shift</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_less-than-or-equal"><code>&lt;=</code></a></td>
+<td align="left">Less than or equal operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_equal-to"><code>&lt;=&gt;</code></a></td>
+<td align="left">NULL-safe equal to operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/arithmetic-functions.html#operator_mod"><code>%</code>, <code>MOD</code></a></td>
+<td align="left">Modulo operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/arithmetic-functions.html#operator_times"><code>*</code></a></td>
+<td align="left">Multiplication operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/arithmetic-functions.html#operator_plus"><code>+</code></a></td>
+<td align="left">Addition operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/arithmetic-functions.html#operator_minus"><code>-</code></a></td>
+<td align="left">Minus operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/arithmetic-functions.html#operator_unary-minus"><code>-</code></a></td>
+<td align="left">Change the sign of the argument</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#operator_json-column-path"><code>-&gt;</code></a></td>
+<td align="left">Return value from JSON column after evaluating path; equivalent to JSON_EXTRACT().</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#operator_json-inline-path"><code>-&gt;&gt;</code></a></td>
+<td align="left">Return value from JSON column after evaluating path and unquoting the result; equivalent to JSON_UNQUOTE(JSON_EXTRACT()).</td>
+<td align="left">5.7.13</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/arithmetic-functions.html#operator_divide"><code>/</code></a></td>
+<td align="left">Division operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/assignment-operators.html#operator_assign-value"><code>:=</code></a></td>
+<td align="left">Assign a value</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/assignment-operators.html#operator_assign-equal"><code>=</code></a></td>
+<td align="left">Assign a value (as part of a <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/set-variable.html"><code>SET</code></a> statement, or as part of the <code>SET</code> clause in an <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/update.html"><code>UPDATE</code></a> statement)</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_equal"><code>=</code></a></td>
+<td align="left">Equal operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/bit-functions.html#operator_bitwise-xor"><code>^</code></a></td>
+<td align="left">Bitwise XOR</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_and"><code>AND</code>, <code>&amp;&amp;</code></a></td>
+<td align="left">Logical AND</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_between"><code>BETWEEN ... AND ...</code></a></td>
+<td align="left">Whether a value is within a range of values</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/cast-functions.html#operator_binary"><code>BINARY</code></a></td>
+<td align="left">Cast a string to a binary string</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/flow-control-functions.html#operator_case"><code>CASE</code></a></td>
+<td align="left">Case operator</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/arithmetic-functions.html#operator_div"><code>DIV</code></a></td>
+<td align="left">Integer division</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_in"><code>IN()</code></a></td>
+<td align="left">Whether a value is within a set of values</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_is"><code>IS</code></a></td>
+<td align="left">Test a value against a boolean</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_is-not"><code>IS NOT</code></a></td>
+<td align="left">Test a value against a boolean</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_is-not-null"><code>IS NOT NULL</code></a></td>
+<td align="left">NOT NULL value test</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_is-null"><code>IS NULL</code></a></td>
+<td align="left">NULL value test</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like"><code>LIKE</code></a></td>
+<td align="left">Simple pattern matching</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_not"><code>NOT</code>, <code>!</code></a></td>
+<td align="left">Negates value</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_not-between"><code>NOT BETWEEN ... AND ...</code></a></td>
+<td align="left">Whether a value is not within a range of values</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/comparison-operators.html#operator_not-in"><code>NOT IN()</code></a></td>
+<td align="left">Whether a value is not within a set of values</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_not-like"><code>NOT LIKE</code></a></td>
+<td align="left">Negation of simple pattern matching</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/regexp.html#operator_not-regexp"><code>NOT REGEXP</code></a></td>
+<td align="left">Negation of REGEXP</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">[<code>OR</code>, &#96;</td>
+<td align="left"></td>
+<td align="left">&#96;](<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_or">https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_or</a>)</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/regexp.html#operator_regexp"><code>REGEXP</code></a></td>
+<td align="left">Whether string matches regular expression</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/regexp.html#operator_regexp"><code>RLIKE</code></a></td>
+<td align="left">Whether string matches regular expression</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#operator_sounds-like"><code>SOUNDS LIKE</code></a></td>
+<td align="left">Compare sounds</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_xor"><code>XOR</code></a></td>
+<td align="left">Logical XOR</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">[&#96;</td>
+<td align="left">&#96;](<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/bit-functions.html#operator_bitwise-or">https://dev.mysql.com/doc/refman/5.7/en/bit-functions.html#operator_bitwise-or</a>)</td>
+<td align="left">Bitwise OR</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/bit-functions.html#operator_bitwise-invert"><code>~</code></a></td>
+<td align="left">Bitwise inversion</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h3 id="运算符优先级"><a href="#运算符优先级" class="headerlink" title="运算符优先级"></a>运算符优先级</h3><p>以下列表中，从上到下，优先级从高到低。一行中的运算符具有相同的优先级。</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">INTERVAL
+BINARY, COLLATE
+!
+- (unary minus), ~ (unary bit inversion)
+^
+*, &#x2F;, DIV, %, MOD
+-, +
+&lt;&lt;, &gt;&gt;
+&amp;
+|
+&#x3D; (comparison), &lt;&#x3D;&gt;, &gt;&#x3D;, &gt;, &lt;&#x3D;, &lt;, &lt;&gt;, !&#x3D;, IS, LIKE, REGEXP, IN
+BETWEEN, CASE, WHEN, THEN, ELSE
+NOT
+AND, &amp;&amp;
+XOR
+OR, ||
+&#x3D; (assignment), :&#x3D;</code></pre>
+
+<p>&#x3D; 的优先级取决于它是用作 比较 还是 赋值</p>
+<p>记不住优先级没关系，会用括号就行。</p>
+<h3 id="比较函数和运算符"><a href="#比较函数和运算符" class="headerlink" title="比较函数和运算符"></a>比较函数和运算符</h3><table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>&gt;</code></td>
+<td align="left">大于</td>
+</tr>
+<tr>
+<td align="left"><code>&gt;=</code></td>
+<td align="left">大于等于</td>
+</tr>
+<tr>
+<td align="left"><code>&lt;</code></td>
+<td align="left">小于</td>
+</tr>
+<tr>
+<td align="left"><code>&lt;&gt;</code>, <code>!=</code></td>
+<td align="left">不等于</td>
+</tr>
+<tr>
+<td align="left"><code>&lt;=</code></td>
+<td align="left">小于等于</td>
+</tr>
+<tr>
+<td align="left"><code>&lt;=&gt;</code></td>
+<td align="left">不等于，相比&#x3D;，&lt;&#x3D;&gt;可以用于比较NULL</td>
+</tr>
+<tr>
+<td align="left"><code>=</code></td>
+<td align="left">等于</td>
+</tr>
+<tr>
+<td align="left"><code>BETWEEN ... AND ...</code></td>
+<td align="left">值是否在值的范围内</td>
+</tr>
+<tr>
+<td align="left"><code>NOT BETWEEN ... AND ...</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>COALESCE()</code></td>
+<td align="left">返回第一个非 NULL 参数</td>
+</tr>
+<tr>
+<td align="left"><code>GREATEST()</code></td>
+<td align="left">返回最大的参数</td>
+</tr>
+<tr>
+<td align="left"><code>IN()</code></td>
+<td align="left">判断值在一组值中</td>
+</tr>
+<tr>
+<td align="left"><code>NOT IN()</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>INTERVAL()</code></td>
+<td align="left">INTERVAL(N,N1,N2,N3,……….)  N是要判断的数值，N1,N2,N3,…是分段的间隔。返回值是段的位置，区间前闭后开</td>
+</tr>
+<tr>
+<td align="left"><code>IS</code></td>
+<td align="left">测试值为 TRUE&#x2F;FALSE&#x2F;UNKNOW</td>
+</tr>
+<tr>
+<td align="left"><code>IS NOT</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>IS NULL</code></td>
+<td align="left">测试值为NULL</td>
+</tr>
+<tr>
+<td align="left"><code>IS NOT NULL</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>ISNULL()</code></td>
+<td align="left">同 <code>IS NULL</code></td>
+</tr>
+<tr>
+<td align="left"><code>LEAST()</code></td>
+<td align="left">返回最小的参数</td>
+</tr>
+<tr>
+<td align="left"><code>LIKE</code></td>
+<td align="left">简单的正则匹配</td>
+</tr>
+<tr>
+<td align="left"><code>NOT LIKE</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>STRCMP()</code></td>
+<td align="left">比较两个字符串</td>
+</tr>
+</tbody></table>
+<h4 id="INTERVAL-N-N1-N2-N3-…"><a href="#INTERVAL-N-N1-N2-N3-…" class="headerlink" title="INTERVAL(N,N1,N2,N3,…)"></a>INTERVAL(N,N1,N2,N3,…)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT INTERVAL(23, 1, 15, 17, 30, 44, 200);		&#x2F;&#x2F; 17 &lt;&#x3D; 23 &lt; 30，1和15之间返回1,15和17之间返回2，17和30之间返回3
+        -&gt; 3
+mysql&gt; SELECT INTERVAL(10, 1, 10, 100, 1000);			&#x2F;&#x2F; 10 &lt;&#x3D; 10 &lt; 100，区间前闭后开
+        -&gt; 2
+mysql&gt; SELECT INTERVAL(22, 23, 30, 44, 200);			&#x2F;&#x2F; 22 &lt; 23
+        -&gt; 0</code></pre>
+
+<h4 id="IS-bool-value"><a href="#IS-bool-value" class="headerlink" title="IS bool_value"></a>IS bool_value</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 IS TRUE, 0 IS FALSE, NULL IS UNKNOWN;
+        -&gt; 1, 1, 1</code></pre>
+
+<h4 id="LEAST-value1-value2-…"><a href="#LEAST-value1-value2-…" class="headerlink" title="LEAST(value1,value2,…)"></a>LEAST(value1,value2,…)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT LEAST(2,0);
+        -&gt; 0
+mysql&gt; SELECT LEAST(34.0,3.0,5.0,767.0);
+        -&gt; 3.0
+mysql&gt; SELECT LEAST(&#39;B&#39;,&#39;A&#39;,&#39;C&#39;);
+        -&gt; &#39;A&#39;</code></pre>
+
+<ul>
+<li>如果参数中有 NULL，则直接返回 NULL</li>
+<li>如果参数是数字和字符串，则将他们作为数字进行比较</li>
+<li>如果参数都是字符串，则按照二进制字符串进行比较</li>
+</ul>
+<h4 id="expr-LIKE-pattern"><a href="#expr-LIKE-pattern" class="headerlink" title="expr LIKE pattern"></a>expr LIKE pattern</h4><p>如果expr或pattern为NULL，则结果为NULL</p>
+<p>在pattern中，可以使用以下两个通配符：</p>
+<ul>
+<li>%：匹配任意数量的字符，甚至零个字符</li>
+<li>_：匹配一个字符</li>
+</ul>
+<p>转义符是 \</p>
+<p>LIKE匹配字符串不区分大小写，除非expr或者pattern区分大小写（使用区分大小写的排序规则或二进制字符串）：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT &#39;abc&#39; LIKE &#39;ABC&#39;;
+        -&gt; 1
+mysql&gt; SELECT &#39;abc&#39; LIKE _latin1 &#39;ABC&#39; COLLATE latin1_general_cs;
+        -&gt; 0
+mysql&gt; SELECT &#39;abc&#39; LIKE _latin1 &#39;ABC&#39; COLLATE latin1_bin;
+        -&gt; 0
+mysql&gt; SELECT &#39;abc&#39; LIKE BINARY &#39;ABC&#39;;
+        -&gt; 0</code></pre>
+
+<p>作为标准 SQL 的扩展，MySQL 允许在数值表达式上使用 LIKE：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 10 LIKE &#39;1%&#39;;
+        -&gt; 1</code></pre>
+
+<h4 id="STRCMP-expr1-expr2"><a href="#STRCMP-expr1-expr2" class="headerlink" title="STRCMP(expr1,expr2)"></a>STRCMP(expr1,expr2)</h4><p>如果字符串相同，返回0，如果根据当前排序顺序，第一个参数小于第二个参数，返回 -1；否则返回1</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT STRCMP(&#39;text&#39;, &#39;text2&#39;);
+        -&gt; -1
+mysql&gt; SELECT STRCMP(&#39;text2&#39;, &#39;text&#39;);
+        -&gt; 1
+mysql&gt; SELECT STRCMP(&#39;text&#39;, &#39;text&#39;);
+        -&gt; 0</code></pre>
+
+<h3 id="逻辑运算符"><a href="#逻辑运算符" class="headerlink" title="逻辑运算符"></a>逻辑运算符</h3><table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>AND</code>, <code>&amp;&amp;</code></td>
+<td align="left">逻辑与</td>
+</tr>
+<tr>
+<td align="left"><code>NOT</code>, <code>!</code></td>
+<td align="left">否</td>
+</tr>
+<tr>
+<td align="left"><code>OR</code>, &#96;</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>XOR</code></td>
+<td align="left">逻辑异或</td>
+</tr>
+</tbody></table>
+<p>在 SQL 中，所有逻辑运算符的计算结果为 TRUE、 FALSE 或 NULL (UNKNOWN)。在 MySQL 中，它们被实现为1(TRUE)、0(FALSE)和 NULL。</p>
+<p>MySQL 将任何非零、非 NULL 值计算为 TRUE：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 10 IS TRUE;
+-&gt; 1
+mysql&gt; SELECT -10 IS TRUE;
+-&gt; 1
+mysql&gt; SELECT &#39;string&#39; IS NOT NULL;
+-&gt; 1</code></pre>
+
+<h4 id="NOT"><a href="#NOT" class="headerlink" title="NOT,!"></a>NOT,!</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT NOT 10;
+        -&gt; 0
+mysql&gt; SELECT NOT 0;
+        -&gt; 1
+mysql&gt; SELECT NOT NULL;
+        -&gt; NULL
+mysql&gt; SELECT ! (1+1);
+        -&gt; 0
+mysql&gt; SELECT ! 1+1;
+        -&gt; 1</code></pre>
+
+<h4 id="AND-amp-amp"><a href="#AND-amp-amp" class="headerlink" title="AND,&amp;&amp;"></a>AND,&amp;&amp;</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 AND 1;
+        -&gt; 1
+mysql&gt; SELECT 1 AND 0;
+        -&gt; 0
+mysql&gt; SELECT 1 AND NULL;
+        -&gt; NULL
+mysql&gt; SELECT 0 AND NULL;
+        -&gt; 0
+mysql&gt; SELECT NULL AND 0;
+        -&gt; 0</code></pre>
+
+<h4 id="OR"><a href="#OR" class="headerlink" title="OR,||"></a>OR,||</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 OR 1;
+        -&gt; 1
+mysql&gt; SELECT 1 OR 0;
+        -&gt; 1
+mysql&gt; SELECT 0 OR 0;
+        -&gt; 0
+mysql&gt; SELECT 0 OR NULL;
+        -&gt; NULL
+mysql&gt; SELECT 1 OR NULL;
+        -&gt; 1</code></pre>
+
+<h4 id="XOR"><a href="#XOR" class="headerlink" title="XOR"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_xor"><code>XOR</code></a></h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 XOR 1;
+        -&gt; 0
+mysql&gt; SELECT 1 XOR 0;
+        -&gt; 1
+mysql&gt; SELECT 1 XOR NULL;
+        -&gt; NULL
+mysql&gt; SELECT 1 XOR 1 XOR 1;
+        -&gt; 1</code></pre>
+
+<h3 id="分配运算符"><a href="#分配运算符" class="headerlink" title="分配运算符 :="></a>分配运算符 <code>:=</code></h3><p>与 <code>=</code> 不同，<code>:=</code> 运算符从不被解释为比较运算符</p>
+<h2 id="流程控制"><a href="#流程控制" class="headerlink" title="流程控制"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/flow-control-functions.html">流程控制</a></h2><table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>CASE</code></td>
+<td align="left">Case operator</td>
+</tr>
+<tr>
+<td align="left"><code>IF()</code></td>
+<td align="left">If&#x2F;else construct</td>
+</tr>
+<tr>
+<td align="left"><code>IFNULL()</code></td>
+<td align="left">Null if&#x2F;else construct</td>
+</tr>
+<tr>
+<td align="left"><code>NULLIF()</code></td>
+<td align="left">Return NULL if expr1 &#x3D; expr2</td>
+</tr>
+</tbody></table>
+<h4 id="CASE"><a href="#CASE" class="headerlink" title="CASE"></a>CASE</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">CASE value WHEN compare_value THEN result [WHEN compare_value THEN result ...] [ELSE result] END
+
+CASE WHEN condition THEN result [WHEN condition THEN result ...] [ELSE result] END</code></pre>
+
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT CASE 1 WHEN 1 THEN &#39;one&#39;
+    -&gt;     WHEN 2 THEN &#39;two&#39; ELSE &#39;more&#39; END;
+        -&gt; &#39;one&#39;
+mysql&gt; SELECT CASE WHEN 1&gt;0 THEN &#39;true&#39; ELSE &#39;false&#39; END;
+        -&gt; &#39;true&#39;
+mysql&gt; SELECT CASE BINARY &#39;B&#39;
+    -&gt;     WHEN &#39;a&#39; THEN 1 WHEN &#39;b&#39; THEN 2 END;
+        -&gt; NULL</code></pre>
+
+<h4 id="IF-expr1-expr2-expr3"><a href="#IF-expr1-expr2-expr3" class="headerlink" title="IF(expr1,expr2,expr3)"></a>IF(expr1,expr2,expr3)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT IF(1&gt;2,2,3);
+        -&gt; 3
+mysql&gt; SELECT IF(1&lt;2,&#39;yes&#39;,&#39;no&#39;);
+        -&gt; &#39;yes&#39;
+mysql&gt; SELECT IF(STRCMP(&#39;test&#39;,&#39;test1&#39;),&#39;no&#39;,&#39;yes&#39;);
+        -&gt; &#39;no&#39;</code></pre>
+
+<h4 id="IFNULL-expr1-expr2"><a href="#IFNULL-expr1-expr2" class="headerlink" title="IFNULL(expr1,expr2)"></a>IFNULL(expr1,expr2)</h4><p>如果 expr1不为 NULL，则 IFNULL ()返回 expr1; 否则返回 expr2</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT IFNULL(1,0);
+        -&gt; 1
+mysql&gt; SELECT IFNULL(NULL,10);
+        -&gt; 10
+mysql&gt; SELECT IFNULL(1&#x2F;0,10);
+        -&gt; 10
+mysql&gt; SELECT IFNULL(1&#x2F;0,&#39;yes&#39;);
+        -&gt; &#39;yes&#39;</code></pre>
+
+<h4 id="NULLIF-expr1-expr2"><a href="#NULLIF-expr1-expr2" class="headerlink" title="NULLIF(expr1,expr2)"></a>NULLIF(expr1,expr2)</h4><p>如果 expr1 &#x3D; expr2为 true，则返回 NULL，否则返回 expr1。这与 <code>CASE WHEN expr1 = expr2 THEN NULL ELSE expr1 END</code> 相同。</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT NULLIF(1,1);
+        -&gt; NULL
+mysql&gt; SELECT NULLIF(1,2);
+        -&gt; 1</code></pre>
+
+<p>注意：如果参数不相等，MySQL 将计算 expr1两次</p>
+<h2 id="数值函数和运算符-Numeric"><a href="#数值函数和运算符-Numeric" class="headerlink" title="数值函数和运算符(Numeric)"></a>数值函数和运算符(Numeric)</h2><h3 id="算术运算符"><a href="#算术运算符" class="headerlink" title="算术运算符"></a>算术运算符</h3><table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>%</code>, <code>MOD</code></td>
+<td align="left">取余</td>
+</tr>
+<tr>
+<td align="left"><code>*</code></td>
+<td align="left">乘</td>
+</tr>
+<tr>
+<td align="left"><code>+</code></td>
+<td align="left">加</td>
+</tr>
+<tr>
+<td align="left"><code>-</code></td>
+<td align="left">减</td>
+</tr>
+<tr>
+<td align="left"><code>/</code></td>
+<td align="left">除</td>
+</tr>
+<tr>
+<td align="left"><code>DIV</code></td>
+<td align="left">整数除法，结果向下取整</td>
+</tr>
+</tbody></table>
+<h3 id="数学函数"><a href="#数学函数" class="headerlink" title="数学函数"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html">数学函数</a></h3><p>常用的数学函数如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">Name 姓名</th>
+<th align="left">Description 描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>ABS()</code></td>
+<td align="left">返回绝对值</td>
+</tr>
+<tr>
+<td align="left"><code>CEIL()</code></td>
+<td align="left">返回不小于参数的最小整数值</td>
+</tr>
+<tr>
+<td align="left"><code>CEILING()</code></td>
+<td align="left">同 <code>CEIL()</code></td>
+</tr>
+<tr>
+<td align="left"><code>CONV()</code></td>
+<td align="left">进制转换，返回字符串</td>
+</tr>
+<tr>
+<td align="left"><code>FLOOR()</code></td>
+<td align="left">向下取整，注意负数，示例：1.23向下取整是1、-1.23向下取整是-2</td>
+</tr>
+<tr>
+<td align="left"><code>MOD()</code></td>
+<td align="left">返回余数</td>
+</tr>
+<tr>
+<td align="left"><code>POW()</code></td>
+<td align="left">求幂</td>
+</tr>
+<tr>
+<td align="left"><code>POWER()</code></td>
+<td align="left">同 <code>POW()</code></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_rand"><code>RAND()</code></a></td>
+<td align="left">Return a random floating-point value 返回一个随机浮点值</td>
+</tr>
+<tr>
+<td align="left"><code>ROUND()</code></td>
+<td align="left">四舍五入</td>
+</tr>
+<tr>
+<td align="left"><code>SIGN()</code></td>
+<td align="left">根据 X 是否为负、0或正，返回参数的符号 -1、0或1</td>
+</tr>
+<tr>
+<td align="left"><code>TRUNCATE()</code></td>
+<td align="left">截断到指定的小数位数，区别与<code>ROUND()</code></td>
+</tr>
+</tbody></table>
+<h4 id="CONV-N-from-base-to-base"><a href="#CONV-N-from-base-to-base" class="headerlink" title="CONV(N,from_base,to_base)"></a>CONV(N,from_base,to_base)</h4><p>N是待转换的数字，from_base是N当前的进制，to_base是N要输出的进制。</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT CONV(2,10,2);			&#x2F;&#x2F; 将10进制中的2转换为2进制输出
+		-&gt; &#39;10&#39;
+
+mysql&gt; SELECT CONV(&#39;a&#39;,16,2);		&#x2F;&#x2F; 16进制中，a是10
+        -&gt; &#39;1010&#39;
+mysql&gt; SELECT CONV(&#39;6E&#39;,18,8);
+        -&gt; &#39;172&#39;
+mysql&gt; SELECT CONV(-17,10,-18);
+        -&gt; &#39;-H&#39;
+mysql&gt; SELECT CONV(10+&#39;10&#39;+&#39;10&#39;+X&#39;0a&#39;,10,10);
+        -&gt; &#39;40&#39;</code></pre>
+
+<h4 id="POW-X-Y"><a href="#POW-X-Y" class="headerlink" title="POW(X,Y)"></a>POW(X,Y)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT POW(2,3);
+        -&gt; 8
+mysql&gt; SELECT POW(2,-2);
+        -&gt; 0.25</code></pre>
+
+<h4 id="ROUND-X-ROUND-X-D"><a href="#ROUND-X-ROUND-X-D" class="headerlink" title="ROUND(X), ROUND(X,D)"></a>ROUND(X), ROUND(X,D)</h4><p>将参数 X 四舍五入到小数位 D，D默认是0，D可以为负，D绝对值最大30：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT ROUND(-1.23);
+        -&gt; -1
+mysql&gt; SELECT ROUND(-1.58);
+        -&gt; -2
+mysql&gt; SELECT ROUND(1.58);
+        -&gt; 2
+mysql&gt; SELECT ROUND(1.298, 1);
+        -&gt; 1.3
+mysql&gt; SELECT ROUND(1.298, 0);
+        -&gt; 1
+mysql&gt; SELECT ROUND(23.298, -1);
+        -&gt; 20
+mysql&gt; SELECT ROUND(.12345678901234567890123456789012345, 35);
+        -&gt; 0.123456789012345678901234567890</code></pre>
+
+<h4 id="SIGN-X"><a href="#SIGN-X" class="headerlink" title="SIGN(X)"></a>SIGN(X)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT SIGN(-32);
+        -&gt; -1
+mysql&gt; SELECT SIGN(0);
+        -&gt; 0
+mysql&gt; SELECT SIGN(234);
+        -&gt; 1</code></pre>
+
+<h4 id="TRUNCATE-X-D"><a href="#TRUNCATE-X-D" class="headerlink" title="TRUNCATE(X,D)"></a>TRUNCATE(X,D)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT TRUNCATE(1.223,1);
+        -&gt; 1.2
+mysql&gt; SELECT TRUNCATE(1.999,1);
+        -&gt; 1.9
+mysql&gt; SELECT TRUNCATE(1.999,0);
+        -&gt; 1
+mysql&gt; SELECT TRUNCATE(-1.999,1);
+        -&gt; -1.9
+mysql&gt; SELECT TRUNCATE(122,-2);
+       -&gt; 100
+mysql&gt; SELECT TRUNCATE(10.28*100,0);
+       -&gt; 1028</code></pre>
+
+<h2 id="日期和时间函数"><a href="#日期和时间函数" class="headerlink" title="日期和时间函数"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html">日期和时间函数</a></h2><h3 id="INTERVAL-运算符"><a href="#INTERVAL-运算符" class="headerlink" title="INTERVAL 运算符"></a>INTERVAL 运算符</h3><p>INTERVAL 运算符表示时间间隔，用法如下：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">INTERVAL expr unit</code></pre>
+
+<p><code>expr</code>和<code>unit</code>的对应关系</p>
+<table>
+<thead>
+<tr>
+<th align="left"><em><code>unit</code></em></th>
+<th align="left"><code>expr</code></th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>MICROSECOND</code></td>
+<td align="left"><code>MICROSECONDS</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>SECOND</code></td>
+<td align="left"><code>SECONDS</code></td>
+<td><code>INTERVAL 1 SECOND</code></td>
+</tr>
+<tr>
+<td align="left"><code>MINUTE</code></td>
+<td align="left"><code>MINUTES</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>HOUR</code></td>
+<td align="left"><code>HOURS</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>DAY</code></td>
+<td align="left"><code>DAYS</code></td>
+<td><code>INTERVAL 1 DAY</code></td>
+</tr>
+<tr>
+<td align="left"><code>WEEK</code></td>
+<td align="left"><code>WEEKS</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>MONTH</code></td>
+<td align="left"><code>MONTHS</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>QUARTER</code></td>
+<td align="left"><code>QUARTERS</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>YEAR</code></td>
+<td align="left"><code>YEARS</code></td>
+<td><code>INTERVAL 1 YEAR</code></td>
+</tr>
+<tr>
+<td align="left"><code>SECOND_MICROSECOND</code></td>
+<td align="left"><code>&#39;SECONDS.MICROSECONDS&#39;</code></td>
+<td><code>INTERVAL &#39;1.999999&#39; SECOND_MICROSECOND</code></td>
+</tr>
+<tr>
+<td align="left"><code>MINUTE_MICROSECOND</code></td>
+<td align="left"><code>&#39;MINUTES:SECONDS.MICROSECONDS&#39;</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>MINUTE_SECOND</code></td>
+<td align="left"><code>&#39;MINUTES:SECONDS&#39;</code></td>
+<td><code>INTERVAL &#39;1:1&#39; MINUTE_SECOND</code></td>
+</tr>
+<tr>
+<td align="left"><code>HOUR_MICROSECOND</code></td>
+<td align="left"><code>&#39;HOURS:MINUTES:SECONDS.MICROSECONDS&#39;</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>HOUR_SECOND</code></td>
+<td align="left"><code>&#39;HOURS:MINUTES:SECONDS&#39;</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>HOUR_MINUTE</code></td>
+<td align="left"><code>&#39;HOURS:MINUTES&#39;</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>DAY_MICROSECOND</code></td>
+<td align="left"><code>&#39;DAYS HOURS:MINUTES:SECONDS.MICROSECONDS&#39;</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>DAY_SECOND</code></td>
+<td align="left"><code>&#39;DAYS HOURS:MINUTES:SECONDS&#39;</code></td>
+<td><code>INTERVAL &#39;1 1:1:1&#39; DAY_SECOND</code></td>
+</tr>
+<tr>
+<td align="left"><code>DAY_MINUTE</code></td>
+<td align="left"><code>&#39;DAYS HOURS:MINUTES&#39;</code></td>
+<td></td>
+</tr>
+<tr>
+<td align="left"><code>DAY_HOUR</code></td>
+<td align="left"><code>&#39;DAYS HOURS&#39;</code></td>
+<td><code>INTERVAL &#39;-1 10&#39; DAY_HOUR</code></td>
+</tr>
+<tr>
+<td align="left"><code>YEAR_MONTH</code></td>
+<td align="left"><code>&#39;YEARS-MONTHS&#39;</code></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>注意：</p>
+<ul>
+<li><code>expr</code>中可以使用任意分割符，上表中主要以<code>:</code>为例演示。</li>
+<li><code>expr</code> 被视为一个字符串，所以当<code>expr</code>为非字符串时要小心。以HOUR _ MINUTE为例：’6&#x2F;4‘ 被视为6小时4分钟，而6&#x2F;4会先计算得1.5000，然后被视作‘1.5000’，也就是1小时5000分钟。<ul>
+<li>如果确实想要6&#x2F;4表示1.5小时，可以将结果转一下，例如：<code>INTERVAL CAST(6/4 AS DECIMAL(3,1)) HOUR_MINUTE</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h4><ul>
+<li><p>某些函数，如 DATE _ ADD ()、 DATE _ SUB ()、EXTRACT()</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT DATE_ADD(&#39;2018-05-01&#39;,INTERVAL 1 DAY);
+        -&gt; &#39;2018-05-02&#39;
+mysql&gt; SELECT DATE_SUB(&#39;2018-05-01&#39;,INTERVAL 1 YEAR);
+        -&gt; &#39;2017-05-01&#39;
+mysql&gt; SELECT EXTRACT(YEAR FROM &#39;2019-07-02&#39;);
+        -&gt; 2019</code></pre>
+</li>
+<li><p>+&#x2F;-运算</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">date + INTERVAL expr unit
+date - INTERVAL expr unit</code></pre>
+
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT &#39;2018-12-31 23:59:59&#39; + INTERVAL 1 SECOND;
+        -&gt; &#39;2019-01-01 00:00:00&#39;
+mysql&gt; SELECT INTERVAL 1 DAY + &#39;2018-12-31&#39;;
+        -&gt; &#39;2019-01-01&#39;
+mysql&gt; SELECT &#39;2025-01-01&#39; - INTERVAL 1 SECOND;
+        -&gt; &#39;2024-12-31 23:59:59&#39;</code></pre>
+
+<p>注：对于-运算，<code>INTERVAL expr</code> 只允许在右边，因为从一个间隔中减去一个日期或日期时间值是没有意义的。</p>
+</li>
+</ul>
+<h3 id="日期和时间函数-1"><a href="#日期和时间函数-1" class="headerlink" title="日期和时间函数"></a>日期和时间函数</h3><table>
+<thead>
+<tr>
+<th align="left">Name 姓名</th>
+<th align="left">Description 描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>DATE_ADD()</code></td>
+<td align="left">date 加 time</td>
+</tr>
+<tr>
+<td align="left"><code>DATE_SUB()</code></td>
+<td align="left">date 减 time</td>
+</tr>
+<tr>
+<td align="left"><code>ADDDATE()</code></td>
+<td align="left">当用三个参数调用时，同<code>DATE_ADD()</code></td>
+</tr>
+<tr>
+<td align="left"><code>SUBDATE()</code></td>
+<td align="left">当用三个参数调用时，同<code>DATE_SUB()</code></td>
+</tr>
+<tr>
+<td align="left"><code>ADDTIME()</code></td>
+<td align="left">time 或 datetime 加 time</td>
+</tr>
+<tr>
+<td align="left"><code>TIMESTAMPADD()</code></td>
+<td align="left">向 datetime 表达式添加间隔</td>
+</tr>
+<tr>
+<td align="left"><code>SUBTIME()</code></td>
+<td align="left">time 或 datetime 减 time</td>
+</tr>
+<tr>
+<td align="left"><code>CONVERT_TZ()</code></td>
+<td align="left">转换日期的时区</td>
+</tr>
+<tr>
+<td align="left"><code>CURDATE()</code></td>
+<td align="left">返回当前日期，返回 <code>YYYY-MM-DD&#39;</code>或 <code>YYYYMMDD</code> 格式</td>
+</tr>
+<tr>
+<td align="left"><code>CURRENT_DATE()</code>, <code>CURRENT_DATE</code></td>
+<td align="left">同<code>CURDATE()</code></td>
+</tr>
+<tr>
+<td align="left"><code>CURTIME()</code></td>
+<td align="left">返回当前时间，返回 <code>&#39;hh:mm:ss&#39;</code> or <em><code>hhmmss</code></em> 格式</td>
+</tr>
+<tr>
+<td align="left"><code>CURRENT_TIME()</code>, <code>CURRENT_TIME</code></td>
+<td align="left">同<code>CURTIME()</code></td>
+</tr>
+<tr>
+<td align="left"><code>NOW()</code></td>
+<td align="left">返回当前日期和时间，返回 <code>&#39;YYYY-MM-DD hh:mm:ss&#39;</code> 或 <code>YYYYMMDDhhmmss</code> 格式</td>
+</tr>
+<tr>
+<td align="left"><code>LOCALTIME()</code>, <code>LOCALTIME</code></td>
+<td align="left">同<code>NOW()</code></td>
+</tr>
+<tr>
+<td align="left"><code>CURRENT_TIMESTAMP()</code>, <code>CURRENT_TIMESTAMP</code></td>
+<td align="left">同<code>NOW()</code></td>
+</tr>
+<tr>
+<td align="left"><code>LOCALTIMESTAMP</code>, <code>LOCALTIMESTAMP()</code></td>
+<td align="left">同<code>NOW()</code></td>
+</tr>
+<tr>
+<td align="left"><code>DATE()</code></td>
+<td align="left">提取 date 或 datetime 表达式的 date 部分</td>
+</tr>
+<tr>
+<td align="left"><code>DATE_FORMAT()</code></td>
+<td align="left">格式化日期</td>
+</tr>
+<tr>
+<td align="left"><code>TIME_FORMAT()</code></td>
+<td align="left">与<code>DATE_FORMAT()</code>类似，但format只包含小时、分钟、秒和微秒的格式说明符。其他说明符产生 NULL 值或0。</td>
+</tr>
+<tr>
+<td align="left"><code>DATEDIFF()</code></td>
+<td align="left">两个日期相减，返回差的天数</td>
+</tr>
+<tr>
+<td align="left"><code>TIMESTAMPDIFF(unit,datetime_expr1,datetime_expr2)</code></td>
+<td align="left">datetime _ expr2 - datetime _ expr1</td>
+</tr>
+<tr>
+<td align="left"><code>TIMEDIFF()</code></td>
+<td align="left">expr1-expr2，返回的结果限制在 TIME 值允许的范围内</td>
+</tr>
+<tr>
+<td align="left"><code>DAYOFMONTH()</code></td>
+<td align="left">返回月份的日期(0-31)</td>
+</tr>
+<tr>
+<td align="left"><code>DAY()</code></td>
+<td align="left">同 <code>DAYOFMONTH()</code></td>
+</tr>
+<tr>
+<td align="left"><code>DAYOFWEEK()</code></td>
+<td align="left">返回一周中的第几天，1对应周日，7对应周六</td>
+</tr>
+<tr>
+<td align="left"><code>DAYOFYEAR()</code></td>
+<td align="left">返回一年当中的第几天(1-366)</td>
+</tr>
+<tr>
+<td align="left"><code>EXTRACT()</code></td>
+<td align="left">提取日期的一部分</td>
+</tr>
+<tr>
+<td align="left"><code>TIME()</code></td>
+<td align="left">提取传递的表达式的时间部分</td>
+</tr>
+<tr>
+<td align="left"><code>FROM_DAYS()</code></td>
+<td align="left">给定一个天数 N，返回一个 DATE 值。它不适用于公历(1582)出现之前的值</td>
+</tr>
+<tr>
+<td align="left"><code>FROM_UNIXTIME()</code></td>
+<td align="left">将 Unix 时间戳格式化为日期</td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT()</code></td>
+<td align="left">返回日期格式字符串</td>
+</tr>
+<tr>
+<td align="left"><code>HOUR()</code></td>
+<td align="left">提取小时</td>
+</tr>
+<tr>
+<td align="left"><code>LAST_DAY()</code></td>
+<td align="left">返回日期所在月最后一天</td>
+</tr>
+<tr>
+<td align="left"><code>MAKEDATE()</code></td>
+<td align="left">从一年中的某一天创建一个日期</td>
+</tr>
+<tr>
+<td align="left"><code>MAKETIME()</code></td>
+<td align="left">从小时、分钟、秒开始创建时间</td>
+</tr>
+<tr>
+<td align="left"><code>MICROSECOND()</code></td>
+<td align="left">返回参数中的微秒</td>
+</tr>
+<tr>
+<td align="left"><code>MINUTE()</code></td>
+<td align="left">返回参数的分钟</td>
+</tr>
+<tr>
+<td align="left"><code>MONTH()</code></td>
+<td align="left">返回日期的月份，范围为1至12</td>
+</tr>
+<tr>
+<td align="left"><code>PERIOD_DIFF()</code></td>
+<td align="left">返回两个期间之间的月数</td>
+</tr>
+<tr>
+<td align="left"><code>QUARTER()</code></td>
+<td align="left">返回日期所在的季度，范围在1到4之间</td>
+</tr>
+<tr>
+<td align="left"><code>SEC_TO_TIME()</code></td>
+<td align="left">将秒数转换为‘ hh: mm: ss’格式</td>
+</tr>
+<tr>
+<td align="left"><code>TIME_TO_SEC()</code></td>
+<td align="left">time转换为秒</td>
+</tr>
+<tr>
+<td align="left"><code>SECOND()</code></td>
+<td align="left">返回秒(0-59)</td>
+</tr>
+<tr>
+<td align="left"><code>STR_TO_DATE()</code></td>
+<td align="left">将字符串转换为日期</td>
+</tr>
+<tr>
+<td align="left"><code>SYSDATE()</code></td>
+<td align="left">返回<code>SYSDATE()</code>函数开始执行的时间</td>
+</tr>
+<tr>
+<td align="left"><code>TIMESTAMP()</code></td>
+<td align="left">对于单个参数，此函数返回 date 或 datetime 表达式; 对于两个参数，返回参数之和</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_to-days"><code>TO_DAYS()</code></a></td>
+<td align="left">Return the date argument converted to days 返回转换为天数的日期参数</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_to-seconds"><code>TO_SECONDS()</code></a></td>
+<td align="left">Return the date or datetime argument converted to seconds since Year 0 返回自0年以来转换为秒的日期或日期时间参数</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_unix-timestamp"><code>UNIX_TIMESTAMP()</code></a></td>
+<td align="left">返回一个 Unix 时间戳</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-date"><code>UTC_DATE()</code></a></td>
+<td align="left">Return the current UTC date 返回当前的 UTC 日期</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-time"><code>UTC_TIME()</code></a></td>
+<td align="left">Return the current UTC time 返回当前的 UTC 时间</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-timestamp"><code>UTC_TIMESTAMP()</code></a></td>
+<td align="left">Return the current UTC date and time 返回当前的 UTC 日期和时间</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_week"><code>WEEK()</code></a></td>
+<td align="left">Return the week number 返回星期号码</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_weekday"><code>WEEKDAY()</code></a></td>
+<td align="left">Return the weekday index 返回工作日索引</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_weekofyear"><code>WEEKOFYEAR()</code></a></td>
+<td align="left">Return the calendar week of the date (1-53) 返回日期的日历周(1-53)</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_year"><code>YEAR()</code></a></td>
+<td align="left">Return the year 返回年份</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_yearweek"><code>YEARWEEK()</code></a></td>
+<td align="left">Return the year and week 返回年份和周数</td>
+</tr>
+</tbody></table>
+<h4 id="ADDDATE-date-INTERVAL-expr-unit-ADDDATE-expr-days"><a href="#ADDDATE-date-INTERVAL-expr-unit-ADDDATE-expr-days" class="headerlink" title="ADDDATE(date,INTERVAL expr unit), ADDDATE(expr,days)"></a>ADDDATE(date,INTERVAL expr unit), ADDDATE(expr,days)</h4><p>以下两种写法等价：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT ADDDATE(&#39;2008-01-02&#39;, INTERVAL 31 DAY);
+        -&gt; &#39;2008-02-02&#39;
+        
+mysql&gt; SELECT ADDDATE(&#39;2008-01-02&#39;, 31);
+        -&gt; &#39;2008-02-02&#39;</code></pre>
+
+<h4 id="ADDTIME-expr1-expr2"><a href="#ADDTIME-expr1-expr2" class="headerlink" title="ADDTIME(expr1,expr2)"></a>ADDTIME(expr1,expr2)</h4><p><code>expr1</code>是time或datetime，<code>expr2</code>是time：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT ADDTIME(&#39;2007-12-31 23:59:59.999999&#39;, &#39;1 1:1:1.000002&#39;);
+        -&gt; &#39;2008-01-02 01:01:01.000001&#39;
+mysql&gt; SELECT ADDTIME(&#39;01:00:00.999999&#39;, &#39;02:00:00.999998&#39;);
+        -&gt; &#39;03:00:01.999997&#39;</code></pre>
+
+<h4 id="CURDATE"><a href="#CURDATE" class="headerlink" title="CURDATE()"></a>CURDATE()</h4><p>以“ YYYY-MM-DD”或 YYYYMMDD 格式返回当前日期值，具体取决于函数是在字符串上下文中使用还是在数字上下文中使用：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT CURDATE();
+        -&gt; &#39;2008-06-13&#39;
+mysql&gt; SELECT CURDATE() + 0;
+        -&gt; 20080613</code></pre>
+
+<h4 id="DATE-expr"><a href="#DATE-expr" class="headerlink" title="DATE(expr)"></a>DATE(expr)</h4><pre class="language-none"><code class="language-none">mysql&gt; SELECT DATE(&#39;2003-12-31 01:02:03&#39;);
+        -&gt; &#39;2003-12-31&#39;</code></pre>
+
+<h4 id="DATE-FORMAT-date-format"><a href="#DATE-FORMAT-date-format" class="headerlink" title="DATE_FORMAT(date,format)"></a>DATE_FORMAT(date,format)</h4><p>常用format：也适用于其他函数: <code>STR_TO_DATE()</code>、 <code>TIME_formAT()</code>、 <code>UNIX_TIMESTAMP()</code></p>
+<table>
+<thead>
+<tr>
+<th align="left">Specifier</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>%c</code></td>
+<td align="left">月份，数字(<code>0</code>..<code>12</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%d</code></td>
+<td align="left">月份的日期，数字(<code>00</code>..<code>31</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%e</code></td>
+<td align="left">月份的日期，数字(<code>0</code>..<code>31</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%f</code></td>
+<td align="left">微秒(<code>000000</code>..<code>999999</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%H</code></td>
+<td align="left">小时(<code>00</code>..<code>23</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%h</code></td>
+<td align="left">小时(<code>01</code>..<code>12</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%I</code></td>
+<td align="left">小时(<code>01</code>..<code>12</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%i</code></td>
+<td align="left">分钟，数字(<code>00</code>..<code>59</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%j</code></td>
+<td align="left">年份日(<code>001</code>..<code>366</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%k</code></td>
+<td align="left">小时(<code>0</code>..<code>23</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%l</code></td>
+<td align="left">小时(<code>1</code>..<code>12</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%m</code></td>
+<td align="left">月份，数字(<code>00</code>..<code>12</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%S</code></td>
+<td align="left">秒(<code>00</code>..<code>59</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%s</code></td>
+<td align="left">秒(<code>00</code>..<code>59</code>)</td>
+</tr>
+<tr>
+<td align="left"><code>%T</code></td>
+<td align="left">时间，24小时(<em><code>hh:mm:ss</code></em>)</td>
+</tr>
+<tr>
+<td align="left"><code>%w</code></td>
+<td align="left">星期几(<code>0</code>&#x3D;Sunday.. &#x3D; 星期天.<code>6</code>&#x3D;Saturday) &#x3D; 星期六)</td>
+</tr>
+<tr>
+<td align="left"><code>%Y</code></td>
+<td align="left">年，数字，四位数</td>
+</tr>
+<tr>
+<td align="left"><code>%y</code></td>
+<td align="left">年份，数字(两位数字)</td>
+</tr>
+</tbody></table>
+<h4 id="DATEDIFF-expr1-expr2"><a href="#DATEDIFF-expr1-expr2" class="headerlink" title="DATEDIFF(expr1,expr2)"></a>DATEDIFF(expr1,expr2)</h4><p>返回以天为单位表示的 <code>expr1</code> - <code>expr2</code>，计算中只使用expr1和expr2的date的部分，会直接舍弃time的部分。</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT DATEDIFF(&#39;2007-12-31 23:59:59&#39;,&#39;2007-12-30&#39;);
+        -&gt; 1
+mysql&gt; SELECT DATEDIFF(&#39;2010-11-30 23:59:59&#39;,&#39;2010-12-31&#39;);
+        -&gt; -31</code></pre>
+
+<h4 id="DAYOFMONTH-date"><a href="#DAYOFMONTH-date" class="headerlink" title="DAYOFMONTH(date)"></a>DAYOFMONTH(date)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT DAYOFMONTH(&#39;2007-02-03&#39;);
+        -&gt; 3</code></pre>
+
+<h4 id="EXTRACT-unit-FROM-date"><a href="#EXTRACT-unit-FROM-date" class="headerlink" title="EXTRACT(unit FROM date)"></a>EXTRACT(unit FROM date)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT EXTRACT(YEAR FROM &#39;2019-07-02&#39;);
+        -&gt; 2019
+mysql&gt; SELECT EXTRACT(YEAR_MONTH FROM &#39;2019-07-02 01:02:03&#39;);
+        -&gt; 201907
+mysql&gt; SELECT EXTRACT(DAY_MINUTE FROM &#39;2019-07-02 01:02:03&#39;);
+        -&gt; 20102
+mysql&gt; SELECT EXTRACT(MICROSECOND
+    -&gt;                FROM &#39;2003-01-02 10:30:00.000123&#39;);
+        -&gt; 123</code></pre>
+
+<h4 id="FROM-UNIXTIME-unix-timestamp-format"><a href="#FROM-UNIXTIME-unix-timestamp-format" class="headerlink" title="FROM_UNIXTIME(unix_timestamp[,format])"></a>FROM_UNIXTIME(unix_timestamp[,format])</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT FROM_UNIXTIME(1447430881);
+        -&gt; &#39;2015-11-13 10:08:01&#39;
+mysql&gt; SELECT FROM_UNIXTIME(1447430881) + 0;
+        -&gt; 20151113100801
+mysql&gt; SELECT FROM_UNIXTIME(1447430881,
+    -&gt;                      &#39;%Y %D %M %h:%i:%s %x&#39;);
+        -&gt; &#39;2015 13th November 10:08:01 2015&#39;</code></pre>
+
+<h4 id="GET-FORMAT-DATE-TIME-DATETIME-‘EUR’-’USA’-’JIS’-’ISO’-’INTERNAL’"><a href="#GET-FORMAT-DATE-TIME-DATETIME-‘EUR’-’USA’-’JIS’-’ISO’-’INTERNAL’" class="headerlink" title="GET_FORMAT({DATE|TIME|DATETIME}, {‘EUR’|’USA’|’JIS’|’ISO’|’INTERNAL’})"></a>GET_FORMAT({DATE|TIME|DATETIME}, {‘EUR’|’USA’|’JIS’|’ISO’|’INTERNAL’})</h4><table>
+<thead>
+<tr>
+<th align="left">Function Call 函数调用</th>
+<th align="left">Result 结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>GET_FORMAT(DATE,&#39;USA&#39;)</code></td>
+<td align="left"><code>&#39;%m.%d.%Y&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATE,&#39;JIS&#39;)</code></td>
+<td align="left"><code>&#39;%Y-%m-%d&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATE,&#39;ISO&#39;)</code></td>
+<td align="left"><code>&#39;%Y-%m-%d&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATE,&#39;EUR&#39;)</code></td>
+<td align="left"><code>&#39;%d.%m.%Y&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATE,&#39;INTERNAL&#39;)</code></td>
+<td align="left"><code>&#39;%Y%m%d&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATETIME,&#39;USA&#39;)</code></td>
+<td align="left"><code>&#39;%Y-%m-%d %H.%i.%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATETIME,&#39;JIS&#39;)</code></td>
+<td align="left"><code>&#39;%Y-%m-%d %H:%i:%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATETIME,&#39;ISO&#39;)</code></td>
+<td align="left"><code>&#39;%Y-%m-%d %H:%i:%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATETIME,&#39;EUR&#39;)</code></td>
+<td align="left"><code>&#39;%Y-%m-%d %H.%i.%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(DATETIME,&#39;INTERNAL&#39;)</code></td>
+<td align="left"><code>&#39;%Y%m%d%H%i%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(TIME,&#39;USA&#39;)</code></td>
+<td align="left"><code>&#39;%h:%i:%s %p&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(TIME,&#39;JIS&#39;)</code></td>
+<td align="left"><code>&#39;%H:%i:%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(TIME,&#39;ISO&#39;)</code></td>
+<td align="left"><code>&#39;%H:%i:%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(TIME,&#39;EUR&#39;)</code></td>
+<td align="left"><code>&#39;%H.%i.%s&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><code>GET_FORMAT(TIME,&#39;INTERNAL&#39;)</code></td>
+<td align="left"><code>&#39;%H%i%s&#39;</code></td>
+</tr>
+</tbody></table>
+<h4 id="HOUR-time"><a href="#HOUR-time" class="headerlink" title="HOUR(time)"></a>HOUR(time)</h4><p>返回时间的小时。对于时间值，返回值的范围是0到23。但是，TIME 值的范围实际上要大得多，因此 HOUR 可以返回大于23的值：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT HOUR(&#39;10:05:03&#39;);
+        -&gt; 10
+mysql&gt; SELECT HOUR(&#39;272:59:59&#39;);
+        -&gt; 272</code></pre>
+
+<h4 id="LAST-DAY-date"><a href="#LAST-DAY-date" class="headerlink" title="LAST_DAY(date)"></a>LAST_DAY(date)</h4><p>返回date或datetime所在月最后一天。如果参数无效，返回 NULL：</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT LAST_DAY(&#39;2003-02-05&#39;);
+        -&gt; &#39;2003-02-28&#39;
+mysql&gt; SELECT LAST_DAY(&#39;2004-02-05&#39;);
+        -&gt; &#39;2004-02-29&#39;
+mysql&gt; SELECT LAST_DAY(&#39;2004-01-01 01:01:01&#39;);
+        -&gt; &#39;2004-01-31&#39;
+mysql&gt; SELECT LAST_DAY(&#39;2003-03-32&#39;);
+        -&gt; NULL</code></pre>
+
+<h4 id="MAKEDATE-year-dayofyear"><a href="#MAKEDATE-year-dayofyear" class="headerlink" title="MAKEDATE(year,dayofyear)"></a>MAKEDATE(year,dayofyear)</h4><p>dayofyear 必须大于0，否则返回NULL</p>
+<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT MAKEDATE(2011,31), MAKEDATE(2011,32);
+        -&gt; &#39;2011-01-31&#39;, &#39;2011-02-01&#39;
+mysql&gt; SELECT MAKEDATE(2011,365), MAKEDATE(2014,365);
+        -&gt; &#39;2011-12-31&#39;, &#39;2014-12-31&#39;
+mysql&gt; SELECT MAKEDATE(2011,0);
+        -&gt; NULL</code></pre>
+
+<h4 id="TIMESTAMP-expr-TIMESTAMP-expr1-expr2"><a href="#TIMESTAMP-expr-TIMESTAMP-expr1-expr2" class="headerlink" title="TIMESTAMP(expr), TIMESTAMP(expr1,expr2)"></a>TIMESTAMP(expr), TIMESTAMP(expr1,expr2)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT TIMESTAMP(&#39;2003-12-31&#39;);
+        -&gt; &#39;2003-12-31 00:00:00&#39;
+mysql&gt; SELECT TIMESTAMP(&#39;2003-12-31 12:00:00&#39;,&#39;12:00:00&#39;);
+        -&gt; &#39;2004-01-01 00:00:00&#39;</code></pre>
+
+
+
+<h2 id="字符串函数和运算符"><a href="#字符串函数和运算符" class="headerlink" title="字符串函数和运算符"></a>字符串函数和运算符</h2><h2 id="强制转换函数和运算符"><a href="#强制转换函数和运算符" class="headerlink" title="强制转换函数和运算符"></a>强制转换函数和运算符</h2><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BINARY</td>
+<td>运算符</td>
+<td>将expr的字符集（character）转成binary、排序规则（collation）转成binary，注意：只转字符集和排序规则，便于字符串进行比较</td>
+</tr>
+<tr>
+<td>CAST()</td>
+<td>函数</td>
+<td></td>
+</tr>
+<tr>
+<td>CONVERT()</td>
+<td>函数</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="BINARY-expr"><a href="#BINARY-expr" class="headerlink" title="BINARY expr"></a>BINARY expr</h3><p>一般情况下，我们将字符集设置为 utf8mb4，排序规则设置为 utf8mb4_general_ci，这种排序规则在使用 &#x3D; 进行比较的时候不区分大小写，而binary排序规则是区分大小写的</p>
+<p>mysql中字符串使用 &#x3D; 进行比较的时候，会忽略掉尾部的空空格，这符合SQL标准，无需设置也无法更改。利用BINARY将字符串的排序规则转成binary后，尾部的空格就不会忽略了</p>
+<h3 id="CAST-expr-AS-type"><a href="#CAST-expr-AS-type" class="headerlink" title="CAST(expr AS type)"></a>CAST(expr AS type)</h3><p>type： []表示可选</p>
+<ul>
+<li>BINARY[(N)]</li>
+<li>CHAR[(N)]</li>
+<li>DATE </li>
+<li>DATETIME[(M)]</li>
+<li>DECIMAL[(M[,D])]</li>
+<li>JSON</li>
+<li>NCHAR[(N)]</li>
+<li>SIGNED [INTEGER]</li>
+<li>TIME[(M)]</li>
+<li>UNSIGNED [INTEGER]</li>
+</ul>
+<p><strong>CAST(expr, type)</strong> 和 <strong>CONVERT(expr, type)</strong> 同 CAST(expr AS type) </p>
+<h3 id="CONVERT-expr-USING-transcoding-name"><a href="#CONVERT-expr-USING-transcoding-name" class="headerlink" title="CONVERT(expr USING transcoding_name)"></a>CONVERT(expr USING transcoding_name)</h3><p>字符集转换</p>
+<h2 id="位函数和运算符"><a href="#位函数和运算符" class="headerlink" title="位函数和运算符"></a>位函数和运算符</h2><h2 id="加密和压缩函数"><a href="#加密和压缩函数" class="headerlink" title="加密和压缩函数"></a>加密和压缩函数</h2><p>略…</p>
+<h2 id="信息函数"><a href="#信息函数" class="headerlink" title="信息函数"></a>信息函数</h2><table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_benchmark"><code>BENCHMARK()</code></a></td>
+<td align="left">Repeatedly execute an expression 重复执行一个表达式</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_charset"><code>CHARSET()</code></a></td>
+<td align="left">Return the character set of the argument 返回参数的字符集</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_coercibility"><code>COERCIBILITY()</code></a></td>
+<td align="left">Return the collation coercibility value of the string argument 返回字符串参数的排序规则强制性值</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_collation"><code>COLLATION()</code></a></td>
+<td align="left">Return the collation of the string argument 返回字符串参数的排序规则</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_connection-id"><code>CONNECTION_ID()</code></a></td>
+<td align="left">Return the connection ID (thread ID) for the connection 返回连接的连接 ID (线程 ID)</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_current-user"><code>CURRENT_USER()</code>, <code>CURRENT_USER</code></a></td>
+<td align="left">The authenticated user name and host name 经过身份验证的用户名和主机名</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_database"><code>DATABASE()</code></a></td>
+<td align="left">Return the default (current) database name 返回默认(当前)数据库名称</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_found-rows"><code>FOUND_ROWS()</code></a></td>
+<td align="left">For a SELECT with a LIMIT clause, the number of rows that would be returned were there no LIMIT clause 对于带有 LIMIT 子句的 SELECT，如果没有 LIMIT 子句，则返回的行数</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_last-insert-id"><code>LAST_INSERT_ID()</code></a></td>
+<td align="left">Value of the AUTOINCREMENT column for the last INSERT 最后一次 INSERT 的 AUTOINCREMENT 列的值</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count"><code>ROW_COUNT()</code></a></td>
+<td align="left">The number of rows updated 更新的行数</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema"><code>SCHEMA()</code></a></td>
+<td align="left">Synonym for DATABASE() DATABASE ()的同义词</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_session-user"><code>SESSION_USER()</code></a></td>
+<td align="left">Synonym for USER() USER ()的同义词</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_system-user"><code>SYSTEM_USER()</code></a></td>
+<td align="left">Synonym for USER() USER ()的同义词</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_user"><code>USER()</code></a></td>
+<td align="left">The user name and host name provided by the client 客户端提供的用户名和主机名</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_version"><code>VERSION()</code></a></td>
+<td align="left">Return a string that indicates the MySQL server version 返回指示 MySQL 服务器版本的字符串</td>
+</tr>
+</tbody></table>
+<h2 id="json函数"><a href="#json函数" class="headerlink" title="json函数"></a>json函数</h2><h2 id="与全局事务标识符-GTID-一起使用的函数"><a href="#与全局事务标识符-GTID-一起使用的函数" class="headerlink" title="与全局事务标识符(GTID)一起使用的函数"></a>与全局事务标识符(GTID)一起使用的函数</h2><p>…</p>
+<h2 id="聚合函数"><a href="#聚合函数" class="headerlink" title="聚合函数"></a>聚合函数</h2><p>聚合函数通常与 <code>GROUP BY</code> 子句一起使用，以将值分组为子集。</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"></th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Name 姓名</td>
+<td align="left">Description 描述</td>
+<td align="left">Introduced 介绍</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_avg"><code>AVG()</code></a></td>
+<td align="left">Return the average value of the argument 返回参数的平均值</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_bit-and"><code>BIT_AND()</code></a></td>
+<td align="left">Return bitwise AND 按位返回 AND</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_bit-or"><code>BIT_OR()</code></a></td>
+<td align="left">Return bitwise OR 按位返回 OR</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_bit-xor"><code>BIT_XOR()</code></a></td>
+<td align="left">Return bitwise XOR 返回按位异或</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_count"><code>COUNT()</code></a></td>
+<td align="left">Return a count of the number of rows returned 返回返回行数的计数</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_count-distinct"><code>COUNT(DISTINCT)</code></a></td>
+<td align="left">Return the count of a number of different values 返回许多不同值的计数</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_group-concat"><code>GROUP_CONCAT()</code></a></td>
+<td align="left">Return a concatenated string 返回连接的字符串</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_json-arrayagg"><code>JSON_ARRAYAGG()</code></a></td>
+<td align="left">Return result set as a single JSON array 以单个 JSON 数组的形式返回结果集</td>
+<td align="left">5.7.22</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_json-objectagg"><code>JSON_OBJECTAGG()</code></a></td>
+<td align="left">Return result set as a single JSON object 将结果集作为单个 JSON 对象返回</td>
+<td align="left">5.7.22</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_max"><code>MAX()</code></a></td>
+<td align="left">Return the maximum value 返回最大值</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_min"><code>MIN()</code></a></td>
+<td align="left">Return the minimum value 返回最小值</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_std"><code>STD()</code></a></td>
+<td align="left">Return the population standard deviation 返回人口标准差</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_stddev"><code>STDDEV()</code></a></td>
+<td align="left">Return the population standard deviation 返回人口标准差</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_stddev-pop"><code>STDDEV_POP()</code></a></td>
+<td align="left">Return the population standard deviation 返回人口标准差</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_stddev-samp"><code>STDDEV_SAMP()</code></a></td>
+<td align="left">Return the sample standard deviation 返回样本标准差</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_sum"><code>SUM()</code></a></td>
+<td align="left">Return the sum 把钱退回去</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_var-pop"><code>VAR_POP()</code></a></td>
+<td align="left">Return the population standard variance 返回总体标准方差</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_var-samp"><code>VAR_SAMP()</code></a></td>
+<td align="left">Return the sample variance 返回样本方差</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/aggregate-functions.html#function_variance"><code>VARIANCE()</code></a></td>
+<td align="left">Return the population standard variance 返回总体标准方差</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h2 id="其他函数"><a href="#其他函数" class="headerlink" title="其他函数"></a>其他函数</h2><table>
+<thead>
+<tr>
+<th align="left">Name 姓名</th>
+<th align="left">Description 描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_any-value"><code>ANY_VALUE()</code></a></td>
+<td align="left">Suppress ONLY_FULL_GROUP_BY value rejection 禁止拒绝 ONLY _ FULL _ GROUP _ BY 值</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_default"><code>DEFAULT()</code></a></td>
+<td align="left">Return the default value for a table column 返回表列的默认值</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet-aton"><code>INET_ATON()</code></a></td>
+<td align="left">Return the numeric value of an IP address 返回 IP 地址的数值</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet-ntoa"><code>INET_NTOA()</code></a></td>
+<td align="left">Return the IP address from a numeric value 从数值返回 IP 地址</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet6-aton"><code>INET6_ATON()</code></a></td>
+<td align="left">Return the numeric value of an IPv6 address 返回 IPv6地址的数值</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_inet6-ntoa"><code>INET6_NTOA()</code></a></td>
+<td align="left">Return the IPv6 address from a numeric value 从数值中返回 IPv6地址</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_is-ipv4"><code>IS_IPV4()</code></a></td>
+<td align="left">Whether argument is an IPv4 address 参数是否为 IPv4地址</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_is-ipv4-compat"><code>IS_IPV4_COMPAT()</code></a></td>
+<td align="left">Whether argument is an IPv4-compatible address 参数是否为 IPv4兼容地址</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_is-ipv4-mapped"><code>IS_IPV4_MAPPED()</code></a></td>
+<td align="left">Whether argument is an IPv4-mapped address 参数是否为 IPv4映射的地址</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_is-ipv6"><code>IS_IPV6()</code></a></td>
+<td align="left">Whether argument is an IPv6 address 参数是否为 IPv6地址</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_master-pos-wait"><code>MASTER_POS_WAIT()</code></a></td>
+<td align="left">Block until the replica has read and applied all updates up to the specified position 块，直到副本读取并应用到指定位置的所有更新</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_name-const"><code>NAME_CONST()</code></a></td>
+<td align="left">Cause the column to have the given name 使列具有给定的名称</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_sleep"><code>SLEEP()</code></a></td>
+<td align="left">Sleep for a number of seconds 睡几秒钟</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_uuid"><code>UUID()</code></a></td>
+<td align="left">Return a Universal Unique Identifier (UUID) 返回通用唯一标识符(UUID)</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_uuid-short"><code>UUID_SHORT()</code></a></td>
+<td align="left">Return an integer-valued universal identifier 返回整数值通用标识符</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values"><code>VALUES()</code></a></td>
+<td align="left">Define the values to be used during an INSERT 定义在 INSERT 过程中使用的值</td>
+</tr>
+</tbody></table>
+<h2 id="精确数学"><a href="#精确数学" class="headerlink" title="精确数学"></a>精确数学</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="prev" title="数据结构">
+                  <i class="fa fa-chevron-left"></i> 数据结构
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%B7%A5%E5%85%B7/firefox%20userChrome.css/" rel="next" title="firefox userChrome.css">
+                  firefox userChrome.css <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="DNS 相关概念和技术    DNS 查询类型 递归查询：一般客户机和本地 DNS 服务器之间属于递归查询。如果本地 DNS 服务器本身不能解析，则本地 DNS 服务器向其他 DNS 服务器发起发出查询请求。 迭代查询：一般情况下(有例外)本地的 DNS 服务器向其它 DNS 服务器的查询属于迭代查询。如果其他 DNS 服务器也不能解析，则本地 DNS 服务器再向下一个 DNS 服务器发出查询请求">
+<meta property="og:type" content="article">
+<meta property="og:title" content="域名系统DNS服务">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/DNS/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9FDNS%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="DNS 相关概念和技术    DNS 查询类型 递归查询：一般客户机和本地 DNS 服务器之间属于递归查询。如果本地 DNS 服务器本身不能解析，则本地 DNS 服务器向其他 DNS 服务器发起发出查询请求。 迭代查询：一般情况下(有例外)本地的 DNS 服务器向其它 DNS 服务器的查询属于迭代查询。如果其他 DNS 服务器也不能解析，则本地 DNS 服务器再向下一个 DNS 服务器发出查询请求">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600324177530.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600307364243.png">
+<meta property="article:published_time" content="2021-02-04T07:21:56.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.486Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="dns">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1600324177530.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/DNS/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9FDNS%E6%9C%8D%E5%8A%A1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/DNS/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9FDNS%E6%9C%8D%E5%8A%A1/","path":"运维/DNS/域名系统DNS服务/","title":"域名系统DNS服务"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>域名系统DNS服务 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%92%8C%E6%8A%80%E6%9C%AF"><span class="nav-number">1.</span> <span class="nav-text">DNS 相关概念和技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS-%E6%9F%A5%E8%AF%A2%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.</span> <span class="nav-text">DNS 查询类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8D%E7%A7%B0%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.2.</span> <span class="nav-text">名称服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E7%9A%84%E6%9F%A5%E8%AF%A2%E8%AF%B7%E6%B1%82%E7%BB%8F%E8%BF%87%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">1.3.</span> <span class="nav-text">完整的查询请求经过的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS-%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.4.</span> <span class="nav-text">DNS 服务器类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%9F%9F%E4%BC%A0%E8%BE%93"><span class="nav-number">1.5.</span> <span class="nav-text">区域传输</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.6.</span> <span class="nav-text">解析类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%9F%E8%B4%A3%E6%9C%AC%E5%9C%B0%E5%9F%9F%E5%90%8D%E7%9A%84%E6%AD%A3%E5%90%91%E5%92%8C%E5%8F%8D%E5%90%91%E8%A7%A3%E6%9E%90%E5%BA%93"><span class="nav-number">1.7.</span> <span class="nav-text">负责本地域名的正向和反向解析库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E7%AD%94%E6%A1%88"><span class="nav-number">1.8.</span> <span class="nav-text">解析答案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E8%AE%B0%E5%BD%95%E5%AE%9A%E4%B9%89%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.9.</span> <span class="nav-text">资源记录定义格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%84%E7%A7%8D%E8%B5%84%E6%BA%90%E8%AE%B0%E5%BD%95"><span class="nav-number">1.10.</span> <span class="nav-text">各种资源记录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SOA"><span class="nav-number">1.10.1.</span> <span class="nav-text">SOA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NS"><span class="nav-number">1.10.2.</span> <span class="nav-text">NS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MX"><span class="nav-number">1.10.3.</span> <span class="nav-text">MX</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#A"><span class="nav-number">1.10.4.</span> <span class="nav-text">A</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AAAA"><span class="nav-number">1.10.5.</span> <span class="nav-text">AAAA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PTR"><span class="nav-number">1.10.6.</span> <span class="nav-text">PTR</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CNAME"><span class="nav-number">1.10.7.</span> <span class="nav-text">CNAME</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TXT"><span class="nav-number">1.10.8.</span> <span class="nav-text">TXT</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83"><span class="nav-number">1.11.</span> <span class="nav-text">子域授权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%92%E8%81%94%E7%BD%91%E5%9F%9F%E5%90%8D"><span class="nav-number">1.12.</span> <span class="nav-text">互联网域名</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-%E8%BD%AF%E4%BB%B6-bind"><span class="nav-number">2.</span> <span class="nav-text">DNS 软件 bind</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bind-%E7%9B%B8%E5%85%B3%E7%A8%8B%E5%BA%8F%E5%8C%85"><span class="nav-number">2.1.</span> <span class="nav-text">bind 相关程序包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bind-%E7%9B%B8%E5%85%B3%E6%96%87%E4%BB%B6"><span class="nav-number">2.2.</span> <span class="nav-text">bind 相关文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.</span> <span class="nav-text">主配置文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0-DNS-%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">实现 DNS 服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB-DNS-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">3.1.</span> <span class="nav-text">主 DNS 服务器配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%AE%9A%E4%B9%89%E5%8C%BA%E5%9F%9F"><span class="nav-number">3.1.1.</span> <span class="nav-text">1. 定义区域</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%9A%E4%B9%89%E5%8C%BA%E5%9F%9F%E8%A7%A3%E6%9E%90%E5%BA%93%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.2.</span> <span class="nav-text">2. 定义区域解析库文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E4%B8%BB%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%AD%E6%B3%95%E6%A3%80%E6%9F%A5"><span class="nav-number">3.1.3.</span> <span class="nav-text">3. 主配置文件语法检查</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E4%B8%BB%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%AD%E6%B3%95%E6%A3%80%E6%9F%A5"><span class="nav-number">3.1.4.</span> <span class="nav-text">4. 主配置文件语法检查</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E9%85%8D%E7%BD%AE%E7%94%9F%E6%95%88"><span class="nav-number">3.1.5.</span> <span class="nav-text">5. 配置生效</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%92%8C%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7"><span class="nav-number">3.1.6.</span> <span class="nav-text">测试和管理工具</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#dig"><span class="nav-number">3.1.6.1.</span> <span class="nav-text">dig</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#host"><span class="nav-number">3.1.6.2.</span> <span class="nav-text">host</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nslookup"><span class="nav-number">3.1.6.3.</span> <span class="nav-text">nslookup</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#rndc"><span class="nav-number">3.1.6.4.</span> <span class="nav-text">rndc</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0-DNS-%E6%AD%A3%E5%90%91%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">3.1.7.</span> <span class="nav-text">实战案例：实现 DNS 正向服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%81%E8%AE%B8%E5%8A%A8%E6%80%81%E6%9B%B4%E6%96%B0"><span class="nav-number">3.1.8.</span> <span class="nav-text">允许动态更新</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8F%8D%E5%90%91%E8%A7%A3%E6%9E%90%E5%8C%BA%E5%9F%9F"><span class="nav-number">4.</span> <span class="nav-text">实现反向解析区域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">实现从服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS-%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">5.1.</span> <span class="nav-text">DNS 从服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E4%BB%8E%E5%8C%BA%E5%9F%9F"><span class="nav-number">5.2.</span> <span class="nav-text">定义从区域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0-DNS-%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">5.3.</span> <span class="nav-text">实战案例：实现 DNS 从服务器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%AD%90%E5%9F%9F"><span class="nav-number">6.</span> <span class="nav-text">实现子域</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8C%83%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0-DNS-%E7%88%B6%E5%9F%9F%E5%92%8C%E5%AD%90%E5%9F%9F%E6%9C%8D%E5%8A%A1"><span class="nav-number">6.1.</span> <span class="nav-text">范例：实现 DNS 父域和子域服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0-DNS-%E8%BD%AC%E5%8F%91%EF%BC%88%E7%BC%93%E5%AD%98%EF%BC%89%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">7.</span> <span class="nav-text">实现 DNS 转发（缓存）服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%99%BA%E8%83%BD-DNS"><span class="nav-number">8.</span> <span class="nav-text">智能 DNS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%BA%E8%83%BD-DNS-%E7%9B%B8%E5%85%B3%E6%8A%80%E6%9C%AF"><span class="nav-number">8.1.</span> <span class="nav-text">智能 DNS 相关技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ACL"><span class="nav-number">8.1.1.</span> <span class="nav-text">ACL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E6%8C%87%E4%BB%A4"><span class="nav-number">8.1.2.</span> <span class="nav-text">访问控制指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#view"><span class="nav-number">8.1.3.</span> <span class="nav-text">view</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%88%A9%E7%94%A8-view-%E5%AE%9E%E7%8E%B0%E6%99%BA%E8%83%BD-DNS"><span class="nav-number">8.1.4.</span> <span class="nav-text">实战案例：利用 view 实现智能 DNS</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%9F%E5%8A%A9%E6%99%BA%E8%83%BD-DNS-%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%8A%80%E6%9C%AF"><span class="nav-number">8.2.</span> <span class="nav-text">借助智能 DNS 实现的技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#GSLB"><span class="nav-number">8.2.1.</span> <span class="nav-text">GSLB</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CDN"><span class="nav-number">8.2.2.</span> <span class="nav-text">CDN</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-%E6%8E%92%E9%94%99"><span class="nav-number">9.</span> <span class="nav-text">DNS 排错</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B"><span class="nav-number">10.</span> <span class="nav-text">实战案例</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/DNS/%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9FDNS%E6%9C%8D%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="域名系统DNS服务 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          域名系统DNS服务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-04 15:21:56" itemprop="dateCreated datePublished" datetime="2021-02-04T15:21:56+08:00">2021-02-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/DNS/" itemprop="url" rel="index"><span itemprop="name">DNS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="DNS-相关概念和技术"><a href="#DNS-相关概念和技术" class="headerlink" title="DNS 相关概念和技术"></a>DNS 相关概念和技术</h2><img data-src="//img.to2b.cn/blog/ljk/1600324177530.png" style="zoom:80%;" />
+
+<img data-src="//img.to2b.cn/blog/ljk/1600307364243.png" style="zoom:80%;" />
+
+<h3 id="DNS-查询类型"><a href="#DNS-查询类型" class="headerlink" title="DNS 查询类型"></a>DNS 查询类型</h3><ul>
+<li>递归查询：一般客户机和本地 DNS 服务器之间属于递归查询。如果本地 DNS 服务器本身不能解析，则本地 DNS 服务器向其他 DNS 服务器发起发出查询请求。</li>
+<li>迭代查询：一般情况下(有例外)本地的 DNS 服务器向其它 DNS 服务器的查询属于迭代查询。如果其他 DNS 服务器也不能解析，则本地 DNS 服务器再向下一个 DNS 服务器发出查询请求。</li>
+</ul>
+<h3 id="名称服务器"><a href="#名称服务器" class="headerlink" title="名称服务器"></a>名称服务器</h3><p>Name Server：域内负责解析本域内的名称的 DNS 服务器</p>
+<h3 id="完整的查询请求经过的流程"><a href="#完整的查询请求经过的流程" class="headerlink" title="完整的查询请求经过的流程"></a>完整的查询请求经过的流程</h3><pre class="language-latex" data-language="latex"><code class="language-latex">Client -->hosts文件 --> Client DNS Service Local Cache --> DNS Server (递归) --> DNS Server Cache -->DNS iteration(迭代) --> 根--> 顶级域名DNS-->二级域名DNS…</code></pre>
+
+<h3 id="DNS-服务器类型"><a href="#DNS-服务器类型" class="headerlink" title="DNS 服务器类型"></a>DNS 服务器类型</h3><ul>
+<li><p>主 DNS 服务器</p>
+<p>管理和维护所负责解析的域内解析库的服务器</p>
+</li>
+<li><p>从 DNS 服务器</p>
+<p>从主服务器或从服务器“复制”（区域传输）解析库副本。</p>
+<ul>
+<li>序列号：解析库版本号，主服务器解析库变化时，其序列递增</li>
+<li>刷新时间间隔：从服务器从主服务器请求同步解析的时间间隔</li>
+<li>重试时间间隔：从服务器请求同步失败时，再次尝试时间间隔</li>
+<li>过期时长：从服务器联系不到主服务器时，多久后停止服务</li>
+<li>通知机制：主服务器解析库发生变化时，会主动通知从服务器</li>
+</ul>
+</li>
+<li><p>缓存 DNS 服务器（转发器）</p>
+</li>
+</ul>
+<h3 id="区域传输"><a href="#区域传输" class="headerlink" title="区域传输"></a>区域传输</h3><ul>
+<li>完全传输：传送整个解析库</li>
+<li>增量传输：传递解析库变化的那部分内容</li>
+</ul>
+<h3 id="解析类型"><a href="#解析类型" class="headerlink" title="解析类型"></a>解析类型</h3><ul>
+<li>FQDN（ Fully Qualified Domain Name） –&gt; IP：正向解析</li>
+<li>IP –&gt; FQDN：反向解析</li>
+</ul>
+<p>注意：正反向解析是两个不同的名称空间，是两棵不同的解析树</p>
+<h3 id="负责本地域名的正向和反向解析库"><a href="#负责本地域名的正向和反向解析库" class="headerlink" title="负责本地域名的正向和反向解析库"></a>负责本地域名的正向和反向解析库</h3><ul>
+<li>正向区域</li>
+<li>反向区域</li>
+</ul>
+<h3 id="解析答案"><a href="#解析答案" class="headerlink" title="解析答案"></a>解析答案</h3><ul>
+<li>肯定答案：存在对应的查询结果</li>
+<li>否定答案：请求的条目不存在等原因导致无法返回结果</li>
+<li>权威答案：直接由存有此查询结果的 DNS 服务器（权威服务器）返回的答案</li>
+<li>非权威答案：由其它非权威服务器返回的查询答案</li>
+</ul>
+<h3 id="资源记录定义格式"><a href="#资源记录定义格式" class="headerlink" title="资源记录定义格式"></a>资源记录定义格式</h3><pre class="language-ini" data-language="ini"><code class="language-ini">name [TTL] IN rr_type value</code></pre>
+
+<ul>
+<li>name：zone 的名称，是一个 FQDN，通常使用@来表示；zone 的名称可以定义变量$ORIGIN来表示，优先继承$ORIGIN</li>
+<li>TTL：可从全局继承</li>
+<li>IN：表示记录类型属于 Internet 类别</li>
+<li>rr_type：resource record 资源记录</li>
+<li>value：根据资源记录类型的不同，value 也不同</li>
+</ul>
+<p>同一个名字可以通过多条记录定义多个不同的值；此时 DNS 服务器会以轮询方式响应</p>
+<p>同一个值也可能有多个不同的定义名字；通过多个不同的名字指向同一个值进行定义；此仅表示通过多个不同的名字可以找到同一个主机</p>
+<h3 id="各种资源记录"><a href="#各种资源记录" class="headerlink" title="各种资源记录"></a>各种资源记录</h3><p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_26711103/article/details/82873550">https://blog.csdn.net/qq_26711103/article/details/82873550</a></p>
+<p>区域解析库：由众多资源记录 RR（Resource Record）组成</p>
+<h4 id="SOA"><a href="#SOA" class="headerlink" title="SOA"></a>SOA</h4><p>Start Of Authority：起始授权记录，一个区域解析库有且仅能有一个 SOA 记录，必须位于解析库的第一条记录</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">;</span> zone <span class="token function">file</span> fragment <span class="token keyword">for</span> mytest.cn
+    <span class="token punctuation">;</span><span class="token variable">$TTL</span> <span class="token number">600</span>
+    <span class="token variable">$ORIGIN</span> mytest.cn.
+    <span class="token punctuation">;</span> SOA record
+    <span class="token punctuation">;</span> owner-name ttl class rr      name-server      email-addr  <span class="token punctuation">(</span>sn ref ret ex min<span class="token punctuation">)</span>
+    @                 IN   SOA     ns1.mytest.cn.   root.mytest.cn. <span class="token punctuation">(</span>
+                                                                    <span class="token number">0</span>	<span class="token punctuation">;</span> serial
+                                                                    1D	<span class="token punctuation">;</span> refresh
+                                                                    1H	<span class="token punctuation">;</span> retry
+                                                                    1W	<span class="token punctuation">;</span> expire
+                                                                    3H <span class="token punctuation">)</span>	<span class="token punctuation">;</span> minimum
+
+<span class="token comment"># M：分钟；H：小时；D：天；W：周</span></code></pre>
+
+<ul>
+<li><p>owner-name：当前域的名称，通常用 @ 来表示，优先继承$ORIGIN</p>
+</li>
+<li><p>value：可以设置多个值，本例中设置了三个值，依次为：</p>
+<ol>
+<li><p>name-server：当前域的主 DNS 服务器的 FQDN，形式为 xxx.ower-name，ower-name 可以省略，例如这里<code>ns1.mytest.cn.</code>还可以写成<code>ns1</code>，下面得配合一条 A 记录把它解析成 ip</p>
+</li>
+<li><p>email-addr：负责此区域的人员的电子邮件地址，因为@在这里有特殊意义，所以用.替代。所以上面的<code>root.mytest.cn.</code>实际上是<code>root.mytest@cn.</code></p>
+</li>
+<li><p>主从服务区域传输相关定义</p>
+<ol>
+<li>serial<br>序列号 – Serial，每次变更区域内容时数值+1，以通知 slave 同步数据。值范围 1 ~ 4294967295，最大增量 2147483647</li>
+<li>refresh<br>更新频率 – Refresh，slave 主动向 master 更新。建议 1200 ~ 43200 秒</li>
+<li>retry<br>重试时间 – Retry，当 slave 同步数据失败，多少时间内会再次重试同步。典型值为 180（3 分钟）至 900（15 分钟）或更高。</li>
+<li>expire<br>失效时间(Expire)，一直尝试的失败时间，持续到这个设定值，指示区域数据不再具有权威性。建议 1209600 ~ 2419200 秒 (2-4 weeks)</li>
+<li>minimum<br>bind9 开始将此值重新定义为负缓存时间。任何解析器都可以缓存 NAME ERROR &#x3D; NXDOMAIN 结果的时间。允许的最大值是 3 hours (10800 seconds).</li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="NS"><a href="#NS" class="headerlink" title="NS"></a>NS</h4><p>Name Server，专用于标明当前区域的 DNS 服务器，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name [TTL] IN rr_type value</span>
+<span class="token comment"># name: 当前区域的名字</span>
+<span class="token comment"># value: 当前区域的某DNS服务器的名字，例如ns.magedu.org</span>
+magedu.org.   IN  NS  ns1.magedu.org.
+magedu.org.   IN  NS  ns2.magedu.org.</code></pre>
+
+<p>注意：</p>
+<ol>
+<li>相邻的两个资源记录的 name 相同时，后续的可省略</li>
+<li>对 NS 记录而言，任何一个 ns 记录后面的服务器名字，都应该在后续有一个 A 记录</li>
+<li>一个区域可以有多个 NS 记录</li>
+</ol>
+<h4 id="MX"><a href="#MX" class="headerlink" title="MX"></a>MX</h4><p>Mail eXchanger，邮件交换器，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name [TTL] IN rr_type value</span>
+<span class="token comment"># name: 当前区域的名字</span>
+<span class="token comment"># value: 当前区域的某邮件服务器(smtp服务器)的主机名</span>
+magedu.org.   IN  MX  10  mx1.magedu.org.
+              IN  MX  20  mx2.magedu.org.
+mx1               A 10.0.0.100
+mx2               A 10.0.0.200</code></pre>
+
+<p>注意：</p>
+<ol>
+<li>一个区域内，MX 记录可有多个；但每个记录的 value 之前应该有一个数字(0-99)，表示此服务器的优先级；数字越小优先级越高</li>
+<li>对 MX 记录而言，任何一个 MX 记录后面的服务器名字，都应该在后续有一个 A 记录</li>
+</ol>
+<h4 id="A"><a href="#A" class="headerlink" title="A"></a>A</h4><p>internet Address，作用：FQDN –&gt; IP，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: 某主机的FQDN，例如：www.magedu.org.</span>
+<span class="token comment"># value: 主机名对应主机的IP地址</span>
+<span class="token comment"># 避免用户写错名称时给错误答案，可通过泛域名解析进行解析至某特定地址</span>
+www.magedu.org.         IN  A   1.1.1.1
+www.magedu.org.         IN  A   2.2.2.2
+mx1.magedu.org.         IN  A   3.3.3.3
+mx2.magedu.org.         IN  A   4.4.4.4
+$GENERATE 1-254 HOST$   IN  A   1.2.3.$
+*.magedu.org.           IN  A   5.5.5.5
+magedu.org.             IN  A   6.6.6.6</code></pre>
+
+<h4 id="AAAA"><a href="#AAAA" class="headerlink" title="AAAA"></a>AAAA</h4><p>FQDN –&gt; IPv6</p>
+<pre class="language-none"><code class="language-none">name: FQDN
+value: IPv6</code></pre>
+
+<h4 id="PTR"><a href="#PTR" class="headerlink" title="PTR"></a>PTR</h4><p>PoinTeR，IP –&gt; FQDN，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: IP，有特定格式，把IP地址反过来写，1.2.3.4，要写作4.3.2.1；而有特定后缀：in-addr.arpa.，所以完整写法为：4.3.2.1.in-addr.arpa.</span>
+<span class="token comment"># value: FQDN</span>
+4.3.2.1.in-addr.arpa. 	IN 	PTR 	www.magedu.org.
+<span class="token comment"># 网络地址及后缀可省略；主机地址依然需要反着写，如1.2.3为网络地址，可简写成：</span>
+4 						IN 	PTR 	www.magedu.org.</code></pre>
+
+<h4 id="CNAME"><a href="#CNAME" class="headerlink" title="CNAME"></a>CNAME</h4><p>Canonical Name，别名记录，范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: 别名的FQDN</span>
+<span class="token comment"># value: 真正名字的FQDN</span>
+www.magedu.org. IN CNAME websrv.magedu.org.</code></pre>
+
+<h4 id="TXT"><a href="#TXT" class="headerlink" title="TXT"></a>TXT</h4><p>对域名进行标识和说明的一种方式，一般做验证记录时会使用此项，如：SPF（反垃圾邮件）记录，https 验证等。范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini">_dnsauth TXT 2012011200000051qgs69bwoh4h6nht4n1h0lr038x</code></pre>
+
+<h3 id="子域授权"><a href="#子域授权" class="headerlink" title="子域授权"></a>子域授权</h3><p>每个域的名称服务器，都是通过其上级名称服务器在解析进行授权。</p>
+<p>glue record：粘合记录，父域授权子域的记录。</p>
+<p>范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini">.com. IN NS ns1.com.
+.com. IN NS ns2.com.
+ns1.com. IN A 2.2.2.1
+ns2.com. IN A 2.2.2.</code></pre>
+
+<h3 id="互联网域名"><a href="#互联网域名" class="headerlink" title="互联网域名"></a>互联网域名</h3><p>注册，备案，解析。。。</p>
+<h2 id="DNS-软件-bind"><a href="#DNS-软件-bind" class="headerlink" title="DNS 软件 bind"></a>DNS 软件 bind</h2><p>DNS 服务器软件：bind、powerdns、dnsmasq、unbound、coredns</p>
+<h3 id="bind-相关程序包"><a href="#bind-相关程序包" class="headerlink" title="bind 相关程序包"></a>bind 相关程序包</h3><ul>
+<li>bind：服务端</li>
+<li>bind-libs：相关库</li>
+<li>bind-utils：客户端</li>
+<li>bind-chroot：安全包，默认将 dns 相关文件放至&#x2F;var&#x2F;named&#x2F;chroot</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#dnf -y install bind bind-utils</span></code></pre>
+
+<h3 id="bind-相关文件"><a href="#bind-相关文件" class="headerlink" title="bind 相关文件"></a>bind 相关文件</h3><ul>
+<li>bind 主程序：&#x2F;usr&#x2F;sbin&#x2F;named。bind 的主程序是 named，不同名，有点小奇怪</li>
+<li>服务脚本和 Unit 名称：&#x2F;etc&#x2F;rc.d&#x2F;init.d&#x2F;named、&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;named.service</li>
+<li>主配置文件：&#x2F;etc&#x2F;named.conf、etc&#x2F;named.rfc1912.zones、&#x2F;etc&#x2F;rndc.key</li>
+<li>管理工具：&#x2F;usr&#x2F;sbin&#x2F;rndc：remote name domain controller，默认与 bind 安装在同一主机，且只能通过 127.0.0.1 连接 name 进程，提供辅助性的管理功能，953&#x2F;tcp</li>
+<li>解析库文件：&#x2F;var&#x2F;named&#x2F;ZONE_NAME.ZONE<ul>
+<li>一台物理服务器可同时为多个区域提供解析</li>
+<li>必须要有根区域文件：named.ca</li>
+<li>应该有两个（如果是 ipv6，则更多）实现 localhost 和本地回环地址的解析库</li>
+</ul>
+</li>
+</ul>
+<h3 id="主配置文件"><a href="#主配置文件" class="headerlink" title="主配置文件"></a>主配置文件</h3><ul>
+<li><p>全局配置：options {}</p>
+</li>
+<li><p>日志子系统配置：logging {}</p>
+</li>
+<li><p>区域配置：本机能够为哪些 zone 进行解析，就要被定义哪些 zone</p>
+<pre class="language-none"><code class="language-none">zone “ZONE_NAME” IN &#123;&#125;</code></pre></li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>任何服务器程序如果期望能够通过网络被其他主机访问，至少应该监听在一个能与外部主机通信的 IP 地址上</li>
+<li>缓存名称服务器配置：监听外部地址即可</li>
+<li>dnssec：建议关闭 dnssc，设为 no</li>
+</ul>
+<h2 id="实现-DNS-服务器"><a href="#实现-DNS-服务器" class="headerlink" title="实现 DNS 服务器"></a>实现 DNS 服务器</h2><h3 id="主-DNS-服务器配置"><a href="#主-DNS-服务器配置" class="headerlink" title="主 DNS 服务器配置"></a>主 DNS 服务器配置</h3><h4 id="1-定义区域"><a href="#1-定义区域" class="headerlink" title="1. 定义区域"></a>1. 定义区域</h4><p>主 DNS 服务器配置文件：&#x2F;etc&#x2F;named.conf，示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#注释掉下面两行</span>
+// listen-on port <span class="token number">53</span> <span class="token punctuation">&#123;</span> <span class="token number">127.0</span>.0.1<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+// allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 添加区域</span>
+zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
+	<span class="token builtin class-name">type</span> <span class="token punctuation">&#123;</span>master<span class="token operator">|</span> slave <span class="token operator">|</span> hint <span class="token operator">|</span> forward<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+	<span class="token function">file</span> <span class="token string">"ZONE_NAME.zone"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<ul>
+<li>listen-on port：监听的地址和端口。注释掉和将<code>127.0.0.1;</code>修改为<code>localhost;</code>效果是一样的，设置<code>127.0.0.1</code>则只会监听地址 127.0.0.1，而注释掉或者设置为 localhost 则监听所有本机地址</li>
+<li>allow-query：允许谁向此 DNS 进行查询。注释掉和修改<code>localhost;</code>为<code>any;</code>效果是一样的，设置<code>localhost</code>则允许本机的 ip 地址列表</li>
+</ul>
+<h4 id="2-定义区域解析库文件"><a href="#2-定义区域解析库文件" class="headerlink" title="2. 定义区域解析库文件"></a>2. 定义区域解析库文件</h4><p>默认位置：&#x2F;var&#x2F;named&#x2F;目录下；</p>
+<p>内容包括两部分：宏定义 和 资源记录，范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$TTL</span> <span class="token number">86400</span>
+<span class="token variable">$ORIGIN</span> magedu.org.
+@ 		IN 	SOA 	ns1.magedu.org. 	admin.magedu.org <span class="token punctuation">(</span>
+														<span class="token number">2015042201</span>
+														1H
+														5M
+														7D
+														1D <span class="token punctuation">)</span>
+		IN 	NS	 	ns1
+		IN 	NS	 	ns2
+		IN 	MX	 	<span class="token number">10</span> 					mx1
+		IN 	MX	 	<span class="token number">20</span> 					mx2
+ns1 	IN 	A 		<span class="token number">172.16</span>.100.11
+ns2 	IN 	A 		<span class="token number">172.16</span>.100.12
+mx1 	IN 	A 		<span class="token number">172.16</span>.100.13
+mx2 	IN 	A 		<span class="token number">172.16</span>.100.14
+websrv 	IN 	A 		<span class="token number">172.16</span>.100.11
+websrv 	IN 	A 		<span class="token number">172.16</span>.100.12
+www 	IN 	CNAME 	websrv</code></pre>
+
+<h4 id="3-主配置文件语法检查"><a href="#3-主配置文件语法检查" class="headerlink" title="3. 主配置文件语法检查"></a>3. 主配置文件语法检查</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$named</span>-checkconf</code></pre>
+
+<h4 id="4-主配置文件语法检查"><a href="#4-主配置文件语法检查" class="headerlink" title="4. 主配置文件语法检查"></a>4. 主配置文件语法检查</h4><pre class="language-bash" data-language="bash"><code class="language-bash">named-checkzone <span class="token punctuation">[</span>options<span class="token punctuation">]</span> zonename filename</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$named</span>-checkzone <span class="token string">"magedu.org"</span> /var/named/magedu.org.zone</code></pre>
+
+<h4 id="5-配置生效"><a href="#5-配置生效" class="headerlink" title="5. 配置生效"></a>5. 配置生效</h4><p>三种方式：</p>
+<ul>
+<li><code>rndc reload</code></li>
+<li><code>systemctl reload named</code></li>
+<li><code>service named reload</code></li>
+</ul>
+<h4 id="测试和管理工具"><a href="#测试和管理工具" class="headerlink" title="测试和管理工具"></a>测试和管理工具</h4><h5 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h5><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> bind-utils</code></pre>
+
+<p>dig 只用于测试 dns 系统，不会查询 hosts 文件进行解析</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">dig</span> <span class="token punctuation">[</span>-t type<span class="token punctuation">]</span> name <span class="token punctuation">[</span>@SERVER<span class="token punctuation">]</span> <span class="token punctuation">[</span>query options<span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li><p>-t：要查询的资源记录类型。默认 A，除了 AAAA、NS 这一类，还可以是 axfr（全区域传输） 和 ixfr（增量区域传输）。</p>
+</li>
+<li><p>query options：</p>
+<p>+[no]trace：跟踪解析过程 : <code>dig +trace magedu.org</code> +[no]recurse：进行递归解析</p>
+</li>
+</ul>
+<h5 id="host"><a href="#host" class="headerlink" title="host"></a>host</h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">host</span> <span class="token punctuation">[</span>-t type<span class="token punctuation">]</span> name <span class="token punctuation">[</span>SERVER<span class="token punctuation">]</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">host</span> <span class="token parameter variable">-t</span> NS magedu.org <span class="token number">172.16</span>.0.1
+<span class="token function">host</span> <span class="token parameter variable">-t</span> soa magedu.org
+<span class="token function">host</span> <span class="token parameter variable">-t</span> mx magedu.org
+<span class="token function">host</span> <span class="token parameter variable">-t</span> axfr magedu.org
+<span class="token function">host</span> <span class="token number">1.2</span>.3.4</code></pre>
+
+<h5 id="nslookup"><a href="#nslookup" class="headerlink" title="nslookup"></a>nslookup</h5><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> bind-utils</code></pre>
+
+<p>nslookup 可以支持交互和非交互式两种方式执行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">nslookup</span> <span class="token punctuation">[</span>-option<span class="token punctuation">]</span> <span class="token punctuation">[</span>name <span class="token operator">|</span> -<span class="token punctuation">]</span> <span class="token punctuation">[</span>server<span class="token punctuation">]</span></code></pre>
+
+<p>交互模式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nslookup<span class="token operator">></span>
+	server IP: 指明使用哪个DNS server进行查询
+	<span class="token builtin class-name">set</span> <span class="token assign-left variable">q</span><span class="token operator">=</span>RR_TYPE: 指明查询的资源记录类型
+	NAME: 要查询的名称</code></pre>
+
+<h5 id="rndc"><a href="#rndc" class="headerlink" title="rndc"></a>rndc</h5><p>利用 rndc 工具可以实现管理 DNS 功能，rndc 监听端口: 953&#x2F;tcp</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">rndc COMMAND</code></pre>
+
+<ul>
+<li>status: 查看状态</li>
+<li>reload: 重载主配置文件和区域解析库文件</li>
+<li>reload zonename: 重载区域解析库文件</li>
+<li>retransfer zonename: 手动启动区域传送，而不管序列号是否增加</li>
+<li>notify zonename: 重新对区域传送发通知</li>
+<li>reconfig: 重载主配置文件</li>
+<li>querylog: 开启或关闭查询日志文件&#x2F;var&#x2F;log&#x2F;message</li>
+<li>trace: 递增 debug 一个级别</li>
+<li>trace LEVEL: 指定使用的级别</li>
+<li>notrace：将调试级别设置为 0</li>
+<li>flush：清空 DNS 服务器的所有缓存记录</li>
+</ul>
+<h4 id="实战案例：实现-DNS-正向服务器"><a href="#实战案例：实现-DNS-正向服务器" class="headerlink" title="实战案例：实现 DNS 正向服务器"></a><a href="%E5%AE%9E%E9%AA%8C1%EF%BC%9ADNS%E6%AD%A3%E5%90%91%E6%9C%8D%E5%8A%A1%E5%99%A8.md">实战案例：实现 DNS 正向服务器</a></h4><h4 id="允许动态更新"><a href="#允许动态更新" class="headerlink" title="允许动态更新"></a>允许动态更新</h4><p>动态更新：可以通过远程更新区域数据库的资源记录，例如添加删除解析记录</p>
+<p>实现动态更新，需要在指定的 zone 语句块中添加以下指令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Allow-update <span class="token punctuation">&#123;</span>any<span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="实现反向解析区域"><a href="#实现反向解析区域" class="headerlink" title="实现反向解析区域"></a>实现反向解析区域</h2><h2 id="实现从服务器"><a href="#实现从服务器" class="headerlink" title="实现从服务器"></a>实现从服务器</h2><p>只有一台主 DNS 服务器，存在单点失败的问题，可以建立主 DNS 服务器的备份服务器，即从服务器来实现 DNS 服务的容错机制。从服务器可以自动和主服务器进行单向的数据同步，从而和主 DNS 服务器一样，也可以对外提供查询服务，但从服务器不提供数据更新服务。</p>
+<h3 id="DNS-从服务器"><a href="#DNS-从服务器" class="headerlink" title="DNS 从服务器"></a>DNS 从服务器</h3><ol>
+<li>应该为一台独立的名称服务器</li>
+<li>主服务器的区域解析库文件中必须有一条 NS 记录指向从服务器</li>
+<li>从服务器只需要定义区域，而无须提供解析库文件；解析库文件应该放置于&#x2F;var&#x2F;named&#x2F;slaves&#x2F;目录中</li>
+<li>主服务器得允许从服务器作区域传送</li>
+<li>主从服务器时间应该同步，可通过 ntp 进行</li>
+<li>bind 程序的版本应该保持一致；否则，应该从高，主低</li>
+</ol>
+<h3 id="定义从区域"><a href="#定义从区域" class="headerlink" title="定义从区域"></a>定义从区域</h3><p>格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
+    <span class="token builtin class-name">type</span> slave<span class="token punctuation">;</span>
+    masters <span class="token punctuation">&#123;</span> MASTER_IP<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+    <span class="token function">file</span> <span class="token string">"slaves/ZONE_NAME.zone"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<h3 id="实战案例：实现-DNS-从服务器"><a href="#实战案例：实现-DNS-从服务器" class="headerlink" title="实战案例：实现 DNS 从服务器"></a><a href="%E5%AE%9E%E9%AA%8C2%EF%BC%9ADNS%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8.md">实战案例：实现 DNS 从服务器</a></h3><h2 id="实现子域"><a href="#实现子域" class="headerlink" title="实现子域"></a>实现子域</h2><p>将子域委派给其他主机管理，实现分布 DNS 数据库</p>
+<p>正向解析 DNS 区域子域方法，很简单，只需要配置两条资源记录，一条 NS，一条 A，范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">shanghai.magedu.local. 	      IN  NS  ns1.shanghai.magedu.local.
+shanghai.magedu.local. 	      IN  NS  ns2.shanghai.magedu.local.
+zhengzhou.magedu.local.       IN  NS  ns1.zhengzhou.magedu.local.
+zhengzhou.magedu.local.       IN  NS  ns2.zhengzhou.magedu.local.
+ns1.shanghai.magedu.local.    IN  A   <span class="token number">1.1</span>.1.1
+ns2.shanghai.magedu.local.    IN  A   <span class="token number">1.1</span>.1.2
+ns1.zhengzhou.magedu.local.   IN  A   <span class="token number">1.1</span>.1.3
+ns2.zhengzhou.magedu.local.   IN  A   <span class="token number">1.1</span>.1.4</code></pre>
+
+<h3 id="范例：实现-DNS-父域和子域服务"><a href="#范例：实现-DNS-父域和子域服务" class="headerlink" title="范例：实现 DNS 父域和子域服务"></a><a href="%E5%AE%9E%E9%AA%8C3%EF%BC%9ADNS%E5%AD%90%E5%9F%9F%E6%9C%8D%E5%8A%A1%E5%99%A8.md">范例：实现 DNS 父域和子域服务</a></h3><h2 id="实现-DNS-转发（缓存）服务器"><a href="#实现-DNS-转发（缓存）服务器" class="headerlink" title="实现 DNS 转发（缓存）服务器"></a>实现 DNS 转发（缓存）服务器</h2><p>利用 DNS 转发，可以将用户的 DNS 请求，转发至指定的 DNS 服务器，而非默认的根 DNS 服务器，并将指定服务器查询的返回结果进行缓存，提高效率</p>
+<p>注意：被转发的服务器需要能够为请求者做递归，否则转发请求不予执行</p>
+<p>转发方式有两种：全局转发 和 特定区域转发</p>
+<p>全局转发：对非本机所负责解析区域的请求，全转发给指定的服务器</p>
+<p>特定区域转发：仅转发对特定的区域的请求，比全局转发优先级高</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 无论全局转发还是特定区域转发，都需要关闭dnssec功能</span>
+options <span class="token punctuation">&#123;</span>
+    dnssec-enable no<span class="token punctuation">;</span>
+    dnssec-validation no<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 全局转发</span>
+options <span class="token punctuation">&#123;</span>
+    forward first<span class="token operator">|</span>only<span class="token punctuation">;</span>
+    forwarders <span class="token punctuation">&#123;</span> <span class="token function">ip</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 特定区域转发</span>
+zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
+<span class="token builtin class-name">type</span> forward<span class="token punctuation">;</span>
+forward first<span class="token operator">|</span>only<span class="token punctuation">;</span>
+forwarders <span class="token punctuation">&#123;</span> <span class="token function">ip</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<ul>
+<li>first：先转发至指定 DNS 服务器，如果无法解析查询请求，则本服务器再去根服务器查询</li>
+<li>only：先转发至指定 DNS 服务器，如果无法解析查询请求，则本服务器将不再去根服务器查询</li>
+</ul>
+<p>[实战案例：实现 DNS forward（缓存）服务器](实验 4：DNS forward（缓存）服务器.md)</p>
+<h2 id="智能-DNS"><a href="#智能-DNS" class="headerlink" title="智能 DNS"></a>智能 DNS</h2><h3 id="智能-DNS-相关技术"><a href="#智能-DNS-相关技术" class="headerlink" title="智能 DNS 相关技术"></a>智能 DNS 相关技术</h3><h4 id="ACL"><a href="#ACL" class="headerlink" title="ACL"></a>ACL</h4><p>ACL：把一个或多个地址归并为一个集合，并通过一个统一的名称调用，简单说就是对发起 dns 解析请求的客户端的 ip 进行分类，通常会根据省市地区进行分类</p>
+<p>注意：只能先定义后使用；因此需要定义在 options 前面</p>
+<p>格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">acl acl_name <span class="token punctuation">&#123;</span>
+	<span class="token comment"># 可以是具体ip，也可以网段</span>
+    <span class="token function">ip</span><span class="token punctuation">;</span>
+    net/prelen<span class="token punctuation">;</span>
+    <span class="token punctuation">..</span>.
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">..</span>.
+options <span class="token punctuation">&#123;</span><span class="token punctuation">..</span>.<span class="token punctuation">&#125;</span></code></pre>
+
+<p>bind 内置 4 个 acl：none、any、localhost、localnet</p>
+<ul>
+<li>none：没有一个主机</li>
+<li>any：任意主机</li>
+<li>localhost：本机</li>
+<li>localnet：本机的 IP 同掩码运算后得到的网络地址</li>
+</ul>
+<h4 id="访问控制指令"><a href="#访问控制指令" class="headerlink" title="访问控制指令"></a>访问控制指令</h4><ul>
+<li>allow-query {}： 允许查询的主机；白名单</li>
+<li>allow-transfer {}：允许区域传送的主机；白名单</li>
+<li>allow-recursion {}: 允许递归的主机,建议全局使用</li>
+<li>allow-update {}: 允许更新区域数据库中的内容</li>
+</ul>
+<p>{}中填入的就是 acl，范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>		<span class="token comment"># 只处理来自本机的dns解析请求</span></code></pre>
+
+<h4 id="view"><a href="#view" class="headerlink" title="view"></a>view</h4><p>视图，将 ACL 和区域数据库实现对应关系，以实现智能 DNS</p>
+<p>view 格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 一个bind服务器可定义多个view，每个view只能匹配一个acl</span>
+<span class="token comment"># 客户端请求到达时，自上而下检查view中的acl</span>
+<span class="token comment"># 当请求者的ip能被acl匹配到，则使用所在view中的zone数据库，处理其dns解析请求</span>
+view VIEW_NAME <span class="token punctuation">&#123;</span>
+	match-clients <span class="token punctuation">&#123;</span> acl_name<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>	<span class="token comment"># match-clients 只能匹配一个acl</span>
+	zone <span class="token string">"ZONE_NAME"</span> <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
+		<span class="token function">file</span> <span class="token string">"ZONE_FILE"</span><span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+	include <span class="token string">"/etc/named.rfc1912.zones"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token comment"># 来自上海的ip，则匹配到对应的zone数据库</span>
+view VIEW_NAME <span class="token punctuation">&#123;</span>
+	match-clients <span class="token punctuation">&#123;</span> shanghainet<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>		<span class="token comment"># shanghainet是已经定义的acl</span>
+	zone <span class="token string">"magedu.local"</span> <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
+		<span class="token function">file</span> <span class="token string">"magedu.local.zone.sh"</span><span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+	include <span class="token string">"/etc/named.rfc1912.zones"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+
+<ul>
+<li>ACL 定义在 options 之前，view 定义在 options 之后</li>
+<li>一旦启用了 view，所有的 zone 都只能定义在 view 中</li>
+<li>仅在允许递归请求的客户端所在 view 中定义根区域</li>
+</ul>
+<h4 id="实战案例：利用-view-实现智能-DNS"><a href="#实战案例：利用-view-实现智能-DNS" class="headerlink" title="实战案例：利用 view 实现智能 DNS"></a><a href="%E5%AE%9E%E9%AA%8C5%EF%BC%9A%E5%88%A9%E7%94%A8view%E5%AE%9E%E7%8E%B0%E6%99%BA%E8%83%BDDNS.md">实战案例：利用 view 实现智能 DNS</a></h4><h3 id="借助智能-DNS-实现的技术"><a href="#借助智能-DNS-实现的技术" class="headerlink" title="借助智能 DNS 实现的技术"></a>借助智能 DNS 实现的技术</h3><h4 id="GSLB"><a href="#GSLB" class="headerlink" title="GSLB"></a>GSLB</h4><p>Global Server Load Balance 全局负载均衡</p>
+<p>GSLB 是对服务器和链路进行综合判断来决定由哪个地点的服务器来提供服务，实现异地服务器群服务质量的保证</p>
+<p>GSLB 主要的目的是在整个网络范围内将用户的请求定向到最近的节点（或者区域）</p>
+<p>GSLB 分为基于 DNS 实现、基于重定向实现、基于路由协议实现，其中最通用的是基于 DNS 解析方式</p>
+<h4 id="CDN"><a href="#CDN" class="headerlink" title="CDN"></a>CDN</h4><ol>
+<li><p>用户向浏览器输入<a target="_blank" rel="noopener" href="http://www.a.com这个域名,浏览器第一次发现本地没有dns缓存,则向网站的dns服务器请求/">www.a.com这个域名，浏览器第一次发现本地没有dns缓存，则向网站的DNS服务器请求</a></p>
+</li>
+<li><p>网站的 DNS 域名解析器设置了 CNAME，指向了<a target="_blank" rel="noopener" href="http://www.a.tbcdn.com,请求指向了cdn网络中的智能dns负载均衡系统/">www.a.tbcdn.com,请求指向了CDN网络中的智能DNS负载均衡系统</a></p>
+</li>
+<li><p>智能 DNS 负载均衡系统解析域名，把对用户响应速度最快的 IP 节点返回给用户；</p>
+</li>
+<li><p>用户向该 IP 节点（CDN 服务器）发出请求</p>
+</li>
+<li><p>由于是第一次访问，CDN 服务器会通过 Cache 内部专用 DNS 解析得到此域名的原 web 站点 IP，向原站点服务器发起请求，并在 CDN 服务器上缓存内容</p>
+</li>
+<li><p>请求结果发给用户</p>
+</li>
+</ol>
+<h2 id="DNS-排错"><a href="#DNS-排错" class="headerlink" title="DNS 排错"></a>DNS 排错</h2><pre class="language-bash" data-language="bash"><code class="language-bash">SERVFAIL:The nameserver encountered a problem <span class="token keyword">while</span> processing the query.
+<span class="token comment"># 可使用dig +trace排错，可能是网络和防火墙导致</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">NXDOMAIN：The queried name does not exist <span class="token keyword">in</span> the zone.
+<span class="token comment"># 可能是CNAME对应的A记录不存在导致</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">REFUSED：The nameserver refused the client's DNS request due to policy restrictions.
+<span class="token comment"># 可能是DNS策略导致</span></code></pre>
+
+<h2 id="实战案例"><a href="#实战案例" class="headerlink" title="实战案例"></a><a href="%E7%BB%BC%E5%90%88%E5%AE%9E%E9%AA%8C.md">实战案例</a></h2><p>综合案例：实现 inertnet 的 DNS 服务架构</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/dns/" rel="tag"><i class="fa fa-tag"></i> dns</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/PHP/%E6%BA%90%E7%A0%81/PHP%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" rel="prev" title="PHP垃圾回收机制">
+                  <i class="fa fa-chevron-left"></i> PHP垃圾回收机制
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/DNS/%E5%AE%9E%E9%AA%8C1%EF%BC%9ADNS%E6%AD%A3%E5%90%91%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="next" title="实验1：DNS正向服务器">
+                  实验1：DNS正向服务器 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

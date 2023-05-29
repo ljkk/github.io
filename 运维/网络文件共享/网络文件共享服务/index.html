@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="补充知识：iSCSI 概括的说，iSCSI 是一种存储设备远程映射技术，它可以将一个远程服务器上的存储设备映射到本地，并呈现为一个块设备（大白话就是磁盘）。从普通用户的角度，映射过来的磁盘与本地安装的磁盘毫无差异。 这种映射方式基于是基于 SCSI 协议的，SCSI 协议是计算机与外围设备（例如硬盘、光盘等）通信的协议。而 iSCSI 则是通过 TCP 协议对 SCSI 进行封装的一种协议，也就是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件共享服务">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="补充知识：iSCSI 概括的说，iSCSI 是一种存储设备远程映射技术，它可以将一个远程服务器上的存储设备映射到本地，并呈现为一个块设备（大白话就是磁盘）。从普通用户的角度，映射过来的磁盘与本地安装的磁盘毫无差异。 这种映射方式基于是基于 SCSI 协议的，SCSI 协议是计算机与外围设备（例如硬盘、光盘等）通信的协议。而 iSCSI 则是通过 TCP 协议对 SCSI 进行封装的一种协议，也就是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605015314494.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605015584443.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605016511802.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605016539213.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605259157055.png">
+<meta property="article:published_time" content="2020-12-09T15:38:35.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="文件共享">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1605015314494.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E6%9C%8D%E5%8A%A1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E6%9C%8D%E5%8A%A1/","path":"运维/网络文件共享/网络文件共享服务/","title":"文件共享服务"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>文件共享服务 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">存储类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%AD%98%E5%82%A8%E6%AF%94%E8%BE%83"><span class="nav-number">1.1.</span> <span class="nav-text">三种存储比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%AD%98%E5%82%A8%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.2.</span> <span class="nav-text">三种存储应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FTP-%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">FTP 服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#vsftpd"><span class="nav-number">2.1.</span> <span class="nav-text">vsftpd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pureftpd"><span class="nav-number">2.2.</span> <span class="nav-text">pureftpd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFS-%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.</span> <span class="nav-text">NFS 服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nfs-%E8%BD%AF%E4%BB%B6%E4%BB%8B%E7%BB%8D"><span class="nav-number">3.2.</span> <span class="nav-text">nfs 软件介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nfs-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.3.</span> <span class="nav-text">nfs 配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nfs-%E5%B7%A5%E5%85%B7"><span class="nav-number">3.4.</span> <span class="nav-text">nfs 工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#fpcinfo"><span class="nav-number">3.4.1.</span> <span class="nav-text">fpcinfo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exportfs"><span class="nav-number">3.4.2.</span> <span class="nav-text">exportfs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#showmount"><span class="nav-number">3.4.3.</span> <span class="nav-text">showmount</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#monut"><span class="nav-number">3.4.4.</span> <span class="nav-text">monut</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E6%8C%82%E8%BD%BD-autofs"><span class="nav-number">3.5.</span> <span class="nav-text">自动挂载 autofs</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#x2F-etc-x2F-fstab-%E5%92%8C-autofs"><span class="nav-number">3.5.1.</span> <span class="nav-text">&#x2F;etc&#x2F;fstab 和 autofs</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SAMBA-%E6%9C%8D%E5%8A%A1"><span class="nav-number">4.</span> <span class="nav-text">SAMBA 服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#samba-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">4.1.</span> <span class="nav-text">samba 服务器配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#smb-conf-%E4%B8%AD%E7%9A%84%E5%AE%8F%E5%AE%9A%E4%B9%89"><span class="nav-number">4.1.1.</span> <span class="nav-text">smb.conf 中的宏定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#global-%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE"><span class="nav-number">4.1.2.</span> <span class="nav-text">[global] 全局配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E5%AE%9A%E5%85%B1%E4%BA%AB%E7%9B%AE%E5%BD%95%E9%85%8D%E7%BD%AE"><span class="nav-number">4.1.3.</span> <span class="nav-text">特定共享目录配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#samba-%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86"><span class="nav-number">4.2.</span> <span class="nav-text">samba 用户管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#smbpasswd-%E5%91%BD%E4%BB%A4"><span class="nav-number">4.2.1.</span> <span class="nav-text">smbpasswd 命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%EF%BC%9A"><span class="nav-number">4.2.2.</span> <span class="nav-text">案例：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%9A%84%E5%AE%9E%E6%97%B6%E5%90%8C%E6%AD%A5"><span class="nav-number">5.</span> <span class="nav-text">数据的实时同步</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#inotify"><span class="nav-number">5.1.</span> <span class="nav-text">inotify</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#inotify-%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0"><span class="nav-number">5.1.1.</span> <span class="nav-text">inotify 内核参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#inotify-tools"><span class="nav-number">5.1.2.</span> <span class="nav-text">inotify-tools</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#inotifywait"><span class="nav-number">5.1.2.1.</span> <span class="nav-text">inotifywait</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#inotifywatch"><span class="nav-number">5.1.2.2.</span> <span class="nav-text">inotifywatch</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rsync"><span class="nav-number">5.2.</span> <span class="nav-text">rsync</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#inotify-rsync-shell-%E8%84%9A%E6%9C%AC-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5"><span class="nav-number">5.3.</span> <span class="nav-text">inotify+rsync+shell 脚本 实现实时数据同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sersync-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5"><span class="nav-number">5.4.</span> <span class="nav-text">sersync 实现实时数据同步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-rsync-daemon-%E5%AE%9E%E7%8E%B0-sersync"><span class="nav-number">5.4.1.</span> <span class="nav-text">基于 rsync daemon 实现 sersync</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E8%BF%9C%E7%A8%8B-shell-%E5%AE%9E%E7%8E%B0-sersync"><span class="nav-number">5.4.2.</span> <span class="nav-text">基于远程 shell 实现 sersync</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E6%9C%8D%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="文件共享服务 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          文件共享服务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:38:35" itemprop="dateCreated datePublished" datetime="2020-12-09T23:38:35+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">网络文件共享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>补充知识：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/60986068">iSCSI</a></p>
+<p>概括的说，iSCSI 是一种存储设备远程映射技术，它可以将一个远程服务器上的存储设备映射到本地，并呈现为一个块设备（大白话就是磁盘）。从普通用户的角度，映射过来的磁盘与本地安装的磁盘毫无差异。</p>
+<p>这种映射方式基于是基于 SCSI 协议的，SCSI 协议是计算机与外围设备（例如硬盘、光盘等）通信的协议。而 iSCSI 则是通过 TCP 协议对 SCSI 进行封装的一种协议，也就是通过以太网传输 SCSI 协议的内容。</p>
+<h2 id="存储类型"><a href="#存储类型" class="headerlink" title="存储类型"></a>存储类型</h2><p>存储类型分为三类：</p>
+<ul>
+<li><p>直连式存储：Direct-Attached Storage，简称 DAS</p>
+</li>
+<li><p>网络附加存储：Network-Attached Storage，简称 NAS</p>
+</li>
+<li><p>存储区域网络：Storage Area Network，简称 SAN</p>
+<p>FC：Fibre Channel 光纤</p>
+</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605015314494.png"></p>
+<h3 id="三种存储比较"><a href="#三种存储比较" class="headerlink" title="三种存储比较"></a>三种存储比较</h3><p><img data-src="//img.to2b.cn/blog/ljk/1605015584443.png"></p>
+<h3 id="三种存储应用场景"><a href="#三种存储应用场景" class="headerlink" title="三种存储应用场景"></a>三种存储应用场景</h3><ul>
+<li>DAS 虽然比较古老了，但是还是很适用于那些数据量不大，对磁盘访问速度要求较高的中小企业</li>
+<li>NAS 多适用于文件服务器，用来存储非结构化数据，虽然受限于以太网的速度，但是部署灵活，成本低</li>
+<li>SAN 则适用于大型应用或数据库系统，缺点是成本高、较为复杂</li>
+</ul>
+<h2 id="FTP-服务"><a href="#FTP-服务" class="headerlink" title="FTP 服务"></a>FTP 服务</h2><p>文件传输协议：File Transfer Protocol，基于 C&#x2F;S 结构</p>
+<p>数据传输格式：二进制（默认）和文本</p>
+<p>双通道协议：命令和数据传输使用不同的端口</p>
+<p>两种模式：从服务器角度命令 <strong>主动</strong> 和 <strong>被动</strong> 模式</p>
+<ul>
+<li><p>主动模式：Port Style</p>
+<p>windows 连接 FTP 服务器默认使用主动模式</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605016511802.png"></p>
+</li>
+<li><p>被动模式：PASV Style</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605016539213.png"></p>
+</li>
+</ul>
+<p>FTP 服务状态码：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">1XX：信息   <span class="token number">125</span>：数据连接打开
+2XX：成功类状态   <span class="token number">200</span>：命令OK <span class="token number">230</span>：登录成功
+3XX：补充类   <span class="token number">331</span>：用户名OK
+4XX：客户端错误   <span class="token number">425</span>：不能打开数据连接
+5XX：服务器错误   <span class="token number">530</span>：不能登录</code></pre>
+
+<p>用户认证：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">匿名用户：ftp、anonymous，对应Linux用户ftp
+系统用户：Linux用户、用户/etc/passwd，密码/etc/shadow
+虚拟用户：特定服务的专用用户、独立的用户/密码文件</code></pre>
+
+<p>常见 FTP 相关软件：</p>
+<ul>
+<li><p>FTP 服务器端软件</p>
+<p>Wu-ftpd、Proftpd、Pureftpd、Filezilla Server、Serv-U、Wing FTP Server、IIS</p>
+<p><a target="_blank" rel="noopener" href="https://security.appspot.com/vsftpd.html">vsftpd</a>：Very Secure FTP Daemon，CentOS 默认 FTP 服务器</p>
+</li>
+<li><p>客户端软件</p>
+<p>ftp、lftp、lftpget、wget、curl</p>
+</li>
+</ul>
+<h3 id="vsftpd"><a href="#vsftpd" class="headerlink" title="vsftpd"></a>vsftpd</h3><pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+<h3 id="pureftpd"><a href="#pureftpd" class="headerlink" title="pureftpd"></a>pureftpd</h3><pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+<h2 id="NFS-服务"><a href="#NFS-服务" class="headerlink" title="NFS 服务"></a>NFS 服务</h2><h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><p>Network File System：网络文件系统，基于内核的文件系统。通过 NFS，用户和程序可以像访问本地文件一样去访问远端系统上的文件，基于 RPC（Remote Procedure Call Protecol）实现。</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605259157055.png"></p>
+<p>上图中的 portmap，自 centos6 之后就被 rpcbind 代替了</p>
+<p><strong>优点：</strong>节省本地存储空间,将常用的数据,如:&#x2F;home 目录,存放在 NFS 服务器上且可以通过网络访问,本地终端将可减少自身存储空间的使用</p>
+<p><strong>缺点：</strong>1. 占用带宽；2. 端口号比较多，而且不固定，防火墙不太好配；所以 nfs 一般不用在互联网，都是用在局域网</p>
+<h3 id="nfs-软件介绍"><a href="#nfs-软件介绍" class="headerlink" title="nfs 软件介绍"></a>nfs 软件介绍</h3><p>软件包：nfs-utils（包括服务器和客户端相关工具）</p>
+<p>相关软件包：rpcbind（必须）、tcp_wrappers</p>
+<p>kernel 支持：nfs.ko</p>
+<p>端口：2049（nfsd），其他端口由 portmap 分配</p>
+<p>nfs 服务主要进程：</p>
+<ul>
+<li>rpc.nfsd：最主要的 NFS 进程,管理客户端是否可登录</li>
+<li>rpc.mountd：挂载和卸载 NFS 文件系统,包括权限管理</li>
+<li>rpc.lockd：非必要,管理文件锁,避免同时写出错</li>
+<li>rpc.statd：非必要,检查文件一致性,可修复文件</li>
+</ul>
+<p>日志：&#x2F;var&#x2F;lib&#x2F;nfs</p>
+<p>配置文件：&#x2F;etc&#x2F;exports 和 &#x2F;etc&#x2F;exports.d&#x2F;*.exports</p>
+<h3 id="nfs-配置文件"><a href="#nfs-配置文件" class="headerlink" title="nfs 配置文件"></a>nfs 配置文件</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/dir	host1<span class="token punctuation">(</span>opt1,opt2<span class="token punctuation">)</span>	host2<span class="token punctuation">(</span>opt1,opt2<span class="token punctuation">)</span></code></pre>
+
+<ul>
+<li><p>host 格式：支持通配符 *、ipv4、ipv6、FQDN（全域名）、NIS 域的主机组</p>
+</li>
+<li><p>opt 格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">默认选项：<span class="token punctuation">(</span>ro,sync,root_squash,no_all_squash<span class="token punctuation">)</span>
+ro：只读
+rw：可读可写
+async：异步,数据变化后不立即写磁盘,先写入到缓冲区中,过一段时间再写入磁盘,性能高,安全性低
+sync：1.0.0后为默认，同步,数据在请求时立即写入共享存储磁盘,性能低,安全性高
+root_squash：默认，远程root映射为nobody（CentOS7以前的版本为nfsnobody）,<span class="token environment constant">UID</span>为65534
+no_root_squash：远程root映射成NFS服务器的root用户，squash的意思是压榨
+all_squash：所有远程用户<span class="token punctuation">(</span>包括root<span class="token punctuation">)</span>都被压榨
+no_all_squash：默认，保留共享文件的<span class="token environment constant">UID</span>和GID，即不压榨
+anonuid和anongid：指明匿名用户映射为特定用户<span class="token environment constant">UID</span>和组GID,而非nobody,可配合all_squash使用</code></pre></li>
+</ul>
+<pre class="language-none"><code class="language-none">
+  默认把root用户压榨成nobody用户，普通用户不压榨，anonuid和anongid可以设置默认压榨成哪个用户
+
+范例：
+
+​&#96;&#96;&#96;bash
+# vim &#x2F;etc&#x2F;exports
+
+&#x2F;data&#x2F;script 10.0.0.0&#x2F;24(ro,async)
+&#x2F;data&#x2F;script 10.0.0.0&#x2F;24(rw,async,root_squash,anonuid&#x3D;1000,anongid&#x3D;1000,all_squash)
+
+&#x2F;myshare server.example.com
+&#x2F;myshare *.example.com
+&#x2F;myshare server?.example.com
+&#x2F;myshare server[0-20].example.com
+&#x2F;myshare 172.25.11.10
+&#x2F;myshare 172.25.0.0&#x2F;16
+&#x2F;myshare 2000:472:18:b51:c32:a21
+&#x2F;myshare 2000:472:18:b51::&#x2F;64
+&#x2F;myshare *.example.com 172.25.0.0&#x2F;16
+&#x2F;myshare desktop.example.com(ro)
+&#x2F;myshare desktop.example.com(ro) server[0-20].example.com(rw)
+&#x2F;myshare diskless.example.com(rw,no_root_squash)</code></pre>
+
+<h3 id="nfs-工具"><a href="#nfs-工具" class="headerlink" title="nfs 工具"></a>nfs 工具</h3><h4 id="fpcinfo"><a href="#fpcinfo" class="headerlink" title="fpcinfo"></a>fpcinfo</h4><p>rpcinfo 工具可以查看 RPC 相关信息</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看注册在指定主机的RPC程序</span>
+rpcinfo <span class="token parameter variable">-p</span> <span class="token function">hostname</span>
+
+<span class="token comment"># 查看RPC注册程序</span>
+rpcinfo <span class="token parameter variable">-s</span> <span class="token function">hostname</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#rpcinfo -p</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#rpcinfo -s</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#rpcinfo -p 10.0.0.8	# 查看远程主机</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#rpcinfo -s 10.0.0.8</span></code></pre>
+
+<h4 id="exportfs"><a href="#exportfs" class="headerlink" title="exportfs"></a>exportfs</h4><p>用于管理 NFS 导出的文件系统</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">exportfs <span class="token punctuation">[</span>-avi<span class="token punctuation">]</span> <span class="token punctuation">[</span>-o options,<span class="token punctuation">..</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>client:/path <span class="token punctuation">..</span><span class="token punctuation">]</span>
+exportfs <span class="token parameter variable">-r</span> <span class="token punctuation">[</span>-v<span class="token punctuation">]</span>
+exportfs <span class="token punctuation">[</span>-av<span class="token punctuation">]</span> <span class="token parameter variable">-u</span> <span class="token punctuation">[</span>client:/path <span class="token punctuation">..</span><span class="token punctuation">]</span>
+exportfs <span class="token punctuation">[</span>-v<span class="token punctuation">]</span>
+exportfs <span class="token parameter variable">-f</span>
+exportfs <span class="token parameter variable">-s</span></code></pre>
+
+<ul>
+<li>-v：查看本机所有 NFS 共享</li>
+<li>-r：重读配置文件，这个选项可以避免重启服务</li>
+<li>-a：输出本机所有共享</li>
+<li>-au：停止本机所有共享</li>
+</ul>
+<h4 id="showmount"><a href="#showmount" class="headerlink" title="showmount"></a>showmount</h4><p>常见用法：查看远程主机的 nfs 共享</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">showmount <span class="token parameter variable">-e</span> <span class="token function">hostname</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#showmount -e 10.0.0.8</span>
+Export list <span class="token keyword">for</span> <span class="token number">10.0</span>.0.8:
+/data/wordpress *</code></pre>
+
+<h4 id="monut"><a href="#monut" class="headerlink" title="monut"></a>monut</h4><p>客户端 nfs 挂载</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mount</span> <span class="token punctuation">[</span>-fnrsvw<span class="token punctuation">]</span> <span class="token parameter variable">-t</span> nfs <span class="token punctuation">[</span>-o options<span class="token punctuation">]</span> device <span class="token function">dir</span></code></pre>
+
+<p>options：</p>
+<ul>
+<li>nfsvers&#x3D;n</li>
+<li>vers&#x3D;n</li>
+<li>soft &#x2F; hard</li>
+<li></li>
+</ul>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+<h3 id="自动挂载-autofs"><a href="#自动挂载-autofs" class="headerlink" title="自动挂载 autofs"></a>自动挂载 autofs</h3><p>使用 autofs 服务按需要挂载外围设备，NFS 共享等，并在空闲 5 分钟后后自动卸载</p>
+<p>配置文件：&#x2F;etc&#x2F;auto.master</p>
+<p>案例：</p>
+<p>10.0.0.1(ubuntu)：nfs server，共享&#x2F;data&#x2F;wwwroot&#x2F;script 目录</p>
+<p>10.0.0.71(centos)：nfs client</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 10.0.0.1</span>
+<span class="token comment"># 安装nfs服务端软件</span>
+lujinkai@Z510:~$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> nfs-kernel-server
+<span class="token comment"># 修改exports共享设置文件</span>
+lujinkai@Z510:~$ <span class="token function">vim</span> /etc/exports
+/data/wwwroot/script <span class="token number">10.0</span>.0.0/24<span class="token punctuation">(</span>rw,async,root_squash,anonuid<span class="token operator">=</span><span class="token number">1000</span>,anongid<span class="token operator">=</span><span class="token number">1000</span>,all_squash<span class="token punctuation">)</span>
+<span class="token comment"># 重新加载配置文件</span>
+lujinkai@Z510:~$ <span class="token function">sudo</span> exportfs <span class="token parameter variable">-r</span>
+
+<span class="token comment"># 10.0.0.71</span>
+<span class="token comment"># 安装autofs，并设置开机自启</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> autofs
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> <span class="token builtin class-name">enable</span> <span class="token parameter variable">--now</span> autofs.service
+<span class="token comment"># 查看10.0.0.1共享的目录</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$showmount</span> <span class="token parameter variable">-e</span> <span class="token number">10.0</span>.0.1
+Export list <span class="token keyword">for</span> <span class="token number">10.0</span>.0.1:
+/data/wwwroot/script <span class="token number">10.0</span>.0.0/24
+<span class="token comment"># 修改auto.master，注意格式，`man auto.master`可以查看格式</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/auto.master
+<span class="token punctuation">..</span>.
+/root/www /etc/auto.www
+<span class="token comment"># 编辑/root/www指定的配置文件</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/auto.www
+script <span class="token parameter variable">-fstype</span><span class="token operator">=</span>nfs <span class="token number">10.0</span>.0.1:/home/lujinkai/www/script
+<span class="token comment"># 重启autofs</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart autofs.service
+<span class="token comment"># 查看是否挂载成功</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> ~/www/
+<span class="token punctuation">[</span>root@c71 www<span class="token punctuation">]</span><span class="token variable">$ll</span>	<span class="token comment"># 没有任何东西</span>
+总用量 <span class="token number">0</span>
+<span class="token punctuation">[</span>root@c71 www<span class="token punctuation">]</span><span class="token variable">$df</span> <span class="token parameter variable">-Th</span> ./
+文件系统       类型    容量  已用  可用 已用% 挂载点
+/etc/auto.www  autofs     <span class="token number">0</span>     <span class="token number">0</span>     <span class="token number">0</span>     - /root/www
+<span class="token punctuation">[</span>root@c71 www<span class="token punctuation">]</span><span class="token variable">$cd</span> script	<span class="token comment"># 直接进入，就会自动挂载</span>
+<span class="token punctuation">[</span>root@c71 script<span class="token punctuation">]</span><span class="token variable">$ll</span>
+总用量 <span class="token number">48</span>
+<span class="token parameter variable">-rwxrwxrwx</span> <span class="token number">1</span> lujinkai lujinkai  <span class="token number">688</span> <span class="token number">11</span>月 <span class="token number">13</span> <span class="token number">21</span>:54 demo.sh
+drwxrwxrwx <span class="token number">2</span> lujinkai lujinkai <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">12</span> <span class="token number">10</span>:09 etc
+drwxrwxrwx <span class="token number">4</span> lujinkai lujinkai <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">12</span> <span class="token number">16</span>:30 include
+drwxrwxrwx <span class="token number">2</span> lujinkai lujinkai <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">12</span> <span class="token number">19</span>:34 ini
+drwxrwxrwx <span class="token number">2</span> lujinkai lujinkai <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:08 init.d
+<span class="token parameter variable">-rwxrwxrwx</span> <span class="token number">1</span> lujinkai lujinkai <span class="token number">3750</span> <span class="token number">10</span>月 <span class="token number">31</span> <span class="token number">20</span>:11 install.sh
+<span class="token parameter variable">-rwxrwxrwx</span> <span class="token number">1</span> lujinkai lujinkai <span class="token number">2051</span> <span class="token number">10</span>月 <span class="token number">31</span> <span class="token number">15</span>:52 magedu.sh
+<span class="token parameter variable">-rwxrwxrwx</span> <span class="token number">1</span> lujinkai lujinkai <span class="token number">1462</span> <span class="token number">10</span>月 <span class="token number">28</span> <span class="token number">15</span>:58 scp_list.sh
+<span class="token parameter variable">-rwxrwxrwx</span> <span class="token number">1</span> lujinkai lujinkai <span class="token number">1744</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">10</span>:54 scp_sh.sh
+<span class="token parameter variable">-rwxrwxrwx</span> <span class="token number">1</span> lujinkai lujinkai <span class="token number">1440</span> <span class="token number">10</span>月 <span class="token number">13</span> <span class="token number">21</span>:57 sftp-config.json
+drwxrwxrwx <span class="token number">3</span> lujinkai lujinkai <span class="token number">4096</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">11</span>:03 src
+-rwxrwxr-x <span class="token number">1</span> lujinkai lujinkai <span class="token number">1211</span> <span class="token number">11</span>月 <span class="token number">11</span> <span class="token number">10</span>:55 u_scp_sh.sh
+<span class="token punctuation">[</span>root@c71 script<span class="token punctuation">]</span><span class="token variable">$df</span> <span class="token parameter variable">-Th</span> ./
+文件系统                           类型  容量  已用  可用 已用% 挂载点
+<span class="token number">10.0</span>.0.1:/home/lujinkai/www/script nfs4  117G   37G   74G   <span class="token number">34</span>% /root/www/script</code></pre>
+
+<h4 id="x2F-etc-x2F-fstab-和-autofs"><a href="#x2F-etc-x2F-fstab-和-autofs" class="headerlink" title="&#x2F;etc&#x2F;fstab 和 autofs"></a>&#x2F;etc&#x2F;fstab 和 autofs</h4><p>&#x2F;etc&#x2F;fstab 设置开机自动挂载，系统开机会去读取这个文件，用于挂载本地固定设备，如硬盘</p>
+<p>autofs 设置自动挂载，只有当访问挂载点的时候，autofs 才会挂载，过一段时间没有访问，autofs 就会自动卸载设备，用于挂载动态的设备，如光盘、nfs、smb 等文件系统</p>
+<h2 id="SAMBA-服务"><a href="#SAMBA-服务" class="headerlink" title="SAMBA 服务"></a>SAMBA 服务</h2><p>官网：<a target="_blank" rel="noopener" href="https://www.samba.org/">https://www.samba.org/</a></p>
+<p>相关包：</p>
+<ul>
+<li>samba 提供 smb 服务器端</li>
+<li>samba-client 客户端软件</li>
+<li>samba-common 通用软件</li>
+<li>cifs-utils smb 客户端工具</li>
+<li>samba-winbind 和 AD 相关</li>
+</ul>
+<p>相关服务进程：</p>
+<ul>
+<li>smbd 提供 smb(cifs)服务 TCP：139、445</li>
+<li>nmbd NetBIOS 名称解析 UDP：137、138，如果不使用计算机名来访问，这个就没用</li>
+</ul>
+<p>主配置文件：&#x2F;etc&#x2F;samba&#x2F;smb.conf</p>
+<p>语法检查: testparm [-v] [&#x2F;etc&#x2F;samba&#x2F;smb.conf]</p>
+<p>客户端工具：smbclient、mount.cifs</p>
+<h3 id="samba-服务器配置"><a href="#samba-服务器配置" class="headerlink" title="samba 服务器配置"></a>samba 服务器配置</h3><p>&#x2F;etc&#x2F;samba&#x2F;smb.conf 是主配置文件，ini 格式，来自 samba-common 包</p>
+<p>分为全局配置[global] 和特定的共享设置，例如[homes]、[printers]等\</p>
+<h4 id="smb-conf-中的宏定义"><a href="#smb-conf-中的宏定义" class="headerlink" title="smb.conf 中的宏定义"></a>smb.conf 中的宏定义</h4><pre class="language-bash" data-language="bash"><code class="language-bash">%m 客户端主机的NetBIOS名
+%M 客户端主机的FQDN
+%H 当前用户家目录路径
+%U 当前用户的用户名
+%g 当前用户所属组
+%h samba服务器的主机名
+%L samba服务器的NetBIOS名
+%I 客户端主机的IP，是i的大写字母
+%T 当前日期和时间
+%S 可登录的用户名
+<span class="token punctuation">..</span>.</code></pre>
+
+<h4 id="global-全局配置"><a href="#global-全局配置" class="headerlink" title="[global] 全局配置"></a>[global] 全局配置</h4><ul>
+<li><p>workgroup：指定工作组名称</p>
+</li>
+<li><p>server string：主机注释信息</p>
+</li>
+<li><p>netbios name：指定 NetBIOS 名，可以被 SAMBA 客户端使用，但不支持 ping</p>
+<p>注意：netbios name 需要启动 nmb 服务</p>
+<p>范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">global</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">workgroup</span> <span class="token punctuation">=</span> <span class="token value attr-value">workgroup</span>
+<span class="token key attr-name">netbios name</span> <span class="token punctuation">=</span> <span class="token value attr-value">smbserver # 此设置需要启动nmb服务才可能生效</span></code></pre>
+</li>
+<li><p>interfaces：指定服务侦听接口和 IP</p>
+</li>
+<li><p>hosts allow： 允许指定主机访问，可用逗号，空格，或 tab 分隔，默认允许所有主机访问，可以在其他共享独立配置，但是[global]中的设置会覆盖其他共享设置，可以是以下格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">172.16</span>.0.0/24
+<span class="token number">172.16</span>.0.0/255.255.255.0
+desktop.example.com
+.example.com	<span class="token comment"># 以example.com后缀的主机名</span></code></pre>
+</li>
+<li><p>hosts deny：拒绝指定主机访问，格式和 hosts allow 相同</p>
+</li>
+<li><p>config file&#x3D;&#x2F;etc&#x2F;samba&#x2F;conf.d&#x2F;%U：用户独立的配置文件</p>
+</li>
+<li><p>log file&#x3D;&#x2F;var&#x2F;log&#x2F;samba&#x2F;log.%I：不同客户机采用不同日志</p>
+</li>
+<li><p>log level &#x3D; 2：日志级别，默认为 0，不记录日志</p>
+<p>范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">global</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">Log file</span><span class="token punctuation">=</span><span class="token value attr-value">/var/log/samba/log.%I</span>
+<span class="token key attr-name">log level</span> <span class="token punctuation">=</span> <span class="token value attr-value">2</span></code></pre>
+</li>
+<li><p>max log size&#x3D;50：日志文件达到 50K，将轮循 rotate，单位 KB</p>
+</li>
+<li><p>security&#x3D;user：认证方式，有三种</p>
+<ul>
+<li>user：samba 用户（采有 linux 用户，samba 的独立口令）</li>
+<li>share：匿名(CentOS7 不再支持)，已不建议使用</li>
+<li>server：已不建议使用</li>
+</ul>
+</li>
+<li><p>passdb backend &#x3D; tdbsam：密码数据库格式</p>
+</li>
+<li><p>…</p>
+</li>
+</ul>
+<h4 id="特定共享目录配置"><a href="#特定共享目录配置" class="headerlink" title="特定共享目录配置"></a>特定共享目录配置</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>共享名称<span class="token punctuation">]</span> 		 <span class="token comment"># 远程网络看到的共享名称</span>
+comment 		<span class="token comment"># 注释信息</span>
+path 			<span class="token comment"># 所共享的目录路径</span>
+public			<span class="token comment"># 能否被guest访问的共享，默认no，和guest=ok 类似</span>
+browsable 		<span class="token comment"># 是否允许所有用户浏览此共享,默认为yes,no为隐藏</span>
+<span class="token assign-left variable">writable</span><span class="token operator">=</span>yes 	<span class="token comment"># 可以被所有用户读写，默认为no</span>
+<span class="token builtin class-name">read</span> <span class="token assign-left variable">only</span><span class="token operator">=</span>no 	<span class="token comment"># 和writable=yes等价，如与以上设置冲突，放在后面的设置生效，默认只读</span>
+<span class="token function">write</span> list		<span class="token comment"># 可读写的用户，可设置为用户或者组，用空格或逗号分隔，用户组有两种格式：@组名、+组名；如果设置writable=no，那write list中的用户和组可读写</span>
+valid <span class="token function">users</span> 	<span class="token comment"># 规定合法用户，即能访问该共享的用户，用空格或逗号分隔，如为空，将允许所有</span>
+force group		<span class="token comment"># 指定存取资源时须以此设定的群组使用者进入才能存取(用户名/@组名)</span>
+force user		<span class="token comment"># 指定存取资源时须以此设定的使用者进入才能存取(用户名/@组名)</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">share</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">path</span> <span class="token punctuation">=</span> <span class="token value attr-value">/data/dir</span>
+<span class="token key attr-name">valid users</span><span class="token punctuation">=</span><span class="token value attr-value">wang,@admins</span>
+<span class="token key attr-name">writeable</span> <span class="token punctuation">=</span> <span class="token value attr-value">no</span>
+<span class="token key attr-name">browseable</span> <span class="token punctuation">=</span> <span class="token value attr-value">no</span></code></pre>
+
+<h3 id="samba-用户管理"><a href="#samba-用户管理" class="headerlink" title="samba 用户管理"></a>samba 用户管理</h3><h4 id="smbpasswd-命令"><a href="#smbpasswd-命令" class="headerlink" title="smbpasswd 命令"></a>smbpasswd 命令</h4><p>smbpasswd 用于管理 samba 用户</p>
+<p><strong>添加用户：</strong>实际上是把把系统用户映射为 samba 用户，所以添加的用户首先必须是 linux 系统用户</p>
+<pre class="language-none"><code class="language-none">smbpasswd -a &lt;user&gt;		# 交互式
+pdbedit -a -u &lt;user&gt;</code></pre>
+
+<p><strong>修改用户密码：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">smbpasswd <span class="token operator">&lt;</span>user<span class="token operator">></span>	<span class="token comment"># 交互式</span></code></pre>
+
+<p><strong>删除用户和密码：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">smbpasswd <span class="token parameter variable">-x</span> <span class="token operator">&lt;</span>user<span class="token operator">></span>
+pdbedit <span class="token parameter variable">-x</span> <span class="token parameter variable">-u</span> <span class="token operator">&lt;</span>user<span class="token operator">></span>	<span class="token comment"># 这个好像权限更大</span></code></pre>
+
+<p><strong>查看 samba 用户列表：</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">pdbedit <span class="token parameter variable">-L</span> <span class="token parameter variable">-v</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 为了方便配置，可以将用户指定同一个组</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span>$ <span class="token function">groupadd</span> <span class="token parameter variable">-r</span> smb
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$useradd</span> <span class="token parameter variable">-G</span> smb <span class="token parameter variable">-s</span> /sbin/nologin smb1
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$useradd</span> <span class="token parameter variable">-G</span> smb <span class="token parameter variable">-s</span> /sbin/nologin smb2
+
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$smbpasswd</span> <span class="token parameter variable">-a</span> smb1
+New SMB password:
+Retype new SMB password:
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$smbpasswd</span> <span class="token parameter variable">-a</span> smb2
+New SMB password:
+Retype new SMB password:
+Added user smb2.
+
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$pdbedit</span> <span class="token parameter variable">-L</span>
+smb1:1001:
+smb2:1002:
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$pdbedit</span> <span class="token parameter variable">-L</span> <span class="token parameter variable">-v</span>
+---------------
+Unix username:        smb1
+NT username:
+Account Flags:        <span class="token punctuation">[</span>U          <span class="token punctuation">]</span>
+User SID:             S-1-5-21-540276018-2794668495-3753694806-1000
+Primary Group SID:    S-1-5-21-540276018-2794668495-3753694806-513
+Full Name:
+Home Directory:       <span class="token punctuation">\</span><span class="token punctuation">\</span>c71<span class="token punctuation">\</span>smb1
+HomeDir Drive:
+Logon Script:
+Profile Path:         <span class="token punctuation">\</span><span class="token punctuation">\</span>c71<span class="token punctuation">\</span>smb1<span class="token punctuation">\</span>profile
+Domain:               C71
+Account desc:
+Workstations:
+Munged dial:
+Logon time:           <span class="token number">0</span>
+Logoff time:          Wed, 06 Feb <span class="token number">2036</span> <span class="token number">23</span>:06:39 CST
+Kickoff time:         Wed, 06 Feb <span class="token number">2036</span> <span class="token number">23</span>:06:39 CST
+Password last set:    Sat, <span class="token number">14</span> Nov <span class="token number">2020</span> <span class="token number">17</span>:46:18 CST
+Password can change:  Sat, <span class="token number">14</span> Nov <span class="token number">2020</span> <span class="token number">17</span>:46:18 CST
+Password must change: never
+Last bad password   <span class="token builtin class-name">:</span> <span class="token number">0</span>
+Bad password count  <span class="token builtin class-name">:</span> <span class="token number">0</span>
+Logon hours         <span class="token builtin class-name">:</span> FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+---------------
+Unix username:        smb2
+NT username:
+Account Flags:        <span class="token punctuation">[</span>U          <span class="token punctuation">]</span>
+User SID:             S-1-5-21-540276018-2794668495-3753694806-1001
+Primary Group SID:    S-1-5-21-540276018-2794668495-3753694806-513
+Full Name:
+Home Directory:       <span class="token punctuation">\</span><span class="token punctuation">\</span>c71<span class="token punctuation">\</span>smb2
+HomeDir Drive:
+Logon Script:
+Profile Path:         <span class="token punctuation">\</span><span class="token punctuation">\</span>c71<span class="token punctuation">\</span>smb2<span class="token punctuation">\</span>profile
+Domain:               C71
+Account desc:
+Workstations:
+Munged dial:
+Logon time:           <span class="token number">0</span>
+Logoff time:          Wed, 06 Feb <span class="token number">2036</span> <span class="token number">23</span>:06:39 CST
+Kickoff time:         Wed, 06 Feb <span class="token number">2036</span> <span class="token number">23</span>:06:39 CST
+Password last set:    Sat, <span class="token number">14</span> Nov <span class="token number">2020</span> <span class="token number">17</span>:46:24 CST
+Password can change:  Sat, <span class="token number">14</span> Nov <span class="token number">2020</span> <span class="token number">17</span>:46:24 CST
+Password must change: never
+Last bad password   <span class="token builtin class-name">:</span> <span class="token number">0</span>
+Bad password count  <span class="token builtin class-name">:</span> <span class="token number">0</span>
+Logon hours         <span class="token builtin class-name">:</span> FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</code></pre>
+
+<h4 id="案例："><a href="#案例：" class="headerlink" title="案例："></a>案例：</h4><p>实现不同 samba 用户访问相同的 samba 共享，实现不同的配置</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 10.0.0.71 服务端</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> samba
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$groupadd</span> <span class="token parameter variable">-r</span> smb
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$useradd</span> <span class="token parameter variable">-G</span> smb <span class="token parameter variable">-s</span> /sbin/nologin smb1	<span class="token comment"># 注意这里是-G，而不是-g</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$useradd</span> <span class="token parameter variable">-G</span> smb <span class="token parameter variable">-s</span> /sbin/nologin smb2
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$smbpasswd</span> <span class="token parameter variable">-a</span> smb1
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$smbpasswd</span> <span class="token parameter variable">-a</span> smb2
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/samba/smb.conf
+<span class="token comment">#在workgroup下加一行</span>
+config <span class="token assign-left variable">file</span><span class="token operator">=</span> /etc/samba/conf.d/%U
+<span class="token punctuation">[</span>share<span class="token punctuation">]</span>
+<span class="token assign-left variable">Path</span><span class="token operator">=</span>/data/dir
+Read <span class="token assign-left variable">only</span><span class="token operator">=</span> NO
+Guest ok <span class="token operator">=</span> <span class="token function">yes</span>
+<span class="token function">write</span> <span class="token assign-left variable">list</span><span class="token operator">=</span>@wheel
+<span class="token comment">#针对smb1和smb2用户创建单独的配置文件</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/samba/smb.conf/smb1
+<span class="token punctuation">[</span>share<span class="token punctuation">]</span>
+<span class="token assign-left variable">Path</span><span class="token operator">=</span>/data/dir1
+Read <span class="token assign-left variable">only</span><span class="token operator">=</span> NO 					<span class="token comment"># 等价于writable = yes</span>
+Create <span class="token assign-left variable">mask</span><span class="token operator">=</span>0644 				<span class="token comment"># 说明：默认为744</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/samba/smb.conf/smb2
+<span class="token punctuation">[</span>share<span class="token punctuation">]</span>
+<span class="token assign-left variable">path</span><span class="token operator">=</span>/data/dir2
+Read <span class="token assign-left variable">only</span><span class="token operator">=</span> NO
+Create <span class="token assign-left variable">mask</span><span class="token operator">=</span>0644
+<span class="token comment"># 重启服务</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart smb.service
+
+<span class="token comment"># 10.0.0.72 客户端</span>
+<span class="token comment"># 用户smb1，smb2访问share共享目录，看到目录是不同目录</span>
+<span class="token punctuation">[</span>root@c72 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> samba-client cifs-utils
+<span class="token punctuation">[</span>root@c72 ~<span class="token punctuation">]</span><span class="token variable">$smbclient</span> //10.0.0.73/share <span class="token parameter variable">-U</span> smb1%123456
+<span class="token punctuation">[</span>root@c72 ~<span class="token punctuation">]</span><span class="token variable">$smbclient</span> //10.0.0.73/share <span class="token parameter variable">-U</span> smb2%123456
+
+<span class="token comment"># windows：文件管理器输入 \\10.0.0.73\share 回车，然后输入账号密码即可</span></code></pre>
+
+<h2 id="数据的实时同步"><a href="#数据的实时同步" class="headerlink" title="数据的实时同步"></a>数据的实时同步</h2><p>实现实时同步的方法：</p>
+<ul>
+<li>inotify + rsync</li>
+<li>sersync：国人周洋在 inotify 基础上开发的，功能强大，只是已经不再更新了</li>
+</ul>
+<h3 id="inotify"><a href="#inotify" class="headerlink" title="inotify"></a>inotify</h3><p>异步的文件系统事件监控机制，利用事件驱动机制，而无须通过诸如 cron 等的轮询机制来获取事件，linux 内核从 2.6.13 起支持 inotify，通过 inotify 可以监控文件系统中添加、删除，修改、移动等各种事件</p>
+<p>inotify+rsync 使用方式：</p>
+<ol>
+<li>利用监控服务（inotify），监控同步数据服务器目录中信息的变化</li>
+<li>发现目录中数据产生变化，就利用 rsync 服务推送到备份服务器上</li>
+<li>利用脚本进行结合</li>
+</ol>
+<h4 id="inotify-内核参数"><a href="#inotify-内核参数" class="headerlink" title="inotify 内核参数"></a>inotify 内核参数</h4><ul>
+<li>max_queued_events：inotify 事件队列最大长度，如值太小会出现 Event Queue Overflow 错误，默认值:16384， 生产环境建议调大，比如:327679</li>
+<li>max_user_instances：每个用户创建 inotify 实例最大值，默认值:128</li>
+<li>max_user_watches：可以监视的文件的总数量(inotifywait 单进程)，默认值:8192，建议调大</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@data-centos8 ~<span class="token punctuation">]</span><span class="token comment">#vim /etc/sysctl.conf</span>
+<span class="token assign-left variable">fs.inotify.max_queued_events</span><span class="token operator">=</span><span class="token number">66666</span>
+<span class="token assign-left variable">fs.inotify.max_user_watches</span><span class="token operator">=</span><span class="token number">100000</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#sysctl</span>
+<span class="token parameter variable">-p</span>
+fs.inotify.max_queued_events <span class="token operator">=</span> <span class="token number">66666</span>
+fs.inotify.max_user_watches <span class="token operator">=</span> <span class="token number">100000</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#cat /proc/sys/fs/inotify/*</span>
+<span class="token number">66666</span>
+<span class="token number">128</span>
+<span class="token number">100000</span></code></pre>
+
+<h4 id="inotify-tools"><a href="#inotify-tools" class="headerlink" title="inotify-tools"></a>inotify-tools</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> inotify-tools
+
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$rpm</span> <span class="token parameter variable">-ql</span> inotify-tools
+<span class="token comment"># 在被监控的文件或目录上等待特定文件系统事件(open、close、delete等)发生，常用于实时同步的目录监控</span>
+/usr/bin/inotifywait
+<span class="token comment"># 收集被监控的文件系统使用的统计数据，指文件系统事件发生的次数统计</span>
+/usr/bin/inotifywatch
+<span class="token punctuation">..</span>.</code></pre>
+
+<h5 id="inotifywait"><a href="#inotifywait" class="headerlink" title="inotifywait"></a>inotifywait</h5><pre class="language-bash" data-language="bash"><code class="language-bash">inotifywait <span class="token punctuation">[</span> options <span class="token punctuation">]</span> file1 <span class="token punctuation">[</span> file2 <span class="token punctuation">]</span> <span class="token punctuation">[</span> file3 <span class="token punctuation">]</span> <span class="token punctuation">[</span> <span class="token punctuation">..</span>. <span class="token punctuation">]</span>
+
+<span class="token comment"># 常用option</span>
+-m, --monitor：			始终保持事件监听
+-d, --daemon：			以守护进程方式执行,和-m相似,配合-o使用
+-r, --recursive：		递归监控目录数据信息变化
+-q, --quiet：			输出少量事件信息
+<span class="token parameter variable">--exclude</span> <span class="token operator">&lt;</span>pattern<span class="token operator">></span>：	指定排除文件或目录,使用扩展的正则表达式匹配的模式实现
+<span class="token parameter variable">--excludei</span> <span class="token operator">&lt;</span>pattern<span class="token operator">></span>：	和exclude相似,不区分大小写
+-o, <span class="token parameter variable">--outfile</span> <span class="token operator">&lt;</span>file<span class="token operator">></span>：	打印事件到文件中,相当于标准正确输出,注意:使用绝对路径
+-s, --syslogOutput：		发送错误到syslog相当于标准错误输出
+<span class="token parameter variable">--timefmt</span> <span class="token operator">&lt;</span>fmt<span class="token operator">></span>：		指定时间输出格式
+<span class="token parameter variable">--format</span> <span class="token operator">&lt;</span>fmt<span class="token operator">></span>：			指定的输出格式<span class="token punctuation">;</span>即实际监控输出内容
+-e：						指定监听指定的事件,如果省略,表示所有事件都进行监听
+
+<span class="token parameter variable">--timefmt</span> <span class="token string">"%Y-%m-%d %H:%M:%S"</span>
+%Y 	<span class="token comment"># 年份信息,包含世纪信息</span>
+%y 	<span class="token comment"># 年份信息,不包括世纪信息</span>
+%m 	<span class="token comment"># 显示月份,范围 01-12</span>
+%d 	<span class="token comment"># 每月的第几天,范围是 01-31</span>
+%H 	<span class="token comment"># 小时信息,使用 24小时制,范围 00-23</span>
+%M 	<span class="token comment"># 分钟,范围 00-59</span>
+%S 	<span class="token comment"># 秒,范例 0-60</span>
+
+<span class="token parameter variable">--format</span> <span class="token string">"%T %w%f event: %;e"</span>
+%T 	<span class="token comment"># 输出时间格式中定义的时间格式信息,通过 --timefmt option 语法格式指定时间信息</span>
+%w 	<span class="token comment"># 事件出现时,监控文件或目录的名称信息,相当于dirname</span>
+%f 	<span class="token comment"># 事件出现时,将显示监控目录下触发事件的文件或目录信息,否则为空,相当于basename</span>
+%e 	<span class="token comment"># 显示发生的事件信息,不同的事件默认用逗号分隔</span>
+%Xe <span class="token comment"># 显示发生的事件信息,不同的事件指定用X进行分隔</span>
+
+<span class="token parameter variable">-e</span> create,delete,moved_to,close_write,attrib
+create 			<span class="token comment">#文件或目录创建</span>
+delete 			<span class="token comment">#文件或目录被删除</span>
+modify 			<span class="token comment">#文件或目录内容被写入</span>
+attrib 			<span class="token comment">#文件或目录属性改变</span>
+close_write 	<span class="token comment">#文件或目录关闭,在写入模式打开之后关闭的</span>
+close_nowrite 	<span class="token comment">#文件或目录关闭,在只读模式打开之后关闭的</span>
+close 			<span class="token comment">#文件或目录关闭,不管读或是写模式</span>
+<span class="token function">open</span> 			<span class="token comment">#文件或目录被打开</span>
+lsdir 			<span class="token comment">#浏览目录内容</span>
+moved_to 		<span class="token comment">#文件或目录被移动到监控的目录中</span>
+moved_from 		<span class="token comment">#文件或目录从监控的目录中被移动</span>
+move 			<span class="token comment">#文件或目录不管移动到或是移出监控目录都触发事件</span>
+access 			<span class="token comment">#文件或目录内容被读取</span>
+delete_self 	<span class="token comment">#文件或目录被删除,目录本身被删除</span>
+unmount 		<span class="token comment">#取消挂载</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 监控一次性事件</span>
+inotifywait /data/www
+
+<span class="token comment"># 持续前台监控</span>
+inotifywait <span class="token parameter variable">-mrq</span> /data/www <span class="token parameter variable">--exclude</span><span class="token operator">=</span><span class="token string">".*\.swx|\.swp"</span>
+
+<span class="token comment"># 持续后台监控,并记录日志</span>
+inotifywait <span class="token parameter variable">-o</span> /root/inotify.log <span class="token parameter variable">-drq</span> /data/www <span class="token parameter variable">--timefmt</span> <span class="token string">"%Y-%m-%d %H:%M:%S"</span> <span class="token parameter variable">--format</span> <span class="token string">"%T %w%f event: %e"</span>
+
+<span class="token comment">#持续前台监控特定事件</span>
+inotifywait <span class="token parameter variable">-mrq</span> /data/www <span class="token parameter variable">--timefmt</span> <span class="token string">"%F %H:%M:%S"</span> <span class="token parameter variable">--format</span> <span class="token string">"%T %w%f event:%;e"</span> <span class="token parameter variable">-e</span> create,delete,moved_to,close_write,attrib</code></pre>
+
+<h5 id="inotifywatch"><a href="#inotifywatch" class="headerlink" title="inotifywatch"></a>inotifywatch</h5><pre class="language-bash" data-language="bash"><code class="language-bash">inotifywatch <span class="token punctuation">[</span> options <span class="token punctuation">]</span> file1 <span class="token punctuation">[</span> file2 <span class="token punctuation">]</span> <span class="token punctuation">[</span> <span class="token punctuation">..</span>. <span class="token punctuation">]</span></code></pre>
+
+<h3 id="rsync"><a href="#rsync" class="headerlink" title="rsync"></a>rsync</h3><p>rsync 常用做镜像备份和同步数据，配合计划任务实现定时备份，配合 inotify 可以实现触发式的实时数据同步</p>
+<p>官方网站: <a target="_blank" rel="noopener" href="http://rsync.samba.org/">http://rsync.samba.org/</a></p>
+<p>软件包：rsync、rsync-daemon(CentOS 8)</p>
+<p>服务文件：&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;rsyncd.service</p>
+<p>配置文件：&#x2F;etc&#x2F;rsyncd.conf</p>
+<p>端口：873&#x2F;tcp</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 源地址 和 目标地址 都在本机</span>
+<span class="token function">rsync</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. SRC <span class="token punctuation">[</span>SRC<span class="token punctuation">]</span><span class="token punctuation">..</span>. DEST
+
+<span class="token comment"># 2. 通过远程shell连接</span>
+<span class="token function">rsync</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. SRC <span class="token punctuation">[</span>SRC<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span><span class="token environment constant">USER</span>@<span class="token punctuation">]</span>HOST:DEST		<span class="token comment"># pull 推</span>
+<span class="token function">rsync</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span><span class="token environment constant">USER</span>@<span class="token punctuation">]</span>HOST:SRC <span class="token punctuation">[</span>DEST<span class="token punctuation">]</span>			<span class="token comment"># push 拉</span>
+
+<span class="token comment"># 3. 连接到rsync守护进程</span>
+<span class="token function">rsync</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. SRC <span class="token punctuation">[</span>SRC<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span><span class="token environment constant">USER</span>@<span class="token punctuation">]</span>HOST::DEST 					<span class="token comment"># pull 推</span>
+<span class="token function">rsync</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. SRC <span class="token punctuation">[</span>SRC<span class="token punctuation">]</span><span class="token punctuation">..</span>. rsync://<span class="token punctuation">[</span><span class="token environment constant">USER</span>@<span class="token punctuation">]</span>HOST<span class="token punctuation">[</span>:PORT<span class="token punctuation">]</span>/DEST		<span class="token comment"># pull 推</span>
+<span class="token function">rsync</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span><span class="token environment constant">USER</span>@<span class="token punctuation">]</span>HOST::SRC <span class="token punctuation">[</span>DEST<span class="token punctuation">]</span>							<span class="token comment"># push 拉</span>
+<span class="token function">rsync</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. rsync://<span class="token punctuation">[</span><span class="token environment constant">USER</span>@<span class="token punctuation">]</span>HOST<span class="token punctuation">[</span>:PORT<span class="token punctuation">]</span>/SRC <span class="token punctuation">[</span>DEST<span class="token punctuation">]</span>				<span class="token comment"># push 拉</span>
+
+The <span class="token string">':'</span> usages connect via remote shell, <span class="token keyword">while</span> <span class="token string">'::'</span> <span class="token operator">&amp;</span> <span class="token string">'rsync://'</span> usages connect to an <span class="token function">rsync</span> daemon, and require SRC or DEST to start with a module name.</code></pre>
+
+<p>前两种的本质是通过本地或远程 shell，而第 3 种方式则是让远程主机上运行 rsyncd 服务，使其监听在一个端口上，等待客户端的连接</p>
+<p><strong>范例：</strong>备份服务器启动 rsync 的守护进程，然后数据服务器去连接，再进行数据的推送和拉取</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 备份服务器 10.0.0.71</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start rsyncd.service
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ss</span> <span class="token parameter variable">-ntl</span>
+State      Recv-Q Send-Q      Local Address:Port                     Peer Address:Port
+LISTEN     <span class="token number">0</span>      <span class="token number">5</span>                       *:873                                 *:*
+LISTEN     <span class="token number">0</span>      <span class="token number">5</span>                    <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:873                              <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:*
+
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/rsyncd.conf
+<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>backup<span class="token punctuation">]</span>				<span class="token comment"># bachup 模块</span>
+path <span class="token operator">=</span> /data/backup		<span class="token comment"># 备份路径</span>
+<span class="token builtin class-name">read</span> only <span class="token operator">=</span> no			<span class="token comment"># 设置可写，默认只读</span>
+
+<span class="token comment"># 查看设置的模块</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$rsync</span> <span class="token number">127.0</span>.0.1::
+backup
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$rsync</span> rsync://127.0.0.1
+backup
+
+<span class="token comment"># 默认用户以nobody访问此目录，所以给nobody设置读写权限</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$setfacl</span> <span class="token parameter variable">-m</span> u:nobody:rwx /data/backup/
+
+<span class="token comment"># 数据服务器 10.0.0.1</span>
+lujinkai@Z510:~$ <span class="token function">rsync</span> rsync://10.0.0.71
+backup
+lujinkai@Z510:~$ <span class="token function">rsync</span> <span class="token number">10.0</span>.0.71::
+backup
+
+<span class="token comment"># 推送，将本机的u_script目录备份到10.0.0.71的/data/backup目录（rsyncd.conf中backup模块设置）</span>
+lujinkai@Z510:~/www$ <span class="token function">rsync</span> <span class="token parameter variable">-av</span> ./u_script/ root@10.0.0.71::backup
+lujinkai@Z510:~/www$ <span class="token function">rsync</span> <span class="token number">10.0</span>.0.71::backup
+drwxrwxr-x          <span class="token number">4,096</span> <span class="token number">2020</span>/11/14 <span class="token number">22</span>:38:48 <span class="token builtin class-name">.</span>
+-rwxrwxr-x            <span class="token number">319</span> <span class="token number">2020</span>/11/14 <span class="token number">22</span>:38:48 demo.sh
+drwxrwxr-x          <span class="token number">4,096</span> <span class="token number">2020</span>/11/09 <span class="token number">14</span>:52:39 include
+<span class="token comment"># 拉取</span>
+lujinkai@Z510:~/www$ <span class="token function">rsync</span> <span class="token parameter variable">-av</span> root@10.0.0.71::backup ./u_script/</code></pre>
+
+<p>rsyncd.conf 的格式 参考 <code>man rsyncd.conf</code> 或者 <a target="_blank" rel="noopener" href="https://linux.die.net/man/5/rsyncd.conf">https://linux.die.net/man/5/rsyncd.conf</a></p>
+<p>上面的过程都是免密的，我们也可以设置认证</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 备份服务器 10.0.0.71</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token string">"rsyncuser:123456"</span> <span class="token operator">></span> /etc/rsync.pas
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$chmod</span> <span class="token number">600</span> /etc/rsync.pas
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/rsyncd.conf
+<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>backup<span class="token punctuation">]</span>
+path <span class="token operator">=</span> /data/backup
+<span class="token builtin class-name">read</span> only <span class="token operator">=</span> no
+auth <span class="token function">users</span> <span class="token operator">=</span> rsyncuser	<span class="token comment"># 默认anonymous可以访问rsync服务器，这里设置只能虚拟用户rsyncuser访问</span>
+secrets <span class="token function">file</span> <span class="token operator">=</span> /etc/rsync.pas	<span class="token comment"># 认证文件</span>
+<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart rsyncd.service	<span class="token comment"># 也可以不重启</span>
+
+<span class="token comment"># 数据服务器 10.0.0.1</span>
+<span class="token comment"># 将秘密写入到/etc/rsync.pas，也可以赋值给环境变量 export RSYNC_PASSWORD=123456</span>
+lujinkai@Z510:~/www$ <span class="token builtin class-name">echo</span> <span class="token number">123456</span> <span class="token operator">></span> /etc/rsync.pas
+<span class="token comment"># 测试,注意这里一定要指定用户名 rsyncuser</span>
+lujinkai@Z510:~/www$ <span class="token function">rsync</span> rsyncuser@10.0.0.71::backup
+Password:
+drwxrwxr-x          <span class="token number">4,096</span> <span class="token number">2020</span>/11/14 <span class="token number">22</span>:38:48 <span class="token builtin class-name">.</span>
+-rwxrwxr-x            <span class="token number">319</span> <span class="token number">2020</span>/11/14 <span class="token number">22</span>:38:48 demo.sh
+drwxrwxr-x          <span class="token number">4,096</span> <span class="token number">2020</span>/11/09 <span class="token number">14</span>:52:39 include</code></pre>
+
+<h3 id="inotify-rsync-shell-脚本-实现实时数据同步"><a href="#inotify-rsync-shell-脚本-实现实时数据同步" class="headerlink" title="inotify+rsync+shell 脚本 实现实时数据同步"></a>inotify+rsync+shell 脚本 实现实时数据同步</h3><p>备份数据库是：10.0.0.71，inotifywait 监控文件变化，rsync 负责同步数据</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">SRC</span><span class="token operator">=</span><span class="token string">'/data/www/'</span> <span class="token comment">#注意最后的/</span>
+<span class="token assign-left variable">DEST</span><span class="token operator">=</span><span class="token string">'rsyncuser@10.0.0.71::backup'</span>
+<span class="token function">rpm</span> <span class="token parameter variable">-q</span> <span class="token function">rsync</span> <span class="token operator">&amp;></span>/dev/null <span class="token operator">||</span> yum <span class="token function">install</span> <span class="token function">rsync</span>
+inotifywait <span class="token punctuation">\</span>
+    <span class="token parameter variable">-mrq</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--exclude</span><span class="token operator">=</span><span class="token string">".*\.swp"</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--timefmt</span> <span class="token string">'%Y-%m-%d %H:%M:%S'</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">--format</span> <span class="token string">'%T %w %f'</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-e</span> create,delete,moved_to,close_write,attrib <span class="token variable">$&#123;SRC&#125;</span> <span class="token operator">|</span>
+    <span class="token keyword">while</span> <span class="token builtin class-name">read</span> DATE TIME DIR FILE<span class="token punctuation">;</span> <span class="token keyword">do</span>
+        <span class="token assign-left variable">FILEPATH</span><span class="token operator">=</span><span class="token variable">$&#123;DIR&#125;</span><span class="token variable">$&#123;FILE&#125;</span>
+        <span class="token function">rsync</span> <span class="token punctuation">\</span>
+            <span class="token parameter variable">-az</span> <span class="token punctuation">\</span>
+            <span class="token parameter variable">--delete</span> <span class="token punctuation">\</span>
+            -password-file<span class="token operator">=</span>/etc/rsync.pas <span class="token variable">$SRC</span> <span class="token variable">$DEST</span> <span class="token operator">&amp;&amp;</span>
+            <span class="token builtin class-name">echo</span> <span class="token string">"At <span class="token variable">$&#123;TIME&#125;</span> on <span class="token variable">$&#123;DATE&#125;</span>, file <span class="token variable">$FILEPATH</span> was backuped up via rsync"</span> <span class="token operator">>></span>/var/log/changelist.log
+    <span class="token keyword">done</span></code></pre>
+
+<h3 id="sersync-实现实时数据同步"><a href="#sersync-实现实时数据同步" class="headerlink" title="sersync 实现实时数据同步"></a>sersync 实现实时数据同步</h3><p>sersync 虽然快 10 年没更新了，但是还是比较好用的</p>
+<p>sersync 项目地址: <a target="_blank" rel="noopener" href="https://code.google.com/archive/p/sersync/">https://code.google.com/archive/p/sersync/</a><br>sersync 下载地址: <a target="_blank" rel="noopener" href="https://code.google.com/archive/p/sersync/downloads">https://code.google.com/archive/p/sersync/downloads</a></p>
+<p>sersync 类似于 inotify，同样用于监控，但它克服了 inotify 的缺点</p>
+<p>inotify 最大的不足是会产生重复事件,或者同一个目录下多个文件的操作会产生多个事件,例如,当监控目录中有 5 个文件时,删除目录时会产生 6 个监控事件,从而导致重复调用 rsync 命令。另外比如:vim 文件时,inotify 会监控到临时文件的事件,但这些事件相对于 rsync 来说是不应该被监控的</p>
+<p>sersync 优点：</p>
+<ul>
+<li>c++编写，速度快</li>
+<li>对 linux 系统文件系统产生的临时文件和重复的文件操作进行过滤，所以在结合 rsync 同步的时候，节省了运行时耗和网络资源</li>
+<li>配置很简单，其中提供了静态编译好的二进制文件和 xml 配置文件，直接使用即可</li>
+<li>使用多线程进行同步，尤其在同步较大文件时，能够保证多个服务器实时保持同步状态</li>
+<li>有出错处理机制,通过失败队列对出错的文件重新同步,如果仍旧失败,则按设定时长对同步失败的文件重新同步</li>
+<li>不仅可以实现实时同步，另外还自带 crontab 功能，只需在 xml 配置文件中开启，即也可以按要求隔一段时间整体同步一次，而无需再额外配置 crontab 功能</li>
+<li>可以二次开发</li>
+</ul>
+<p>sersync 只有两个文件：</p>
+<ul>
+<li><p>二进制程序文件 sersync2</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:/usr/local/sersync$ ./sersync2 <span class="token parameter variable">-h</span>
+<span class="token builtin class-name">set</span> the system param
+execute：echo <span class="token number">50000000</span> <span class="token operator">></span> /proc/sys/fs/inotify/max_user_watches
+sh: <span class="token number">1</span>: cannot create /proc/sys/fs/inotify/max_user_watches: Permission denied
+execute：echo <span class="token number">327679</span> <span class="token operator">></span> /proc/sys/fs/inotify/max_queued_events
+sh: <span class="token number">1</span>: cannot create /proc/sys/fs/inotify/max_queued_events: Permission denied
+parse the <span class="token builtin class-name">command</span> param
+_______________________________________________________
+参数-d:启用守护进程模式
+参数-r:在监控前，将监控目录与远程主机用rsync命令推送一遍
+c参数-n: 指定开启守护线程的数量，默认为10个
+参数-o:指定配置文件，默认使用confxml.xml文件
+参数-m:单独启用其他模块，使用 <span class="token parameter variable">-m</span> refreshCDN 开启刷新CDN模块
+参数-m:单独启用其他模块，使用 <span class="token parameter variable">-m</span> socket 开启socket模块
+参数-m:单独启用其他模块，使用 <span class="token parameter variable">-m</span> http 开启http模块
+不加-m参数，则默认执行同步程序
+</code></pre>
+</li>
+<li><p>配置文件 confxml.xml</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:/usr/local/sersync$ <span class="token function">vim</span> confxml.xml
+<span class="token operator">&lt;</span>?xml <span class="token assign-left variable">version</span><span class="token operator">=</span><span class="token string">"1.0"</span> <span class="token assign-left variable">encoding</span><span class="token operator">=</span><span class="token string">"ISO-8859-1"</span>?<span class="token operator">></span>
+<span class="token operator">&lt;</span>head <span class="token assign-left variable">version</span><span class="token operator">=</span><span class="token string">"2.5"</span><span class="token operator">></span>
+    <span class="token operator">&lt;</span>host <span class="token assign-left variable">hostip</span><span class="token operator">=</span><span class="token string">"localhost"</span> <span class="token assign-left variable">port</span><span class="token operator">=</span><span class="token string">"8008"</span><span class="token operator">></span><span class="token operator">&lt;</span>/host<span class="token operator">></span>
+    <span class="token operator">&lt;</span>debug <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span>/<span class="token operator">></span>		<span class="token comment"># 是否开启调试模式</span>
+    <span class="token operator">&lt;</span>fileSystem <span class="token assign-left variable">xfs</span><span class="token operator">=</span><span class="token string">"false"</span>/<span class="token operator">></span>
+    <span class="token operator">&lt;</span>filter <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span><span class="token operator">></span>	<span class="token comment"># 是否开启文件过滤功能</span>
+		<span class="token operator">&lt;</span>exclude <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"(.*)\.svn"</span><span class="token operator">></span><span class="token operator">&lt;</span>/exclude<span class="token operator">></span>
+		<span class="token operator">&lt;</span>exclude <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"(.*)\.gz"</span><span class="token operator">></span><span class="token operator">&lt;</span>/exclude<span class="token operator">></span>
+		<span class="token operator">&lt;</span>exclude <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"^info/*"</span><span class="token operator">></span><span class="token operator">&lt;</span>/exclude<span class="token operator">></span>
+		<span class="token operator">&lt;</span>exclude <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"^static/*"</span><span class="token operator">></span><span class="token operator">&lt;</span>/exclude<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/filter<span class="token operator">></span>
+    <span class="token operator">&lt;</span>inotify<span class="token operator">></span>	<span class="token comment"># 监控的事件</span>
+		<span class="token operator">&lt;</span>delete <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"true"</span>/<span class="token operator">></span>
+		<span class="token operator">&lt;</span>createFolder <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"true"</span>/<span class="token operator">></span>
+		<span class="token operator">&lt;</span>createFile <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span>/<span class="token operator">></span>
+		<span class="token operator">&lt;</span>closeWrite <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"true"</span>/<span class="token operator">></span>
+		<span class="token operator">&lt;</span>moveFrom <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"true"</span>/<span class="token operator">></span>
+		<span class="token operator">&lt;</span>moveTo <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"true"</span>/<span class="token operator">></span>
+		<span class="token operator">&lt;</span>attrib <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span>/<span class="token operator">></span>		<span class="token comment"># 修改此行为true，文件属性变化后也会同步</span>
+		<span class="token operator">&lt;</span>modify <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span>/<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/inotify<span class="token operator">></span>
+
+    <span class="token operator">&lt;</span>sersync<span class="token operator">></span>	<span class="token comment"># rsync命令的配置段</span>
+	<span class="token operator">&lt;</span>localpath <span class="token assign-left variable">watch</span><span class="token operator">=</span><span class="token string">"/opt/tongbu"</span><span class="token operator">></span>		<span class="token comment"># 同步的目录</span>
+		<span class="token comment"># name是远程rsyncd的模块名，如果下面ssh标签开启了start，name则为远程sehll方式运行的目标目录</span>
+	    <span class="token operator">&lt;</span>remote <span class="token assign-left variable">ip</span><span class="token operator">=</span><span class="token string">"127.0.0.1"</span> <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"tongbu1"</span>/<span class="token operator">></span>
+	    <span class="token operator">&lt;</span><span class="token operator">!</span>--<span class="token operator">&lt;</span>remote <span class="token assign-left variable">ip</span><span class="token operator">=</span><span class="token string">"192.168.8.39"</span> <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"tongbu"</span>/<span class="token operator">></span>--<span class="token operator">></span>
+	    <span class="token operator">&lt;</span><span class="token operator">!</span>--<span class="token operator">&lt;</span>remote <span class="token assign-left variable">ip</span><span class="token operator">=</span><span class="token string">"192.168.8.40"</span> <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"tongbu"</span>/<span class="token operator">></span>--<span class="token operator">></span>
+	<span class="token operator">&lt;</span>/localpath<span class="token operator">></span>
+	<span class="token operator">&lt;</span>rsync<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>commonParams <span class="token assign-left variable">params</span><span class="token operator">=</span><span class="token string">"-artuz"</span>/<span class="token operator">></span>		<span class="token comment"># 指定rsync选项</span>
+	    <span class="token operator">&lt;</span>auth <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span> <span class="token assign-left variable">users</span><span class="token operator">=</span><span class="token string">"root"</span> <span class="token assign-left variable">passwordfile</span><span class="token operator">=</span><span class="token string">"/etc/rsync.pas"</span>/<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>userDefinedPort <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span> <span class="token assign-left variable">port</span><span class="token operator">=</span><span class="token string">"874"</span>/<span class="token operator">></span><span class="token operator">&lt;</span><span class="token operator">!</span>-- <span class="token assign-left variable">port</span><span class="token operator">=</span><span class="token number">874</span> --<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>timeout <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token string">"100"</span>/<span class="token operator">></span><span class="token operator">&lt;</span><span class="token operator">!</span>-- <span class="token assign-left variable">timeout</span><span class="token operator">=</span><span class="token number">100</span> --<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>ssh <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span>/<span class="token operator">></span>	<span class="token comment"># 默认使用rsync daemon运行rsync命令,true为使用远程shell模式</span>
+	<span class="token operator">&lt;</span>/rsync<span class="token operator">></span>
+	<span class="token comment"># 错误重传及日志文件路径，默认60分钟</span>
+	<span class="token operator">&lt;</span>failLog <span class="token assign-left variable">path</span><span class="token operator">=</span><span class="token string">"/tmp/rsync_fail_log.sh"</span> <span class="token assign-left variable">timeToExecute</span><span class="token operator">=</span><span class="token string">"60"</span>/<span class="token operator">></span>
+	<span class="token operator">&lt;</span>crontab <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span> <span class="token assign-left variable">schedule</span><span class="token operator">=</span><span class="token string">"600"</span><span class="token operator">></span>	<span class="token comment"># 定时，默认600分钟</span>
+	    <span class="token operator">&lt;</span>crontabfilter <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span><span class="token operator">></span>	<span class="token comment"># 是否开启定时</span>
+		<span class="token operator">&lt;</span>exclude <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"*.php"</span><span class="token operator">></span><span class="token operator">&lt;</span>/exclude<span class="token operator">></span>
+		<span class="token operator">&lt;</span>exclude <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"info/*"</span><span class="token operator">></span><span class="token operator">&lt;</span>/exclude<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>/crontabfilter<span class="token operator">></span>
+	<span class="token operator">&lt;</span>/crontab<span class="token operator">></span>
+	<span class="token operator">&lt;</span>plugin <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span> <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"command"</span>/<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/sersync<span class="token operator">></span>
+<span class="token comment">#####################################以下行不需要修改####################################</span>
+    <span class="token operator">&lt;</span>plugin <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"command"</span><span class="token operator">></span>
+	<span class="token operator">&lt;</span>param <span class="token assign-left variable">prefix</span><span class="token operator">=</span><span class="token string">"/bin/sh"</span> <span class="token assign-left variable">suffix</span><span class="token operator">=</span><span class="token string">""</span> <span class="token assign-left variable">ignoreError</span><span class="token operator">=</span><span class="token string">"true"</span>/<span class="token operator">></span>	<span class="token operator">&lt;</span><span class="token operator">!</span>--prefix /opt/tongbu/mmm.sh suffix--<span class="token operator">></span>
+	<span class="token operator">&lt;</span>filter <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"false"</span><span class="token operator">></span>
+	    <span class="token operator">&lt;</span>include <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"(.*)\.php"</span>/<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>include <span class="token assign-left variable">expression</span><span class="token operator">=</span><span class="token string">"(.*)\.sh"</span>/<span class="token operator">></span>
+	<span class="token operator">&lt;</span>/filter<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/plugin<span class="token operator">></span>
+
+    <span class="token operator">&lt;</span>plugin <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"socket"</span><span class="token operator">></span>
+	<span class="token operator">&lt;</span>localpath <span class="token assign-left variable">watch</span><span class="token operator">=</span><span class="token string">"/opt/tongbu"</span><span class="token operator">></span>
+	    <span class="token operator">&lt;</span>deshost <span class="token assign-left variable">ip</span><span class="token operator">=</span><span class="token string">"192.168.138.20"</span> <span class="token assign-left variable">port</span><span class="token operator">=</span><span class="token string">"8009"</span>/<span class="token operator">></span>
+	<span class="token operator">&lt;</span>/localpath<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/plugin<span class="token operator">></span>
+    <span class="token operator">&lt;</span>plugin <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"refreshCDN"</span><span class="token operator">></span>
+	<span class="token operator">&lt;</span>localpath <span class="token assign-left variable">watch</span><span class="token operator">=</span><span class="token string">"/data0/htdocs/cms.xoyo.com/site/"</span><span class="token operator">></span>
+	    <span class="token operator">&lt;</span>cdninfo <span class="token assign-left variable">domainname</span><span class="token operator">=</span><span class="token string">"ccms.chinacache.com"</span> <span class="token assign-left variable">port</span><span class="token operator">=</span><span class="token string">"80"</span> <span class="token assign-left variable">username</span><span class="token operator">=</span><span class="token string">"xxxx"</span> <span class="token assign-left variable">passwd</span><span class="token operator">=</span><span class="token string">"xxxx"</span>/<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>sendurl <span class="token assign-left variable">base</span><span class="token operator">=</span><span class="token string">"http://pic.xoyo.com/cms"</span>/<span class="token operator">></span>
+	    <span class="token operator">&lt;</span>regexurl <span class="token assign-left variable">regex</span><span class="token operator">=</span><span class="token string">"false"</span> <span class="token assign-left variable">match</span><span class="token operator">=</span><span class="token string">"cms.xoyo.com/site([/a-zA-Z0-9]*).xoyo.com/images"</span>/<span class="token operator">></span>
+	<span class="token operator">&lt;</span>/localpath<span class="token operator">></span>
+    <span class="token operator">&lt;</span>/plugin<span class="token operator">></span>
+<span class="token operator">&lt;</span>/head<span class="token operator">></span></code></pre></li>
+</ul>
+<h4 id="基于-rsync-daemon-实现-sersync"><a href="#基于-rsync-daemon-实现-sersync" class="headerlink" title="基于 rsync daemon 实现 sersync"></a>基于 rsync daemon 实现 sersync</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 下载</span>
+lujinkai@Z510:~/www/script/src$ <span class="token function">wget</span> https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/sersync/sersync2.5.4_64bit_binary_stable_final.tar.gz
+<span class="token comment"># 解压，可以看到，sersync只有两个文件：二进制程序文件和xml配置文件</span>
+lujinkai@Z510:~/www/script/src$ <span class="token function">tar</span> zxvf sersync2.5.4_64bit_binary_stable_final.tar.gz
+lujinkai@Z510:~/www/script/src$ <span class="token function">sudo</span> <span class="token function">mv</span> GNU-Linux-x86/ /usr/local/sersync
+<span class="token comment"># 添加到环境变量PATH，过程略...</span>
+<span class="token comment"># 修改配置文件</span>
+lujinkai@Z510:~/www/script/src$ <span class="token builtin class-name">cd</span> /usr/local/sersync/
+lujinkai@Z510:/usr/local/sersync$ <span class="token function">vim</span> confxml.xml	<span class="token comment"># 过程略...</span>
+<span class="token comment"># 确认安装rsync客户端工具</span>
+lujinkai@Z510:/usr/local/sersync$ <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> <span class="token function">rsync</span>
+<span class="token comment"># 创建连接rsynd服务器的用户密码文件,并必须修改权限</span>
+lujinkai@Z510:~$ <span class="token builtin class-name">echo</span> <span class="token number">123456</span> <span class="token operator">></span> /etc/rsync.pas
+lujinkai@Z510:~$ <span class="token function">chmod</span> <span class="token number">600</span> /etc/rsync.pas
+<span class="token comment"># 以后台方式执行同步</span>
+lujinkai@Z510:~$ sersync2 <span class="token parameter variable">-dro</span> /usr/local/sersync/confxml.xml
+<span class="token comment"># 如果同步失败,可以手动执行下面命令,观察过程</span>
+lujinkai@Z510:~$ <span class="token builtin class-name">cd</span> /data/www <span class="token operator">&amp;&amp;</span> <span class="token function">rsync</span> <span class="token parameter variable">-artuz</span> <span class="token parameter variable">-R</span> <span class="token parameter variable">--delete</span> ./rsyncuser@10.0.0.71::backup --password-file<span class="token operator">=</span>/etc/rsync.pas <span class="token operator">></span>/dev/null <span class="token operator"><span class="token file-descriptor important">2</span>></span><span class="token file-descriptor important">&amp;1</span>
+
+<span class="token comment"># sersync支持多实例，监控多个目录时，只需分别配置不同配置文件，然后使用sersync2指定对应配置文件运行</span>
+lujinkai@Z510:~$ sersync2 <span class="token parameter variable">-rd</span> <span class="token parameter variable">-o</span> /etc/sersync.d/nginx.xml</code></pre>
+
+<h4 id="基于远程-shell-实现-sersync"><a href="#基于远程-shell-实现-sersync" class="headerlink" title="基于远程 shell 实现 sersync"></a>基于远程 shell 实现 sersync</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先配置ssh基于key的自动验证，过程略...</span>
+<span class="token comment"># 修改配置文件 confxml.xml</span>
+<span class="token operator">&lt;</span>localpath <span class="token assign-left variable">watch</span><span class="token operator">=</span><span class="token string">"/data/www"</span><span class="token operator">></span>
+<span class="token operator">&lt;</span>remote <span class="token assign-left variable">ip</span><span class="token operator">=</span><span class="token string">"备份服务器IP"</span> <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">"/data/backup"</span>/<span class="token operator">></span> <span class="token comment">#修改此行指定备份服务器地址和备份目标目录</span>
+<span class="token operator">&lt;</span>/localpath<span class="token operator">></span>
+<span class="token punctuation">..</span>.
+<span class="token operator">&lt;</span>ssh <span class="token assign-left variable">start</span><span class="token operator">=</span><span class="token string">"true"</span>/<span class="token operator">></span>		<span class="token comment"># 开启ssh</span>
+
+<span class="token comment"># 不需要配置/etc/rsync.pas，其他步骤和上面一样</span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/" rel="tag"><i class="fa fa-tag"></i> 文件共享</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E6%97%A5%E5%BF%97/%E6%97%A5%E5%BF%97%E6%9C%8D%E5%8A%A1%E7%AE%A1%E7%90%86/" rel="prev" title="日志服务管理">
+                  <i class="fa fa-chevron-left"></i> 日志服务管理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/pureftpd/" rel="next" title="pureftpd">
+                  pureftpd <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

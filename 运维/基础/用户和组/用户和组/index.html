@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Linux 安全模型3A： 认证: Authentication (确认身份, 登录系统的用户名和密码) 授权: Authorization (对于文件和程序的权限) 审计: Accouting|Audition (监控日志)  认证和授权 linux 本身的软件实现, 审计通过特定的软件实现 用户登录成功时，系统会自动分配令牌 token，token 中包含了用户标识和组成员等信息，用户的每一步">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用户和组">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="Linux 安全模型3A： 认证: Authentication (确认身份, 登录系统的用户名和密码) 授权: Authorization (对于文件和程序的权限) 审计: Accouting|Audition (监控日志)  认证和授权 linux 本身的软件实现, 审计通过特定的软件实现 用户登录成功时，系统会自动分配令牌 token，token 中包含了用户标识和组成员等信息，用户的每一步">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1596264424437.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1596266655590.png">
+<meta property="article:published_time" content="2021-02-04T08:33:06.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="用户和组">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1596264424437.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/","path":"运维/基础/用户和组/用户和组/","title":"用户和组"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用户和组 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-%E5%AE%89%E5%85%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">Linux 安全模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7"><span class="nav-number">2.</span> <span class="nav-text">用户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%BB%84"><span class="nav-number">3.</span> <span class="nav-text">用户组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E7%94%A8%E6%88%B7%E7%BB%84%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">4.</span> <span class="nav-text">用户和用户组的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">5.</span> <span class="nav-text">安全上下文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">6.</span> <span class="nav-text">用户和组的配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x2F-etc-x2F-passwd-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">7.</span> <span class="nav-text">&#x2F;etc&#x2F;passwd 文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x2F-etc-x2F-shadow-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">8.</span> <span class="nav-text">&#x2F;etc&#x2F;shadow 文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x2F-etc-x2F-group-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">9.</span> <span class="nav-text">&#x2F;etc&#x2F;group 文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x2F-etc-x2F-gshadow-%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">10.</span> <span class="nav-text">&#x2F;etc&#x2F;gshadow 文件格式</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用户和组 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用户和组
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-04 16:33:06" itemprop="dateCreated datePublished" datetime="2021-02-04T16:33:06+08:00">2021-02-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/" itemprop="url" rel="index"><span itemprop="name">用户和组</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Linux-安全模型"><a href="#Linux-安全模型" class="headerlink" title="Linux 安全模型"></a>Linux 安全模型</h2><p><strong>3A：</strong></p>
+<pre class="language-none"><code class="language-none">认证: Authentication (确认身份, 登录系统的用户名和密码)
+授权: Authorization (对于文件和程序的权限)
+审计: Accouting|Audition (监控日志)</code></pre>
+
+<p>认证和授权 linux 本身的软件实现, 审计通过特定的软件实现</p>
+<p>用户登录成功时，系统会自动分配令牌 token，token 中包含了用户标识和组成员等信息，用户的每一步操作，系统都会校验他的 token，验证他的权限</p>
+<h2 id="用户"><a href="#用户" class="headerlink" title="用户"></a>用户</h2><p>linux 中每个用户是通过 uid 来唯一标识的 <code>id -u</code></p>
+<pre class="language-none"><code class="language-none">管理员：root，0
+普通用户
+  系统用户：1-499 (centos6及以前)，1-999 (centos7以后)，对守护进行获取资源进行权限分配
+  登录用户：500+ (centos6及以前)，1000+ (centos7以后)，给用户进行交互式登录使用</code></pre>
+
+<h2 id="用户组"><a href="#用户组" class="headerlink" title="用户组"></a>用户组</h2><p>linux 中可以将一个或多个用户加入用户组中, 用户组通过 gid 唯一标识 <code>id -g</code></p>
+<pre class="language-none"><code class="language-none">管理员组: root, 0
+普通组:
+  系统组
+  普通组</code></pre>
+
+<h2 id="用户和用户组的关系"><a href="#用户和用户组的关系" class="headerlink" title="用户和用户组的关系"></a>用户和用户组的关系</h2><ul>
+<li>主组：用户必须属于一个且只有一个主组，默认创建用户时会自动创建和用户同名的组作为用户的主组，由于此组中只有一个用户，又称为私有组</li>
+<li>附加组：一个用户可以属于 0 个或多个辅助组，附属组</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>lujinkai@centos7 root<span class="token punctuation">]</span>$ <span class="token function">id</span> postfix
+<span class="token assign-left variable">uid</span><span class="token operator">=</span><span class="token number">89</span><span class="token punctuation">(</span>postfix<span class="token punctuation">)</span> <span class="token assign-left variable">gid</span><span class="token operator">=</span><span class="token number">89</span><span class="token punctuation">(</span>postfix<span class="token punctuation">)</span> <span class="token assign-left variable">groups</span><span class="token operator">=</span><span class="token number">89</span><span class="token punctuation">(</span>postfix<span class="token punctuation">)</span>,12<span class="token punctuation">(</span>mail<span class="token punctuation">)</span></code></pre>
+
+<h2 id="安全上下文"><a href="#安全上下文" class="headerlink" title="安全上下文"></a>安全上下文</h2><p>进程能够访问资源的权限取决于进程的运行者身份，而非程序本身</p>
+<h2 id="用户和组的配置文件"><a href="#用户和组的配置文件" class="headerlink" title="用户和组的配置文件"></a>用户和组的配置文件</h2><pre class="language-bash" data-language="bash"><code class="language-bash">/etc/passwd  <span class="token comment">#系统用户配置文件，存储了系统中所有用户的基本信息，并且所有用户都可以对此文件执行读操作</span>
+/etc/shadow  <span class="token comment">#存储 Linux 系统中用户的密码信息，又称为“影子文件”</span>
+/etc/group   <span class="token comment">#用户组配置文件，用户组的所有信息都存放在此文件中</span>
+/etc/gshadow <span class="token comment">#存储组用户的密码信息</span></code></pre>
+
+<h2 id="x2F-etc-x2F-passwd-文件格式"><a href="#x2F-etc-x2F-passwd-文件格式" class="headerlink" title="&#x2F;etc&#x2F;passwd 文件格式"></a>&#x2F;etc&#x2F;passwd 文件格式</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># whatis passwd</span>
+sslpasswd <span class="token punctuation">(</span>1ssl<span class="token punctuation">)</span>     - compute password hashes
+<span class="token function">passwd</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>           - update user's authentication tokens
+<span class="token function">passwd</span> <span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>           - password <span class="token function">file</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># man 5 passwd</span></code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1596264424437.png"></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">name      <span class="token comment"># 1 用户登录名</span>
+password  <span class="token comment"># 2 在很早之前, 这里确实存储密码, 后来因为安全问题, 密码就搬迁到/etc/shadow中了, 但是因为兼容性问题, 所以格式不能变, 就留了一个占位符, 用x或*占位</span>
+<span class="token environment constant">UID</span>       <span class="token comment">#  3 用户的id</span>
+GID       <span class="token comment">#  4 用户主组的id</span>
+GECOS     <span class="token comment"># 5 存储用户全名和一些注释</span>
+directory <span class="token comment"># 6 用户家目录</span>
+shell     <span class="token comment"># 7 用户默认使用的shell ( /bin/bash )</span></code></pre>
+
+<h2 id="x2F-etc-x2F-shadow-文件格式"><a href="#x2F-etc-x2F-shadow-文件格式" class="headerlink" title="&#x2F;etc&#x2F;shadow 文件格式"></a>&#x2F;etc&#x2F;shadow 文件格式</h2><p>&#x2F;etc&#x2F;passwd 文件所有用户都可以读, &#x2F;etc&#x2F;shadow 文件只有 root 用户才可以读</p>
+<p>注意：如果这个文件的权限发生了改变，则需要注意是否是恶意攻击</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1596266655590.png"></p>
+<p><a target="_blank" rel="noopener" href="http://c.biancheng.net/view/840.html">Linux &#x2F;etc&#x2F;shadow（影子文件）内容解析（超详细）</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>. 用户登录名
+<span class="token number">2</span>. 加密过的用户登录密码, 一般用sha512加密
+<span class="token number">3</span>. 最后一次修改密码的时间, 如果没有修改过, 则空置
+<span class="token number">4</span>. 密码再过几天可以被更改, <span class="token number">0</span>表示随时都可以更改
+<span class="token number">5</span>. 密码再过几天必须被更改, <span class="token number">9999</span>是300多年, 可以认为永不过期
+<span class="token number">6</span>. 密码过期前几天系统提醒用户, 默认是一周
+<span class="token number">7</span>. 密码过期后的宽限时间, 以天为单位, 也就是说密码过期后, 用户如果还没有修改密码, 则在此字段规定的宽限天数内, 用户还是可以登录系统
+<span class="token number">8</span>. 账号过期时间, 从1970.1.1开始算, 多少天后账号失效, 在此规定时间之外, 不论密码是否过期, 都无法登录<span class="token operator">!</span> 该字段通常被使用在具有收费服务的系统中
+<span class="token number">9</span>. 保留, 这个字段目前没有使用, 等待新功能的加入</code></pre>
+
+<h2 id="x2F-etc-x2F-group-文件格式"><a href="#x2F-etc-x2F-group-文件格式" class="headerlink" title="&#x2F;etc&#x2F;group 文件格式"></a>&#x2F;etc&#x2F;group 文件格式</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 组名:密码:GID:以当前组为附加组的用户列表(分割符为逗号)</span>
+
+root:x:0:
+mail:x:12:postfix
+lujinkai:x:1000:</code></pre>
+
+<h2 id="x2F-etc-x2F-gshadow-文件格式"><a href="#x2F-etc-x2F-gshadow-文件格式" class="headerlink" title="&#x2F;etc&#x2F;gshadow 文件格式"></a>&#x2F;etc&#x2F;gshadow 文件格式</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 组名:组密码:组管理员</span>
+
+root:::
+mail:::postfix
+lujinkai:<span class="token operator">!</span>::</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">组密码：通常不设置组密码, 为空或者 <span class="token operator">!</span> 都表示该群组没有组密码
+组管理员列表：可以更改组密码和添加用户到群组中, 组管理员列表用逗号分隔。这个功能现在不常用了
+组管理员：该字段显示这个用户组中有哪些附加用户，和<span class="token variable"><span class="token variable">`</span>/etc/group<span class="token variable">`</span></span> 文件中附加组显示内容相同，多个用户也是用逗号分隔</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/" rel="tag"><i class="fa fa-tag"></i> 用户和组</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/DNS/%E7%BB%BC%E5%90%88%E5%AE%9E%E9%AA%8C/" rel="prev" title="综合实验">
+                  <i class="fa fa-chevron-left"></i> 综合实验
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/" rel="next" title="相关命令">
+                  相关命令 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

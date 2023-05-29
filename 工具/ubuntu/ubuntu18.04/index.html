@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="1. 安装系统分区  &#x2F;boot 300MB 逻辑分区  &#x2F; 自动补全 主分区  其他的不用设置 更新  不要勾选更新，等安装完系统，更新源之后再更新比较快 2. 更新源装完系统后第一件事就是更新国内源 将 apt 的源更换为国内的源，我选择的是阿里云 https:&#x2F;&#x2F;developer.aliyun.com&#x2F;mirror&#x2F;ubuntu?spm&#x3D;a2c6h.13651102.0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu18.04">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/ubuntu/ubuntu18.04/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="1. 安装系统分区  &#x2F;boot 300MB 逻辑分区  &#x2F; 自动补全 主分区  其他的不用设置 更新  不要勾选更新，等安装完系统，更新源之后再更新比较快 2. 更新源装完系统后第一件事就是更新国内源 将 apt 的源更换为国内的源，我选择的是阿里云 https:&#x2F;&#x2F;developer.aliyun.com&#x2F;mirror&#x2F;ubuntu?spm&#x3D;a2c6h.13651102.0">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.lujinkai.cn/note/phpMyAdmin.png">
+<meta property="article:published_time" content="2020-12-07T13:37:10.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.482Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.lujinkai.cn/note/phpMyAdmin.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/ubuntu/ubuntu18.04/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/ubuntu/ubuntu18.04/","path":"工具/ubuntu/ubuntu18.04/","title":"ubuntu18.04"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ubuntu18.04 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.</span> <span class="nav-text">1. 安装系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%9B%B4%E6%96%B0%E6%BA%90"><span class="nav-number">2.</span> <span class="nav-text">2. 更新源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%AE%89%E8%A3%85%E5%B8%B8%E7%94%A8%E8%BD%AF%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">3. 安装常用软件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-gnome-tweaks"><span class="nav-number">3.1.</span> <span class="nav-text">1. gnome-tweaks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-WPS"><span class="nav-number">3.2.</span> <span class="nav-text">2. WPS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-chrome"><span class="nav-number">3.3.</span> <span class="nav-text">3. chrome</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-vscode"><span class="nav-number">3.4.</span> <span class="nav-text">4. vscode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-typora"><span class="nav-number">3.5.</span> <span class="nav-text">5. typora</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-sublime-text3"><span class="nav-number">3.6.</span> <span class="nav-text">6. sublime_text3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-phpstorm"><span class="nav-number">3.7.</span> <span class="nav-text">7. phpstorm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-PyCharm"><span class="nav-number">3.8.</span> <span class="nav-text">8. PyCharm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-SecureCRT"><span class="nav-number">3.9.</span> <span class="nav-text">9. SecureCRT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-%E6%90%9C%E7%8B%97%E8%BE%93%E5%85%A5%E6%B3%95"><span class="nav-number">3.10.</span> <span class="nav-text">10. 搜狗输入法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-%E7%BD%91%E6%98%93%E4%BA%91%E9%9F%B3%E4%B9%90"><span class="nav-number">3.11.</span> <span class="nav-text">11. 网易云音乐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98"><span class="nav-number">3.12.</span> <span class="nav-text">12. 百度网盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Remmina"><span class="nav-number">3.13.</span> <span class="nav-text">13. Remmina</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-Rhythmbox"><span class="nav-number">3.14.</span> <span class="nav-text">14. Rhythmbox</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-SVN"><span class="nav-number">3.15.</span> <span class="nav-text">15. SVN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-nfs"><span class="nav-number">3.16.</span> <span class="nav-text">16. nfs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-%E5%9D%9A%E6%9E%9C%E4%BA%91"><span class="nav-number">3.17.</span> <span class="nav-text">17. 坚果云</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-%E9%85%8D%E7%BD%AE-ssh"><span class="nav-number">3.18.</span> <span class="nav-text">18. 配置 ssh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-phpMyAdmin"><span class="nav-number">3.19.</span> <span class="nav-text">19. phpMyAdmin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#20-postman"><span class="nav-number">3.20.</span> <span class="nav-text">20. postman</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/ubuntu/ubuntu18.04/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ubuntu18.04 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ubuntu18.04
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-07 21:37:10" itemprop="dateCreated datePublished" datetime="2020-12-07T21:37:10+08:00">2020-12-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/ubuntu/" itemprop="url" rel="index"><span itemprop="name">ubuntu</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="1-安装系统"><a href="#1-安装系统" class="headerlink" title="1. 安装系统"></a>1. 安装系统</h2><p>分区</p>
+<p> &#x2F;boot 300MB 逻辑分区</p>
+<p> &#x2F; 自动补全 主分区</p>
+<p> 其他的不用设置</p>
+<p>更新</p>
+<p> 不要勾选更新，等安装完系统，更新源之后再更新比较快</p>
+<h2 id="2-更新源"><a href="#2-更新源" class="headerlink" title="2. 更新源"></a>2. 更新源</h2><p>装完系统后<strong>第一件事</strong>就是更新国内源</p>
+<p>将 apt 的源更换为国内的源，我选择的是阿里云</p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/ubuntu?spm=a2c6h.13651102.0.0.3e221b11OyziSW">https://developer.aliyun.com/mirror/ubuntu?spm=a2c6h.13651102.0.0.3e221b11OyziSW</a></p>
+<p>让更新后的源生效</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> update		// 更新软件列表
+<span class="token function">sudo</span> <span class="token function">apt-get</span> upgrade	// 更新软件</code></pre>
+
+<h2 id="3-安装常用软件"><a href="#3-安装常用软件" class="headerlink" title="3. 安装常用软件"></a>3. 安装常用软件</h2><h3 id="1-gnome-tweaks"><a href="#1-gnome-tweaks" class="headerlink" title="1. gnome-tweaks"></a>1. <strong>gnome-tweaks</strong></h3><p>可以通过 ubuntu 软件 搜索安装，或者</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span>  <span class="token function">install</span>    gnome-tweaks</code></pre>
+
+<h3 id="2-WPS"><a href="#2-WPS" class="headerlink" title="2. WPS"></a>2. WPS</h3><p><a target="_blank" rel="noopener" href="https://www.wps.cn/product/wpslinux/">https://www.wps.cn/product/wpslinux/</a></p>
+<p>下载.dep 包，然后双击安装即可</p>
+<h3 id="3-chrome"><a href="#3-chrome" class="headerlink" title="3. chrome"></a>3. chrome</h3><p><a target="_blank" rel="noopener" href="https://www.google.cn/chrome/">https://www.google.cn/chrome/</a></p>
+<p>下载.dep 包，然后双击安装即可</p>
+<h3 id="4-vscode"><a href="#4-vscode" class="headerlink" title="4. vscode"></a>4. vscode</h3><p><a target="_blank" rel="noopener" href="https://code.visualstudio.com/">https://code.visualstudio.com/</a></p>
+<p>下载.dep 包，然后双击安装即可</p>
+<h3 id="5-typora"><a href="#5-typora" class="headerlink" title="5. typora"></a>5. typora</h3><p><a target="_blank" rel="noopener" href="https://www.typora.io/">https://www.typora.io/</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># or run:</span>
+<span class="token comment"># sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys BA300B7755AFCFAE</span>
+<span class="token function">wget</span> <span class="token parameter variable">-qO</span> - https://typora.io/linux/public-key.asc <span class="token operator">|</span> <span class="token function">sudo</span> apt-key <span class="token function">add</span> -
+<span class="token comment"># add Typora's repository</span>
+<span class="token function">sudo</span> add-apt-repository <span class="token string">'deb https://typora.io/linux ./'</span>
+<span class="token function">sudo</span> <span class="token function">apt-get</span> update
+<span class="token comment"># install typora</span>
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> typora</code></pre>
+
+<h3 id="6-sublime-text3"><a href="#6-sublime-text3" class="headerlink" title="6. sublime_text3"></a>6. sublime_text3</h3><p><a target="_blank" rel="noopener" href="https://www.sublimetext.com/docs/3/linux_repositories.html">https://www.sublimetext.com/docs/3/linux_repositories.html</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> <span class="token parameter variable">-qO</span> - https://download.sublimetext.com/sublimehq-pub.gpg <span class="token operator">|</span> <span class="token function">sudo</span> apt-key <span class="token function">add</span> -
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> apt-transport-https
+<span class="token builtin class-name">echo</span> <span class="token string">"deb https://download.sublimetext.com/ apt/stable/"</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/apt/sources.list.d/sublime-text.list
+<span class="token function">sudo</span> <span class="token function">apt-get</span> update
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> sublime-text</code></pre>
+
+<h3 id="7-phpstorm"><a href="#7-phpstorm" class="headerlink" title="7. phpstorm"></a>7. phpstorm</h3><p><a target="_blank" rel="noopener" href="https://www.jetbrains.com/phpstorm/download/#section=linux">https://www.jetbrains.com/phpstorm/download/#section=linux</a></p>
+<p>两种安装方式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> snap <span class="token function">install</span> phpstorm <span class="token parameter variable">--classic</span></code></pre>
+
+<p>或者直接下载 .tar.gz 包，然后将解压后的目录移动到 &#x2F;opt 下，再执行 phpstorm.sh 即可</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">tar</span> <span class="token parameter variable">-zxvf</span> PhpStorm-2019.2.3.tar.gz
+<span class="token function">sudo</span> <span class="token function">mv</span> PhpStorm-2019.2.3.tar.gz /opt/PhpStorm
+<span class="token builtin class-name">cd</span> /opt
+./PhpStorm/bin/phpstorm.sh</code></pre>
+
+<p>激活码：百度搜一个</p>
+<p>删除： 删除 &#x2F;opt&#x2F;PhpStorm 和 ~&#x2F;.PhpStorm2019.2 即可</p>
+<p>重装：删除~&#x2F;.PhpStorm2019.2 然后重新执行 phpstorm.sh 即可</p>
+<h3 id="8-PyCharm"><a href="#8-PyCharm" class="headerlink" title="8. PyCharm"></a>8. PyCharm</h3><p>两种安装方式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> snap <span class="token function">install</span> pycharm-professional <span class="token parameter variable">--classic</span></code></pre>
+
+<p>或者</p>
+<p>或者直接下载 .tar.gz 包，然后将解压后的目录移动到 &#x2F;opt 下，再执行 pycharm.sh 即可</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">tar</span> <span class="token parameter variable">-zxvf</span> pycharm-professional-2019.2.3.tar.gz
+<span class="token function">sudo</span> <span class="token function">mv</span> pycharm-2019.2.3/ /opt/pycharm
+<span class="token builtin class-name">cd</span> /opt
+./pycharm/bin/pycharm.sh</code></pre>
+
+<p>激活码：百度搜一个</p>
+<p>删除： 删除 &#x2F;opt&#x2F;pycharm 和 ~&#x2F;.PyCharm2019.2 即可</p>
+<p>重装：删除~&#x2F;.PyCharm2019.2 然后重新执行 pycharm.sh 即可</p>
+<p>奇怪的是，pycharm 不会自己生成快捷方式，所以需要自己手动添加</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /usr/share/applications/
+<span class="token function">sudo</span> <span class="token function">vim</span> PyCharm.desktop</code></pre>
+
+<p>将以下代码添加到 PyCharm.desktop</p>
+<pre class="language-none"><code class="language-none">[Desktop Entry]
+Type&#x3D;Application
+Name&#x3D;PyCharm
+GenericName&#x3D;pycharm-2019.2
+Comment&#x3D;Pycharm3:The Python IDE
+Exec&#x3D;sh &#x2F;opt&#x2F;pycharm&#x2F;bin&#x2F;pycharm.sh
+Icon&#x3D;&#x2F;opt&#x2F;pycharm&#x2F;bin&#x2F;pycharm.png
+Terminal&#x3D;pycharm
+Categories&#x3D;PyCharm;</code></pre>
+
+<h3 id="9-SecureCRT"><a href="#9-SecureCRT" class="headerlink" title="9. SecureCRT"></a>9. SecureCRT</h3><p><a target="_blank" rel="noopener" href="https://www.vandyke.com/cgi-bin/releases.php?product=securecrt">https://www.vandyke.com/cgi-bin/releases.php?product=securecrt</a></p>
+<p>下载之前需要先注册，这个有点麻烦</p>
+<p>两种安装方式，.dep 或者.tar.gz，这里选择 .tar.gz，将下载的 scrt-8.5.4.1942.ubuntu18-64.tar.gz 解压到&#x2F;opt 下</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">tar</span> <span class="token parameter variable">-zxvf</span> scrt-8.5.4.1942.ubuntu18-64.tar.gz
+<span class="token function">sudo</span> <span class="token function">mv</span> scrt-8.5.4 /opt/
+/opt/scrt-8.5.4/SecureCRT		// 启动软件</code></pre>
+
+<p>添加快捷方式到启动器</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mv</span> /opt/scrt-8.5.4/SecureCRT.desktop /usr/share/applications/
+<span class="token function">sudo</span> <span class="token function">vim</span> /usr/share/applications/SecureCRT.desktop
+// 修改   <span class="token assign-left variable">Exec</span><span class="token operator">=</span>/opt/scrt-8.5.4/SecureCRT
+//             <span class="token assign-left variable">Icon</span><span class="token operator">=</span>/opt/scrt-8.5.4/securecrt_64.png</code></pre>
+
+<p>安装完毕</p>
+<p>如果采用双击.dep 安装包的方式，安装完成后，双击 SecureCTR 图标, 打不开也不报错</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@lujinkai-TM1703:/usr/lib/x86_64-linux-gnu$ <span class="token function">whereis</span> SecureCRT
+SecureCRT: /usr/bin/SecureCRT</code></pre>
+
+<p>回车执行:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/usr/bin/SecureCRT</code></pre>
+
+<p>报错: <code>error while loading shared libraries: libpython2.7.so.1.0: cannot open shared object file: No such file or directory</code></p>
+<p>检测:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">locate</span> libpython2.7.so.1.0</code></pre>
+
+<p>显示正常: <code>/usr/lib/x86_64-linux-gnu/libpython2.7.so.1.0</code></p>
+<p>奇怪, 但是查找不到这文件</p>
+<p>所以直接安装这个库:</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> libpython2.7-dev</code></pre>
+
+<p>问题解决</p>
+<h3 id="10-搜狗输入法"><a href="#10-搜狗输入法" class="headerlink" title="10. 搜狗输入法"></a>10. 搜狗输入法</h3><p><a target="_blank" rel="noopener" href="https://pinyin.sogou.com/linux/?r=pinyin">https://pinyin.sogou.com/linux/?r=pinyin</a></p>
+<p>因为搜狗输入法依赖 fcitx，所以要先安装 fcitx</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> fcitx</code></pre>
+
+<p>下载搜狗输入法，使用 dpkg 安装</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> dpkg <span class="token parameter variable">-i</span> sogoupinyin_2.2.0.0108_amd64.deb</code></pre>
+
+<p>报错，解决依赖关系</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> --fix-broken <span class="token function">install</span></code></pre>
+
+<p>启动器打开 输入法，配置为 fcitx。</p>
+<p>设置 -&gt; 区域和语言 -&gt; 输入源：删除多余语言，只保留一个 汉语-&gt; 管理已安装的语言 -&gt; 添加或删除语言… ：只安装一个 中文简体</p>
+<p>重启</p>
+<p>注：搜狗输入法目前支持 ubuntu18.04，在 ubuntu20.04 上推荐使用谷歌输入法</p>
+<h3 id="11-网易云音乐"><a href="#11-网易云音乐" class="headerlink" title="11. 网易云音乐"></a>11. 网易云音乐</h3><p><a target="_blank" rel="noopener" href="https://music.163.com/#/download">https://music.163.com/#/download</a></p>
+<p>下载全部客户端，选择 Linux 版，双击下载的.dep 安装包即可</p>
+<h3 id="12-百度网盘"><a href="#12-百度网盘" class="headerlink" title="12. 百度网盘"></a>12. 百度网盘</h3><p><a target="_blank" rel="noopener" href="https://pan.baidu.com/download">https://pan.baidu.com/download</a></p>
+<p>下载.dep 包，然后双击安装即可</p>
+<h3 id="13-Remmina"><a href="#13-Remmina" class="headerlink" title="13. Remmina"></a>13. Remmina</h3><p>软件中心搜索 “Remmina”</p>
+<h3 id="14-Rhythmbox"><a href="#14-Rhythmbox" class="headerlink" title="14. Rhythmbox"></a>14. Rhythmbox</h3><p>软件中心搜索 “Rhythmbox”</p>
+<h3 id="15-SVN"><a href="#15-SVN" class="headerlink" title="15. SVN"></a>15. SVN</h3><p>这个有点麻烦，没有可视化客户端，只能用命令行了</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> subversion</code></pre>
+
+<p>先略过。。。</p>
+<h3 id="16-nfs"><a href="#16-nfs" class="headerlink" title="16. nfs"></a>16. nfs</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> nfs-common</code></pre>
+
+<p>这个有点麻烦，暂时略过，用坚果云代替先</p>
+<h3 id="17-坚果云"><a href="#17-坚果云" class="headerlink" title="17. 坚果云"></a>17. 坚果云</h3><p><a target="_blank" rel="noopener" href="https://www.jianguoyun.com/s/downloads">https://www.jianguoyun.com/s/downloads</a></p>
+<p>下载 Linux 版，双击.dep 安装包即可</p>
+<h3 id="18-配置-ssh"><a href="#18-配置-ssh" class="headerlink" title="18. 配置 ssh"></a>18. 配置 ssh</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">vim</span> /etc/ssh/ssh_config	// 修改配置文件</code></pre>
+
+<p>修改&amp;&amp;添加</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">GSSAPIAuthentication no		// 默认yes，修改为no
+
+ServerAliveInterval <span class="token number">55</span>		// 每隔55秒发送一次请求
+ServerAliveCountMax <span class="token number">9</span>		// <span class="token number">9</span>次没有响应就断开连接</code></pre>
+
+<p>重启</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">service</span> <span class="token function">ssh</span> restart</code></pre>
+
+<p>如果无法重启，则安装<code>openssh-server</code>后再重启</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> openssh-server</code></pre>
+
+<h3 id="19-phpMyAdmin"><a href="#19-phpMyAdmin" class="headerlink" title="19. phpMyAdmin"></a>19. phpMyAdmin</h3><p>因为 phpMyAdimin 默认只能访问本地数据库，但是我们的需求是可以连接远程服务器的数据库。</p>
+<p>打开&#x2F;phpmyadmin&#x2F;libraries 目录，</p>
+<p>修改 config.default.php 文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$cfg</span><span class="token punctuation">[</span><span class="token string">'AllowArbitraryServer'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>  修改成：<span class="token variable">$cfg</span><span class="token punctuation">[</span><span class="token string">'AllowArbitraryServer'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span></code></pre>
+
+<p>然后把 phpMyAdmin 目录移动到&#x2F;data&#x2F;wwwroot 下，单独给它配置访问域名，因为如果通过二级目录去访问，有时候会报如下的错误：</p>
+<p><img data-src="//img.lujinkai.cn/note/phpMyAdmin.png"></p>
+<h3 id="20-postman"><a href="#20-postman" class="headerlink" title="20. postman"></a>20. postman</h3><p><a target="_blank" rel="noopener" href="https://www.getpostman.com/downloads/">https://www.getpostman.com/downloads/</a></p>
+<p>解压，进入解压后的目录，直接执行 Postman 即可</p>
+<p>但是没有桌面图标，这个我就不添加图标了，只在 &#x2F;ust&#x2F;local&#x2F;bin 目录下添加一个软链接指向 &#x2F;opt&#x2F;Postman&#x2F;Postman</p>
+<p>未完待续。。。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%B7%A5%E5%85%B7/ubuntu/%E5%8F%8C%E7%B3%BB%E7%BB%9F%E4%BF%AE%E6%94%B9%E5%BC%95%E5%AF%BC%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F/" rel="prev" title="双系统修改引导启动顺序">
+                  <i class="fa fa-chevron-left"></i> 双系统修改引导启动顺序
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/MySQL/mysql5.7%20datetime%20%E9%BB%98%E8%AE%A4%E5%80%BC%E4%B8%BA'0000-00-00%20000000'%E6%97%A0%E6%B3%95%E5%88%9B%E5%BB%BA/" rel="next" title="mysql5.7 datetime 默认值为'0000-00-00 000000'无法创建">
+                  mysql5.7 datetime 默认值为'0000-00-00 000000'无法创建 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

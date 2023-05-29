@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="https:&#x2F;&#x2F;www.easyswoole.com&#x2F;Components&#x2F;jwt.htmlhttps:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1608021814182894637&amp;wfr&#x3D;spider&amp;for&#x3D;pc使用 JWT 实现单点登录（完全跨域方案） JWT：JSON Web Token JWT 不仅可用于认证，还可用于信息交换。善用 JWT 有助于减少服务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jwt">
+<meta property="og:url" content="http://blog.lujinkai.cn/PHP/EasySwoole/jwt/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="https:&#x2F;&#x2F;www.easyswoole.com&#x2F;Components&#x2F;jwt.htmlhttps:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1608021814182894637&amp;wfr&#x3D;spider&amp;for&#x3D;pc使用 JWT 实现单点登录（完全跨域方案） JWT：JSON Web Token JWT 不仅可用于认证，还可用于信息交换。善用 JWT 有助于减少服务">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-11T15:21:58.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.474Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="EasySwoole">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/PHP/EasySwoole/jwt/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/PHP/EasySwoole/jwt/","path":"PHP/EasySwoole/jwt/","title":"jwt"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>jwt | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90-token-%E7%BC%96%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">生成 token 编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90-token-%E8%A7%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">解析 token 解码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#easyswoole-%E4%B8%AD%E7%9A%84-jwt"><span class="nav-number">3.</span> <span class="nav-text">easyswoole 中的 jwt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E7%BB%AD%E6%9C%9F"><span class="nav-number">4.</span> <span class="nav-text">自动续期</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/EasySwoole/jwt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="jwt | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          jwt
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-11 23:21:58" itemprop="dateCreated datePublished" datetime="2020-12-11T23:21:58+08:00">2020-12-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/EasySwoole/" itemprop="url" rel="index"><span itemprop="name">EasySwoole</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p><a target="_blank" rel="noopener" href="https://www.easyswoole.com/Components/jwt.html">https://www.easyswoole.com/Components/jwt.html</a><br><a target="_blank" rel="noopener" href="https://baijiahao.baidu.com/s?id=1608021814182894637&wfr=spider&for=pc">https://baijiahao.baidu.com/s?id=1608021814182894637&amp;wfr=spider&amp;for=pc</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42873937/article/details/82460997">使用 JWT 实现单点登录（完全跨域方案）</a></p>
+<p>JWT：JSON Web Token</p>
+<p>JWT 不仅可用于认证，还可用于信息交换。善用 JWT 有助于减少服务器请求数据库的次数</p>
+<h2 id="生成-token-编码"><a href="#生成-token-编码" class="headerlink" title="生成 token 编码"></a>生成 token 编码</h2><p>将<font color=red> <u>用户信息</u> + <u>固定数据</u>（加密方式、用户、过期时间等）+ <u>密钥</u> </font> 加密，得到 <font color=red>签名</font>，然后将这四部分数据 base64 编码，生成一个长字符串，这个长字符串就是 token</p>
+<p>注意：</p>
+<ul>
+<li>密钥保存在服务器上，千万不能泄露，可以设置成 项目名称+随机字符串 的格式</li>
+<li>token 中的所有信息都是公开的，所以一定不能存放密码等隐私信息</li>
+<li>一旦 JWT 签发，有效期内将会一直有效，不能取消 token 或更改 token 的权限为了减少盗用，JWT 的有效期不宜设置太长。对于某些重要操作，用户在使用时应该每次都进行进行身份验证</li>
+<li>密钥可以保证 token 的安全性，但是无法防止 token 的盗用问题，为了减少盗用和窃取，推荐使用 HTTPS 协议进行传输</li>
+</ul>
+<h2 id="解析-token-解码"><a href="#解析-token-解码" class="headerlink" title="解析 token 解码"></a>解析 token 解码</h2><p>base64 解码 token，得到一堆明文信息和签名，明文信息里有一个字段说明了加密用的算法，将明文信息使用指定的加密方式加密，如果等于签名，则 token 校验通过，在进行超时等其他参数的校验</p>
+<h2 id="easyswoole-中的-jwt"><a href="#easyswoole-中的-jwt" class="headerlink" title="easyswoole 中的 jwt"></a>easyswoole 中的 jwt</h2><p>官方文档：<a target="_blank" rel="noopener" href="https://www.easyswoole.com/Components/jwt.html">https://www.easyswoole.com/Components/jwt.html</a></p>
+<p>官方文档写的比较简略，通过查阅源码，可以有更详细的了解。</p>
+<p>token 由三或四部分组成：</p>
+<ol>
+<li><p>前缀：prefix，可省略</p>
+</li>
+<li><p>头部：header，是 alg（加密方式）和 typ（类型，默认 JWT 且无法更改）的组合，经过 base64 转码</p>
+</li>
+<li><p>有效载荷：payload，包含以下信息，经过 base64 转码</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token string single-quoted-string">'exp'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getExp</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 过期时间，默认两个小时</span>
+<span class="token string single-quoted-string">'sub'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getSub</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 主题，没有默认值</span>
+<span class="token string single-quoted-string">'nbf'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getNbf</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 在此之前不可用，默认time()</span>
+<span class="token string single-quoted-string">'aud'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getAud</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 用户，无默认值</span>
+<span class="token string single-quoted-string">'iat'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getIat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 发布时间，默认time()</span>
+<span class="token string single-quoted-string">'jti'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getJti</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// jwt-id，用于标识jwt，默认10字节的随机字符串</span>
+<span class="token string single-quoted-string">'iss'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getIss</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>			<span class="token comment">// 发行人，默认'EasySwoole'</span>
+<span class="token comment">// token状态，0初始状态，1合法token，-1非法token，-2过期token，生成token的时候，status默认给1</span>
+<span class="token comment">// 不太理解payload中为什么要包含这个字段</span>
+<span class="token string single-quoted-string">'status'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getStatus</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token string single-quoted-string">'data'</span> <span class="token operator">=></span> <span class="token variable">$this</span><span class="token operator">-></span><span class="token function">getData</span><span class="token punctuation">(</span><span class="token punctuation">)</span>			<span class="token comment">// 自定义的数据</span></code></pre>
+
+<p>必要的信息都有默认值：</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token comment">// Jwt</span>
+<span class="token keyword">private</span> <span class="token variable">$secretKey</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'EasySwoole'</span><span class="token punctuation">;</span>
+<span class="token keyword">private</span> <span class="token variable">$alg</span> <span class="token operator">=</span> <span class="token class-name static-context">Jwt</span><span class="token operator">::</span><span class="token constant">ALG_METHOD_HS256</span><span class="token punctuation">;</span> <span class="token comment">// 默认加密方式</span>
+
+<span class="token comment">// JwtObject</span>
+<span class="token keyword">protected</span> <span class="token variable">$iss</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'EasySwoole'</span><span class="token punctuation">;</span> <span class="token comment">// 发行人</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">nbf</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">nbf</span> <span class="token operator">=</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">iat</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">iat</span> <span class="token operator">=</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">exp</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">exp</span> <span class="token operator">=</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">7200</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$this</span><span class="token operator">-></span><span class="token property">jti</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$this</span><span class="token operator">-></span><span class="token property">jti</span> <span class="token operator">=</span> <span class="token class-name static-context">Random</span><span class="token operator">::</span><span class="token function">character</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>签名：signature，包含 secretKey（秘钥）、header、payload、alg，经过加密然后 base64 转码</p>
+<p>除了 secretKey，其他所有信息相当于都是明文，secretKey 储存在服务器的内存中，如果重启服务，secretKey 就会丢失，之前的 token 就都无法通过校验，所以<strong>推荐直接修改 Jwt 组件中的默认 secretKey，然后在生成 token 的时候，不指定 secretKey，使用默认值</strong></p>
+</li>
+</ol>
+<p>生成 token，以下是最简略的写法：</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">use</span> <span class="token package">EasySwoole<span class="token punctuation">\</span>Jwt<span class="token punctuation">\</span>Jwt</span><span class="token punctuation">;</span>
+
+<span class="token variable">$token</span> <span class="token operator">=</span> <span class="token class-name static-context">Jwt</span><span class="token operator">::</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">publish</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">__toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<p>生成 token，以下是推荐写法：</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">use</span> <span class="token package">EasySwoole<span class="token punctuation">\</span>Jwt<span class="token punctuation">\</span>Jwt</span><span class="token punctuation">;</span>
+
+<span class="token variable">$jwtObject</span> <span class="token operator">=</span> <span class="token class-name static-context">Jwt</span><span class="token operator">::</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-></span><span class="token function">publish</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setPrefix</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'Bearer'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">// token前缀，Bearer表示标准jwt格式</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setSub</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'yuanzhan'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">// 主题</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setAud</span><span class="token punctuation">(</span><span class="token variable">$userId</span><span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">// 用户id</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setExp</span><span class="token punctuation">(</span><span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">3600</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">// 过期时间设置为1个小时</span>
+<span class="token comment">// 自定义数据</span>
+<span class="token variable">$jwtObject</span><span class="token operator">-></span><span class="token function">setData</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+    <span class="token string single-quoted-string">'other_info'</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token variable">$token</span> <span class="token operator">=</span> <span class="token variable">$jwt</span><span class="token operator">-></span><span class="token function">__toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h2 id="自动续期"><a href="#自动续期" class="headerlink" title="自动续期"></a>自动续期</h2><p>设置 token 过期时间 2h，2h 内用户一直在操作，然后贸然过期肯定不合理，所以 token 要有自动续期机制。</p>
+<p>方案：</p>
+<ul>
+<li>后端：每次校验 token 的过期时间，如果过期但是过期时间不超过 4 个小时，则生成一个新 token，并附着在此次请求返回的数据的基础上。这里用“refreshToken”字段</li>
+<li>前端：每次 http 请求校验返回值中有没有“refreshToken”字段，如果有，则刷新本地 token</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/EasySwoole/" rel="tag"><i class="fa fa-tag"></i> EasySwoole</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/PHP/EasySwoole/%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6/" rel="prev" title="上传文件">
+                  <i class="fa fa-chevron-left"></i> 上传文件
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/PHP/EasySwoole/php-fpm%E8%BF%9B%E7%A8%8B%E6%A8%A1%E5%9E%8B/" rel="next" title="php-fpm进程模型">
+                  php-fpm进程模型 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

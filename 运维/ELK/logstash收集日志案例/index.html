@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="tomcat 日志tomcat 默认的格式比较简单，包含 ip、date、method、url、status code 等信息，例如： 10.0.0.1 - - [06&#x2F;Mar&#x2F;2021:09:26:09 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 11156 10.0.0.1 - - [06&#x2F;Mar&#x2F;2021:09:26:10 +0800] &quot;GET &#x2F;tomcat.svg HTTP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="logstash收集日志案例">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/logstash%E6%94%B6%E9%9B%86%E6%97%A5%E5%BF%97%E6%A1%88%E4%BE%8B/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="tomcat 日志tomcat 默认的格式比较简单，包含 ip、date、method、url、status code 等信息，例如： 10.0.0.1 - - [06&#x2F;Mar&#x2F;2021:09:26:09 +0800] &quot;GET &#x2F; HTTP&#x2F;1.1&quot; 200 11156 10.0.0.1 - - [06&#x2F;Mar&#x2F;2021:09:26:10 +0800] &quot;GET &#x2F;tomcat.svg HTTP">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615022486227.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615023193996.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615130970319.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615135063740.png">
+<meta property="article:published_time" content="2021-03-05T02:24:34.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.494Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="logstash">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1615022486227.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/logstash%E6%94%B6%E9%9B%86%E6%97%A5%E5%BF%97%E6%A1%88%E4%BE%8B/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/logstash%E6%94%B6%E9%9B%86%E6%97%A5%E5%BF%97%E6%A1%88%E4%BE%8B/","path":"运维/ELK/logstash收集日志案例/","title":"logstash收集日志案例"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>logstash收集日志案例 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#tomcat-%E6%97%A5%E5%BF%97"><span class="nav-number">1.</span> <span class="nav-text">tomcat 日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-%E6%97%A5%E5%BF%97"><span class="nav-number">2.</span> <span class="nav-text">java 日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-%E8%AE%BF%E9%97%AE%E6%97%A5%E5%BF%97"><span class="nav-number">3.</span> <span class="nav-text">nginx 访问日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-x2F-UDP-%E6%97%A5%E5%BF%97"><span class="nav-number">4.</span> <span class="nav-text">TCP&#x2F;UDP 日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87-rsyslog-%E6%94%B6%E9%9B%86-haproxy-%E6%97%A5%E5%BF%97"><span class="nav-number">5.</span> <span class="nav-text">通过 rsyslog 收集 haproxy 日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#filebeat-%E6%94%B6%E9%9B%86%E6%97%A5%E5%BF%97%E5%B9%B6%E5%86%99%E5%85%A5-redis-x2F-kafka"><span class="nav-number">6.</span> <span class="nav-text">filebeat 收集日志并写入 redis&#x2F;kafka</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86%E5%AE%9E%E6%88%98"><span class="nav-number">7.</span> <span class="nav-text">日志收集实战</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%9D%90%E6%A0%87%E5%9C%B0%E5%9B%BE%E7%BB%9F%E8%AE%A1%E5%AE%A2%E6%88%B7-IP-%E6%89%80%E5%9C%A8%E5%9F%8E%E5%B8%82"><span class="nav-number">8.</span> <span class="nav-text">通过坐标地图统计客户 IP 所在城市</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">9.</span> <span class="nav-text">日志写入数据库</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/logstash%E6%94%B6%E9%9B%86%E6%97%A5%E5%BF%97%E6%A1%88%E4%BE%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="logstash收集日志案例 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          logstash收集日志案例
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-05 10:24:34" itemprop="dateCreated datePublished" datetime="2021-03-05T10:24:34+08:00">2021-03-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/ELK/" itemprop="url" rel="index"><span itemprop="name">ELK</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="tomcat-日志"><a href="#tomcat-日志" class="headerlink" title="tomcat 日志"></a>tomcat 日志</h2><p>tomcat 默认的格式比较简单，包含 ip、date、method、url、status code 等信息，例如：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:09 +0800<span class="token punctuation">]</span> <span class="token string">"GET / HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">11156</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /tomcat.svg HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">67795</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /tomcat.css HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">5542</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /bg-nav.png HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">1401</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /bg-middle.png HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">1918</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /bg-upper.png HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">3103</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /bg-button.png HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">713</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /asf-logo-wide.svg HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">27235</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:10 +0800<span class="token punctuation">]</span> <span class="token string">"GET /favicon.ico HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">21630</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:12 +0800<span class="token punctuation">]</span> <span class="token string">"GET /manager/status HTTP/1.1"</span> <span class="token number">403</span> <span class="token number">3446</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:14 +0800<span class="token punctuation">]</span> <span class="token string">"GET /manager/html HTTP/1.1"</span> <span class="token number">403</span> <span class="token number">3446</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:19 +0800<span class="token punctuation">]</span> <span class="token string">"GET / HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">11156</span>
+<span class="token number">10.0</span>.0.1 - - <span class="token punctuation">[</span>06/Mar/2021:09:26:19 +0800<span class="token punctuation">]</span> <span class="token string">"GET /favicon.ico HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">21630</span></code></pre>
+
+<ol>
+<li><p>为了 kibana 能单独统计每个字段，需要日志记录成 json 格式，当然也可以是其他格式，只要有对应的 codec 插件可以解析就行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk conf<span class="token punctuation">]</span><span class="token variable">$pwd</span>
+/usr/local/tomcat/conf
+<span class="token punctuation">[</span>root@elk2-ljk conf<span class="token punctuation">]</span><span class="token variable">$vim</span> server.xml		<span class="token comment"># 自定义日志格式 为json格式</span>
+<span class="token punctuation">..</span>.
+        <span class="token operator">&lt;</span>Valve <span class="token assign-left variable">className</span><span class="token operator">=</span><span class="token string">"org.apache.catalina.valves.AccessLogValve"</span> <span class="token assign-left variable">directory</span><span class="token operator">=</span><span class="token string">"logs"</span>
+               <span class="token assign-left variable">prefix</span><span class="token operator">=</span><span class="token string">"tomcat_access_log"</span> <span class="token assign-left variable">suffix</span><span class="token operator">=</span><span class="token string">".log"</span>
+               <span class="token assign-left variable">pattern</span><span class="token operator">=</span><span class="token string">"&#123;&amp;quot;clientip&amp;quot;:&amp;quot;%h&amp;quot;,&amp;quot;ClientUser&amp;quot;:&amp;quot;%l&amp;quot;,&amp;quot;authenticated&amp;quot;:&amp;quot;%u&amp;quot;,&amp;quot;AccessTime&amp;quot;: &amp;quot;%t&amp;quot;,&amp;quot;method&amp;quot;:&amp;quot;%r&amp;quot;,&amp;quot;status&amp;quot;:&amp;quot;%s&amp;quot;,&amp;quot;SendBytes&amp;quot;:&amp;quot;%b&amp;quot;,&amp;quot;Query?string&amp;quot;:&amp;quot;%q&amp;quot;,    &amp;quot;partner&amp;quot;:&amp;quot;%&#123;Referer&#125;i&amp;quot;,&amp;quot;AgentVersion&amp;quot;:&amp;quot;%&#123;User-Agent&#125;i&amp;quot;&#125;"</span> /<span class="token operator">></span>
+<span class="token punctuation">..</span>.
+
+<span class="token comment"># &amp;quot; 表示双引号</span>
+
+<span class="token punctuation">[</span>root@elk2-ljk conf<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart tomcat.service	<span class="token comment"># 重启tomcat</span>
+<span class="token comment"># 查看日志，已经成功修改为json格式</span>
+<span class="token punctuation">[</span>root@elk2-ljk logs<span class="token punctuation">]</span><span class="token variable">$cat</span> <span class="token punctuation">..</span>/logs/tomcat_access_log.2021-03-06.log
+<span class="token punctuation">&#123;</span><span class="token string">"clientip"</span><span class="token builtin class-name">:</span><span class="token string">"10.0.0.1"</span>,<span class="token string">"ClientUser"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"authenticated"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"AccessTime"</span><span class="token builtin class-name">:</span><span class="token string">"[06/Mar/2021:12:50:56 +0800]"</span>,<span class="token string">"method"</span><span class="token builtin class-name">:</span><span class="token string">"GET / HTTP/1.1"</span>,<span class="token string">"status"</span><span class="token builtin class-name">:</span><span class="token string">"200"</span>,<span class="token string">"SendBytes"</span><span class="token builtin class-name">:</span>       <span class="token string">"11156"</span>,<span class="token string">"Query?string"</span><span class="token builtin class-name">:</span><span class="token string">""</span>,<span class="token string">"partner"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"AgentVersion"</span><span class="token builtin class-name">:</span><span class="token string">"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#123;</span><span class="token string">"clientip"</span><span class="token builtin class-name">:</span><span class="token string">"10.0.0.1"</span>,<span class="token string">"ClientUser"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"authenticated"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"AccessTime"</span><span class="token builtin class-name">:</span><span class="token string">"[06/Mar/2021:12:50:56 +0800]"</span>,<span class="token string">"method"</span><span class="token builtin class-name">:</span><span class="token string">"GET /favicon.ico HTTP/1.1"</span>,<span class="token string">"status"</span><span class="token builtin class-name">:</span><span class="token string">"200"</span>,        <span class="token string">"SendBytes"</span><span class="token builtin class-name">:</span><span class="token string">"21630"</span>,<span class="token string">"Query?string"</span><span class="token builtin class-name">:</span><span class="token string">""</span>,<span class="token string">"partner"</span><span class="token builtin class-name">:</span><span class="token string">"http://10.0.1.122:8080/"</span>,<span class="token string">"AgentVersion"</span><span class="token builtin class-name">:</span><span class="token string">"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like  Gecko) Chrome/88.0.4324.190 Safari/537.36"</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#123;</span><span class="token string">"clientip"</span><span class="token builtin class-name">:</span><span class="token string">"10.0.0.1"</span>,<span class="token string">"ClientUser"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"authenticated"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"AccessTime"</span><span class="token builtin class-name">:</span><span class="token string">"[06/Mar/2021:12:51:00 +0800]"</span>,<span class="token string">"method"</span><span class="token builtin class-name">:</span><span class="token string">"GET / HTTP/1.1"</span>,<span class="token string">"status"</span><span class="token builtin class-name">:</span><span class="token string">"200"</span>,<span class="token string">"SendBytes"</span><span class="token builtin class-name">:</span>       <span class="token string">"11156"</span>,<span class="token string">"Query?string"</span><span class="token builtin class-name">:</span><span class="token string">""</span>,<span class="token string">"partner"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"AgentVersion"</span><span class="token builtin class-name">:</span><span class="token string">"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"</span><span class="token punctuation">&#125;</span></code></pre>
+
+<p>百度搜索 “tomcat 日志格式” 或 “apache 日志格式”，下面是部分格式说明：</p>
+<pre class="language-none"><code class="language-none">％a - 远程IP地址
+％A - 本地IP地址
+％b - 发送的字节数，不包括HTTP头，或“ - ”如果没有发送字节
+％B - 发送的字节数，不包括HTTP头
+％h - 远程主机名
+％H - 请求协议
+％l (小写的L)- 远程逻辑从identd的用户名（总是返回&#39; - &#39;）
+％m - 请求方法
+％p - 本地端口
+％q - 查询字符串（在前面加上一个“？”如果它存在，否则是一个空字符串
+％r - 第一行的要求
+％s - 响应的HTTP状态代码
+％S - 用户会话ID
+％t - 日期和时间，在通用日志格式
+％u - 远程用户身份验证
+％U - 请求的URL路径
+％v - 本地服务器名
+％D - 处理请求的时间（以毫秒为单位）
+％T - 处理请求的时间（以秒为单位）
+％I （大写的i） - 当前请求的线程名称
+
+％&#123;XXX&#125;i xxx代表传入的头(HTTP Request)
+％&#123;XXX&#125;o xxx代表传出​​的响应头(Http Resonse)
+％&#123;XXX&#125;c  xxx代表特定的Cookie名
+％&#123;XXX&#125;r  xxx代表ServletRequest属性名
+％&#123;XXX&#125;s xxx代表HttpSession中的属性名</code></pre>
+</li>
+<li><p>logstash 配置文件：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">input <span class="token punctuation">&#123;</span>
+    <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+        <span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"tomcat-access-log"</span>
+        path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/usr/local/tomcat/logs/tomcat_access_log.*.log"</span>
+        start_position <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"end"</span>
+        stat_interval <span class="token operator">=</span><span class="token operator">></span> <span class="token number">3</span>
+        codec <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"json"</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+output <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">[</span>type<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token string">"tomcat-access-log"</span> <span class="token punctuation">&#123;</span>
+        elasticsearch <span class="token punctuation">&#123;</span>
+            hosts <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">"10.0.1.121:9200"</span><span class="token punctuation">]</span>
+            index <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"mytest-%&#123;type&#125;-%&#123;+xxxx.ww&#125;"</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>重启 logstash，注意要以 root 用户身份启动，否则无法采集数据</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart logstash.service</code></pre></li>
+</ol>
+<h2 id="java-日志"><a href="#java-日志" class="headerlink" title="java 日志"></a>java 日志</h2><p>基于 java 开发的应用，都会有 java 日志，java 日志会记录 java 的报错信息，但是一个报错会产生多行日志，例如：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615022486227.png"></p>
+<p>为了方便观察，需要将一个报错的多行日志合并为一行，以 elasticsearch 为例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">input <span class="token punctuation">&#123;</span>
+    <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+        <span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"elasticsearch-java-log"</span>
+        path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/data/elasticsearch/logs/es-cluster.log"</span>
+        start_position <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"beginning"</span>
+        stat_interval <span class="token operator">=</span><span class="token operator">></span> <span class="token number">3</span>
+        codec <span class="token operator">=</span><span class="token operator">></span> multiline <span class="token punctuation">&#123;</span>
+            pattern <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"^\["</span>
+            negate <span class="token operator">=</span><span class="token operator">></span> <span class="token boolean">true</span>
+            what <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"previous"</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+output <span class="token punctuation">&#123;</span>
+    elasticsearch <span class="token punctuation">&#123;</span>
+        hosts <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">"10.0.1.121:9200"</span><span class="token punctuation">]</span>
+        index <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"mytest-%&#123;type&#125;-%&#123;+yyyy.MM&#125;"</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>查看 kibana：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615023193996.png"></p>
+<h2 id="nginx-访问日志"><a href="#nginx-访问日志" class="headerlink" title="nginx 访问日志"></a>nginx 访问日志</h2><p>和采集 tomcat 日志类似，重点是把 nginx 日志修改为 json 格式</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 注意：log_format要写在server外面</span>
+<span class="token punctuation">[</span>root@47105171233 vhost<span class="token punctuation">]</span><span class="token variable">$cat</span> lujinkai.cn.conf
+log_format access_json <span class="token string">'&#123;"@timestamp":"$time_iso8601",'</span>
+<span class="token string">'"host":"$server_addr",'</span>
+<span class="token string">'"clientip":"$remote_addr",'</span>
+<span class="token string">'"size":$body_bytes_sent,'</span>
+<span class="token string">'"responsetime":$request_time,'</span>
+<span class="token string">'"upstreamtime":"$upstream_response_time",'</span>
+<span class="token string">'"upstreamhost":"$upstream_addr",'</span>
+<span class="token string">'"http_host":"$host",'</span>
+<span class="token string">'"url":"$uri",'</span>
+<span class="token string">'"domain":"$host",'</span>
+<span class="token string">'"xff":"$http_x_forwarded_for",'</span>
+<span class="token string">'"referer":"$http_referer",'</span>
+<span class="token string">'"status":"$status"&#125;'</span><span class="token punctuation">;</span>
+
+server <span class="token punctuation">&#123;</span>
+  listen <span class="token number">80</span><span class="token punctuation">;</span>
+  server_name lujinkai.cn<span class="token punctuation">;</span>
+  access_log /data/wwwlogs/lujinkai.cn_nginx.log access_json<span class="token punctuation">;</span>
+  rewrite / http://blog.lujinkai.cn permanent<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment"># 日志成功转为json格式</span>
+<span class="token punctuation">[</span>root@47105171233 wwwlogs<span class="token punctuation">]</span><span class="token variable">$tail</span> <span class="token parameter variable">-f</span> lujinkai.cn_nginx.log
+<span class="token punctuation">&#123;</span><span class="token string">"@timestamp"</span><span class="token builtin class-name">:</span><span class="token string">"2021-03-06T18:20:13+08:00"</span>,<span class="token string">"host"</span><span class="token builtin class-name">:</span><span class="token string">"10.0.0.1"</span>,<span class="token string">"clientip"</span><span class="token builtin class-name">:</span><span class="token string">"113.120.245.191"</span>,<span class="token string">"size"</span>:162,<span class="token string">"responsetime"</span>:0.000,<span class="token string">"upstreamtime"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"upstreamhost"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"http_host"</span><span class="token builtin class-name">:</span><span class="token string">"lujinkai.cn"</span>,<span class="token string">"url"</span><span class="token builtin class-name">:</span><span class="token string">"/"</span>,<span class="token string">"domain"</span><span class="token builtin class-name">:</span><span class="token string">"lujinkai.cn"</span>,<span class="token string">"xff"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"referer"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"status"</span><span class="token builtin class-name">:</span><span class="token string">"301"</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#123;</span><span class="token string">"@timestamp"</span><span class="token builtin class-name">:</span><span class="token string">"2021-03-06T18:20:13+08:00"</span>,<span class="token string">"host"</span><span class="token builtin class-name">:</span><span class="token string">"10.0.0.1"</span>,<span class="token string">"clientip"</span><span class="token builtin class-name">:</span><span class="token string">"113.120.245.191"</span>,<span class="token string">"size"</span>:162,<span class="token string">"responsetime"</span>:0.000,<span class="token string">"upstreamtime"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"upstreamhost"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"http_host"</span><span class="token builtin class-name">:</span><span class="token string">"lujinkai.cn"</span>,<span class="token string">"url"</span><span class="token builtin class-name">:</span><span class="token string">"/robots.txt"</span>,<span class="token string">"domain"</span><span class="token builtin class-name">:</span><span class="token string">"lujinkai.cn"</span>,<span class="token string">"xff"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"referer"</span><span class="token builtin class-name">:</span><span class="token string">"-"</span>,<span class="token string">"status"</span><span class="token builtin class-name">:</span><span class="token string">"301"</span><span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="TCP-x2F-UDP-日志"><a href="#TCP-x2F-UDP-日志" class="headerlink" title="TCP&#x2F;UDP 日志"></a>TCP&#x2F;UDP 日志</h2><p>场景：没有安装 logstash 的服务器（A），向安装了 logstash 的服务器（B）发送日志信息，这个场景不多</p>
+<p>实现：A 通过 nc 命令给 B 发送日志信息，B 监听本地的对应端口，接收数据</p>
+<p>A：客户端</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk ~<span class="token punctuation">]</span><span class="token variable">$nc</span> <span class="token number">10.0</span>.1.121 <span class="token number">9889</span></code></pre>
+
+<p>B：服务端</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">input <span class="token punctuation">&#123;</span>
+    tcp <span class="token punctuation">&#123;</span>
+        port <span class="token operator">=</span><span class="token operator">></span> <span class="token number">9889</span>
+        <span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"tcplog"</span>
+        mode <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"server"</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+output <span class="token punctuation">&#123;</span>
+    stdout <span class="token punctuation">&#123;</span>
+    	codec <span class="token operator">=</span><span class="token operator">></span> rubydebug
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="通过-rsyslog-收集-haproxy-日志"><a href="#通过-rsyslog-收集-haproxy-日志" class="headerlink" title="通过 rsyslog 收集 haproxy 日志"></a>通过 rsyslog 收集 haproxy 日志</h2><p>有些设备无法安装 logstash，例如 路由器、交换机，但是厂家内置了 rsyslog 功能，这里以 haproxy 为例</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. haproxy.cfg 定义haproxy的日志设备为local6</span>
+log <span class="token number">127.0</span>.0.1 local6 info
+
+<span class="token comment"># 2. rsyslog.conf</span>
+module<span class="token punctuation">(</span>load<span class="token operator">=</span><span class="token string">"imudp"</span><span class="token punctuation">)</span>
+input<span class="token punctuation">(</span>type<span class="token operator">=</span><span class="token string">"imudp"</span> <span class="token assign-left variable">port</span><span class="token operator">=</span><span class="token string">"514"</span><span class="token punctuation">)</span>
+module<span class="token punctuation">(</span>load<span class="token operator">=</span><span class="token string">"imtcp"</span><span class="token punctuation">)</span>
+input<span class="token punctuation">(</span>type<span class="token operator">=</span><span class="token string">"imtcp"</span> <span class="token assign-left variable">port</span><span class="token operator">=</span><span class="token string">"514"</span><span class="token punctuation">)</span>
+local6.* @@10.0.1.122
+
+<span class="token comment"># 3. 10.0.1.122主机监听本机的udp514端口，接收日志数据</span>
+input<span class="token punctuation">&#123;</span>
+    syslog <span class="token punctuation">&#123;</span>
+    	<span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"ststem-rsyslog"</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+output<span class="token punctuation">&#123;</span>
+    elasticsearch <span class="token punctuation">&#123;</span>
+        hosts <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">"10.0.1.123:9200"</span><span class="token punctuation">]</span>
+        index <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"logstash-rsyslog-%&#123;+YYYY.MM.dd&#125;"</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="filebeat-收集日志并写入-redis-x2F-kafka"><a href="#filebeat-收集日志并写入-redis-x2F-kafka" class="headerlink" title="filebeat 收集日志并写入 redis&#x2F;kafka"></a>filebeat 收集日志并写入 redis&#x2F;kafka</h2><p>考虑到 elasticsearch 的性能问题，通常不会直接往 elasticsearch 写日志，会加 redis 或 kafka 缓冲一下</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615130970319.png"></p>
+<ul>
+<li>有少数场景，需要收集多个不同格式的日志，例如有的是 syslog 格式，有的是 json 格式，所有的日志都 output 到 redis 的一个 list 中，因为 logstash 的 input 没有条件判断，只能配置一个 codec，所以 logstash 可以将不同的日志发送到 elasticsearch 的不同 index，却无法对不同的日志格式配置不同的 codec，这样的数据最后展示在 kibana 也没有意义，解决方法是在日志收集和日志缓存中间在加一个 logstash（可以共用日志提取及过滤的 logstash），将不同的日志转发到 redis 的不同 list</li>
+<li>日志缓存如果用 redis，需要大内存，推荐 32G；如果用 kafka，16G 就够，因为 kafka 存储数据到磁盘</li>
+</ul>
+<h2 id="日志收集实战"><a href="#日志收集实战" class="headerlink" title="日志收集实战"></a>日志收集实战</h2><p><img data-src="//img.to2b.cn/blog/ljk/1615135063740.png"></p>
+<p>从左向右看，当要访问 ELK 日志统计平台的时候，首先访问的是两台 nginx+keepalived 做的负载高可用，访问的地址是 keepalived 的 IP，当一台 nginx 代理服务器挂掉之后也不影响访问，然后 nginx 将请求转发到 kibana，kibana 再去 elasticsearch 获取数据，elasticsearch 是两台做的集群，数据会随机保存在任意一台 elasticsearch 服务器，redis 服务器做数据的临时保存，避免 web 服务器日志量过大的时候造成的数据收集与保存不一致导致的日志丢失，可以临时保存到 redis，redis 可以是集群，然后再由 logstash 服务器在非高峰时期从 redis 持续的取出即可，另外有一台 mysql 数据库服务器，用于持久化保存特定的数据，web 服务器的日志由 filebeat 收集之后发送给另外的一台 logstash，再有其写入到 redis 即可完成日志的收集，从图中可以看出，redis 服务器处于前端结合的最中间，其左右都要依赖于 redis 的正常运行，web 服务删个日志经过 filebeat 收集之后通过日志转发层的 logstash 写入到 redis 不同的 key 当中，然后提取层 logstash 再从 redis 将数据提取并安按照不同的类型写入到 elasticsearch 的不同 index 当中，用户最终通过 nginx 代理的 kibana 查看到收集到的日志的具体内容</p>
+<h2 id="通过坐标地图统计客户-IP-所在城市"><a href="#通过坐标地图统计客户-IP-所在城市" class="headerlink" title="通过坐标地图统计客户 IP 所在城市"></a>通过坐标地图统计客户 IP 所在城市</h2><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-filters-geoip.html">https://www.elastic.co/guide/en/logstash/current/plugins-filters-geoip.html</a></p>
+<h2 id="日志写入数据库"><a href="#日志写入数据库" class="headerlink" title="日志写入数据库"></a>日志写入数据库</h2><p>写入数据库的目的是用于持久化保存重要数据，比如状态码、客户端 IP、客户端浏览器版本等等，用于后期按月做数据统计等</p>
+<p>写个脚本从，定期从 elasticsearch 中获取数据，写入到 PostgreSQL</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/logstash/" rel="tag"><i class="fa fa-tag"></i> logstash</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/MySQL/MGR/" rel="prev" title="MGR">
+                  <i class="fa fa-chevron-left"></i> MGR
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/%E5%9F%BA%E7%A1%80/" rel="next" title="基础">
+                  基础 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

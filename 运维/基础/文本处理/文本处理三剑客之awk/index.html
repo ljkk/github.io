@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="awk 是一个文本处理工具，通常用于处理数据并生成结果报告。 awk 的工作模式和 sed 类似，也是逐行读取，逐行处理。 awk [-W option] [-F value] [-v var&#x3D;value] [--] &#39;program text&#39; [file ...] awk [-W option] [-F value] [-v var&#x3D;value] [-f program-file] [--]">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文本处理三剑客之awk">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%B8%89%E5%89%91%E5%AE%A2%E4%B9%8Bawk/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="awk 是一个文本处理工具，通常用于处理数据并生成结果报告。 awk 的工作模式和 sed 类似，也是逐行读取，逐行处理。 awk [-W option] [-F value] [-v var&#x3D;value] [--] &#39;program text&#39; [file ...] awk [-W option] [-F value] [-v var&#x3D;value] [-f program-file] [--]">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598605859434.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1598605923551.png">
+<meta property="article:published_time" content="2020-12-09T14:14:55.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="文本处理">
+<meta property="article:tag" content="awk">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1598605859434.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%B8%89%E5%89%91%E5%AE%A2%E4%B9%8Bawk/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%B8%89%E5%89%91%E5%AE%A2%E4%B9%8Bawk/","path":"运维/基础/文本处理/文本处理三剑客之awk/","title":"文本处理三剑客之awk"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>文本处理三剑客之awk | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">语法格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E7%BD%AE%E5%8F%98%E9%87%8F"><span class="nav-number">2.</span> <span class="nav-text">内置变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E5%8C%96%E8%BE%93%E5%87%BA-printf"><span class="nav-number">3.</span> <span class="nav-text">格式化输出 printf</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E7%AC%A6"><span class="nav-number">3.1.</span> <span class="nav-text">格式符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E9%A5%B0%E7%AC%A6"><span class="nav-number">3.2.</span> <span class="nav-text">修饰符</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D"><span class="nav-number">4.</span> <span class="nav-text">模式匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%AF%AD%E5%8F%A5"><span class="nav-number">6.</span> <span class="nav-text">条件语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E8%AF%AD%E5%8F%A5"><span class="nav-number">7.</span> <span class="nav-text">循环语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#continue-%E5%92%8C-break"><span class="nav-number">7.1.</span> <span class="nav-text">continue 和 break</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#next"><span class="nav-number">8.</span> <span class="nav-text">next</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#awk-%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0"><span class="nav-number">9.</span> <span class="nav-text">awk 内置函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%95%B0%E5%87%BD%E6%95%B0"><span class="nav-number">9.1.</span> <span class="nav-text">算数函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%87%BD%E6%95%B0"><span class="nav-number">9.2.</span> <span class="nav-text">字符串函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%87%BD%E6%95%B0"><span class="nav-number">9.3.</span> <span class="nav-text">时间函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%87%BD%E6%95%B0"><span class="nav-number">9.4.</span> <span class="nav-text">其他函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E9%80%89%E9%A1%B9"><span class="nav-number">10.</span> <span class="nav-text">常用选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">11.</span> <span class="nav-text">数组</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">11.1.</span> <span class="nav-text">++</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#awk"><span class="nav-number">12.</span> <span class="nav-text">awk</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%EF%BC%9A"><span class="nav-number">12.1.</span> <span class="nav-text">练习：</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%B8%89%E5%89%91%E5%AE%A2%E4%B9%8Bawk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="文本处理三剑客之awk | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          文本处理三剑客之awk
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:14:55" itemprop="dateCreated datePublished" datetime="2020-12-09T22:14:55+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">文本处理</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>awk 是一个文本处理工具，通常用于处理数据并生成结果报告。</p>
+<p>awk 的工作模式和 sed 类似，也是逐行读取，逐行处理。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">awk</span> <span class="token punctuation">[</span>-W option<span class="token punctuation">]</span> <span class="token punctuation">[</span>-F value<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v <span class="token assign-left variable">var</span><span class="token operator">=</span>value<span class="token punctuation">]</span> <span class="token punctuation">[</span>--<span class="token punctuation">]</span> <span class="token string">'program text'</span> <span class="token punctuation">[</span>file <span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+<span class="token function">awk</span> <span class="token punctuation">[</span>-W option<span class="token punctuation">]</span> <span class="token punctuation">[</span>-F value<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v <span class="token assign-left variable">var</span><span class="token operator">=</span>value<span class="token punctuation">]</span> <span class="token punctuation">[</span>-f program-file<span class="token punctuation">]</span> <span class="token punctuation">[</span>--<span class="token punctuation">]</span> <span class="token punctuation">[</span>file <span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+<span class="token parameter variable">-F</span>	<span class="token comment"># 指定分隔符</span>
+<span class="token parameter variable">-v</span>	<span class="token comment"># 变量赋值</span></code></pre>
+
+<h2 id="语法格式"><a href="#语法格式" class="headerlink" title="语法格式"></a>语法格式</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">awk</span> <span class="token string">'BEGIN&#123;commands&#125;pattern&#123;commands&#125;END&#123;commands&#125;'</span> <span class="token function">file</span>
+<span class="token comment"># 或</span>
+standard output <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'BEGIN&#123;commands&#125;pattern&#123;commands&#125;END&#123;commands&#125;'</span></code></pre>
+
+<ul>
+<li>BEGIN{commands}：正式处理文本之前执行，可以省略</li>
+<li>END 后{commands}：处理完所有文本后执行，可以省略</li>
+<li>pattern{commands}：逐行执行，pattern 判断此行是否符合匹配模式，符合则执行{commands}<ul>
+<li>pattern：匹配模式，可以省略</li>
+<li>{commands}：对每行执行的命令，这里面可以写判断、循环等语句，功能强大，所以 awk 又被称为 awk 编程。不可省略</li>
+</ul>
+</li>
+</ul>
+<h2 id="内置变量"><a href="#内置变量" class="headerlink" title="内置变量"></a>内置变量</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$0</span>          <span class="token comment"># 整行内容</span>
+<span class="token variable">$1</span> - <span class="token variable">$n</span>     <span class="token comment"># 当前行的第1-n个字段</span>
+NF          <span class="token comment"># 当前行的字段个数，也就是有多少列</span>
+NR          <span class="token comment"># 当前行的行号，从1开始计数</span>
+FNR         <span class="token comment"># 多文件处理时，每个文件行号单独计数，从0开始</span>
+FS          <span class="token comment"># 输入字段分割符。不指定默认就是空格或tab</span>
+RS          <span class="token comment"># 输入行分割符号。默认回车换行</span>
+OFS         <span class="token comment"># 输出字段分隔符。默认空格</span>
+ORS         <span class="token comment"># 输出行分割符。默认回车换行</span>
+FILENAME    <span class="token comment"># 处理文件的文件名</span>
+ARGC        <span class="token comment"># 命令行参数个数</span>
+ARGV        <span class="token comment"># 命令行参数数组</span></code></pre>
+
+<h2 id="格式化输出-printf"><a href="#格式化输出-printf" class="headerlink" title="格式化输出 printf"></a>格式化输出 printf</h2><h3 id="格式符"><a href="#格式符" class="headerlink" title="格式符"></a>格式符</h3><pre class="language-bash" data-language="bash"><code class="language-bash">%s    <span class="token comment"># 打印字符串</span>
+%d    <span class="token comment"># 打印十进制数</span>
+%f    <span class="token comment"># 打印一个浮点数</span>
+%x    <span class="token comment"># 打印十六进制数</span>
+%o    <span class="token comment"># 打印八进制数</span>
+%e    <span class="token comment"># 打印数字的科学计数法形式</span>
+%c    <span class="token comment"># 打印单个字符的ASCII码</span></code></pre>
+
+<h3 id="修饰符"><a href="#修饰符" class="headerlink" title="修饰符"></a>修饰符</h3><pre class="language-bash" data-language="bash"><code class="language-bash">-    <span class="token comment"># 左对齐</span>
++    <span class="token comment"># 右对齐</span>
+<span class="token comment">#    # 显示八进制在前面加0，显示十六进制在前面加0x</span></code></pre>
+
+<h2 id="模式匹配"><a href="#模式匹配" class="headerlink" title="模式匹配"></a>模式匹配</h2><p>第一种模式匹配：正则表达式 RegExp</p>
+<p>第二种模式匹配：关系运算符号匹配</p>
+<p>&lt;、&gt;、&lt;、&gt;&#x3D;、!&#x3D;<br><del>：匹配正则表达式<br>!</del>：不匹配正则表达式<br>||：或<br>&amp;&amp;：与<br>!：非</p>
+<h2 id="表达式"><a href="#表达式" class="headerlink" title="表达式"></a>表达式</h2><p>+、-、<em>、&#x2F;、%、^或</em>*、++x、x++、–x、x–</p>
+<p>-x：转换为负数<br>+x：将字符串转换为数值</p>
+<h2 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h2><p>注：awk 中语句块没有作用域，都是全局变量。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">if<span class="token punctuation">(</span>条件表达式<span class="token punctuation">)</span>
+	动作1
+<span class="token keyword">else</span> if<span class="token punctuation">(</span>条件表达式<span class="token punctuation">)</span>
+	动作2
+<span class="token keyword">else</span>
+	动作3</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">switch <span class="token punctuation">(</span>expression<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">case</span> value<span class="token operator">|</span>regex <span class="token builtin class-name">:</span> statement
+    <span class="token punctuation">..</span>.
+    <span class="token punctuation">[</span> default: statement <span class="token punctuation">]</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="循环语句"><a href="#循环语句" class="headerlink" title="循环语句"></a>循环语句</h2><pre class="language-bash" data-language="bash"><code class="language-bash">while<span class="token punctuation">(</span>条件表达式<span class="token punctuation">)</span>
+	动作</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token keyword">do</span>
+	动作
+while（条件表达式）</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">for<span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> i<span class="token operator">&lt;</span><span class="token number">100</span>, i++<span class="token punctuation">)</span>
+	动作</code></pre>
+
+<h3 id="continue-和-break"><a href="#continue-和-break" class="headerlink" title="continue 和 break"></a>continue 和 break</h3><p>continue 跳过本次循环，break 跳出整个循环</p>
+<h2 id="next"><a href="#next" class="headerlink" title="next"></a>next</h2><p>next 可以提前结束对本行处理而直接进入下一行处理(awk 自身循环)</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#awk -F: '&#123;if($3%2!=0) next; print $1,$3&#125;' /etc/passwd</span></code></pre>
+
+<h2 id="awk-内置函数"><a href="#awk-内置函数" class="headerlink" title="awk 内置函数"></a><a target="_blank" rel="noopener" href="https://www.runoob.com/w3cnote/awk-built-in-functions.html#b3">awk 内置函数</a></h2><h3 id="算数函数"><a href="#算数函数" class="headerlink" title="算数函数"></a>算数函数</h3><ul>
+<li><p>rand：返回 0-1 之间一个随机数，需要配合 srand()配合生成随机数种子</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#awk 'BEGIN&#123;srand();print rand()&#125;'</span></code></pre>
+</li>
+<li><p>int：返回整数</p>
+</li>
+</ul>
+<h3 id="字符串函数"><a href="#字符串函数" class="headerlink" title="字符串函数"></a>字符串函数</h3><p><img data-src="//img.to2b.cn/blog/ljk/1598605859434.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1598605923551.png"></p>
+<ul>
+<li><p>length</p>
+</li>
+<li><p>index</p>
+</li>
+<li><p>tolower</p>
+</li>
+<li><p>toupper</p>
+</li>
+<li><p>substr</p>
+</li>
+<li><p>split</p>
+</li>
+<li><p>match</p>
+</li>
+<li><p>sub</p>
+</li>
+<li><p>gsub</p>
+</li>
+</ul>
+<h3 id="时间函数"><a href="#时间函数" class="headerlink" title="时间函数"></a>时间函数</h3><ul>
+<li><p>mktime：生成时间戳</p>
+</li>
+<li><p>strftime：将时间戳转化格式化时间输出</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">strftime<span class="token punctuation">(</span><span class="token string">"%Y-%m-%dT%H:%M"</span>,systime<span class="token punctuation">(</span><span class="token punctuation">))</span> <span class="token punctuation">;</span></code></pre>
+</li>
+<li><p>systime：获取当前时间戳</p>
+</li>
+</ul>
+<h3 id="其他函数"><a href="#其他函数" class="headerlink" title="其他函数"></a>其他函数</h3><ul>
+<li><p>next：提前结束本行处理，进入下一行处理</p>
+</li>
+<li><p>system：system(commands)，在 awk 中调用 shell 命令</p>
+</li>
+<li><p>exit</p>
+</li>
+</ul>
+<p>终止脚本执行</p>
+<h2 id="常用选项"><a href="#常用选项" class="headerlink" title="常用选项"></a>常用选项</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-v</span>    <span class="token comment"># 参数传递</span>
+<span class="token parameter variable">-f</span>    <span class="token comment"># 指定脚本文件</span>
+<span class="token parameter variable">-F</span>    <span class="token comment"># 指定分割符</span>
+<span class="token parameter variable">-V</span>    <span class="token comment"># 查看awk的版本号</span></code></pre>
+
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p>shell 中数组的下标从 0 开始，awk 中数组下标从 1 开始，而且也有关联数组。但每次只能定义元素。如果想一次性定义多个元素，可以通过 split 间接实现。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">str</span><span class="token operator">=</span><span class="token string">"a b c d e"</span>
+split<span class="token punctuation">(</span>str,array,<span class="token string">" "</span><span class="token punctuation">)</span>
+for<span class="token punctuation">(</span>i <span class="token keyword">in</span> array<span class="token punctuation">)</span>
+    print array<span class="token punctuation">[</span>i<span class="token punctuation">]</span></code></pre>
+
+<h3 id=""><a href="#" class="headerlink" title="++"></a>++</h3><p>awk 中，数组[键]++ 表示给数组的元素赋值，赋值+1。灵活运用，可以实现去重、统计的功能</p>
+<pre class="language-awk" data-language="awk"><code class="language-awk">arr<span class="token punctuation">[</span>a<span class="token punctuation">]</span><span class="token operator">=</span><span class="token number">1</span>
+arr<span class="token punctuation">[</span>b<span class="token punctuation">]</span><span class="token operator">=</span><span class="token number">2</span>
+
+<span class="token keyword">print</span> arr<span class="token punctuation">[</span>a<span class="token punctuation">]</span><span class="token operator">++</span>		<span class="token comment"># 2</span></code></pre>
+
+<p>范例：显示主机的连接状态出现的次数</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">awk</span> <span class="token string">'NR!=1&#123;print $1&#125;'</span> ss.log <span class="token operator">|</span><span class="token function">sort</span> <span class="token operator">|</span><span class="token function">uniq</span> <span class="token parameter variable">-c</span>
+ss <span class="token parameter variable">-ant</span> <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'NR>1 &#123;++s[$1]&#125; END &#123;for(k in s) print k,s[k]&#125;'</span></code></pre>
+
+<h2 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h2><p>脚本</p>
+<p>将 awk 写成脚本，调用或直接执行</p>
+<p>范例：调用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#cat passwd.awk</span>
+<span class="token punctuation">&#123;</span>if<span class="token punctuation">(</span><span class="token variable">$3</span><span class="token operator">>=</span><span class="token number">1000</span><span class="token punctuation">)</span>print <span class="token variable">$1</span>,<span class="token variable">$3</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#awk -F: -f passwd.awk /etc/passwd</span>
+nobody <span class="token number">65534</span>
+wang <span class="token number">1000</span>
+mage <span class="token number">1001</span></code></pre>
+
+<p>范例：直接执行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#cat test.awk</span>
+<span class="token comment">#!/bin/awk -f</span>
+<span class="token comment">#this is a awk script</span>
+<span class="token punctuation">&#123;</span>if<span class="token punctuation">(</span><span class="token variable">$3</span><span class="token operator">>=</span><span class="token number">1000</span><span class="token punctuation">)</span>print <span class="token variable">$1</span>,<span class="token variable">$3</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#chmod +x test.awk</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#./test.awk -F: /etc/passwd</span>
+nobody <span class="token number">65534</span>
+wang <span class="token number">1000</span>
+mage <span class="token number">1001</span></code></pre>
+
+<h3 id="练习："><a href="#练习：" class="headerlink" title="练习："></a>练习：</h3><p>检查出最近一小时内访问 nginx 服务次数超过 3 次的客户端 IP</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+<p>1、文件 host_list.log 如下格式,请提取”.magedu.com”前面的主机名部分并写入到回到该文件中</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span> www.magedu.com
+<span class="token number">2</span> blog.magedu.com
+<span class="token number">3</span> study.magedu.com
+<span class="token number">4</span> linux.magedu.com
+<span class="token number">5</span> python.magedu.com
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>
+<span class="token number">999</span> study.magedu.com</code></pre>
+
+<p>2、统计&#x2F;etc&#x2F;fstab 文件中每个文件系统类型出现的次数</p>
+<p>3、统计&#x2F;etc&#x2F;fstab 文件中每个单词出现的次数</p>
+<p>4、提取出字符串 Yd$C@M05MB%9&amp;Bdh7dq+YVixp3vpw 中的所有数字</p>
+<p>5、有一文件记录了 1-100000 之间随机的整数共 5000 个,存储的格式 100,50,35,89…请取出其中最大和最小的整数</p>
+<p>6、解决 Dos 攻击生产案例:根据 web 日志或者或者网络连接数,监控当某个 IP 并发连接数或者短时内 PV 达到 100,即调用防火墙命令封掉对应的 IP,监控频率每隔 5 分钟。防火墙命令为:iptables -AINPUT -s IP -j REJECT</p>
+<p>7、将以下文件内容中 FQDN 取出并根据其进行计数从高到低排序</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">http://mail.magedu.com/index.html
+http://www.magedu.com/test.html
+http://study.magedu.com/index.html
+http://blog.magedu.com/index.html
+http://www.magedu.com/images/logo.jpg
+http://blog.magedu.com/20080102.html
+http://www.magedu.com/images/magedu.jpg</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 文本处理</a>
+              <a href="/tags/awk/" rel="tag"><i class="fa fa-tag"></i> awk</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/Linux%E5%9F%BA%E7%A1%80%E5%85%A5%E9%97%A8%E5%92%8C%E5%B8%AE%E5%8A%A9/" rel="prev" title="Linux基础入门和帮助">
+                  <i class="fa fa-chevron-left"></i> Linux基础入门和帮助
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%B8%89%E5%89%91%E5%AE%A2%E4%B9%8Bgrep/" rel="next" title="文本处理三剑客之grep">
+                  文本处理三剑客之grep <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

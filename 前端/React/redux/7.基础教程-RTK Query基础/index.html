@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="你将学到RTK Query 如何简化 Redux 应用程序的数据获取如何设置 RTK Query如何使用 RTK Query 进行基本的数据获取和更新请求  概述RTK Query 是一个强大的数据获取和缓存工具。它旨在简化在 Web 应用程序中加载数据的常见情况，无需自己手动编写数据获取和缓存逻辑。 RTK Query 是一个包含在 Redux Toolkit 包中的可选插件，其功能构建在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="7.基础教程-RTK Query基础">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/7.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-RTK%20Query%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="你将学到RTK Query 如何简化 Redux 应用程序的数据获取如何设置 RTK Query如何使用 RTK Query 进行基本的数据获取和更新请求  概述RTK Query 是一个强大的数据获取和缓存工具。它旨在简化在 Web 应用程序中加载数据的常见情况，无需自己手动编写数据获取和缓存逻辑。 RTK Query 是一个包含在 Redux Toolkit 包中的可选插件，其功能构建在">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-29T08:14:09.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:22.370Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="redux">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/7.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-RTK%20Query%E5%9F%BA%E7%A1%80/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/7.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-RTK%20Query%E5%9F%BA%E7%A1%80/","path":"前端/React/redux/7.基础教程-RTK Query基础/","title":"7.基础教程-RTK Query基础"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>7.基础教程-RTK Query基础 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text"> 你将学到</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number"></span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%9C%BA"><span class="nav-number"></span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85%E5%90%AB"><span class="nav-number"></span> <span class="nav-text">包含</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RTK-Query-%E7%BC%93%E5%AD%98%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3"><span class="nav-number"></span> <span class="nav-text">RTK Query 缓存的设计思想</span></a></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/7.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-RTK%20Query%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="7.基础教程-RTK Query基础 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          7.基础教程-RTK Query基础
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-05-29 16:14:09 / 修改时间：16:58:22" itemprop="dateCreated datePublished" datetime="2023-05-29T16:14:09+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/" itemprop="url" rel="index"><span itemprop="name">React</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/redux/" itemprop="url" rel="index"><span itemprop="name">redux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<div class="admonition admonition-tip alert alert--success"><div class="admonition-heading"><h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"></path></svg></span> 你将学到</h5></div><div class="admonition-content"><ul class=""><li>RTK Query 如何简化 Redux 应用程序的数据获取</li><li>如何设置 RTK Query</li><li>如何使用 RTK Query 进行基本的数据获取和更新请求</li></ul></div></div>
+</blockquote>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p><strong>RTK Query</strong> 是一个强大的数据获取和缓存工具。它旨在简化在 Web 应用程序中加载数据的常见情况，<strong>无需自己手动编写数据获取和缓存逻辑</strong>。</p>
+<p>RTK Query 是<strong>一个包含在 Redux Toolkit 包中的可选插件</strong>，其功能构建在 Redux Toolkit 中的其他 API 之上。</p>
+<h3 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h3><p>在过去的几年里，React 社区已经意识到 <strong>“数据获取和缓存” 实际上是一组不同于 “状态管理” 的关注点</strong>。</p>
+<p>RTK Query 从其他开创数据获取解决方案的工具中汲取灵感，例如 Apollo Client、React Query、Urql 和 SWR，但在其 API 设计中添加了独特的方法：</p>
+<ul>
+<li>数据获取和缓存逻辑构建在 Redux Toolkit 的 <code>createSlice</code> 和 <code>createAsyncThunk</code> API 之上</li>
+<li>由于 Redux Toolkit 与 UI 无关，因此 RTK Query 的功能可以与任何 UI 层一起使用</li>
+<li>API 请求接口是提前定义的，包括如何从参数生成查询参数和转换响应以进行缓存</li>
+<li>RTK Query 还可以生成封装整个数据获取过程的 React hooks ，为组件提供 <code>data</code> 和 <code>isFetching</code> 字段，并在组件挂载和卸载时管理缓存数据的生命周期</li>
+<li>RTK Query 提供“缓存数据项生命周期函数”选项，支持在获取初始数据后通过 websocket 消息流式传输缓存更新等用例</li>
+<li>我们有从 OpenAPI 和 GraphQL 模式生成 API slice 代码的早期工作示例</li>
+<li>最后，RTK Query 完全用 TypeScript 编写，旨在提供出色的 TS 使用体验</li>
+</ul>
+<h3 id="包含"><a href="#包含" class="headerlink" title="包含"></a>包含</h3><p>RTK Query 包含在核心 Redux Toolkit 包的安装中。它可以通过以下两个入口点之一获得：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">&#123;</span> createApi <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"@reduxjs/toolkit/query"</span>
+
+<span class="token comment">/* 自动生成的特定于 React 的入口点	对应于定义请求接口的 hooks  */</span>
+<span class="token keyword">import</span> <span class="token punctuation">&#123;</span> createApi <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"@reduxjs/toolkit/query/react"</span></code></pre>
+
+<p>RTK Query 主要由两个 API 组成：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://redux-toolkit.js.org/rtk-query/api/createApi"><code>createApi()</code></a>：RTK Query 功能的核心。它允许你定义一组请求接口来描述如何从一系列请求接口检索数据，包括如何获取和转换该数据的配置。在大多数情况下，你应该在每个应用程序中使用一次，根据经验，“每个基本 URL 一个 API slice”。</li>
+<li><a target="_blank" rel="noopener" href="https://redux-toolkit.js.org/rtk-query/api/fetchBaseQuery"><code>fetchBaseQuery()</code></a>: <a target="_blank" rel="noopener" href="https://developer.mozilla.org/en"><code>fetch</code></a> 的一个小包装 -US&#x2F;docs&#x2F;Web&#x2F;API&#x2F;Fetch_API），旨在简化请求。旨在为大多数用户在 <code>createApi</code> 中使用推荐的 <code>baseQuery</code>。</li>
+</ul>
+<h3 id="RTK-Query-缓存的设计思想"><a href="#RTK-Query-缓存的设计思想" class="headerlink" title="RTK Query 缓存的设计思想"></a>RTK Query 缓存的设计思想</h3><p>Redux 一直强调可预测性和显式行为。Redux 没有“魔法”，<strong>所有 Redux 逻辑都遵循相同的基本模式，即通过 reducers 调度操作和更新状态</strong>。这确实意味着有时你必须编写更多代码才能使事情发生。</p>
+<p><strong>Redux Toolkit 核心 API 不会更改 Redux 应用程序中的任何基本数据流</strong> 你仍在调度操作和编写 reducer，只是代码比手动编写所有逻辑要少。 <strong>RTK Query 同理</strong>。这是一个额外的抽象级别，但<strong>在内部，它仍在执行我们已经看到的用于管理异步请求及其响应的完全相同的步骤</strong>。</p>
+<p>但是，当你使用 RTK Query 时，会发生思维转变。我们不再考虑“管理状态”本身。相反，<strong>我们现在考虑“管理*缓存数据*”</strong>。与其尝试自己编写 reducer，我们现在将专注于定义 <strong>“这些数据来自哪里？”、“这个更新应该如何发送？”、“这个缓存的数据应该什么时候重新获取？”，以及“缓存的数据应该如何更新？”</strong>。如何获取、存储和检索这些数据成为我们不再需要担心的实现细节。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/redux/" rel="tag"><i class="fa fa-tag"></i> redux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/React/redux/6.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E6%80%A7%E8%83%BD%E4%B8%8E%E6%95%B0%E6%8D%AE%E8%8C%83%E5%BC%8F%E5%8C%96/" rel="prev" title="6.基础教程-性能与数据范式化">
+                  <i class="fa fa-chevron-left"></i> 6.基础教程-性能与数据范式化
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/React/redux/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" rel="next" title="快速开始">
+                  快速开始 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="基本配置将 Linux 主机接入到网络，需要配置网络相关设置。一般包括如下内容： - 主机名 - IP&#x2F;netmask - 路由：默认网关 - DNS服务器   - 主DNS服务器   - 次DNS服务器   - 第三个DNS服务器  命令修改的配置一般都是临时的，重启机器就失效了，如果要让配置更改永久生效，需要将配置更改写入到相关的配置文件中 相关配置文件配置当前主机的主机名永久修改：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络配置">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="基本配置将 Linux 主机接入到网络，需要配置网络相关设置。一般包括如下内容： - 主机名 - IP&#x2F;netmask - 路由：默认网关 - DNS服务器   - 主DNS服务器   - 次DNS服务器   - 第三个DNS服务器  命令修改的配置一般都是临时的，重启机器就失效了，如果要让配置更改永久生效，需要将配置更改写入到相关的配置文件中 相关配置文件配置当前主机的主机名永久修改：">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-01T14:55:48.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.510Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/","path":"运维/基础/网络/网络配置/","title":"网络配置"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>网络配置 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">基本配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">相关配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%BD%93%E5%89%8D%E4%B8%BB%E6%9C%BA%E7%9A%84%E4%B8%BB%E6%9C%BA%E5%90%8D"><span class="nav-number">2.1.</span> <span class="nav-text">配置当前主机的主机名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E4%B8%BB%E6%9C%BA%E5%90%8D%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8C-IP-%E5%9C%B0%E5%9D%80%E7%9A%84%E6%98%A0%E5%B0%84"><span class="nav-number">2.2.</span> <span class="nav-text">本地主机名数据库和 IP 地址的映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS-%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90"><span class="nav-number">2.3.</span> <span class="nav-text">DNS 域名解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-x2F-etc-x2F-host-%E5%92%8C-DNS-%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">2.4.</span> <span class="nav-text">修改&#x2F;etc&#x2F;host 和 DNS 的优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E7%9B%B8%E5%85%B3%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.5.</span> <span class="nav-text">路由相关的配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E5%8D%A1%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.6.</span> <span class="nav-text">网卡相关配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E7%BD%91%E5%8D%A1%E8%AE%BE%E5%A4%87%E5%90%8D"><span class="nav-number">2.6.1.</span> <span class="nav-text">修改网卡设备名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E6%8C%87%E5%AE%9A-IP"><span class="nav-number">2.6.2.</span> <span class="nav-text">静态指定 IP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D-IP"><span class="nav-number">2.6.3.</span> <span class="nav-text">动态分配 IP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E5%8D%A1%E5%88%AB%E5%90%8D"><span class="nav-number">2.6.4.</span> <span class="nav-text">网卡别名</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BD%91%E5%8D%A1"><span class="nav-number">3.</span> <span class="nav-text">多网卡</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bonding"><span class="nav-number">3.1.</span> <span class="nav-text">Bonding</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Teaming"><span class="nav-number">3.2.</span> <span class="nav-text">Teaming</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E6%A1%A5"><span class="nav-number">4.</span> <span class="nav-text">网桥</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="网络配置 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络配置
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-01 22:55:48" itemprop="dateCreated datePublished" datetime="2021-01-01T22:55:48+08:00">2021-01-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><p>将 Linux 主机接入到网络，需要配置网络相关设置。一般包括如下内容：</p>
+<pre class="language-none"><code class="language-none">- 主机名
+- IP&#x2F;netmask
+- 路由：默认网关
+- DNS服务器
+  - 主DNS服务器
+  - 次DNS服务器
+  - 第三个DNS服务器</code></pre>
+
+<p>命令修改的配置一般都是临时的，重启机器就失效了，如果要让配置更改永久生效，需要将配置更改写入到相关的配置文件中</p>
+<h2 id="相关配置文件"><a href="#相关配置文件" class="headerlink" title="相关配置文件"></a>相关配置文件</h2><h3 id="配置当前主机的主机名"><a href="#配置当前主机的主机名" class="headerlink" title="配置当前主机的主机名"></a>配置当前主机的主机名</h3><p>永久修改：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#centos6 之前版本</span>
+/etc/sysconfig/network
+<span class="token assign-left variable"><span class="token environment constant">HOSTNAME</span></span><span class="token operator">=</span>
+<span class="token comment">#centos7 以后版 使用 hostnametcl set-hostname xxx 命令 或者修改文件</span>
+/etc/hostname
+<span class="token environment constant">HOSTNAME</span></code></pre>
+
+<h3 id="本地主机名数据库和-IP-地址的映射"><a href="#本地主机名数据库和-IP-地址的映射" class="headerlink" title="本地主机名数据库和 IP 地址的映射"></a>本地主机名数据库和 IP 地址的映射</h3><p>优先级高于 DNS</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/etc/hosts
+
+<span class="token comment"># 修改hostname后一定要修改hosts文件，保证本机主机名会解析到127.0.0.1</span>
+<span class="token number">127.0</span>.0.1 本机主机名
+
+<span class="token comment">#ip 主机名 别名</span>
+<span class="token number">10.0</span>.1.1 k8s-master1.ljk.cn master1</code></pre>
+
+<p>生产中，因为 ip 的不确定性，所以局域网中主机间通信不依赖 ip，而是依赖主机名，具体实现有两种方法：</p>
+<ol>
+<li>局域网中的主机不多：所有主机共同维护一份 hosts，记录每个 ip 和主机名之间的解析关系</li>
+<li>局域网中的主机很多：搭建 DNS 服务</li>
+</ol>
+<h3 id="DNS-域名解析"><a href="#DNS-域名解析" class="headerlink" title="DNS 域名解析"></a>DNS 域名解析</h3><p><a target="_blank" rel="noopener" href="https://blog.51cto.com/allenh/1880377">&#x2F;etc&#x2F;resolv.conf</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nameserver DNS_SERVER_IP1
+nameserver DNS_SERVER_IP2
+nameserver DNS_SERVER_IP3
+search DOMAIN</code></pre>
+
+<p>nmcli 会将配置的 DNS 写入到这个文件，但是不管 nmcli 给 connection 有没有配置 DNS 或是配置的什么，最终解析域名还是以这个文件中的 DNS 为准，所以建议直接修改这个文件。</p>
+<p><code>search DOMAIN</code>是当域名无法 DNS 解析时，会将 DOMAIN 加到域名后面再尝试进行解析，例如：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#cat /etc/resolv.conf</span>
+<span class="token comment"># Generated by NetworkManager</span>
+search lujinkai.cn
+nameserver <span class="token number">180.76</span>.76.76
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ping blog</span>
+PING blog.lujinkai.cn <span class="token punctuation">(</span><span class="token number">47.105</span>.171.233<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">47.105</span>.171.233 <span class="token punctuation">(</span><span class="token number">47.105</span>.171.233<span class="token punctuation">)</span>: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">128</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">24.0</span> ms
+<span class="token number">64</span> bytes from <span class="token number">47.105</span>.171.233 <span class="token punctuation">(</span><span class="token number">47.105</span>.171.233<span class="token punctuation">)</span>: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">128</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">23.5</span> ms</code></pre>
+
+<h3 id="修改-x2F-etc-x2F-host-和-DNS-的优先级"><a href="#修改-x2F-etc-x2F-host-和-DNS-的优先级" class="headerlink" title="修改&#x2F;etc&#x2F;host 和 DNS 的优先级"></a>修改&#x2F;etc&#x2F;host 和 DNS 的优先级</h3><p>&#x2F;etc&#x2F;nsswitch.conf</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">hosts:      files dns myhostname</code></pre>
+
+<h3 id="路由相关的配置文件"><a href="#路由相关的配置文件" class="headerlink" title="路由相关的配置文件"></a>路由相关的配置文件</h3><p>新建文件 &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;route-IFACE</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">两种风格：
+<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> TARGET via GW
+如：10.0.0.0/8 via <span class="token number">172.16</span>.0.1
+
+<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span> 每三行定义一条路由
+ADDRESS<span class="token comment">#=TARGET</span>
+NETMASK<span class="token comment">#=mask</span>
+GATEWAY<span class="token comment">#=GW</span></code></pre>
+
+<p>不推荐直接修改配置文件，推荐使用 nmcli：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加一条路由: 0.0.0.0 via 10.0.0.8</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nmcli</span> connection modify eth0 ipv4.addresses <span class="token number">0.0</span>.0.0 ipv4.gateway <span class="token number">10.0</span>.0.8
+<span class="token punctuation">[</span>root@centos8 network-scripts<span class="token punctuation">]</span><span class="token variable">$route</span> <span class="token parameter variable">-n</span>
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+<span class="token number">0.0</span>.0.0         <span class="token number">10.0</span>.0.8        <span class="token number">0.0</span>.0.0         UG    <span class="token number">100</span>    <span class="token number">0</span>        <span class="token number">0</span> eth0</code></pre>
+
+<h3 id="网卡相关配置文件"><a href="#网卡相关配置文件" class="headerlink" title="网卡相关配置文件"></a>网卡相关配置文件</h3><h4 id="修改网卡设备名"><a href="#修改网卡设备名" class="headerlink" title="修改网卡设备名"></a>修改网卡设备名</h4><p>网卡组成格式：</p>
+<pre class="language-latex" data-language="latex"><code class="language-latex">en: Ethernet 有线局域网
+wl: wlan 无线局域网
+ww: wwan无线广域网
+o&lt;index>: 集成设备的设备索引号
+s&lt;slot>: 扩展槽的索引号
+x&lt;MAC>: 基于MAC地址的命名
+p&lt;bus>s&lt;slot>: enp2s1</code></pre>
+
+<p>CentOS6 之前网卡的默认命名方式 eth0、eth1、eth2。。。从 CentOS&#x2F;RHEL7 起，可预见的命名规则变成了默认。这一规则，接口名称被自动基于固件，拓扑结构和位置信息来确定。现在，即使添加或移除网络设备，接口名称仍然保持固定，而无需重新枚举，和坏掉的硬件可以无缝替换。</p>
+<p>修改 CentOS7、8 的网卡设备名为 CentOS6 形式：</p>
+<ol>
+<li><p>编辑&#x2F;etc&#x2F;default&#x2F;grub 配置文件，给 GRUB_CMDLINE_LINUX 选项添加 net.ifnames&#x3D;0 字段，如果是戴尔的机器，还需要再加 biosdevname&#x3D;0</p>
+</li>
+<li><p>为 grub2 生成其配置文件：<code>grub2-mkconfig -o /etc/grub2.cfg</code></p>
+<p>如果是 ubuntu：<code>sudo grub-mkconfig -o /boot/grub/grub.cfg</code></p>
+</li>
+</ol>
+<h4 id="静态指定-IP"><a href="#静态指定-IP" class="headerlink" title="静态指定 IP"></a>静态指定 IP</h4><p>在<code>/etc/sysconfig/network-scripts</code>下新建文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">NAME</span><span class="token operator">=</span>eth0
+<span class="token assign-left variable">DEVICE</span><span class="token operator">=</span>eth0
+<span class="token assign-left variable">BOOTPROTO</span><span class="token operator">=</span>static
+<span class="token assign-left variable">IPADDR</span><span class="token operator">=</span><span class="token number">10.0</span>.0.6
+<span class="token assign-left variable">PREFIX</span><span class="token operator">=</span><span class="token number">24</span>	<span class="token comment"># 子网掩码</span>
+<span class="token assign-left variable">GATEWAY</span><span class="token operator">=</span><span class="token number">10.0</span>.0.2	<span class="token comment"># 网关，也就是路由器</span>
+<span class="token assign-left variable">DNS1</span><span class="token operator">=</span><span class="token number">223.6</span>.6.6
+<span class="token assign-left variable">DNS2</span><span class="token operator">=</span><span class="token number">180.76</span>.76.76
+<span class="token assign-left variable">ONBOOT</span><span class="token operator">=</span>yes</code></pre>
+
+<h4 id="动态分配-IP"><a href="#动态分配-IP" class="headerlink" title="动态分配 IP"></a>动态分配 IP</h4><p>也是在<code>/etc/sysconfig/network-scripts</code>下新建文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">DEVICE</span><span class="token operator">=</span>eth0
+<span class="token assign-left variable">NAME</span><span class="token operator">=</span>eth0
+<span class="token assign-left variable">BOOTPROTO</span><span class="token operator">=</span>dhcp
+<span class="token assign-left variable">ONBOOT</span><span class="token operator">=</span>yes</code></pre>
+
+<h4 id="网卡别名"><a href="#网卡别名" class="headerlink" title="网卡别名"></a>网卡别名</h4><p>还是在<code>/etc/sysconfig/network-scripts</code>下新建文件，网卡别名必须使用静态地址</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">DEVICE</span><span class="token operator">=</span>eth0:1
+<span class="token assign-left variable">IPADDR</span><span class="token operator">=</span><span class="token number">11.0</span>.0.6
+<span class="token assign-left variable">PREFIX</span><span class="token operator">=</span><span class="token number">8</span></code></pre>
+
+<p>修改完后 <code>service network restart</code>重启服务即可</p>
+<p>以上是 CentOS6 配置网卡的方式，CentOS7、8 不推荐手动修改文件，推荐使用 nmcli 命令自动生成配置文件。</p>
+<h2 id="多网卡"><a href="#多网卡" class="headerlink" title="多网卡"></a>多网卡</h2><p>将多块网卡绑定同一 IP 地址对外提供服务，可以实现高可用或者负载均衡。直接给两块网卡设置同一 IP 地址是不可以的。通过 Bonding 或 Teaming，虚拟一块网卡对外提供连接，物理网卡的被修改为相同的 MAC 地址。</p>
+<h3 id="Bonding"><a href="#Bonding" class="headerlink" title="Bonding"></a>Bonding</h3><p>共 7 种模式，0-6mode：</p>
+<p>0：轮询、1：活动-备份、3：广播</p>
+<p>说明：active-backup、balance-tlb 和 balance-alb 模式不需要交换机的任何特殊配置。其他绑定模式需要配置交换机以便整合链接。如：Cisco 交换机需要在模式 0、2 和 3 中使用 EtherChannel，但在模式 4 中需要 LACP 和 EtherChannel。</p>
+<p>实现 bonding 模式 1：</p>
+<p>创建 bonding 设备的配置文件&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-bond0：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">NAME</span><span class="token operator">=</span>bond0
+<span class="token assign-left variable">TYPE</span><span class="token operator">=</span>bond
+<span class="token assign-left variable">DEVICE</span><span class="token operator">=</span>bond0
+<span class="token assign-left variable">BOOTPROTO</span><span class="token operator">=</span>none
+<span class="token assign-left variable">IPADDR</span><span class="token operator">=</span><span class="token number">10.0</span>.0.100
+<span class="token assign-left variable">PREFIX</span><span class="token operator">=</span><span class="token number">8</span>
+<span class="token assign-left variable">BONDING_OPTS</span><span class="token operator">=</span><span class="token string">"mode=1 miimon=100"</span></code></pre>
+
+<p>修改两个 eth0 和 eth1 两个网卡的配置</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">NAME</span><span class="token operator">=</span>eth0
+<span class="token assign-left variable">DEVICE</span><span class="token operator">=</span>eth0
+<span class="token assign-left variable">BOOTPROTO</span><span class="token operator">=</span>none
+<span class="token assign-left variable">MASTER</span><span class="token operator">=</span>bond0
+<span class="token assign-left variable">SLAVE</span><span class="token operator">=</span>yes
+<span class="token assign-left variable">ONBOOT</span><span class="token operator">=</span>yes</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">NAME</span><span class="token operator">=</span>eth1
+<span class="token assign-left variable">DEVICE</span><span class="token operator">=</span>eth1
+<span class="token assign-left variable">BOOTPROTO</span><span class="token operator">=</span>none
+<span class="token assign-left variable">MASTER</span><span class="token operator">=</span>bond0
+<span class="token assign-left variable">SLAVE</span><span class="token operator">=</span>yes
+<span class="token assign-left variable">ONBOOT</span><span class="token operator">=</span>yes</code></pre>
+
+<p>查看 bond0 状态：<code>/proc/net/bonding/bond0</code></p>
+<p>删除 bond0：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ifconfig</span> bond0 down
+rmmod bonding</code></pre>
+
+<h3 id="Teaming"><a href="#Teaming" class="headerlink" title="Teaming"></a>Teaming</h3><p>从 CentOS7 开始，不推荐使用 bonding，推荐使用网络组，网络组提供更好的性能和扩展性。网络组由内核驱动和 teamd 守护进程实现。</p>
+<p>网络组也有多种模式：broadcast、roundrobin、activebackup、loadbalance、lacp (implements the 802.3ad Link Aggregation Control Protocol)</p>
+<p>网络组特点：</p>
+<ul>
+<li>启动网络组接口不会自动启动网络组中的 port 接口</li>
+<li>启动网络组接口中的 port 接口总会自动启动网络组接口</li>
+<li>禁用网络组接口会自动禁用网络组中的 port 接口</li>
+<li>没有 port 接口的网络组接口可以启动静态 IP 连接</li>
+<li>启用 DHCP 连接时，没有 port 接口的网络组会等待 port 接口的加入</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建网络组接口，虽然使用connection创建，但好像使用device来创建更符合逻辑</span>
+nmcli con <span class="token function">add</span> <span class="token builtin class-name">type</span> team con-name CNAME ifname INAME <span class="token punctuation">[</span>config JSON<span class="token punctuation">]</span>
+CNAME 连接名
+INAME 接口名，也随便写。其他连接ifname是指定关联的物理网卡接口，而网络组是软件，所以这里的ifname不是指定，是定义
+JSON 指定runner方式,格式：<span class="token string">'&#123;"runner": &#123;"name": "METHOD"&#125;&#125;'</span>
+METHOD 可以是broadcast, roundrobin, activebackup, loadbalance, lacp
+
+<span class="token comment"># 创建port接口</span>
+nmcli con <span class="token function">add</span> <span class="token builtin class-name">type</span> team-slave con-name CNAME ifname INAME master TEAM
+CNAME 连接名,连接名若不指定，默认为team-slave-IFACE
+INAME 网络接口名
+TEAM 网络组接口名
+
+<span class="token comment"># 断开和启动</span>
+nmcli dev dis INAME
+nmcli con up CNAME
+INAME 设备名 CNAME 网络组接口名或port接口</code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加网络组接口</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli con add type team con-name con-team0 ifname if-team0 config '&#123;"runner":&#123;"name": "loadbalance"&#125;&#125;' ipv4.addresses 10.0.0.88/24 ipv4.method manual</span>
+Connection <span class="token string">'con-team0'</span> <span class="token punctuation">(</span>6a08e7d5-473e-4bed-bc6d-2065efc296c4<span class="token punctuation">)</span> successfully added.
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli device</span>
+DEVICE    TYPE      STATE      CONNECTION
+eth0      ethernet  connected  eth0
+eth1      ethernet  connected  eth1
+eth2      ethernet  connected  eth2
+eth3      ethernet  connected  eth3
+if-team0  team      connected  con-team0
+lo        loopback  unmanaged  --
+
+<span class="token comment"># 给eth0、eth1、eth2三个网卡接口添加连接，并加入到网络组</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli con add con-name team0-eth1 type team-slave ifname eth1 master if-team0</span>
+Connection <span class="token string">'team0-eth1'</span> <span class="token punctuation">(</span>66aad47b-4d03-49ef-bcc7-d628f77f3256<span class="token punctuation">)</span> successfully added.
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli con add con-name team0-eth2 type team-slave ifname eth2 master if-team0</span>
+Connection <span class="token string">'team0-eth2'</span> <span class="token punctuation">(</span>175ea1cb-05a8-4f97-b756-eae6ec844a43<span class="token punctuation">)</span> successfully added.
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli con add con-name team0-eth3 type team-slave ifname eth3 master if-team0</span>
+Connection <span class="token string">'team0-eth3'</span> <span class="token punctuation">(</span>d021a567-5c2c-4528-acdb-e01f25d80988<span class="token punctuation">)</span> successfully added.
+<span class="token comment"># 看一下连接状态，新创建的连接还没有激活</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli connection</span>
+NAME        UUID                                  TYPE      DEVICE
+eth0        d9c122c4-1861-45f3-826f-a1fff455543c  ethernet  eth0
+eth1        8c913f0c-de22-4fa9-a153-9de53621de5a  ethernet  eth1
+eth2        0ee56953-0b62-4181-9987-fb09da4dacd9  ethernet  eth2
+eth3        8028cae7-39b5-4656-8ad8-e82b1adf0025  ethernet  eth3
+con-team0   6a08e7d5-473e-4bed-bc6d-2065efc296c4  team      if-team0
+team0-eth1  66aad47b-4d03-49ef-bcc7-d628f77f3256  ethernet  --
+team0-eth2  175ea1cb-05a8-4f97-b756-eae6ec844a43  ethernet  --
+team0-eth3  d021a567-5c2c-4528-acdb-e01f25d80988  ethernet  --
+<span class="token comment"># 看一下网络组的状态，组内的连接都还没启动</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># teamdctl if-team0 state</span>
+setup:
+  runner: loadbalance
+
+<span class="token comment"># 一个网卡接口可以关联多个连接，但同时只能有一个活跃，切换加入了网络组的连接为活跃状态</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli connection up team0-eth1</span>
+Connection successfully activated <span class="token punctuation">(</span>D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/14<span class="token punctuation">)</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli connection up team0-eth2</span>
+Connection successfully activated <span class="token punctuation">(</span>D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/15<span class="token punctuation">)</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># nmcli connection up team0-eth3</span>
+Connection successfully activated <span class="token punctuation">(</span>D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/16<span class="token punctuation">)</span>
+Connection successfully activated <span class="token punctuation">(</span>D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/16<span class="token punctuation">)</span>
+
+<span class="token comment"># 看一下网络组的状态，都启动了</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># teamdctl if-team0 state</span>
+setup:
+  runner: loadbalance
+ports:
+  eth1
+    <span class="token function">link</span> watches:
+      <span class="token function">link</span> summary: up
+      instance<span class="token punctuation">[</span>link_watch_0<span class="token punctuation">]</span>:
+        name: <span class="token function">ethtool</span>
+        link: up
+        down count: <span class="token number">0</span>
+  eth2
+    <span class="token function">link</span> watches:
+      <span class="token function">link</span> summary: up
+      instance<span class="token punctuation">[</span>link_watch_0<span class="token punctuation">]</span>:
+        name: <span class="token function">ethtool</span>
+        link: up
+        down count: <span class="token number">0</span>
+  eth3
+    <span class="token function">link</span> watches:
+      <span class="token function">link</span> summary: up
+      instance<span class="token punctuation">[</span>link_watch_0<span class="token punctuation">]</span>:
+        name: <span class="token function">ethtool</span>
+        link: up
+        down count: <span class="token number">0</span></code></pre>
+
+<h2 id="网桥"><a href="#网桥" class="headerlink" title="网桥"></a>网桥</h2><p>网桥和交换机都有若干网络接口，交换机网口更多，但两者实现的功能是相同的，都是把这些若干网络接口“连接”起来，在数据链路层对报文进行互相转发，使得连接网口的设备之间能够通信。</p>
+<p>“连接”网口并实现报文互相转发的技术就叫桥接，物理的网桥和交换机（以下简称网桥）的网口数量是固定的，而软件模拟的网桥的网口数量是不固定的，因为软件模拟的网桥的网口既可以指定物理网口，也可以指定虚拟网口，物理网口对外连接交换机，虚拟网口对内连接虚拟机。</p>
+<p>例如：一台服务器有 4 个网口（可能是四张网卡，每张一个网口，也可能是一张网卡有四个网口）、系统中安装了 5 个虚拟机。使用软件网桥把 2 个物理网口和 3 个虚拟网口桥接在一起，每个虚拟网口连接一个虚拟机。这样，从这两个网口中过来的报文只能转发到这个三个虚拟机中，不会影响到其他虚拟机。</p>
+<p>实验一：环境 vmware，三台虚拟机 A、B、C，A 是仅主机模式，C 是 nat 模式，所以 AC 之间不能通信，B 配置两张网卡，一张仅主机，一张 nat，所以 B 既能和 A 通信，也能和 C 通信，所以让 B 充当网桥，把 A 和 C 桥接在一起，从而实现 AC 通信。实现方式可以安装 bridge-utils，也可以使用 nmcli 命令。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/%E8%B7%AF%E7%94%B1/" rel="prev" title="路由">
+                  <i class="fa fa-chevron-left"></i> 路由
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C/Ubuntu%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/" rel="next" title="Ubuntu网络配置">
+                  Ubuntu网络配置 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="getent用来察看系统的数据库中的相关记录，系统数据库包括：ahosts、ahostsv4、ahostsv6、aliases、ethers、group、gshadow、hosts、initgroups、netgroup、networks、passwd、protocols、rpc、services、shadow getent 通过 key 查询整条数据，当然，一条数据并非只能对应一个 key，例如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="相关命令">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="getent用来察看系统的数据库中的相关记录，系统数据库包括：ahosts、ahostsv4、ahostsv6、aliases、ethers、group、gshadow、hosts、initgroups、netgroup、networks、passwd、protocols、rpc、services、shadow getent 通过 key 查询整条数据，当然，一条数据并非只能对应一个 key，例如">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-04T08:33:07.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="用户和组">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/","path":"运维/基础/用户和组/相关命令/","title":"相关命令"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>相关命令 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#getent"><span class="nav-number">1.</span> <span class="nav-text">getent</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vipw-vigr-pwck-grpck"><span class="nav-number">2.</span> <span class="nav-text">vipw \ vigr \ pwck \ grpck</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#useradd"><span class="nav-number">3.</span> <span class="nav-text">useradd</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7%E7%9B%B8%E5%85%B3%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">创建用户相关文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#newusers"><span class="nav-number">3.2.</span> <span class="nav-text">newusers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#chpasswd"><span class="nav-number">3.3.</span> <span class="nav-text">chpasswd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#usermod"><span class="nav-number">4.</span> <span class="nav-text">usermod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#userdel"><span class="nav-number">5.</span> <span class="nav-text">userdel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#id"><span class="nav-number">6.</span> <span class="nav-text">id</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#su"><span class="nav-number">7.</span> <span class="nav-text">su</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#passwd"><span class="nav-number">8.</span> <span class="nav-text">passwd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chage"><span class="nav-number">9.</span> <span class="nav-text">chage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%91%BD%E4%BB%A4"><span class="nav-number">10.</span> <span class="nav-text">其他命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#groupadd"><span class="nav-number">11.</span> <span class="nav-text">groupadd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#groupmod"><span class="nav-number">12.</span> <span class="nav-text">groupmod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#groupdel"><span class="nav-number">13.</span> <span class="nav-text">groupdel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gpasswd"><span class="nav-number">14.</span> <span class="nav-text">gpasswd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#newgrp"><span class="nav-number">15.</span> <span class="nav-text">newgrp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#groupmems"><span class="nav-number">16.</span> <span class="nav-text">groupmems</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#groups"><span class="nav-number">17.</span> <span class="nav-text">groups</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0"><span class="nav-number">18.</span> <span class="nav-text">练习</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="相关命令 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          相关命令
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-04 16:33:07" itemprop="dateCreated datePublished" datetime="2021-02-04T16:33:07+08:00">2021-02-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/" itemprop="url" rel="index"><span itemprop="name">用户和组</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="getent"><a href="#getent" class="headerlink" title="getent"></a>getent</h2><p>用来察看系统的数据库中的相关记录，系统数据库包括：ahosts、ahostsv4、ahostsv6、aliases、ethers、group、gshadow、hosts、initgroups、netgroup、networks、passwd、protocols、rpc、services、shadow</p>
+<p>getent 通过 key 查询整条数据，当然，一条数据并非只能对应一个 key，例如 passwd，一条数据的 key 可以是用户名, 也可以是 UID</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">getent database <span class="token punctuation">[</span>key <span class="token punctuation">..</span>.<span class="token punctuation">]</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查询passwd</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent passwd lujinkai</span>
+lujinkai:x:1000:1000:lujinkai:/home/lujinkai:/bin/bash
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent passwd 1000</span>
+lujinkai:x:1000:1000:lujinkai:/home/lujinkai:/bin/bash
+<span class="token comment"># 查询shadow</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent shadow lujinkai</span>
+lujinkai:<span class="token variable">$6</span><span class="token variable">$Kmenu</span>.bK<span class="token variable">$sIXTEMYHCL9QJ9ZLEmkeybfF6NV3p6l2m3G1SLFSgomaDOPArKcbZuUHgIunOXjMqfJ48KYbW76YvEgg1hcXs0</span>:18475:0:99999:7:::</code></pre>
+
+<h2 id="vipw-vigr-pwck-grpck"><a href="#vipw-vigr-pwck-grpck" class="headerlink" title="vipw \ vigr \ pwck \ grpck"></a>vipw \ vigr \ pwck \ grpck</h2><p>尽量不要直接修改<code>/etc/passwd</code>、<code>/etc/group</code>、<code>/etc/shadow</code>、<code>/etc/gshadow</code> 这四个文件</p>
+<p><strong><code>vipw</code> 可以用来编辑<code>/etc/passwd</code>，<code>vigr</code>可以用来编辑<code>/etc/group</code>，它俩都有语法检查功能</strong></p>
+<p><strong><code>pwck</code>用来验证<code>/etc/passwd</code>和<code>/etc/shadow</code>的内容和格式的完整性，<code>grpck</code>用于验证组文件的完整性</strong></p>
+<p>虽然用这四个命令会比直接使用 vim 修改这四个文件更安全，但是也不推荐使用，了解即可</p>
+<p>推荐使用：useradd、groupadd、chage 等命令，当然本质还是修改这四个文件</p>
+<h2 id="useradd"><a href="#useradd" class="headerlink" title="useradd"></a>useradd</h2><p>用户创建，<code>useradd</code> 等于 <code>adduser</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">useradd</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> LOGIN</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">-u, <span class="token parameter variable">--uid</span> <span class="token environment constant">UID</span>                              <span class="token comment"># 指定uid, 不过不加-o参数, 指定的uid必须是唯一非负整数</span>
+-o, --non-unique                           <span class="token comment"># 配合-u选项, 不检查UID的唯一性</span>
+-g, <span class="token parameter variable">--gid</span> GROUP                            <span class="token comment"># 指定用户所属基本组, 可以是组名, 也可以是GID</span>
+-c, <span class="token parameter variable">--comment</span> COMMENT                      <span class="token comment"># 用户的的注释, 要简短一些</span>
+-s, <span class="token parameter variable">--shell</span> <span class="token environment constant">SHELL</span>                          <span class="token comment"># 指定用户的默认shell, 可从/etc/shells中选择, 如果是给服务用, 指定/sbin/nologin</span>
+-G, <span class="token parameter variable">--groups</span> GROUP1<span class="token punctuation">[</span>,GROUP2,<span class="token punctuation">..</span>.<span class="token punctuation">[</span>,GROUPN<span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token comment"># 指定用户的附加组, 组须是已存在的</span>
+-N, --no-user-group                        <span class="token comment"># 不创建私用组作为主组, 使用users组做主组</span>
+-r, <span class="token parameter variable">--system</span>                               <span class="token comment"># 创建系统用户 centos6之前: UID &lt; 500, centos7之后: UID &lt; 1000，使用这个参数, 不会自动创建家目录和邮件目录</span>
+-d, --home-dir HOME_DIR                    <span class="token comment"># 指定用户的家目录</span>
+-m, --create-home                          <span class="token comment"># 创建家目录, 用于系统用户</span>
+-M, --no-create-home                       <span class="token comment"># 不创建家目录, 用于非系统用户</span>
+-p, <span class="token parameter variable">--password</span> PASSWORD                    <span class="token comment"># 指定密码, 必须是加密过后的</span></code></pre>
+
+<h3 id="创建用户相关文件"><a href="#创建用户相关文件" class="headerlink" title="创建用户相关文件"></a>创建用户相关文件</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/etc/default/useradd
+/etc/skel/
+/etc/login.defs</code></pre>
+
+<p>useradd 命令默认值设置在 <code>/etc/default/useradd</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># useradd defaults file</span>
+<span class="token assign-left variable">GROUP</span><span class="token operator">=</span><span class="token number">100</span>   <span class="token comment"># 如果useradd没有指定组，并且/etc/login.defs中的USERGROUPS_ENAB为no或者useradd使用了-N选项时，此时该参数生效。</span>
+<span class="token assign-left variable"><span class="token environment constant">HOME</span></span><span class="token operator">=</span>/home  <span class="token comment"># 家目录放在此目录下</span>
+<span class="token assign-left variable">INACTIVE</span><span class="token operator">=</span>-1 <span class="token comment"># 对应/etc/shadow文件第7列, 即用户密码过期的宽限期, -1表示不过期</span>
+<span class="token assign-left variable">EXPIRE</span><span class="token operator">=</span>     <span class="token comment"># 对应/etc/shadow文件第8列,即用户账号的有效期, 不设置表示不启用</span>
+<span class="token assign-left variable"><span class="token environment constant">SHELL</span></span><span class="token operator">=</span>/bin/bash
+<span class="token assign-left variable">SKEL</span><span class="token operator">=</span>/etc/skel
+<span class="token assign-left variable">CREATE_MAIL_SPOOL</span><span class="token operator">=</span>yes</code></pre>
+
+<p><code>/etc/skel/</code> 是模板目录，骨架目录。每新建一个用户的家目录，就会把<code>/etc/skel/</code>下的文件拷贝一份到家目录下。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 skel<span class="token punctuation">]</span><span class="token comment"># ls -lia /etc/skel/</span>
+total <span class="token number">24</span>
+<span class="token number">134321114</span> drwxr-xr-x.  <span class="token number">2</span> root root   <span class="token number">62</span> Jul <span class="token number">29</span> <span class="token number">17</span>:08 <span class="token builtin class-name">.</span>
+<span class="token number">134320193</span> drwxr-xr-x. <span class="token number">73</span> root root <span class="token number">8192</span> Aug  <span class="token number">1</span> <span class="token number">17</span>:49 <span class="token punctuation">..</span>
+<span class="token number">134360296</span> -rw-r--r--.  <span class="token number">1</span> root root   <span class="token number">18</span> Apr  <span class="token number">1</span> <span class="token number">10</span>:17 .bash_logout
+<span class="token number">134360297</span> -rw-r--r--.  <span class="token number">1</span> root root  <span class="token number">193</span> Apr  <span class="token number">1</span> <span class="token number">10</span>:17 .bash_profile
+<span class="token number">134360298</span> -rw-r--r--.  <span class="token number">1</span> root root  <span class="token number">231</span> Apr  <span class="token number">1</span> <span class="token number">10</span>:17 .bashrc</code></pre>
+
+<p><code>/etc/login.defs</code> 配合 <code>/etc/passwd</code> 和 <code>/etc/shadow</code> 来对用户进行一些限制 但是优先级低于 <code>/etc/passwd</code>和 <code>/etc/shadow</code></p>
+<p>如果有冲突的地方，系统会以 <code>/etc/passwd</code> 和 <code>/etc/shadow</code> 为准</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 skel<span class="token punctuation">]</span><span class="token comment"># egrep -v '^[ ]*$|^#' /etc/login.defs</span>
+MAIL_DIR        /var/spool/mail
+PASS_MAX_DAYS   <span class="token number">99999</span>
+PASS_MIN_DAYS   <span class="token number">0</span>
+PASS_MIN_LEN    <span class="token number">5</span>
+PASS_WARN_AGE   <span class="token number">7</span>
+UID_MIN                  <span class="token number">1000</span>
+UID_MAX                 <span class="token number">60000</span>
+SYS_UID_MIN               <span class="token number">201</span>
+SYS_UID_MAX               <span class="token number">999</span>
+GID_MIN                  <span class="token number">1000</span>
+GID_MAX                 <span class="token number">60000</span>
+SYS_GID_MIN               <span class="token number">201</span>
+SYS_GID_MAX               <span class="token number">999</span>
+CREATE_HOME     <span class="token function">yes</span>
+UMASK           077
+USERGROUPS_ENAB <span class="token function">yes</span>
+ENCRYPT_METHOD SHA512</code></pre>
+
+<h3 id="newusers"><a href="#newusers" class="headerlink" title="newusers"></a>newusers</h3><p>批量创建用户</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">newusers <span class="token function">passwd</span> 用户文件</code></pre>
+
+<p>用户文件：指定包含用户信息的文本文件，文件格式要与 <code>/etc/passwd</code> 相同</p>
+<h3 id="chpasswd"><a href="#chpasswd" class="headerlink" title="chpasswd"></a>chpasswd</h3><p>批量修改用户密码</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> username:passwd <span class="token operator">|</span> chpasswd</code></pre>
+
+<p>生成密码:</p>
+<ul>
+<li><p>CentOS 6</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># grub-crypt 是centos6中的命令, 可以对口令进行加密, 默认加密方式是 sha-512</span>
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token comment"># grub-crypt --help</span>
+Usage: grub-crypt <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>.
+Encrypt a password.
+
+  -h, <span class="token parameter variable">--help</span>              Print this message and <span class="token builtin class-name">exit</span>
+  -v, <span class="token parameter variable">--version</span>           Print the version information and <span class="token builtin class-name">exit</span>
+  <span class="token parameter variable">--md5</span>                   Use MD5 to encrypt the password
+  --sha-256               Use SHA-256 to encrypt the password
+  --sha-512               Use SHA-512 to encrypt the password <span class="token punctuation">(</span>default<span class="token punctuation">)</span>
+
+Report bugs to <span class="token operator">&lt;</span>bug-grub@gnu.org<span class="token operator">></span>.
+EOF
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token comment"># grub-crypt</span>
+Password:
+Retype password:
+<span class="token variable">$6</span><span class="token variable">$O4ufCj1vTKW</span>/7Ko7<span class="token variable">$p9rV3m0dsEsr0ebCyOVN</span>.togh1fVhQCCDBsoc.RkelfWnRrIm3W5vVPuB86oOKo1Yei0QKxO2MRMoX2qzHV7M1
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token comment"># useradd -p '$6$O4ufCj1vTKW/7Ko7$p9rV3m0dsEsr0ebCyOVN.togh1fVhQCCDBsoc.RkelfWnRrIm3W5vVPuB86oOKo1Yei0QKxO2MRMoX2qzHV7M1' test</span>
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token comment"># getent shadow test</span>
+test:<span class="token variable">$6</span><span class="token variable">$O4ufCj1vTKW</span>/7Ko7<span class="token variable">$p9rV3m0dsEsr0ebCyOVN</span>.togh1fVhQCCDBsoc.RkelfWnRrIm3W5vVPuB86oOKo1Yei0QKxO2MRMoX2qzHV7M1:18475:0:99999:7:::</code></pre>
+</li>
+<li><p>CentOS 7</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># CentOS 7中没有直接命令能加密sha-512口令, 可以使用python</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#python -c 'import</span>
+crypt,getpass<span class="token punctuation">;</span><span class="token assign-left variable">pw</span><span class="token operator">=</span><span class="token string">"magedu"</span><span class="token punctuation">;</span>print<span class="token punctuation">(</span>crypt.crypt<span class="token punctuation">(</span>pw<span class="token punctuation">))</span>'
+<span class="token variable">$6</span><span class="token variable">$pt0SFMf6YqKea3mh</span>$.7Hkslg17uI.Wu7BcMJStVVtkzrwktXrOC8DxcMFC4JO1igrqR7VAi87H5PH
+OuLTUEjl7eJqKUhMT1e9ixojn1</code></pre>
+</li>
+<li><p>CentOS 8</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># -6 表示sha-512加密方式, CentOS7中只有-1(md5)加密方式</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># whatis passwd</span>
+openssl-passwd <span class="token punctuation">(</span>1ssl<span class="token punctuation">)</span> - compute password hashes
+<span class="token function">passwd</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>           - update user's authentication tokens
+<span class="token function">passwd</span> <span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>           - password <span class="token function">file</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># man openssl-passwd</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># openssl passwd -6 123456</span>
+<span class="token variable">$6</span><span class="token variable">$vQQo</span>/2Ie/NqmeTqp<span class="token variable">$o6kCsDtZwNtW7rLh</span>/LEk8yA26sYW4Kmja7uk/pLp<span class="token punctuation">..</span>cNe77btZf3tRxeqtSwgoGKzc5GgXJT9NIpXNShQ9L7r0</code></pre>
+</li>
+<li><p>Ubuntu</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@ubuntu1804 ~<span class="token punctuation">]</span><span class="token comment">#echo wang:centos |chpasswd</span>
+<span class="token punctuation">[</span>root@ubuntu1804 ~<span class="token punctuation">]</span><span class="token comment">#passwd wang &lt;&lt;EOF</span>
+<span class="token operator">></span> centos
+<span class="token operator">></span> centos
+<span class="token operator">></span> EOF
+Enter new UNIX password: Retype new UNIX password: passwd: password updated
+successfully
+<span class="token punctuation">[</span>root@ubuntu1804 ~<span class="token punctuation">]</span><span class="token comment">#echo -e 'magedu\nmagedu' | passwd wang</span>
+Enter new UNIX password: Retype new UNIX password: passwd: password updated
+successfully</code></pre></li>
+</ul>
+<h2 id="usermod"><a href="#usermod" class="headerlink" title="usermod"></a>usermod</h2><p>修改用户属性，不过用户一旦创建完了，很少会再修改，所以这个命令几乎不用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">usermod</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span> login
+
+<span class="token parameter variable">-u</span> <span class="token environment constant">UID</span>                        <span class="token comment"># 新UID</span>
+<span class="token parameter variable">-g</span> GID                        <span class="token comment"># 新主组</span>
+<span class="token parameter variable">-G</span> GROUP1<span class="token punctuation">[</span>,GROUP2,<span class="token punctuation">..</span>.<span class="token punctuation">[</span>,GROUPN<span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token comment"># 新附加组，原来的附加组将会被覆盖；若保留原有，则要同时使用-a选项</span>
+<span class="token parameter variable">-s</span> <span class="token environment constant">SHELL</span>                      <span class="token comment"># 新的默认SHELL</span>
+<span class="token parameter variable">-c</span> <span class="token string">'COMMENT'</span>                  <span class="token comment"># 新的注释信息</span>
+<span class="token parameter variable">-d</span> <span class="token environment constant">HOME</span>                       <span class="token comment"># 新家目录不会自动创建，若要创建新家目录并移动原家数据，同时使用-m选项</span>
+<span class="token parameter variable">-l</span> login_name                 <span class="token comment"># 新的名字</span>
+<span class="token parameter variable">-L</span>                            <span class="token comment"># lock指定用户,在/etc/shadow 密码栏的增加 !</span>
+<span class="token parameter variable">-U</span>                            <span class="token comment"># unlock指定用户,将 /etc/shadow 密码栏的 ! 拿掉</span>
+<span class="token parameter variable">-e</span> YYYY-MM-DD                 <span class="token comment"># 指明用户账号过期日期</span>
+<span class="token parameter variable">-f</span> INACTIVE                   <span class="token comment"># 设定非活动期限，即宽限期</span></code></pre>
+
+<h2 id="userdel"><a href="#userdel" class="headerlink" title="userdel"></a>userdel</h2><p>删除用户</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">userdel</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span><span class="token punctuation">..</span>. Login
+
+<span class="token parameter variable">-f</span> <span class="token parameter variable">--force</span>    <span class="token comment"># 强制</span>
+<span class="token parameter variable">-r</span> <span class="token parameter variable">--remove</span>   <span class="token comment"># 删除用户家目录和邮箱</span></code></pre>
+
+<h2 id="id"><a href="#id" class="headerlink" title="id"></a>id</h2><p>查看用户相关 ID 信息</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">id</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span><span class="token environment constant">USER</span><span class="token punctuation">]</span>
+
+<span class="token parameter variable">-u</span>   <span class="token comment">#</span>
+<span class="token parameter variable">-g</span>   <span class="token comment">#</span>
+<span class="token parameter variable">-G</span>   <span class="token comment">#</span>
+
+<span class="token comment"># 示例</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># id -u</span>
+<span class="token number">0</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># id -u lujinkai</span>
+<span class="token number">1000</span></code></pre>
+
+<h2 id="su"><a href="#su" class="headerlink" title="su"></a>su</h2><p>su：switch user，切换用户</p>
+<p>两种切换的方式:</p>
+<ul>
+<li>su UserName：非登录式切换，即不会读取目标用户的配置文件，不改变当前工作目录，即不完全切换</li>
+<li>su - UserName：登录式切换，会读取目标用户的配置文件，切换至自已的家目录，即完全切换</li>
+</ul>
+<p>注意：su 切换新用户后，使用 exit 退回至旧的用户，而不要再用 su 切换至旧用户，否则会生成很多的 bash 子进程，环境可能会混乱</p>
+<h2 id="passwd"><a href="#passwd" class="headerlink" title="passwd"></a>passwd</h2><p>修改用户密码</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">passwd</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> UserName</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">-d：删除指定用户密码
+-l：锁定指定用户
+-u：解锁指定用户
+-e：强制用户下次登录修改密码
+-f：强制操作
+<span class="token parameter variable">-n</span> mindays：指定最短使用期限
+<span class="token parameter variable">-x</span> maxdays：最大使用期限
+<span class="token parameter variable">-w</span> warndays：提前多少天开始警告
+<span class="token parameter variable">-i</span> inactivedays：非活动期限
+--stdin：从标准输入接收用户密码,Ubuntu无此选项</code></pre>
+
+<h2 id="chage"><a href="#chage" class="headerlink" title="chage"></a>chage</h2><p>修改用户密码策略</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">chage <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. LOGIN</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-d</span> LAST_DAY <span class="token comment">#更改密码的时间</span>
+<span class="token parameter variable">-m</span> <span class="token parameter variable">--mindays</span> MIN_DAYS
+<span class="token parameter variable">-M</span> <span class="token parameter variable">--maxdays</span> MAX_DAYS
+<span class="token parameter variable">-W</span> <span class="token parameter variable">--warndays</span> WARN_DAYS
+<span class="token parameter variable">-I</span> <span class="token parameter variable">--inactive</span> INACTIVE <span class="token comment">#密码过期后的宽限期</span>
+<span class="token parameter variable">-E</span> <span class="token parameter variable">--expiredate</span> EXPIRE_DATE <span class="token comment">#用户的有效期</span>
+<span class="token parameter variable">-l</span> 显示密码策略</code></pre>
+
+<h2 id="其他命令"><a href="#其他命令" class="headerlink" title="其他命令"></a>其他命令</h2><ul>
+<li><code>chfn</code> 指定个人信息，这个命令修改的是&#x2F;etc&#x2F;passwd 的第 5 个字段</li>
+<li><code>chsh</code> 指定 shell，相当于 usermod -s</li>
+<li><code>flnger</code> 可以查看用户个人信息</li>
+</ul>
+<p>这几个命令用的不多，了解即可，flnger 命令在 CentOS8 中已经没有了</p>
+<h2 id="groupadd"><a href="#groupadd" class="headerlink" title="groupadd"></a>groupadd</h2><p>创建组，<code>groupadd</code> 等于 <code>addgroup</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">groupadd</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span><span class="token punctuation">..</span>. group_name</code></pre>
+
+<ul>
+<li>-g GID : 指明 GID</li>
+<li>-r : 创建系统组, CentOS 6 之前: ID&lt;500，CentOS 7 以后: ID&lt;1000</li>
+</ul>
+<p>范例: <code>groupadd -g 48 -r apache</code></p>
+<h2 id="groupmod"><a href="#groupmod" class="headerlink" title="groupmod"></a>groupmod</h2><p>修改组</p>
+<p>groupmod 修改组的属性, 用的不多</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">groupmod</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span><span class="token punctuation">..</span>. group</code></pre>
+
+<ul>
+<li>-n group_name : 新名字</li>
+<li>-g GID : 新 GID</li>
+</ul>
+<h2 id="groupdel"><a href="#groupdel" class="headerlink" title="groupdel"></a>groupdel</h2><p>删除组</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">groupdel</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> GROUP</code></pre>
+
+<p>只有当组下没有用户后, 才能删除成功</p>
+<h2 id="gpasswd"><a href="#gpasswd" class="headerlink" title="gpasswd"></a>gpasswd</h2><p>gpasswd 命令，可以更改组密码，也可以添加删除附加组成员</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">gpasswd <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> GROUP</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-a</span> user                    <span class="token comment"># 将user添加到指定组中</span>
+<span class="token parameter variable">-d</span> user                    <span class="token comment"># 从指定附加组中移除用户user</span>
+<span class="token parameter variable">-M</span> user1,user2,user3<span class="token punctuation">..</span>.    <span class="token comment"># 设置组成员列表, 会覆盖已有的组成员列表</span>
+<span class="token parameter variable">-A</span> user1, user2, user3 <span class="token punctuation">..</span>. <span class="token comment"># 设置有组管理员列表</span>
+
+<span class="token comment"># 设置管理员的之前, 这些用户必须已经在组内了, 管理员有权限往组内添加用户</span></code></pre>
+
+<h2 id="newgrp"><a href="#newgrp" class="headerlink" title="newgrp"></a>newgrp</h2><p>临时切换主组，把用户的主组临时切换到附加组</p>
+<p>这个命令用的不多，了解一下就行</p>
+<h2 id="groupmems"><a href="#groupmems" class="headerlink" title="groupmems"></a>groupmems</h2><p>更改和查看组成员，管理附加组的成员关系（只有 root 用户可以执行这个命令）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">groupmems <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>action<span class="token punctuation">]</span>
+
+-g, <span class="token parameter variable">--group</span> groupname <span class="token comment">#更改为指定组 (只有root)</span>
+-a, <span class="token parameter variable">--add</span> username    <span class="token comment">#指定用户加入组</span>
+-d, <span class="token parameter variable">--delete</span> username <span class="token comment">#从组中删除用户</span>
+-p, <span class="token parameter variable">--purge</span>           <span class="token comment">#从组中清除所有成员</span>
+-l, <span class="token parameter variable">--list</span>            <span class="token comment">#显示组成员列表</span></code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent group lujinkai</span>
+lujinkai:x:1000:lujinkai
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># groupmems -g lujinkai -a test</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent group lujinkai</span>
+lujinkai:x:1000:lujinkai,test
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># groupmems -g lujinkai -l</span>
+lujinkai  <span class="token builtin class-name">test</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># groupmems -g lujinkai -d test</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent group lujinkai</span>
+lujinkai:x:1000:lujinkai
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># groupmems -g lujinkai -p</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent group lujinkai</span>
+lujinkai:x:1000:</code></pre>
+
+<h2 id="groups"><a href="#groups" class="headerlink" title="groups"></a>groups</h2><p>查看用户所属组的列表</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># test用户所属的组有两个 test 和 lujinkai, test是主组 lujinkai是附加组</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># groups test</span>
+<span class="token builtin class-name">test</span> <span class="token builtin class-name">:</span> <span class="token builtin class-name">test</span> lujinkai</code></pre>
+
+<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><p>1.创建用户 gentoo，附加组为 bin 和 root，默认 shell 为&#x2F;bin&#x2F;csh，注释信息为”Gentoo Distribution”</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># useradd gentoo -G bin,root -s /bin/csh -c "Gentoo Distribution"</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># getent passwd gentoo</span>
+gentoo:x:1003:1003:Gentoo Distribution:/home/gentoo:/bin/csh
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># groups gentoo</span>
+gentoo <span class="token builtin class-name">:</span> gentoo root bin</code></pre>
+
+<p>2.创建下面的用户、组和组成员关系:<br>名字为 webs 的组<br>用户 nginx，使用 webs 作为附加组<br>用户 varnish，使用 webs 作为附加组<br>用户 mysql，不可交互登录系统，且不是 webs 的成员，nginx，varnish，mysql 密码都是 magedu</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/" rel="tag"><i class="fa fa-tag"></i> 用户和组</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84/" rel="prev" title="用户和组">
+                  <i class="fa fa-chevron-left"></i> 用户和组
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E4%BB%B6/%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E5%92%8CIO%E9%87%8D%E5%AE%9A%E5%90%91/" rel="next" title="文件管理和IO重定向">
+                  文件管理和IO重定向 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

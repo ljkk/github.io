@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Context 包定义了上下文类型，该上下文类型跨越 API 边界和进程之间传递截止期限，取消信号和其他请求范围值。 对服务器的传入请求应创建一个 Context，对服务器的传出调用应接受 Context。它们之间的函数调用链必须传播 Context，可以用使用 WithCancel，WithDeadline，WithTimeout 或 WithValue 创建的派生上下文替换。当 Context">
+<meta property="og:type" content="article">
+<meta property="og:title" content="context">
+<meta property="og:url" content="http://blog.lujinkai.cn/Golang/%E6%A0%87%E5%87%86%E5%BA%93/context/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="Context 包定义了上下文类型，该上下文类型跨越 API 边界和进程之间传递截止期限，取消信号和其他请求范围值。 对服务器的传入请求应创建一个 Context，对服务器的传出调用应接受 Context。它们之间的函数调用链必须传播 Context，可以用使用 WithCancel，WithDeadline，WithTimeout 或 WithValue 创建的派生上下文替换。当 Context">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/lujinkai/1646475452775.png">
+<meta property="article:published_time" content="2022-09-24T06:39:29.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.474Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="golang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/lujinkai/1646475452775.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/Golang/%E6%A0%87%E5%87%86%E5%BA%93/context/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/Golang/%E6%A0%87%E5%87%86%E5%BA%93/context/","path":"Golang/标准库/context/","title":"context"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>context | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Variables"><span class="nav-number">1.</span> <span class="nav-text">Variables</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Canceled"><span class="nav-number">1.1.</span> <span class="nav-text">Canceled</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DeadlineExceeded"><span class="nav-number">1.2.</span> <span class="nav-text">DeadlineExceeded</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#type-CancelFunc"><span class="nav-number">2.</span> <span class="nav-text">type CancelFunc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#func-WithCancel"><span class="nav-number">3.</span> <span class="nav-text">func WithCancel</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#func-WithDeadline"><span class="nav-number">4.</span> <span class="nav-text">func WithDeadline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#func-WithTimeout"><span class="nav-number">5.</span> <span class="nav-text">func WithTimeout</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#type-Context"><span class="nav-number">6.</span> <span class="nav-text">type Context</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#func-Background"><span class="nav-number">7.</span> <span class="nav-text">func Background</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#func-TODO"><span class="nav-number">8.</span> <span class="nav-text">func TODO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#func-WithValue"><span class="nav-number">9.</span> <span class="nav-text">func WithValue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%8E%9F%E5%88%99"><span class="nav-number">10.1.</span> <span class="nav-text">使用原则</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/Golang/%E6%A0%87%E5%87%86%E5%BA%93/context/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="context | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          context
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-09-24 14:39:29" itemprop="dateCreated datePublished" datetime="2022-09-24T14:39:29+08:00">2022-09-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/%E6%A0%87%E5%87%86%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">标准库</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Context 包定义了上下文类型，该上下文类型跨越 API 边界和进程之间传递截止期限，取消信号和其他请求范围值。</p>
+<p>对服务器的传入请求应创建一个 Context，对服务器的传出调用应接受 Context。它们之间的函数调用链必须传播 Context，可以用使用 WithCancel，WithDeadline，WithTimeout 或 WithValue 创建的派生上下文替换。当 Context 被取消时，从它派生的所有 Context 也被取消。</p>
+<p>WithCancel，WithDeadline 和 WithTimeout 函数采用 Context（父级）并返回派生的 Context（子级）和 CancelFunc。调用 CancelFunc 将取消子对象及其子对象，删除父对子对象的引用，并停止任何关联的定时器。未能调用 CancelFunc 会泄漏子项及其子项，直至父项被取消或计时器激发。go vet 工具检查在所有控制流路径上使用 CancelFuncs。</p>
+<p>使用 Contexts 的程序应该遵循这些规则来保持包之间的接口一致，并使静态分析工具能够检查上下文传播：</p>
+<p>不要将上下文存储在结构类型中；相反，将一个 Context 明确地传递给每个需要它的函数。上下文应该是第一个参数，通常命名为 ctx：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">DoSomething</span><span class="token punctuation">(</span>ctx context<span class="token punctuation">.</span>Context<span class="token punctuation">,</span> arg Arg<span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">&#123;</span>
+	<span class="token comment">// ... use ctx ...</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>即使函数允许，也不要传递 nil Context。如果您不确定要使用哪个 Context，请传递 context.TODO。</p>
+<p>使用上下文值仅适用于传输进程和 API 的请求范围数据，而不用于将可选参数传递给函数。</p>
+<p>相同的上下文可以传递给在不同 goroutine 中运行的函数; 上下文对于多个 goroutine 同时使用是安全的。</p>
+<p>有关使用 Contexts 的服务器的示例代码，请参阅<a target="_blank" rel="noopener" href="https://blog.golang.org/context%E3%80%82">https://blog.golang.org/context。</a></p>
+<h2 id="Variables"><a href="#Variables" class="headerlink" title="Variables"></a>Variables</h2><h3 id="Canceled"><a href="#Canceled" class="headerlink" title="Canceled"></a>Canceled</h3><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">var</span> Canceled <span class="token operator">=</span> errors<span class="token punctuation">.</span><span class="token function">New</span><span class="token punctuation">(</span><span class="token string">"context canceled"</span><span class="token punctuation">)</span></code></pre>
+
+<p>Canceled is the error returned by Context.Err when the context is canceled.</p>
+<h3 id="DeadlineExceeded"><a href="#DeadlineExceeded" class="headerlink" title="DeadlineExceeded"></a>DeadlineExceeded</h3><pre class="language-none"><code class="language-none">var DeadlineExceeded error &#x3D; deadlineExceededError&#123;&#125;</code></pre>
+
+<p>DeadlineExceeded is the error returned by Context.Err when the context’s deadline passes. 截止时间过后返回的错误</p>
+<h2 id="type-CancelFunc"><a href="#type-CancelFunc" class="headerlink" title="type CancelFunc"></a>type CancelFunc</h2><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> CancelFunc <span class="token keyword">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
+
+<h2 id="func-WithCancel"><a href="#func-WithCancel" class="headerlink" title="func WithCancel"></a>func WithCancel</h2><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">WithCancel</span><span class="token punctuation">(</span>parent Context<span class="token punctuation">)</span> <span class="token punctuation">(</span>ctx Context<span class="token punctuation">,</span> cancel CancelFunc<span class="token punctuation">)</span></code></pre>
+
+<p><code>WithCancel</code>函数用来创建一个可取消的<code>context</code>，返回一个<code>context</code>和一个<code>CancelFunc</code>，调用<code>CancelFunc</code>即可触发<code>cancel</code>操作。</p>
+<p>取消 Context 会释放与它相关的资源，所以只要完成在 Context 中运行的操作，代码就应该调用 cancel。</p>
+<p>示例：</p>
+<p>这个例子演示了如何使用可取消的 context 来防止 goroutine 泄漏。在示例函数结束时，由 gen 启动的 goroutine 将返回而不会泄漏。</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"context"</span>
+	<span class="token string">"fmt"</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">func</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	gen <span class="token operator">:=</span> <span class="token keyword">func</span><span class="token punctuation">(</span>ctx context<span class="token punctuation">.</span>Context<span class="token punctuation">)</span> <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token builtin">int</span> <span class="token punctuation">&#123;</span>
+		dst <span class="token operator">:=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">chan</span> <span class="token builtin">int</span><span class="token punctuation">)</span>
+		n <span class="token operator">:=</span> <span class="token number">1</span>
+		<span class="token keyword">go</span> <span class="token keyword">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+			<span class="token keyword">for</span> <span class="token punctuation">&#123;</span>
+				<span class="token keyword">select</span> <span class="token punctuation">&#123;</span>
+				<span class="token keyword">case</span> <span class="token operator">&lt;-</span>ctx<span class="token punctuation">.</span><span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+					<span class="token keyword">return</span> <span class="token comment">// returning not to leak the goroutine	返回不泄漏goroutine</span>
+				<span class="token keyword">case</span> dst <span class="token operator">&lt;-</span> n<span class="token punctuation">:</span>
+					n<span class="token operator">++</span>
+				<span class="token punctuation">&#125;</span>
+			<span class="token punctuation">&#125;</span>
+		<span class="token punctuation">&#125;</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">return</span> dst
+	<span class="token punctuation">&#125;</span>
+
+	ctx<span class="token punctuation">,</span> cancel <span class="token operator">:=</span> context<span class="token punctuation">.</span><span class="token function">WithCancel</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span><span class="token function">Background</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token keyword">defer</span> <span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// cancel when we are finished consuming integers</span>
+
+	<span class="token keyword">for</span> n <span class="token operator">:=</span> <span class="token keyword">range</span> <span class="token function">gen</span><span class="token punctuation">(</span>ctx<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span>
+		<span class="token keyword">if</span> n <span class="token operator">==</span> <span class="token number">5</span> <span class="token punctuation">&#123;</span>
+			<span class="token keyword">break</span>
+		<span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// output:</span>
+<span class="token comment">// 1</span>
+<span class="token comment">// 2</span>
+<span class="token comment">// 3</span>
+<span class="token comment">// 4</span>
+<span class="token comment">// 5</span></code></pre>
+
+<h2 id="func-WithDeadline"><a href="#func-WithDeadline" class="headerlink" title="func WithDeadline"></a>func WithDeadline</h2><pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">WithDeadline</span><span class="token punctuation">(</span>parent Context<span class="token punctuation">,</span> deadline time<span class="token punctuation">.</span>Time<span class="token punctuation">)</span> <span class="token punctuation">(</span>Context<span class="token punctuation">,</span> CancelFunc<span class="token punctuation">)</span></code></pre>
+
+<p><code>WithDeadline</code>返回一个基于<code>parent</code>的可取消的<code>context</code>，并且其过期时间<code>deadline</code>不晚于所设置时间<code>d</code>。</p>
+<p>如果父节点<code>parent</code>有过期时间并且过期时间早于给定时间<code>d</code>，那么新建的子节点<code>context</code>无需设置过期时间，使用<code>WithCancel</code>创建一个可取消的<code>context</code>即可；</p>
+<p>示例：</p>
+<pre class="language-go" data-language="go"><code class="language-go">d <span class="token operator">:=</span> time<span class="token punctuation">.</span><span class="token function">Now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">50</span> <span class="token operator">*</span> time<span class="token punctuation">.</span>Millisecond<span class="token punctuation">)</span>
+ctx<span class="token punctuation">,</span> cancel <span class="token operator">:=</span> context<span class="token punctuation">.</span><span class="token function">WithDeadline</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span><span class="token function">Background</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> d<span class="token punctuation">)</span>
+
+<span class="token comment">// Even though ctx will be expired, it is good practice to call its</span>
+<span class="token comment">// cancelation function in any case. Failure to do so may keep the</span>
+<span class="token comment">// context and its parent alive longer than necessary.</span>
+<span class="token keyword">defer</span> <span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">select</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">case</span> <span class="token operator">&lt;-</span>time<span class="token punctuation">.</span><span class="token function">After</span><span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">*</span> time<span class="token punctuation">.</span>Second<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"overslept"</span><span class="token punctuation">)</span>
+<span class="token keyword">case</span> <span class="token operator">&lt;-</span>ctx<span class="token punctuation">.</span><span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span><span class="token function">Err</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="func-WithTimeout"><a href="#func-WithTimeout" class="headerlink" title="func WithTimeout"></a>func WithTimeout</h2><p>与<code>WithDeadline</code>类似，<code>WithTimeout</code>也是创建一个定时取消的<code>context</code>，只不过<code>WithDeadline</code>是接收一个过期时间点，而<code>WithTimeout</code>接收一个相对当前时间的过期时长<code>timeout</code>:</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">WithTimeout</span><span class="token punctuation">(</span>parent Context<span class="token punctuation">,</span> timeout time<span class="token punctuation">.</span>Duration<span class="token punctuation">)</span> <span class="token punctuation">(</span>Context<span class="token punctuation">,</span> CancelFunc<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token function">WithDeadline</span><span class="token punctuation">(</span>parent<span class="token punctuation">,</span> time<span class="token punctuation">.</span><span class="token function">Now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>timeout<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="type-Context"><a href="#type-Context" class="headerlink" title="type Context"></a>type Context</h2><p>context 包含<strong>截止日期</strong>，<strong>取消信号</strong>以及<strong>跨越 API 边界的其他值</strong>。</p>
+<p>上下文的方法可能会被多个 goroutine 同时调用。</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> Context <span class="token keyword">interface</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">Deadline</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>deadline time<span class="token punctuation">.</span>Time<span class="token punctuation">,</span> ok <span class="token builtin">bool</span><span class="token punctuation">)</span>
+    <span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+    <span class="token function">Err</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">error</span>
+    <span class="token function">Value</span><span class="token punctuation">(</span>key <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">)</span> <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<ul>
+<li><code>Deadline</code>返回绑定当前<code>context</code>的任务被取消的截止时间；如果没有设定期限，将返回<code>ok == false</code>。</li>
+<li><code>Done</code> 当绑定当前<code>context</code>的任务被取消时，将返回一个关闭的<code>channel</code>；如果当前<code>context</code>不会被取消，将返回<code>nil</code>。</li>
+<li><code>Err</code> 如果<code>Done</code>返回的<code>channel</code>没有关闭，将返回<code>nil</code>;如果<code>Done</code>返回的<code>channel</code>已经关闭，将返回非空的值表示任务结束的原因。如果是<code>context</code>被取消，<code>Err</code>将返回<code>Canceled</code>；如果是<code>context</code>超时，<code>Err</code>将返回<code>DeadlineExceeded</code>。</li>
+<li><code>Value</code> 返回<code>context</code>存储的键值对中当前<code>key</code>对应的值，如果没有对应的<code>key</code>,则返回<code>nil</code>。</li>
+</ul>
+<h2 id="func-Background"><a href="#func-Background" class="headerlink" title="func Background"></a>func Background</h2><p><code>emptyCtx</code>是一个<code>int</code>类型的变量，但实现了<code>context</code>的接口。<code>emptyCtx</code>没有超时时间，不能取消，也不能存储任何额外信息，所以<code>emptyCtx</code>用来作为<code>context</code>树的根节点。</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token comment">// An emptyCtx is never canceled, has no values, and has no deadline. It is not</span>
+<span class="token comment">// struct&#123;&#125;, since vars of this type must have distinct addresses.</span>
+<span class="token keyword">type</span> emptyCtx <span class="token builtin">int</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span><span class="token operator">*</span>emptyCtx<span class="token punctuation">)</span> <span class="token function">Deadline</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>deadline time<span class="token punctuation">.</span>Time<span class="token punctuation">,</span> ok <span class="token builtin">bool</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span><span class="token operator">*</span>emptyCtx<span class="token punctuation">)</span> <span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;-</span><span class="token keyword">chan</span> <span class="token keyword">struct</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span><span class="token operator">*</span>emptyCtx<span class="token punctuation">)</span> <span class="token function">Err</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">error</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span><span class="token operator">*</span>emptyCtx<span class="token punctuation">)</span> <span class="token function">Value</span><span class="token punctuation">(</span>key <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">)</span> <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> <span class="token boolean">nil</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">func</span> <span class="token punctuation">(</span>e <span class="token operator">*</span>emptyCtx<span class="token punctuation">)</span> <span class="token function">String</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token builtin">string</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">switch</span> e <span class="token punctuation">&#123;</span>
+    <span class="token keyword">case</span> background<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">"context.Background"</span>
+    <span class="token keyword">case</span> todo<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token string">"context.TODO"</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> <span class="token string">"unknown empty Context"</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">var</span> <span class="token punctuation">(</span>
+    background <span class="token operator">=</span> <span class="token function">new</span><span class="token punctuation">(</span>emptyCtx<span class="token punctuation">)</span>
+    todo       <span class="token operator">=</span> <span class="token function">new</span><span class="token punctuation">(</span>emptyCtx<span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">func</span> <span class="token function">Background</span><span class="token punctuation">(</span><span class="token punctuation">)</span> Context <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> background
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">func</span> <span class="token function">TODO</span><span class="token punctuation">(</span><span class="token punctuation">)</span> Context <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> todo
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>但我们一般不会直接使用<code>emptyCtx</code>，而是使用由<code>emptyCtx</code>实例化的两个变量，分别可以通过调用<code>Background</code>和<code>TODO</code>方法得到，这两个<code>context</code>在实现上是一样的。</p>
+<h2 id="func-TODO"><a href="#func-TODO" class="headerlink" title="func TODO"></a>func TODO</h2><p><code>Background</code> 和 <code>TODO</code> 方法在某种层面上看其实也只是互为别名，两者没有太大的差别，不过 <code>context.Background()</code> 是上下文中最顶层的默认值，所有其他的上下文都应该从 <code>context.Background()</code> 演化出来。</p>
+<p><img data-src="//img.to2b.cn/blog/lujinkai/1646475452775.png" alt="1646128337346"></p>
+<p>我们应该只在不确定时使用 <code>context.TODO()</code>，在多数情况下如果函数没有上下文作为入参，我们往往都会使用 <code>context.Background()</code> 作为起始的 <code>Context</code> 向下传递。</p>
+<h2 id="func-WithValue"><a href="#func-WithValue" class="headerlink" title="func WithValue"></a>func WithValue</h2><p><code>WithValue</code>用以向<code>context</code>添加键值对：</p>
+<pre class="language-go" data-language="go"><code class="language-go"><span class="token keyword">func</span> <span class="token function">WithValue</span><span class="token punctuation">(</span>parent Context<span class="token punctuation">,</span> key<span class="token punctuation">,</span> val <span class="token keyword">interface</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">)</span> Context <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> key <span class="token operator">==</span> <span class="token boolean">nil</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">panic</span><span class="token punctuation">(</span><span class="token string">"nil key"</span><span class="token punctuation">)</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">if</span> <span class="token operator">!</span>reflect<span class="token punctuation">.</span><span class="token function">TypeOf</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">Comparable</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">panic</span><span class="token punctuation">(</span><span class="token string">"key is not comparable"</span><span class="token punctuation">)</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">return</span> <span class="token operator">&amp;</span>valueCtx<span class="token punctuation">&#123;</span>parent<span class="token punctuation">,</span> key<span class="token punctuation">,</span> val<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>这里添加键值对不是在原<code>context</code>结构体上直接添加，而是以此<code>context</code>作为父节点，重新创建一个新的<code>valueCtx</code>子节点，将键值对添加在子节点上，由此形成一条<code>context</code>链。获取<code>value</code>的过程就是在这条<code>context</code>链上由尾部上前搜寻。</p>
+<p>返回<code>parent</code>的一个副本，调用该副本的 Value(key)方法将得到 val。这样我们不光将根节点原有的值保留了，还在子孙节点中加入了新的值，注意若存在 Key 相同，则会被覆盖。</p>
+<p>注意：<strong>为了避免使用 context 的包之间发生冲突，key 必须具有可比性（ comparable ），不应该是 string 或者其他任何内置类型。应该使用自定义类型。</strong></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Go 语言中的 <code>Context</code> 的主要作用还是在多个 Goroutine 或者模块之间同步取消信号或者截止日期，用于减少对资源的消耗和长时间占用，避免资源浪费，虽然传值也是它的功能之一，但是这个功能我们还是很少用到。</p>
+<p>在真正使用传值的功能时我们也应该非常谨慎，不能将请求的所有参数都使用 <code>Context</code> 进行传递，这是一种非常差的设计，比较常见的使用场景是传递请求对应用户的认证令牌以及用于进行分布式追踪的请求 ID。</p>
+<p><code>context</code>包通过构建树型关系的 Context，来达到上一层 Goroutine 能对传递给下一层 Goroutine 的控制。对于处理一个 Request 请求操作，需要采用<code>context</code>来层层控制 Goroutine，以及传递一些变量来共享。</p>
+<ul>
+<li>Context 对象的生存周期一般仅为一个请求的处理周期。即针对一个请求创建一个 Context 变量（它为 Context 树结构的根）；在请求处理结束后，撤销此 ctx 变量，释放资源。</li>
+<li>每次创建一个 Goroutine，要么将原有的 Context 传递给 Goroutine，要么创建一个子 Context 并传递给 Goroutine。</li>
+<li>Context 能灵活地存储不同类型、不同数目的值，并且使多个 Goroutine 安全地读写其中的值。</li>
+<li>当通过父 Context 对象创建子 Context 对象时，可同时获得子 Context 的一个撤销函数，这样父 Context 对象的创建环境就获得了对子 Context 将要被传递到的 Goroutine 的撤销权。</li>
+</ul>
+<h3 id="使用原则"><a href="#使用原则" class="headerlink" title="使用原则"></a>使用原则</h3><ul>
+<li>不要把 Context 存在一个结构体当中，显式地传入函数。Context 变量需要作为第一个参数使用，一般命名为 ctx；</li>
+<li>即使方法允许，也不要传入一个 nil 的 Context，如果你不确定你要用什么 Context 的时候传一个 context.TODO；</li>
+<li>使用 context 的 Value 相关方法只应该用于在程序和接口中传递的和请求相关的元数据，不要用它来传递一些可选的参数；</li>
+<li>同样的 Context 可以用来传递到不同的 goroutine 中，Context 在多个 goroutine 中是安全的；</li>
+<li>在子 Context 被传递到的 goroutine 中，应该对该子 Context 的 Done 信道（channel）进行监控，一旦该信道被关闭（即上层运行环境撤销了本 goroutine 的执行），应主动终止对当前请求信息的处理，释放资源并返回。</li>
+</ul>
+<p>通常，<code>context.Background()</code>作为最顶层的 Context，在此基础上创建可撤销的 Context。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/golang/" rel="tag"><i class="fa fa-tag"></i> golang</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/Golang/%E6%A0%87%E5%87%86%E5%BA%93/sync/sync/" rel="prev" title="sync">
+                  <i class="fa fa-chevron-left"></i> sync
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/Golang/%E6%A0%87%E5%87%86%E5%BA%93/reflect/" rel="next" title="reflect">
+                  reflect <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

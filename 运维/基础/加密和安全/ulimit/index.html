@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="控制 shell 程序的资源 ulimit [-SHacdefilmnpqrstuvx] [limit]    配置文件ulimit 命令，立即生效，但无法保存，永久保存需要修改配置文件： &#x2F;etc&#x2F;security&#x2F;limits.conf &#x2F;etc&#x2F;security&#x2F;limits.d&#x2F;*.conf  # 配置文件格式：每行一个定义 &lt;domain&gt; &lt;type&gt; &lt;item&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ulimit">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/ulimit/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="控制 shell 程序的资源 ulimit [-SHacdefilmnpqrstuvx] [limit]    配置文件ulimit 命令，立即生效，但无法保存，永久保存需要修改配置文件： &#x2F;etc&#x2F;security&#x2F;limits.conf &#x2F;etc&#x2F;security&#x2F;limits.d&#x2F;*.conf  # 配置文件格式：每行一个定义 &lt;domain&gt; &lt;type&gt; &lt;item&gt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599967263678.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599923961894.png">
+<meta property="article:published_time" content="2020-12-09T15:04:11.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="ulimit">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1599967263678.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/ulimit/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/ulimit/","path":"运维/基础/加密和安全/ulimit/","title":"ulimit"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ulimit | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#domain"><span class="nav-number">1.1.</span> <span class="nav-text">domain</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#type"><span class="nav-number">1.2.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#item"><span class="nav-number">1.3.</span> <span class="nav-text">item</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/ulimit/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ulimit | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ulimit
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:04:11" itemprop="dateCreated datePublished" datetime="2020-12-09T23:04:11+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">加密和安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>控制 shell 程序的资源</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">ulimit</span> <span class="token punctuation">[</span>-SHacdefilmnpqrstuvx<span class="token punctuation">]</span> <span class="token punctuation">[</span>limit<span class="token punctuation">]</span></code></pre>
+
+<img data-src="//img.to2b.cn/blog/ljk/1599967263678.png"  />
+
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>ulimit 命令，立即生效，但无法保存，永久保存需要修改配置文件：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/etc/security/limits.conf
+/etc/security/limits.d/*.conf
+
+<span class="token comment"># 配置文件格式：每行一个定义</span>
+<span class="token operator">&lt;</span>domain<span class="token operator">></span> <span class="token operator">&lt;</span>type<span class="token operator">></span> <span class="token operator">&lt;</span>item<span class="token operator">></span> <span class="token operator">&lt;</span>value<span class="token operator">></span>
+
+*          soft    nproc     <span class="token number">4096</span>
+root       soft    nproc     unlimited</code></pre>
+
+<p>配置文件详细信息：<code>man 5 limits.conf</code></p>
+<h3 id="domain"><a href="#domain" class="headerlink" title="domain"></a>domain</h3><table>
+<thead>
+<tr>
+<th>domain</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>username</td>
+<td>一个用户</td>
+</tr>
+<tr>
+<td>@group</td>
+<td>组内所有用户</td>
+</tr>
+<tr>
+<td>*</td>
+<td>所有用户</td>
+</tr>
+<tr>
+<td>%</td>
+<td>限制最多有多少用户登录，%对*生效，限制组使用%group</td>
+</tr>
+<tr>
+<td><min_uid>:<max_uid></td>
+<td></td>
+</tr>
+<tr>
+<td>@<min_gid>:<max_gid></td>
+<td></td>
+</tr>
+<tr>
+<td>%:<gid></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="type"><a href="#type" class="headerlink" title="type"></a>type</h3><table>
+<thead>
+<tr>
+<th>type</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>hard</td>
+<td>软限制,普通用户自己可以修改</td>
+</tr>
+<tr>
+<td>soft</td>
+<td>硬限制,由 root 用户设定，且通过 kernel 强制生效</td>
+</tr>
+<tr>
+<td>-</td>
+<td>二者同时限定</td>
+</tr>
+</tbody></table>
+<h3 id="item"><a href="#item" class="headerlink" title="item"></a>item</h3><table>
+<thead>
+<tr>
+<th>item</th>
+<th>default</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>core</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>data</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>fsize</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>memlock</td>
+<td></td>
+<td>最大锁定内存地址空间</td>
+</tr>
+<tr>
+<td>nofile</td>
+<td>1024</td>
+<td>所能够同时打开的最大文件数量</td>
+</tr>
+<tr>
+<td>rss</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>stack</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>cpu</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>nproc</td>
+<td>1024</td>
+<td>所能够同时运行的进程的最大数量</td>
+</tr>
+<tr>
+<td>as</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>maxlogins</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>maxsyslogins</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>priority</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>locks</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>sigpending</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>msgqueue</td>
+<td></td>
+<td>POSIX 消息队列所使用的最大内存</td>
+</tr>
+<tr>
+<td>nice</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>rtprio</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">*               soft    core            <span class="token number">0</span>
+*               hard    nofile          <span class="token number">512</span>
+@student        hard    nproc           <span class="token number">20</span>
+@faculty        soft    nproc           <span class="token number">20</span>
+@faculty        hard    nproc           <span class="token number">50</span>
+<span class="token function">ftp</span>             hard    nproc           <span class="token number">0</span>
+@student        -       maxlogins       <span class="token number">4</span>
+:123            hard    cpu             <span class="token number">5000</span>
+@500:           soft    cpu             <span class="token number">10000</span>
+<span class="token number">600</span>:700         hard    locks           <span class="token number">10</span></code></pre>
+
+<p>生产案例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">* - core unlimited
+* - nproc <span class="token number">1000000</span>
+* - nofile <span class="token number">1000000</span>
+* - memlock <span class="token number">32000</span>
+* - msgqueue <span class="token number">8192000</span></code></pre>
+
+<p>案例：ulimit 命令修改用户打开的文件个数</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ulimit -n</span>
+<span class="token number">1024</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ulimit -n 1048577</span>
+-bash: ulimit: <span class="token function">open</span> files: cannot modify limit: Operation not permitted
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ulimit -n 1048576</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ulimit -a</span>
+core <span class="token function">file</span> size <span class="token punctuation">(</span>blocks, -c<span class="token punctuation">)</span> unlimited
+data seg size <span class="token punctuation">(</span>kbytes, -d<span class="token punctuation">)</span> unlimited
+scheduling priority <span class="token punctuation">(</span>-e<span class="token punctuation">)</span> <span class="token number">0</span>
+<span class="token function">file</span> size <span class="token punctuation">(</span>blocks, -f<span class="token punctuation">)</span> unlimited
+pending signals <span class="token punctuation">(</span>-i<span class="token punctuation">)</span> <span class="token number">7111</span>
+max locked memory <span class="token punctuation">(</span>kbytes, -l<span class="token punctuation">)</span> <span class="token number">16384</span>
+max memory size <span class="token punctuation">(</span>kbytes, -m<span class="token punctuation">)</span> unlimited
+<span class="token function">open</span> files <span class="token punctuation">(</span>-n<span class="token punctuation">)</span> <span class="token number">1048576</span>
+pipe size <span class="token punctuation">(</span><span class="token number">512</span> bytes, -p<span class="token punctuation">)</span> <span class="token number">8</span>
+POSIX message queues <span class="token punctuation">(</span>bytes, -q<span class="token punctuation">)</span> <span class="token number">819200</span>
+real-time priority <span class="token punctuation">(</span>-r<span class="token punctuation">)</span> <span class="token number">0</span>
+stack size <span class="token punctuation">(</span>kbytes, -s<span class="token punctuation">)</span> <span class="token number">8192</span>
+cpu <span class="token function">time</span> <span class="token punctuation">(</span>seconds, -t<span class="token punctuation">)</span> unlimited
+max user processes <span class="token punctuation">(</span>-u<span class="token punctuation">)</span> <span class="token number">7111</span>
+virtual memory <span class="token punctuation">(</span>kbytes, -v<span class="token punctuation">)</span> unlimited
+<span class="token function">file</span> locks <span class="token punctuation">(</span>-x<span class="token punctuation">)</span> unlimited
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#echo 2^20|bc</span>
+<span class="token number">1048576</span>
+</code></pre>
+
+<p>案例：限制用户最多打开的文件数和运行进程数，并持久保存</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> /etc/pam.d/system-auth
+session required pam_limits.so
+
+<span class="token function">vim</span> /etc/security/limits.conf
+<span class="token comment">#用户apache可打开10240个文件</span>
+apache - nofile <span class="token number">10240</span>
+<span class="token comment">#用户student不能运行超过20个进程</span>
+student hard nproc <span class="token number">10</span>
+
+<span class="token comment">#用student登录多次运行bash，观察结果</span>
+
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#vim /etc/security/limits.conf</span>
+wang - nofile <span class="token number">66666</span>
+wang - nproc <span class="token number">5</span>
+mage - nofile <span class="token number">88888</span>
+
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#su - wang</span>
+Last login: Mon May <span class="token number">25</span> <span class="token number">14</span>:40:38 CST <span class="token number">2020</span> on pts/0
+<span class="token punctuation">[</span>wang@centos8 ~<span class="token punctuation">]</span><span class="token variable">$ulimit</span> <span class="token parameter variable">-n</span>
+<span class="token number">66666</span></code></pre>
+
+<p>案例：限制 mage 用户最大的同时登录次数</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#tail -n1 /etc/security/limits.conf</span>
+mage - maxlogins <span class="token number">2</span>
+
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#who</span>
+mage tty1 <span class="token number">2020</span>-05-25 <span class="token number">14</span>:35
+root pts/0 <span class="token number">2020</span>-05-25 <span class="token number">14</span>:35 <span class="token punctuation">(</span><span class="token number">10.0</span>.0.1<span class="token punctuation">)</span>
+root pts/3 <span class="token number">2020</span>-05-25 <span class="token number">14</span>:06 <span class="token punctuation">(</span><span class="token number">10.0</span>.0.1<span class="token punctuation">)</span>
+mage tty3 <span class="token number">2020</span>-05-25 <span class="token number">14</span>:35</code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1599923961894.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ulimit/" rel="tag"><i class="fa fa-tag"></i> ulimit</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/OpenSSL%E5%91%BD%E4%BB%A4/" rel="prev" title="OpenSSL命令">
+                  <i class="fa fa-chevron-left"></i> OpenSSL命令
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/%E7%B3%BB%E7%BB%9F%E9%83%A8%E7%BD%B2/" rel="next" title="系统部署">
+                  系统部署 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

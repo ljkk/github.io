@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="malloc 函数申请内存, 返回指针; free 释放内存 void * ptr &#x3D; malloc(size); free(ptr)  问题: 申请内存的时候需要传入 size, 为什么 free 的时候没有传入 size, 那么是怎么做到准确释放 size 大小的内存的呢? 其实呢, malloc 在分配内存的时候, 返回的地址的指针指向了程序可用内存的位置, 在 ptr 前面会多分配 32">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内存管理">
+<meta property="og:url" content="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="malloc 函数申请内存, 返回指针; free 释放内存 void * ptr &#x3D; malloc(size); free(ptr)  问题: 申请内存的时候需要传入 size, 为什么 free 的时候没有传入 size, 那么是怎么做到准确释放 size 大小的内存的呢? 其实呢, malloc 在分配内存的时候, 返回的地址的指针指向了程序可用内存的位置, 在 ptr 前面会多分配 32">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.lujinkai.cn/note/malloc.png">
+<meta property="og:image" content="http://img.lujinkai.cn/note/%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D.png">
+<meta property="article:published_time" content="2020-12-09T05:04:36.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.478Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="源码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.lujinkai.cn/note/malloc.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/","path":"PHP/源码/内存管理/","title":"内存管理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>内存管理 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E8%A7%84%E6%A0%BC"><span class="nav-number">2.</span> <span class="nav-text">内存规格</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D"><span class="nav-number">3.</span> <span class="nav-text">内存分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#small-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">small 内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chunk-%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="nav-number">5.</span> <span class="nav-text">chunk 内存对齐</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E6%BA%90%E7%A0%81/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="内存管理 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          内存管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 13:04:36" itemprop="dateCreated datePublished" datetime="2020-12-09T13:04:36+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">源码</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>malloc 函数申请内存, 返回指针;</p>
+<p>free 释放内存</p>
+<pre class="language-c" data-language="c"><code class="language-c"><span class="token keyword">void</span> <span class="token operator">*</span> ptr <span class="token operator">=</span> <span class="token function">malloc</span><span class="token punctuation">(</span>size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">free</span><span class="token punctuation">(</span>ptr<span class="token punctuation">)</span></code></pre>
+
+<p>问题: 申请内存的时候需要传入 size, 为什么 free 的时候没有传入 size, 那么是怎么做到准确释放 size 大小的内存的呢?</p>
+<p>其实呢, malloc 在分配内存的时候, 返回的地址的指针指向了程序可用内存的位置, 在 ptr 前面会多分配 32 位的头部, 头部的低三位表示是否分配。</p>
+<p><img data-src="//img.lujinkai.cn/note/malloc.png"></p>
+<p>当 free 的时候，会向前搜寻 32 的头，取高 29 位为块的大小，所以 free 的时候就不需要传递 size 了，当然这只是一种 malloc 的实现，当前的 linux 的 malloc 事件已经不是这样了，但原理是一样的，也是维护了一个头部。</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><ol>
+<li>chunk</li>
+<li>page</li>
+<li>各种规格的内存</li>
+</ol>
+<p>chunk：2MB 大小的内存；</p>
+<p>page：4KB 大小的内存；</p>
+<p>一个 chunk 可以分成 512 个 page。</p>
+<h2 id="内存规格"><a href="#内存规格" class="headerlink" title="内存规格"></a>内存规格</h2><ol>
+<li>small (size &lt;&#x3D; 3KB）30 个规格</li>
+<li>large (3KB &lt; size &lt; 2MB-4KB) large 是 4K 的整数倍</li>
+<li>huge (size &gt; 2MB - 4KB) huge 一定是 2M 的整数倍, 例如申请 3M 内存, 那么返回的一定是比 3M 大,且是 2M 的整数倍, 是 4M</li>
+</ol>
+<h2 id="内存分配"><a href="#内存分配" class="headerlink" title="内存分配"></a>内存分配</h2><p><img data-src="//img.lujinkai.cn/note/%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D.png"></p>
+<p>zend_mm_alloc_heap 判断申请内存的大小；</p>
+<p>申请内存大于 2M-4K, 则属于 huge, 执行 zend_mm_alloc_huge, 调用 zend_mm_chunk_alloc, 最终调用 mmap 取申请大内存;</p>
+<p>申请内存大于 3K 且小于 2M-4K, 则属于 large, 执行 zend_mm_alloc_large, 调用 zend_mm_alloc_pages</p>
+<p>申请内存小于等于 3K, 则属于 small, 执行 zend_mm_alloc_small 函数, 如果当前有 small 内存, 则直接返回, 如果没有, 则执行 zend_mm_alloc_small_slow, 需要先去 zend_mm_alloc_pages 看看, 如果 large 也没有余量了, 就去 zend_mm_chunk_alloc 开辟新的内存。</p>
+<h2 id="small-内存管理"><a href="#small-内存管理" class="headerlink" title="small 内存管理"></a>small 内存管理</h2><h2 id="chunk-内存对齐"><a href="#chunk-内存对齐" class="headerlink" title="chunk 内存对齐"></a>chunk 内存对齐</h2><p>4k 对其：申请的内存只能是 4K 的整数倍；</p>
+<p>内存对其的好处，当已知一个内存地址，就可以算出此内存（page）的起始地址；例如有一内存地址 0x103c61120，4k 对齐，通过宏计算，此内存所在 page 的起始地址为 0x103c61000，在此 page 的偏移量是 0x120，能过快速定位内存地址所在的 page，提高效率。</p>
+<p>内存管理的代码比较多，但是我们只需要掌握两个核心：当我们 free 的时候，不需要传递 size，</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/PHP/%E6%BA%90%E7%A0%81/%E5%A4%A7%E5%B0%8F%E7%AB%AF/" rel="prev" title="大小端">
+                  <i class="fa fa-chevron-left"></i> 大小端
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/PHP/%E6%BA%90%E7%A0%81/%E5%A6%82%E4%BD%95%E4%B8%80%E7%9C%BC%E5%B0%B1%E7%9C%8B%E5%87%BA%E5%86%85%E5%AD%98%E5%A4%9A%E5%A4%A7/" rel="next" title="如何一眼就看出内存多大">
+                  如何一眼就看出内存多大 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="DevOpsDevOps 是 Development 和 Operations 的组合，也就是开发和运维的简写   什么是持续集成(CI-Continuous integration)持续集成是指多名开发者在开发不同功能代码的过程当中，可以频繁的将代码行合并到一起并切相互不影响工作 什么是持续部署(CD-continuous deployment)是基于某种工具或平台实现代码自动化的构建、测试和部">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GitLab">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/GitLab/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="DevOpsDevOps 是 Development 和 Operations 的组合，也就是开发和运维的简写   什么是持续集成(CI-Continuous integration)持续集成是指多名开发者在开发不同功能代码的过程当中，可以频繁的将代码行合并到一起并切相互不影响工作 什么是持续部署(CD-continuous deployment)是基于某种工具或平台实现代码自动化的构建、测试和部">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614169616979.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614169709436.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614176255696.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614177398119.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614390874831.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614177324513.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614390911662.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614391028145.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614391097079.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614182163957.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614182718463.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614220790963.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614220865939.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614221436755.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614221909588.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614225936831.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614222603444.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614222631085.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614222932661.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614223225964.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614226154584.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614226205798.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614227282416.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614227321434.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614325772039.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614325921744.png">
+<meta property="article:published_time" content="2021-02-24T12:57:24.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.494Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="GitLab">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1614169616979.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/GitLab/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/GitLab/","path":"运维/Jenkins与Gitlab/GitLab/","title":"GitLab"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>GitLab | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DevOps"><span class="nav-number">1.</span> <span class="nav-text">DevOps</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90-CI-Continuous-integration"><span class="nav-number">1.1.</span> <span class="nav-text">什么是持续集成(CI-Continuous integration)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8C%81%E7%BB%AD%E9%83%A8%E7%BD%B2-CD-continuous-deployment"><span class="nav-number">1.2.</span> <span class="nav-text">什么是持续部署(CD-continuous deployment)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8C%81%E7%BB%AD%E4%BA%A4%E4%BB%98-Continuous-Delivery"><span class="nav-number">1.3.</span> <span class="nav-text">什么是持续交付(Continuous Delivery)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitLab"><span class="nav-number">2.</span> <span class="nav-text">GitLab</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SVN"><span class="nav-number">2.1.</span> <span class="nav-text">SVN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Git"><span class="nav-number">2.2.</span> <span class="nav-text">Git</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#git-%E7%BC%93%E5%AD%98%E5%8C%BA%E4%B8%8E%E5%B7%A5%E4%BD%9C%E5%8C%BA%E7%AD%89%E6%A6%82%E5%BF%B5"><span class="nav-number">2.2.1.</span> <span class="nav-text">git 缓存区与工作区等概念</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gitlab-%E9%83%A8%E7%BD%B2%E4%B8%8E%E4%BD%BF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">Gitlab 部署与使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.3.</span> <span class="nav-text">初始化服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gitlab-web-%E7%95%8C%E9%9D%A2"><span class="nav-number">3.4.</span> <span class="nav-text">gitlab web 界面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E8%B4%A6%E5%8F%B7%E6%B3%A8%E5%86%8C"><span class="nav-number">3.5.</span> <span class="nav-text">关闭账号注册</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%82%AE%E7%AE%B1%E5%9C%B0%E5%9D%80"><span class="nav-number">3.6.</span> <span class="nav-text">修改邮箱地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-gitlab-%E8%B4%A6%E6%88%B7"><span class="nav-number">3.7.</span> <span class="nav-text">创建 gitlab 账户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%BB%84"><span class="nav-number">3.8.</span> <span class="nav-text">创建组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E5%91%98%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="nav-number">3.9.</span> <span class="nav-text">管理员创建项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86%E7%94%A8%E6%88%B7%E6%B7%BB%E5%8A%A0%E5%88%B0%E7%BB%84"><span class="nav-number">3.10.</span> <span class="nav-text">将用户添加到组</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#gitlab-%E4%BB%93%E5%BA%93-developer-%E6%9D%83%E9%99%90%E6%97%A0%E6%B3%95-push"><span class="nav-number">3.10.1.</span> <span class="nav-text">gitlab 仓库 developer 权限无法 push</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E9%A1%B9%E7%9B%AE%E4%B8%AD%E6%96%B0%E5%BB%BA%E6%B5%8B%E8%AF%95%E9%A1%B5%E9%9D%A2"><span class="nav-number">3.11.</span> <span class="nav-text">在项目中新建测试页面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B5%8B%E8%AF%95-clone-%E9%A1%B9%E7%9B%AE"><span class="nav-number">3.12.</span> <span class="nav-text">git 客户端测试 clone 项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">3.13.</span> <span class="nav-text">git 常用命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gitignore"><span class="nav-number">3.14.</span> <span class="nav-text">.gitignore</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gitlab-%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD%E6%81%A2%E5%A4%8D"><span class="nav-number">3.15.</span> <span class="nav-text">gitlab 数据备份恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gitlab-%E6%B1%89%E5%8C%96"><span class="nav-number">3.16.</span> <span class="nav-text">gitlab 汉化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E4%BB%A3%E7%A0%81%E9%83%A8%E7%BD%B2%E6%96%B9%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">常见的代码部署方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%93%9D%E7%BB%BF%E9%83%A8%E7%BD%B2"><span class="nav-number">4.1.</span> <span class="nav-text">蓝绿部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%91%E4%B8%9D%E9%9B%80%E5%8F%91%E5%B8%83"><span class="nav-number">4.2.</span> <span class="nav-text">金丝雀发布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83"><span class="nav-number">4.3.</span> <span class="nav-text">滚动发布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#A-x2F-B-%E6%B5%8B%E8%AF%95"><span class="nav-number">4.4.</span> <span class="nav-text">A&#x2F;B 测试</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/GitLab/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="GitLab | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          GitLab
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-24 20:57:24" itemprop="dateCreated datePublished" datetime="2021-02-24T20:57:24+08:00">2021-02-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/" itemprop="url" rel="index"><span itemprop="name">Jenkins与Gitlab</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="DevOps"><a href="#DevOps" class="headerlink" title="DevOps"></a>DevOps</h2><p>DevOps 是 Development 和 Operations 的组合，也就是开发和运维的简写</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614169616979.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614169709436.png"></p>
+<h3 id="什么是持续集成-CI-Continuous-integration"><a href="#什么是持续集成-CI-Continuous-integration" class="headerlink" title="什么是持续集成(CI-Continuous integration)"></a>什么是持续集成(CI-Continuous integration)</h3><p>持续集成是指多名开发者在开发不同功能代码的过程当中，可以频繁的将代码行合并到一起并切相互不影响工作</p>
+<h3 id="什么是持续部署-CD-continuous-deployment"><a href="#什么是持续部署-CD-continuous-deployment" class="headerlink" title="什么是持续部署(CD-continuous deployment)"></a>什么是持续部署(CD-continuous deployment)</h3><p>是基于某种工具或平台实现代码自动化的构建、测试和部署到线上环境以实现交付高质量的产品,持续部署在某种程度上代表了一个开发团队的更新迭代速率</p>
+<h3 id="什么是持续交付-Continuous-Delivery"><a href="#什么是持续交付-Continuous-Delivery" class="headerlink" title="什么是持续交付(Continuous Delivery)"></a>什么是持续交付(Continuous Delivery)</h3><p>持续交付是在持续部署的基础之上，将产品交付到线上环境，因此持续交付是产品价值的一种交付，是产品价值的一种盈利的实现</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614176255696.png"></p>
+<h2 id="GitLab"><a href="#GitLab" class="headerlink" title="GitLab"></a>GitLab</h2><p>GitLab 和 GitHub 一样属于第三方基于 Git 开发的作品，免费且开源，与 Github 类似，可以注册用户，任意提交你的代码，添加 SSHKey 等等。不同的是，GitLab 是可以部署到自己的服务器上，简单来说可把 GitLab 看作个人版的 GitHub</p>
+<p>Git 在每个用户都有一个完整的服务器，然后再有一个中央服务器，用户可以先将代码提交到本地，没有网络也可以先提交到本地，然后在有网络的时候再提交到中央服务器，这样就大大方便了开发者，而相比 CVS 和 SVN 都是集中式的版本控制系统，工作的时候需要先从中央服务器获 取最新的代码，改完之后需要提交，如果是一个比较大的文件则需要足够快的网络才能快速提交完成，而使用分布式的版本控制系统，每个用户都是一个完整的版本库，即使没有中央服务器也可以提交代码或者回滚，最终再把改好的代码提交至中央服务器进行合并即可</p>
+<h3 id="SVN"><a href="#SVN" class="headerlink" title="SVN"></a>SVN</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614177398119.png"></p>
+<p>每次提交的文件都单独保存， 即按照文件的提交时间区分不同的版本， 保存至不同的逻辑存储区域，后期恢复时候直接基于之前版本恢复。</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614390874831.png"></p>
+<hr>
+<h3 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614177324513.png"></p>
+<p>Gitlab 与 SVN 的数据保存方式不一样，gitlab 虽然 也会在内部 对数据进行逻辑划分保存，但是当后期提交的数据如和之前交的数据没有变化，其就直接 快照之前的文件 ，而不是再将文件重新上传一份再保存一遍，这样既节省 了空间又加快了代码提交速度 。</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614390911662.png"></p>
+<h4 id="git-缓存区与工作区等概念"><a href="#git-缓存区与工作区等概念" class="headerlink" title="git 缓存区与工作区等概念"></a>git 缓存区与工作区等概念</h4><p><img data-src="//img.to2b.cn/blog/ljk/1614391028145.png"></p>
+<ul>
+<li>工作区 ：clone 的代码或者开发自己编写代码文件所在 的目录 ，通常是代码所在的一 个服务的目录名称</li>
+<li>暂存区 ：用于存储在工作区中对代码进行修改后的文件所保存的地方，使用 <code>git add</code> 添加</li>
+<li>本地仓库： 用于提交存储在工作区和暂存区中改过的文件地方，使 <code>git commit</code> 提交</li>
+<li>远程仓库 ：多个开发人员共同协作提交代码的仓库，即 gitlab 服务器</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614391097079.png"></p>
+<h2 id="Gitlab-部署与使用"><a href="#Gitlab-部署与使用" class="headerlink" title="Gitlab 部署与使用"></a>Gitlab 部署与使用</h2><p>测试环境：内存 4G 以上<br>生产环境：建议 CPU2C，内存 8G，磁盘 10G 以上配置，和用户数有关</p>
+<p>清华源 centos7：<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7/">https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el7/</a><br>清华源 ubuntu18.04：<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/ubuntu/pool/bionic/main/g/gitlab-ce/">https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/ubuntu/pool/bionic/main/g/gitlab-ce/</a></p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@gitlab src<span class="token punctuation">]</span><span class="token variable">$dpkg</span> <span class="token parameter variable">-i</span> gitlab-ce_13.8.4-ce.0_amd64.deb	<span class="token comment"># 得等一会</span>
+<span class="token punctuation">..</span>.
+configuration <span class="token keyword">in</span> /etc/gitlab/gitlab.rb file.	<span class="token comment"># 配置文件</span>
+<span class="token punctuation">..</span>.</code></pre>
+
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 需要配置gitlab服务器地址和邮件地址</span>
+<span class="token punctuation">[</span>root@gitlab src<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/gitlab/gitlab.rb
+external_url <span class="token string">'http://gitlab.ljk.local'</span>		<span class="token comment"># 修改此行</span>
+<span class="token comment"># 增加下面行，可选邮件通知设置</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_enable'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_address'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"smtp.qq.com"</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_port'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">465</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_user_name'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"441757636@qq.com"</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_password'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"jwopcvnpcawdabbg"</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_domain'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"qq.com"</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_authentication'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"login"</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_enable_starttls_auto'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'smtp_tls'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span>
+gitlab_rails<span class="token punctuation">[</span><span class="token string">'gitlab_email_from'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"441757636@qq.com"</span></code></pre>
+
+<p>gitlab 相关目录：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/etc/gitlab     	<span class="token comment">#配置文件目录</span>
+/run/gitlab     	<span class="token comment">#运行pid目录</span>
+/opt/gitlab     	<span class="token comment">#安装目录</span>
+/var/opt/gitlab 	<span class="token comment">#数据目录</span>
+/var/log/gitlab 	<span class="token comment">#日志目录</span></code></pre>
+
+<h3 id="初始化服务"><a href="#初始化服务" class="headerlink" title="初始化服务"></a>初始化服务</h3><p>修改完配置文件要执行此操作</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@gitlab src<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-ctl reconfigure</code></pre>
+
+<p>常用命令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">gitlab-rails          <span class="token comment">#用于启动控制台进行特殊操作，如修改管理员密码、打开数据库控制台( gitlab-rails dbconsole)等</span>
+gitlab-psql           <span class="token comment">#数据库命令行</span>
+gitlab-rake           <span class="token comment">#数据备份恢复等数据操作</span>
+
+gitlab-ctl            <span class="token comment">#客户端命令行操作行</span>
+gitlab-ctl stop       <span class="token comment">#停止gitlab</span>
+gitlab-ctl start      <span class="token comment">#启动gitlab</span>
+gitlab-ctl restart     <span class="token comment">#重启gitlab</span>
+gitlab-ctl status     <span class="token comment">#查看组件运行状态</span>
+gitlab-ctl <span class="token function">tail</span> nginx <span class="token comment">#查看某个组件的日志</span></code></pre>
+
+<h3 id="gitlab-web-界面"><a href="#gitlab-web-界面" class="headerlink" title="gitlab web 界面"></a>gitlab web 界面</h3><p>username：root<br>注意，使用域名访问需要做 hosts</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614182163957.png"></p>
+<h3 id="关闭账号注册"><a href="#关闭账号注册" class="headerlink" title="关闭账号注册"></a>关闭账号注册</h3><p>默认情况下可以直接注册账号，一般都关闭此功能，由管理员统一注册用户</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614182718463.png"></p>
+<h3 id="修改邮箱地址"><a href="#修改邮箱地址" class="headerlink" title="修改邮箱地址"></a>修改邮箱地址</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614220790963.png"></p>
+<p>新添加的邮箱不是默认的通知邮箱，下面是设置新邮箱为默认邮箱<br><img data-src="//img.to2b.cn/blog/ljk/1614220865939.png"></p>
+<p>设置完后，需要重新登录才能生效，然后可以把之前的默认邮箱删除</p>
+<h3 id="创建-gitlab-账户"><a href="#创建-gitlab-账户" class="headerlink" title="创建 gitlab 账户"></a>创建 gitlab 账户</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614221436755.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614221909588.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614225936831.png"></p>
+<p>创建成功后，需要查看邮件，在邮件链接中重置密码</p>
+<h3 id="创建组"><a href="#创建组" class="headerlink" title="创建组"></a>创建组</h3><p>使用管理员 root 创建组，一个组里面可以有多个项目分支，可以将开发添加到组里，再进行设置权限，不同的组对应公司不同的开发项目或者服务模块，不同的组中添加不同的开发人员帐号，即可实现对开发设置权限的管理<br><img data-src="//img.to2b.cn/blog/ljk/1614222603444.png"><br><img data-src="//img.to2b.cn/blog/ljk/1614222631085.png"></p>
+<h3 id="管理员创建项目"><a href="#管理员创建项目" class="headerlink" title="管理员创建项目"></a>管理员创建项目</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614222932661.png"></p>
+<p>有三种方式：创建空项目、使用模板、导入项目<br><img data-src="//img.to2b.cn/blog/ljk/1614223225964.png"></p>
+<h3 id="将用户添加到组"><a href="#将用户添加到组" class="headerlink" title="将用户添加到组"></a>将用户添加到组</h3><p>更多权限：<a target="_blank" rel="noopener" href="https://docs.gitlab.com/ee/user/permissions.html">https://docs.gitlab.com/ee/user/permissions.html</a></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614226154584.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614226205798.png"></p>
+<h4 id="gitlab-仓库-developer-权限无法-push"><a href="#gitlab-仓库-developer-权限无法-push" class="headerlink" title="gitlab 仓库 developer 权限无法 push"></a>gitlab 仓库 developer 权限无法 push</h4><p>默认 develop 权限无法 merge 和 push 到 master 分支的，可以修改：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614227282416.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614227321434.png"></p>
+<p>在这里，也可以设置也可以保护其他分支</p>
+<h3 id="在项目中新建测试页面"><a href="#在项目中新建测试页面" class="headerlink" title="在项目中新建测试页面"></a>在项目中新建测试页面</h3><p>使用 陆东生 用户登录，新建分支，继承自 master：<br><img data-src="//img.to2b.cn/blog/ljk/1614325772039.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614325921744.png"></p>
+<h3 id="git-客户端测试-clone-项目"><a href="#git-客户端测试-clone-项目" class="headerlink" title="git 客户端测试 clone 项目"></a>git 客户端测试 clone 项目</h3><ol>
+<li><p>ssh 认证</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ssh-keygen <span class="token parameter variable">-t</span> rsa
+<span class="token function">cat</span> ~/.ssh/id_rsa.pub	<span class="token comment"># 将公钥复制到给gitlab</span></code></pre>
+</li>
+<li><p>clone</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">git</span> clone git@gitlab.ljk.local:testgroup/testproject.git</code></pre></li>
+</ol>
+<h3 id="git-常用命令"><a href="#git-常用命令" class="headerlink" title="git 常用命令"></a>git 常用命令</h3><p>运维常用：<code>git pull</code>、<code>git clone</code>、<code>git reset</code></p>
+<h3 id="gitignore"><a href="#gitignore" class="headerlink" title=".gitignore"></a>.gitignore</h3><p>有些文件不需要上传，在 .gitignore 文件中设置忽略规则，示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 项目根目录下创建.gitignore，规则如下：忽略.vscode目录和.gitignore文件</span>
+$ <span class="token function">cat</span> .gitignore
+/.vscode/
+.gitignore
+
+<span class="token comment"># 在src目录下创建.gitignore文件，规则如下：忽略全部，只保留.gitignore</span>
+<span class="token comment"># 目的是只保留src空目录</span>
+$ <span class="token function">cat</span> ./src/.gitignore
+*
+<span class="token operator">!</span>.gitignore</code></pre>
+
+<p>修改完 .gitignore 文件后，更新缓存：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">git</span> <span class="token function">rm</span> <span class="token parameter variable">-r</span> <span class="token parameter variable">--cached</span> <span class="token builtin class-name">.</span>
+<span class="token function">git</span> <span class="token function">add</span> <span class="token builtin class-name">.</span></code></pre>
+
+<h3 id="gitlab-数据备份恢复"><a href="#gitlab-数据备份恢复" class="headerlink" title="gitlab 数据备份恢复"></a>gitlab 数据备份恢复</h3><ol>
+<li><p>备份前必须先停止 gitlab 两个服务</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-ctl stop unicorn
+<span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-ctl stop sidekiq</code></pre>
+</li>
+<li><p>备份数据</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-rake gitlab:backup:create
+<span class="token punctuation">..</span>.
+Warning: Your gitlab.rb and gitlab-secrets.json files contain sensitive data
+and are not included <span class="token keyword">in</span> this backup. You will need these files to restore a backup.
+Please back them up manually.
+
+<span class="token comment"># 以上warning表示gitlab.rb和gitlab-secrets.json两个文件包含敏感信息。未被备份到备份文件中。需要手动备份，这两个文件位于 /etc/gitlab</span>
+
+<span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-ctl start	<span class="token comment"># 备份完成后启动gitlab</span></code></pre>
+
+<p>备份数据位于 <code>/var/opt/gitlab/backups/</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$ls</span> /var/opt/gitlab/backups/
+1614392268_2021_02_27_13.8.4_gitlab_backup.tar</code></pre>
+</li>
+<li><p>查看要恢复的文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/var/opt/gitlab/backups/   <span class="token comment"># Gitlab数据备份目录，需要使用命令备份的</span>
+/var/opt/gitlab/nginx/conf <span class="token comment"># nginx配置文件</span>
+/etc/gitlab/gitlab.rb      <span class="token comment"># gitlab配置文件</span></code></pre>
+</li>
+<li><p>删除项目和用户信息</p>
+</li>
+<li><p>执行恢复</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 恢复前先停止两个服务</span>
+<span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-ctl stop unicorn
+<span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-ctl stop sidekiq
+<span class="token comment"># 恢复时指定备份文件的时间部分，不需要指定文件的全名</span>
+<span class="token punctuation">[</span>root@gitlab ~<span class="token punctuation">]</span><span class="token variable">$gitlab</span>-rake gitlab:backup:restore <span class="token assign-left variable">BACKUP</span><span class="token operator">=</span>备份文件名</code></pre>
+</li>
+<li><p>恢复后再将之前停止的两个服务启动</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">gitlab-ctl start</code></pre></li>
+</ol>
+<h3 id="gitlab-汉化"><a href="#gitlab-汉化" class="headerlink" title="gitlab 汉化"></a>gitlab 汉化</h3><p>虽然不推荐，但是有需求，基于第三方开发爱好者实现</p>
+<p>汉化包地址： <a target="_blank" rel="noopener" href="https://gitlab.com/xhang/gitlab">https://gitlab.com/xhang/gitlab</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">git</span> clone https://gitlab.com/xhang/gitlab.git
+<span class="token function">head</span> <span class="token parameter variable">-1</span> /opt/gitlab/version-manifest.txt	<span class="token comment"># 查看当前gitlab版本</span>
+<span class="token builtin class-name">cd</span> gitlab
+<span class="token function">git</span> <span class="token function">diff</span> v11.9.8 v11.9.8-zh
+<span class="token function">git</span> <span class="token function">diff</span> v11.9.8 v11.9.8-zh <span class="token operator">></span>/root/v11.9.8-zh.diff
+gitlab-ctl stop
+patch <span class="token parameter variable">-f</span> <span class="token parameter variable">-d</span> /opt/gitlab/embedded/service/gitlab-rails <span class="token parameter variable">-p1</span> <span class="token operator">&lt;</span>/root/v11.9.8-zh.diff
+gitlab-ctl reconfigure
+gitlab-ctl start
+gitlab-ctl status</code></pre>
+
+<h2 id="常见的代码部署方式"><a href="#常见的代码部署方式" class="headerlink" title="常见的代码部署方式"></a>常见的代码部署方式</h2><h3 id="蓝绿部署"><a href="#蓝绿部署" class="headerlink" title="蓝绿部署"></a>蓝绿部署</h3><p>不停老版本代码（不影响上一个版本访问），而是在另外一套环境部署新版本然后进行测试，测试通过后将用户流量切到新版本，其特点为业务无中断，升级风险相对较小</p>
+<p>具体过程：</p>
+<ol>
+<li>当前版本业务正常访问(V1)</li>
+<li>在另外一套环境部署新代码(V2)，代码可能是增加了功能或者是修复了某些 bug</li>
+<li>测试通过之后将用户请求流量切到新版本环境</li>
+<li>观察一段时间，如有异常直接切换旧版本，没有异常就删除老版本</li>
+<li>下次升级，将旧版本升级到新版本(V3)</li>
+</ol>
+<h3 id="金丝雀发布"><a href="#金丝雀发布" class="headerlink" title="金丝雀发布"></a>金丝雀发布</h3><p>金丝雀发布也叫灰度发布，是指在黑与白之间，能够平滑过渡的一种发布方式，灰度发布是增量发布的一种类型，灰度发布是在原有版本可用的情况下，同时部署一个新版本应用作为“金丝雀”(小白鼠)，测试新版本的性能和表现，以保障整体系统稳定的情况下，尽早发现、调整问题。因此，灰度发布可以保证整体系统的稳定，在初始灰度的时候就可以发现、调整问题，以保证其影响度</p>
+<p>具体过程：</p>
+<ol>
+<li>准备好部署各个阶段的工件，包括：构建组件，测试脚本，配置文件和部署清单文件。</li>
+<li>从负载均衡列表中移除掉“金丝雀”服务器。</li>
+<li>升级“金丝雀”应用（排掉原有流量并进行部署）。</li>
+<li>对应用进行自动化测试。</li>
+<li>将“金丝雀”服务器重新添加到负载均衡列表中（连通性和健康检查）。</li>
+<li>如果“金丝雀”在线使用测试成功，升级剩余的其他服务器。（否则就回滚）</li>
+</ol>
+<h3 id="滚动发布"><a href="#滚动发布" class="headerlink" title="滚动发布"></a>滚动发布</h3><p>滚动发布，一般是取出一个或者多个服务器停止服务，执行更新，并重新将其投入使用。周而复始，直到集群中所有的实例都更新成新版本，此方式可以防止同时升级，造成服务停止</p>
+<h3 id="A-x2F-B-测试"><a href="#A-x2F-B-测试" class="headerlink" title="A&#x2F;B 测试"></a>A&#x2F;B 测试</h3><p>A&#x2F;B 测试也是同时运行两个 APP 环境，但是和蓝绿部署完全是两码事，A&#x2F;B 测试是用来测试应用功能表现的方法，例如可用性、受欢迎程度、可见性等等，蓝绿部署的目的是安全稳定地发布新版本应用，并在必要时回滚，即蓝绿部署是同一时间只有一套正式环境环境在线，而 A&#x2F;B 测试是两套正式环境同时在线，一般用于多个产品竟争时使用</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/GitLab/" rel="tag"><i class="fa fa-tag"></i> GitLab</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/Nexus/" rel="prev" title="Nexus">
+                  <i class="fa fa-chevron-left"></i> Nexus
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Jenkins%E4%B8%8EGitlab/git%E5%91%BD%E4%BB%A4/" rel="next" title="git命令">
+                  git命令 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

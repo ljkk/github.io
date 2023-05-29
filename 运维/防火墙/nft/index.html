@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="相关文档：  https:&#x2F;&#x2F;wiki.nftables.org&#x2F;wiki-nftables&#x2F;index.php&#x2F;Main_Page https:&#x2F;&#x2F;wiki.nftables.org&#x2F;wiki-nftables&#x2F;index.php&#x2F;Nftables_families man nft  nftables 和 iptables 一样，依赖的底层机制都是 Netfilter，但是 nftables 各">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nft">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E9%98%B2%E7%81%AB%E5%A2%99/nft/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="相关文档：  https:&#x2F;&#x2F;wiki.nftables.org&#x2F;wiki-nftables&#x2F;index.php&#x2F;Main_Page https:&#x2F;&#x2F;wiki.nftables.org&#x2F;wiki-nftables&#x2F;index.php&#x2F;Nftables_families man nft  nftables 和 iptables 一样，依赖的底层机制都是 Netfilter，但是 nftables 各">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600853967007.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600933365734.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600934961736.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600937199061.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600937935815.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600938679478.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1600938925363.png">
+<meta property="article:published_time" content="2020-12-09T15:56:07.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="防火墙">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1600853967007.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E9%98%B2%E7%81%AB%E5%A2%99/nft/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E9%98%B2%E7%81%AB%E5%A2%99/nft/","path":"运维/防火墙/nft/","title":"nft"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>nft | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%87%E7%BA%A7-nftables"><span class="nav-number">1.</span> <span class="nav-text">升级 nftables</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nftables-%E5%92%8C-iptables-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.</span> <span class="nav-text">nftables 和 iptables 的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nf-%E5%92%8C-xt"><span class="nav-number">3.</span> <span class="nav-text">nf* 和 xt*</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A8%EF%BC%88Tables%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">表（Tables）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%B0%87%E4%B8%8E%E9%92%A9%E5%AD%90%E5%87%BD%E6%95%B0"><span class="nav-number">4.1.</span> <span class="nav-text">地址簇与钩子函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E8%A1%A8"><span class="nav-number">4.2.</span> <span class="nav-text">添加表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%97%E5%87%BA%E8%A1%A8"><span class="nav-number">4.3.</span> <span class="nav-text">列出表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E8%A1%A8"><span class="nav-number">4.4.</span> <span class="nav-text">删除表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E8%A1%A8"><span class="nav-number">4.5.</span> <span class="nav-text">清空表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%EF%BC%88Chains%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">链（Chains）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%93%BE"><span class="nav-number">5.1.</span> <span class="nav-text">创建链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%97%E5%87%BA%E9%93%BE"><span class="nav-number">5.2.</span> <span class="nav-text">列出链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%BE%91%E9%93%BE"><span class="nav-number">5.3.</span> <span class="nav-text">编辑链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E9%93%BE"><span class="nav-number">5.4.</span> <span class="nav-text">删除链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E9%93%BE"><span class="nav-number">5.5.</span> <span class="nav-text">清空链</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%84%E5%88%99%EF%BC%88Rules%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">规则（Rules）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables-%E5%92%8C-nftables-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">6.1.</span> <span class="nav-text">iptables 和 nftables 的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#iptables"><span class="nav-number">6.1.1.</span> <span class="nav-text">iptables</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nftables"><span class="nav-number">6.1.2.</span> <span class="nav-text">nftables</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F-expression"><span class="nav-number">6.2.</span> <span class="nav-text">表达式 expression</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#describe"><span class="nav-number">6.2.1.</span> <span class="nav-text">describe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#datatype"><span class="nav-number">6.2.2.</span> <span class="nav-text">datatype</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#expression"><span class="nav-number">6.2.3.</span> <span class="nav-text">expression</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PRIMARY-EXPRESSIONS"><span class="nav-number">6.2.3.1.</span> <span class="nav-text">PRIMARY EXPRESSIONS</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PRIMARY-EXPRESSIONS-1"><span class="nav-number">6.2.3.2.</span> <span class="nav-text">PRIMARY EXPRESSIONS</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E8%A7%84%E5%88%99"><span class="nav-number">6.3.</span> <span class="nav-text">添加规则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#expressions"><span class="nav-number">6.3.1.</span> <span class="nav-text">expressions</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#IP"><span class="nav-number">6.3.1.1.</span> <span class="nav-text">IP</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Ip6"><span class="nav-number">6.3.1.2.</span> <span class="nav-text">Ip6</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Tcp"><span class="nav-number">6.3.1.3.</span> <span class="nav-text">Tcp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Udp"><span class="nav-number">6.3.1.4.</span> <span class="nav-text">Udp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Udplite"><span class="nav-number">6.3.1.5.</span> <span class="nav-text">Udplite</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sctp"><span class="nav-number">6.3.1.6.</span> <span class="nav-text">Sctp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Dccp"><span class="nav-number">6.3.1.7.</span> <span class="nav-text">Dccp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Ah"><span class="nav-number">6.3.1.8.</span> <span class="nav-text">Ah</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Esp"><span class="nav-number">6.3.1.9.</span> <span class="nav-text">Esp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Comp"><span class="nav-number">6.3.1.10.</span> <span class="nav-text">Comp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Icmp"><span class="nav-number">6.3.1.11.</span> <span class="nav-text">Icmp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Icmpv6"><span class="nav-number">6.3.1.12.</span> <span class="nav-text">Icmpv6</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Ether"><span class="nav-number">6.3.1.13.</span> <span class="nav-text">Ether</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Dst"><span class="nav-number">6.3.1.14.</span> <span class="nav-text">Dst</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Frag"><span class="nav-number">6.3.1.15.</span> <span class="nav-text">Frag</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Hbh"><span class="nav-number">6.3.1.16.</span> <span class="nav-text">Hbh</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Mh"><span class="nav-number">6.3.1.17.</span> <span class="nav-text">Mh</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Rt"><span class="nav-number">6.3.1.18.</span> <span class="nav-text">Rt</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Vlan"><span class="nav-number">6.3.1.19.</span> <span class="nav-text">Vlan</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Arp"><span class="nav-number">6.3.1.20.</span> <span class="nav-text">Arp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Ct"><span class="nav-number">6.3.1.21.</span> <span class="nav-text">Ct</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Meta"><span class="nav-number">6.3.1.22.</span> <span class="nav-text">Meta</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#statements"><span class="nav-number">6.3.2.</span> <span class="nav-text">statements</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#verdict"><span class="nav-number">6.3.2.1.</span> <span class="nav-text">verdict</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#log"><span class="nav-number">6.3.2.2.</span> <span class="nav-text">log</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#reject"><span class="nav-number">6.3.2.3.</span> <span class="nav-text">reject</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#counter"><span class="nav-number">6.3.2.4.</span> <span class="nav-text">counter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Limit"><span class="nav-number">6.3.2.5.</span> <span class="nav-text">Limit</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nat"><span class="nav-number">6.3.2.6.</span> <span class="nav-text">nat</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#queueaz"><span class="nav-number">6.3.2.7.</span> <span class="nav-text">queueaz</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#tproxy"><span class="nav-number">6.3.2.8.</span> <span class="nav-text">tproxy</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#synproxy"><span class="nav-number">6.3.2.9.</span> <span class="nav-text">synproxy</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#flow"><span class="nav-number">6.3.2.10.</span> <span class="nav-text">flow</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#dup"><span class="nav-number">6.3.2.11.</span> <span class="nav-text">dup</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#fwd"><span class="nav-number">6.3.2.12.</span> <span class="nav-text">fwd</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#set"><span class="nav-number">6.3.2.13.</span> <span class="nav-text">set</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#map"><span class="nav-number">6.3.2.14.</span> <span class="nav-text">map</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#vmap"><span class="nav-number">6.3.2.15.</span> <span class="nav-text">vmap</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8C%83%E4%BE%8B"><span class="nav-number">6.3.3.</span> <span class="nav-text">范例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%BF%E6%8D%A2%E8%A7%84%E5%88%99"><span class="nav-number">6.4.</span> <span class="nav-text">替换规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%97%E5%87%BA%E8%A7%84%E5%88%99"><span class="nav-number">6.5.</span> <span class="nav-text">列出规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E8%A7%84%E5%88%99"><span class="nav-number">6.6.</span> <span class="nav-text">删除规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E8%A7%84%E5%88%99"><span class="nav-number">6.7.</span> <span class="nav-text">清空规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%8A%A5%E6%96%87%E5%88%86%E7%BB%84%E3%80%81%E5%88%86%E7%B1%BB%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">6.8.</span> <span class="nav-text">数据报文分组、分类的数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E4%B8%8E%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="nav-number">6.8.1.</span> <span class="nav-text">表与命名空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E5%90%88%EF%BC%88sets%EF%BC%89"><span class="nav-number">6.8.2.</span> <span class="nav-text">集合（sets）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8C%BF%E5%90%8D%E9%9B%86%E5%90%88"><span class="nav-number">6.8.2.1.</span> <span class="nav-text">匿名集合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%91%BD%E5%90%8D%E9%9B%86%E5%90%88"><span class="nav-number">6.8.2.2.</span> <span class="nav-text">命名集合</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%96%B0%E5%BB%BA%E5%91%BD%E5%90%8D%E9%9B%86%E5%90%88"><span class="nav-number">6.8.2.2.1.</span> <span class="nav-text">新建命名集合</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%88%97%E5%87%BA%E5%91%BD%E5%90%8D%E9%9B%86%E5%90%88"><span class="nav-number">6.8.2.2.2.</span> <span class="nav-text">列出命名集合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%A0%E5%B0%84%EF%BC%88Maps%EF%BC%89"><span class="nav-number">6.8.3.</span> <span class="nav-text">映射（Maps）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Concatenations"><span class="nav-number">6.8.4.</span> <span class="nav-text">Concatenations</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Metering"><span class="nav-number">6.8.5.</span> <span class="nav-text">Metering</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Updating-sets-from-the-packet-path"><span class="nav-number">6.8.6.</span> <span class="nav-text">Updating sets from the packet path</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Math-operations"><span class="nav-number">6.8.7.</span> <span class="nav-text">Math operations</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stateful-objects"><span class="nav-number">6.8.8.</span> <span class="nav-text">Stateful objects</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Flowtable-the-fastpath-network-stack-bypass"><span class="nav-number">6.8.9.</span> <span class="nav-text">Flowtable (the fastpath network stack bypass)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%84%9A%E6%9C%AC"><span class="nav-number">7.</span> <span class="nav-text">脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0"><span class="nav-number">8.</span> <span class="nav-text">练习</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E9%98%B2%E7%81%AB%E5%A2%99/nft/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="nft | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nft
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:56:07" itemprop="dateCreated datePublished" datetime="2020-12-09T23:56:07+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E9%98%B2%E7%81%AB%E5%A2%99/" itemprop="url" rel="index"><span itemprop="name">防火墙</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>相关文档：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Main_Page">https://wiki.nftables.org/wiki-nftables/index.php/Main_Page</a></li>
+<li><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Nftables_families">https://wiki.nftables.org/wiki-nftables/index.php/Nftables_families</a></li>
+<li><code>man nft</code></li>
+</ul>
+<p>nftables 和 iptables 一样，依赖的底层机制都是 Netfilter，但是 nftables 各个方面都比 iptables 更优秀，未来一定会成为主流，所以有必要好好学习。</p>
+<h2 id="升级-nftables"><a href="#升级-nftables" class="headerlink" title="升级 nftables"></a>升级 nftables</h2><p>CentOS8 自带的 nftables 版本是 0.9.3，而官网最新的版本是 0.9.6，所以需要先升级：</p>
+<ol>
+<li><p>卸载系统自带的 nftables</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$yum</span> remove nftables.x86_64
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$rpm</span> <span class="token parameter variable">-qa</span> <span class="token operator">|</span> <span class="token function">grep</span> ntf
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span>$</code></pre>
+</li>
+<li><p>去官网下载最新版本</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 官网：http://netfilter.org/projects/nftables/downloads.html</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/src/
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> <span class="token function">bzip2</span>
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$tar</span> jxvf nftables-0.9.6.tar.bz2
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$ll</span>
+total <span class="token number">844</span>
+drwxr-xr-x. <span class="token number">10</span> lujinkai lujinkai   <span class="token number">4096</span> Jun <span class="token number">15</span> <span class="token number">16</span>:24 nftables-0.9.6
+-rw-r--r--.  <span class="token number">1</span> root     root     <span class="token number">859481</span> Sep <span class="token number">27</span> 06:49 nftables-0.9.6.tar.bz2</code></pre>
+</li>
+<li><p>安装</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$cd</span> nftables-0.9.6/
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span>$
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable">$mkdir</span> /usr/local/nftables
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> gcc
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span>$./configure <span class="token parameter variable">--prefix</span><span class="token operator">=</span>/usr/local/nftables
+<span class="token punctuation">..</span>.
+<span class="token comment"># 报错，缺少libmnl依赖</span>
+checking <span class="token keyword">for</span> LIBMNL<span class="token punctuation">..</span>. no
+configure: error: Package requirements <span class="token punctuation">(</span>libmnl <span class="token operator">>=</span> <span class="token number">1.0</span>.4<span class="token punctuation">)</span> were not met:
+<span class="token punctuation">..</span><span class="token punctuation">..</span>
+<span class="token comment"># 安装libmnl参考：https://centos.pkgs.org/8/centos-baseos-x86_64/libmnl-1.0.4-6.el8.x86_64.rpm.html</span>
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable">$dnf</span> <span class="token function">install</span> libmnl
+<span class="token comment"># 安装libmnl-devel参考：https://centos.pkgs.org/8/centos-powertools-x86_64/libmnl-devel-1.0.4-6.el8.x86_64.rpm.html</span>
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable">$dnf</span> <span class="token parameter variable">--enablerepo</span><span class="token operator">=</span>PowerTools <span class="token function">install</span> libmnl-devel
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable">$ldconfig</span>
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span>$./configure <span class="token parameter variable">--prefix</span><span class="token operator">=</span>/usr/local/nftables
+<span class="token punctuation">..</span>.
+<span class="token comment"># 报错，缺少libnftnl依赖</span>
+checking <span class="token keyword">for</span> LIBNFTNL<span class="token punctuation">..</span>. no
+configure: error: Package requirements <span class="token punctuation">(</span>libnftnl <span class="token operator">>=</span> <span class="token number">1.1</span>.7<span class="token punctuation">)</span> were not met:
+
+No package <span class="token string">'libnftnl'</span> found
+
+Consider adjusting the PKG_CONFIG_PATH environment variable <span class="token keyword">if</span> you
+installed software <span class="token keyword">in</span> a non-standard prefix.
+
+Alternatively, you may <span class="token builtin class-name">set</span> the environment variables LIBNFTNL_CFLAGS
+and LIBNFTNL_LIBS to avoid the need to call pkg-config.
+See the pkg-config <span class="token function">man</span> page <span class="token keyword">for</span> <span class="token function">more</span> details.
+<span class="token punctuation">..</span>.
+<span class="token comment"># 上面的libmnl通过dnf安装，这个libnftnl就通过编译安装吧，从nftables官网下载最新的libnftnl源码包</span>
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable">$cd</span> <span class="token punctuation">..</span>
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$tar</span> jxvf libnftnl-1.1.7.tar.bz2
+<span class="token punctuation">[</span>root@centos8 src<span class="token punctuation">]</span><span class="token variable">$cd</span> libnftnl-1.1.7/
+<span class="token punctuation">[</span>root@centos8 libnftnl-1.1.7<span class="token punctuation">]</span>$./configure <span class="token parameter variable">--prefix</span><span class="token operator">=</span>/usr/local/libnftnl-1.1.7
+<span class="token punctuation">[</span>root@centos8 libnftnl-1.1.7<span class="token punctuation">]</span><span class="token variable">$make</span> <span class="token operator">&amp;&amp;</span> <span class="token function">make</span> <span class="token function">install</span>
+<span class="token punctuation">..</span>.
+<span class="token comment"># 根据提示，要指定libnftnl的lib和include，这个要查看具体的pkg-config文件</span>
+<span class="token comment"># vim /usr/local/libnftnl-1.1.7/lib/pkgconfig/libnftnl.pc</span>
+<span class="token comment"># ...</span>
+<span class="token comment"># 15 Libs: -L$&#123;libdir&#125; -lnftnl</span>
+<span class="token comment"># 16 Cflags: -I$&#123;includedir&#125;</span>
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable"><span class="token variable">$(</span><span class="token assign-left variable">LIBNFTNL_CFLAGS</span><span class="token operator">=</span>-I/usr/local/libnftnl-1.1.7/include/ <span class="token assign-left variable">LIBNFTNL_LIBS</span><span class="token operator">=</span><span class="token string">"-L/usr/local/libnftnl-1.1.7/lib/ -lnftnl"</span> ./configure <span class="token parameter variable">--prefix</span><span class="token operator">=</span>/usr/local/nftables<span class="token variable">)</span></span>
+<span class="token punctuation">..</span>.
+<span class="token comment"># 报错，缺少libgmb依赖</span>
+checking <span class="token keyword">for</span> <span class="token for-or-select variable">__gmpz_init</span> <span class="token keyword">in</span> -lgmp<span class="token punctuation">..</span>. no
+configure: error: No suitable version of libgmp found
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> gmp gmp-devel
+<span class="token comment"># 继续</span>
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span>$./configure <span class="token parameter variable">--prefix</span><span class="token operator">=</span>/usr/local/nftables
+<span class="token punctuation">..</span>.
+<span class="token comment"># 缺少 libreadline 依赖</span>
+checking <span class="token keyword">for</span> <span class="token for-or-select variable">readline</span> <span class="token keyword">in</span> -lreadline<span class="token punctuation">..</span>. no
+configure: error: No suitable version of libreadline found
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span><span class="token variable">$dnf</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> readline readline-devel
+<span class="token punctuation">[</span>root@centos8 nftables-0.9.6<span class="token punctuation">]</span>$./configure <span class="token parameter variable">--prefix</span><span class="token operator">=</span>/usr/local/nftables
+<span class="token comment"># 安装成功</span>
+nft configuration:
+  cli support:                  readline
+  <span class="token builtin class-name">enable</span> debugging symbols:     <span class="token function">yes</span>
+  use mini-gmp:                 no
+  <span class="token builtin class-name">enable</span> <span class="token function">man</span> page:              <span class="token function">yes</span>
+  libxtables support:           no
+  json output support:          no
+  <span class="token builtin class-name">enable</span> Python:                no</code></pre>
+</li>
+<li><p>配置 systemctl</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /usr/lib/systemd/system/nftables.service
+<span class="token comment"># 从另一台机器上拷贝一份yum安装自动生成的nftables.service文件，稍作改动</span>
+<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>Netfilter Tables
+<span class="token assign-left variable">Documentation</span><span class="token operator">=</span>man:nft<span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">)</span>
+<span class="token assign-left variable">Wants</span><span class="token operator">=</span>network-pre.target
+<span class="token assign-left variable">Before</span><span class="token operator">=</span>network-pre.target
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">Type</span><span class="token operator">=</span>oneshot
+<span class="token assign-left variable">ProtectSystem</span><span class="token operator">=</span>full
+<span class="token assign-left variable">ProtectHome</span><span class="token operator">=</span>true
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/local/nftables/sbin/nft <span class="token parameter variable">-f</span> /usr/local/nftables/etc/nftables/all-in-one.nft
+<span class="token assign-left variable">ExecReload</span><span class="token operator">=</span>/usr/local/nftables/sbin/nft <span class="token string">'flush ruleset; include "/usr/local/nftables/etc/nftables/all-in-one.nft";'</span>
+<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/usr/local/nftables/sbin/nft flush ruleset
+<span class="token assign-left variable">RemainAfterExit</span><span class="token operator">=</span>yes
+
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
+
+<span class="token comment"># 设置开机自启</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> <span class="token builtin class-name">enable</span> <span class="token parameter variable">--now</span> nftables.service</code></pre>
+</li>
+<li><p>配置环境变量</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将 /usr/local/nftables/sbin 添加到PATH（位于/etc/profile）</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span>/usr/local/nftables/sbin:/usr/local/nginx/sbin:<span class="token environment constant">$PATH</span>
+<span class="token comment"># 重载</span>
+<span class="token builtin class-name">.</span> /etc/profile</code></pre></li>
+</ol>
+<h2 id="nftables-和-iptables-的区别"><a href="#nftables-和-iptables-的区别" class="headerlink" title="nftables 和 iptables 的区别"></a>nftables 和 iptables 的区别</h2><ol>
+<li>1</li>
+<li>2</li>
+<li>3</li>
+<li>…</li>
+</ol>
+<h2 id="nf-和-xt"><a href="#nf-和-xt" class="headerlink" title="nf* 和 xt*"></a>nf* 和 xt*</h2><p>nf* 是 netfilter 的缩写，nf_ 前缀的模块是 netfilter 的核心模块（以下称 nf 模块），nftables 之前，netfilter 提供了 iptables、ip6tables、arptables 等用户空间工具，xtables 就是这些工具的统称，缩写为 xt。可能是为了便于理解或者什么理由，专为 xtables 开发的模块以 xt*前缀命名（以下称 xt 模块），当然，xtables 也可以调用 nf 模块。</p>
+<p>安装 iptables 后，会生成&#x2F;usr&#x2F;lib64&#x2F;xtables&#x2F;目录，目录下就是各种 xt 模块。</p>
+<p>xtables 既能调用 xt 模块，也能调用 nf 模块，为了方便我们把 xt 模块和 nf 模块统称为扩展。</p>
+<p>现在，这些 xtables 工具被认为是<a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Legacy_xtables_tools">过时</a>的，推荐使用 nftables，nftables 是 xtables 的全面替代品，nftables 调用的都是 nf 模块，所以安装后自然也不会生成 &#x2F;usr&#x2F;lib64&#x2F;xtables&#x2F;目录。</p>
+<p><strong>因为并没有找到参考资料，以上都是个人理解和猜测，说的不一定准确。</strong></p>
+<h2 id="表（Tables）"><a href="#表（Tables）" class="headerlink" title="表（Tables）"></a>表（Tables）</h2><p>与 iptables 类似，在 nftables 中，<strong>表</strong>是<strong>链</strong>的容器，nftables 不包含任何的表和链，所以开始使用 nftables 时，首先需要添加至少一个表，然后向表里添加链，然后往链里添加规则。</p>
+<h3 id="地址簇与钩子函数"><a href="#地址簇与钩子函数" class="headerlink" title="地址簇与钩子函数"></a>地址簇与钩子函数</h3><p>什么是地址族？<br>地址族：又叫地址簇，AF，Address；不要太纠结这个名称，可以认为就是 地址类型。<br>另外，还有协议族：又叫协议簇，PF，Protocol Family；协议族等价于地址族。</p>
+<p>netfilter 中六个勾子函数（hook），前面 iptables 章节一节已经介绍过了，这里再说一遍，六个钩子函数是：</p>
+<pre class="language-none"><code class="language-none">INGRESS、PREROUTING、INPUT、OUTPUT、FORWARD、POSTROUTING</code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1600853967007.png"></p>
+<h3 id="添加表"><a href="#添加表" class="headerlink" title="添加表"></a>添加表</h3><p>语法：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft <span class="token punctuation">&#123;</span>add <span class="token operator">|</span> create<span class="token punctuation">&#125;</span> table <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span></code></pre>
+
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Nftables_families">family</a>：表支持的地址类型，有六种，每个表只能指定一种，默认是 ip，表示 IPv4</p>
+<table>
+<thead>
+<tr>
+<th>family</th>
+<th>表示的地址族</th>
+<th>iptables 中对应的命令行工具</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ip</td>
+<td>IPv4 地址</td>
+<td>iptables</td>
+</tr>
+<tr>
+<td>ip6</td>
+<td>IPv6 地址</td>
+<td>ip6tables</td>
+</tr>
+<tr>
+<td>inet</td>
+<td>IPv4 和 IPv6 地址</td>
+<td>iptables 和 ip6tables</td>
+</tr>
+<tr>
+<td>arp</td>
+<td>地址解析协议(ARP)地址</td>
+<td>arptables</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td>处理桥接数据包</td>
+<td>ebtables</td>
+</tr>
+<tr>
+<td>netdev</td>
+<td>内核 4.2 之后可用。只能使用 ingress 钩子，在路由之前进行过滤，可以替代<code>tc</code>命令</td>
+<td></td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加一个 IPv4 的 foo 表</span>
+nft <span class="token function">add</span> table <span class="token function">ip</span> foo
+<span class="token comment"># 添加一个 IPv6 的 bar 表</span>
+nft <span class="token function">add</span> table ip6 bar</code></pre>
+
+<h3 id="列出表"><a href="#列出表" class="headerlink" title="列出表"></a>列出表</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 列出所有表</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list tables
+table <span class="token function">ip</span> foo
+table ip6 bar
+<span class="token comment"># 列出一个或多个地址族的所有表，注意这时是tables</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list tables <span class="token function">ip</span>
+table <span class="token function">ip</span> foo
+<span class="token comment"># 列出一个表中的所有链</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list table <span class="token function">ip</span> foo
+table <span class="token function">ip</span> foo <span class="token punctuation">&#123;</span>	<span class="token comment"># 目前表中还没链</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> delete table ip6 bar</code></pre>
+
+<p>说明：内核 3.18 以前，需要先清空表中的内容，再删除表</p>
+<h3 id="清空表"><a href="#清空表" class="headerlink" title="清空表"></a>清空表</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 清空表中所有链中的所有规则</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> flush table <span class="token function">ip</span> foo</code></pre>
+
+<h2 id="链（Chains）"><a href="#链（Chains）" class="headerlink" title="链（Chains）"></a>链（Chains）</h2><p>ntfables 没有内置的链，所有的链都需要手动创建，链有两种类型：基本类型和常规类型。<br>其中基本类型又分类三类：filter、nat、route</p>
+<ul>
+<li><p>基本链：base chains，数据包的入口，需要指定钩子函数和优先级，类似 iptables 中的内置链</p>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>表</th>
+<th>钩子函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>filter</td>
+<td>all</td>
+<td>all</td>
+<td>过滤</td>
+</tr>
+<tr>
+<td>nat</td>
+<td>ip、ip6、inet</td>
+<td>prerouting、input、output、postrouting</td>
+<td>地址转换，第一个包总是命中这个链，因此不要用此链进行过滤</td>
+</tr>
+<tr>
+<td>route</td>
+<td>ip、ip6</td>
+<td>output</td>
+<td>策略路由选择器，等价于 iptables 中的 mangle 表，但是仅用于 output 钩子函数</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>常规链：regular chains，不需要指定钩子函数和优先级，可以用来做跳转，从逻辑上对规则进行分类，类似 iptables 中的自定义类</p>
+</li>
+</ul>
+<h3 id="创建链"><a href="#创建链" class="headerlink" title="创建链"></a>创建链</h3><p>语法：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建常规链</span>
+nft <span class="token function">add</span> chain <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span>
+<span class="token comment"># 创建基本链</span>
+nft <span class="token function">add</span> chain <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span> <span class="token punctuation">&#123;</span>type <span class="token operator">&lt;</span>type<span class="token operator">></span> hook <span class="token operator">&lt;</span>hook<span class="token operator">></span> <span class="token punctuation">[</span>device <span class="token operator">&lt;</span>device<span class="token operator">></span><span class="token punctuation">]</span> priority <span class="token operator">&lt;</span>priority<span class="token operator">></span><span class="token punctuation">;</span> <span class="token punctuation">[</span>policy <span class="token operator">&lt;</span>policy<span class="token operator">></span><span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<ul>
+<li><p>type：可以选择 filter、nat、route</p>
+</li>
+<li><p>hook：钩子函数，六个钩子函数，只能指定一个，不同的表 family 支持不同的钩子函数：</p>
+<table>
+<thead>
+<tr>
+<th>family</th>
+<th>hook</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ip、ip6、inet</td>
+<td>prerouting、input、forward、output、postrouting</td>
+</tr>
+<tr>
+<td>arp</td>
+<td>input、output</td>
+</tr>
+<tr>
+<td>bridge</td>
+<td>prerouting、input、forward、output、postrouting</td>
+</tr>
+<tr>
+<td>netdev</td>
+<td>ingress</td>
+</tr>
+</tbody></table>
+<p>小总结：netdev 只支持 ingress + filter 一种组合；arp 支持 { input | output } + filter 两种组合</p>
+</li>
+<li><p>device：netdev 表只存在于每个传入接口，所以它需要指定 device 参数</p>
+</li>
+<li><p>priority：优先级，可以接受 整数值 或者 标准优先级名。整数值可以为负，数值越低优先级越高；有以下数值可以选择</p>
+<ul>
+<li>NF_IP_PRI_CONNTRACK_DEFRAG (-400): priority of defragmentation</li>
+<li>NF_IP_PRI_RAW (-300): traditional priority of the raw table placed before connection tracking operation</li>
+<li>NF_IP_PRI_SELINUX_FIRST (-225): SELinux operations</li>
+<li>NF_IP_PRI_CONNTRACK (-200): Connection tracking operations</li>
+<li>NF_IP_PRI_MANGLE (-150): mangle operation</li>
+<li>NF_IP_PRI_NAT_DST (-100): destination NAT</li>
+<li>NF_IP_PRI_FILTER (0): filtering operation, the filter table</li>
+<li>NF_IP_PRI_SECURITY (50): Place of security table where secmark can be set for example</li>
+<li>NF_IP_PRI_NAT_SRC (100): source NAT</li>
+<li>NF_IP_PRI_SELINUX_LAST (225): SELinux at packet exit</li>
+<li>NF_IP_PRI_CONNTRACK_HELPER (300): connection tracking at exit</li>
+</ul>
+</li>
+<li><p>policy：链的策略，支持的策略值是 accept、drop，默认是 accept</p>
+</li>
+</ul>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加常规链</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> <span class="token function">add</span> chain <span class="token function">ip</span> foo chain_1
+<span class="token comment"># 添加基本链</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> <span class="token function">add</span> chain <span class="token function">ip</span> foo chain_2 <span class="token punctuation">&#123;</span>type filter hook input priority <span class="token number">0</span><span class="token punctuation">\</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="列出链"><a href="#列出链" class="headerlink" title="列出链"></a>列出链</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 列出一个表中的所有链</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list table <span class="token function">ip</span> foo
+table <span class="token function">ip</span> foo <span class="token punctuation">&#123;</span>
+        chain chain_1 <span class="token punctuation">&#123;</span>
+        <span class="token punctuation">&#125;</span>
+
+        chain chain_2 <span class="token punctuation">&#123;</span>
+                <span class="token builtin class-name">type</span> filter hook input priority filter<span class="token punctuation">;</span> policy accept<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token comment"># 列出一个链中的所有规则</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list chain <span class="token function">ip</span> foo chain_1
+table <span class="token function">ip</span> foo <span class="token punctuation">&#123;</span>
+        chain chain_1 <span class="token punctuation">&#123;</span>	<span class="token comment"># 目前链中还没有规则</span>
+        <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list chain <span class="token function">ip</span> foo chain_2
+table <span class="token function">ip</span> foo <span class="token punctuation">&#123;</span>
+        chain chain_2 <span class="token punctuation">&#123;</span>	<span class="token comment"># 目前链中还没有规则</span>
+                <span class="token builtin class-name">type</span> filter hook input priority filter<span class="token punctuation">;</span> policy accept<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="编辑链"><a href="#编辑链" class="headerlink" title="编辑链"></a>编辑链</h3><p>把添加链语法的 add 或者 create 关键字去掉，就是编辑链的语法</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 编辑常规链</span>
+nft chain <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span>
+<span class="token comment"># 编辑基本链</span>
+nft chain <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span> <span class="token punctuation">&#123;</span><span class="token punctuation">[</span>type <span class="token operator">&lt;</span>type<span class="token operator">></span> hook <span class="token operator">&lt;</span>hook<span class="token operator">></span> <span class="token punctuation">[</span>device <span class="token operator">&lt;</span>device<span class="token operator">></span><span class="token punctuation">]</span> priority <span class="token operator">&lt;</span>priority<span class="token operator">></span> <span class="token punctuation">;</span> <span class="token punctuation">[</span>policy policy <span class="token punctuation">;</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将chain_1链策略从accept更改为drop</span>
+nft chain <span class="token function">ip</span> foo chain_1 <span class="token punctuation">&#123;</span> policy drop <span class="token punctuation">\</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="删除链"><a href="#删除链" class="headerlink" title="删除链"></a>删除链</h3><p>要删除的链不能包含任何规则或者跳转目标。</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> delete chain <span class="token function">ip</span> foo chain_1
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list table <span class="token function">ip</span> foo
+table <span class="token function">ip</span> foo <span class="token punctuation">&#123;</span>
+        chain chain_2 <span class="token punctuation">&#123;</span>
+                <span class="token builtin class-name">type</span> filter hook input priority filter<span class="token punctuation">;</span> policy accept<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="清空链"><a href="#清空链" class="headerlink" title="清空链"></a>清空链</h3><p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 清空chain_2链中的所有规则</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> flush chain <span class="token function">ip</span> foo chain_2</code></pre>
+
+<h2 id="规则（Rules）"><a href="#规则（Rules）" class="headerlink" title="规则（Rules）"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Quick_reference-nftables_in_10_minutes">规则（Rules）</a></h2><h3 id="iptables-和-nftables-的区别"><a href="#iptables-和-nftables-的区别" class="headerlink" title="iptables 和 nftables 的区别"></a>iptables 和 nftables 的区别</h3><p>参考博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/dog250/article/details/41526421?locationNum=8">https://blog.csdn.net/dog250/article/details/41526421?locationNum=8</a></p>
+<h4 id="iptables"><a href="#iptables" class="headerlink" title="iptables"></a>iptables</h4><p>iptables 是由表、链、规则组成，其中规则又由 match、target 组成。</p>
+<p>iptables 的规则是按照配置顺序顺序匹配的，在每一张表的每一个链上依次匹配每一条规则，在每一条规则依次匹配每一个 match，全部匹配的 match 执行该规则的 target，由 target 决定：</p>
+<ul>
+<li>继续匹配下一条规则</li>
+<li>对数据包做一些修改</li>
+<li>跳转到其它的链(即开始从该链依次匹配该链上的每一条规则)</li>
+<li>返回引发跳转的链(即继续匹配跳转前的链的下一条规则)</li>
+<li>丢弃数据包</li>
+<li>接收数据包(即不再继续往下匹配，直接返回)</li>
+<li>记录日志</li>
+<li>…</li>
+</ul>
+<p>整个 iptables 框架的执行流程如下：</p>
+<pre class="language-c" data-language="c"><code class="language-c">循环<span class="token number">1</span><span class="token operator">:</span>
+	<span class="token keyword">static</span> breakrule <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	遍历一个chain的每一条rule <span class="token punctuation">&#123;</span>
+	nomatch <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	循环<span class="token number">2</span><span class="token operator">:</span>遍历一条rule的每一个match <span class="token punctuation">&#123;</span>
+			result <span class="token operator">=</span> rule<span class="token operator">-></span>match<span class="token punctuation">[</span>curr<span class="token punctuation">]</span><span class="token punctuation">(</span>skb<span class="token punctuation">,</span> info<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>result <span class="token operator">!=</span> MATCH<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+				nomatch <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+				<span class="token keyword">break</span><span class="token punctuation">;</span>
+			<span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span>nomatch <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">continue</span>该chain的下一条rule<span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span>
+	result <span class="token operator">=</span> rule<span class="token operator">-></span><span class="token function">target</span><span class="token punctuation">(</span>skb<span class="token punctuation">,</span> info<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span>result <span class="token operator">==</span> DROP<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">break</span>丢弃数据包
+	<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>result <span class="token operator">==</span> ACCEPT<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">break</span>接受数据包
+	<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>result <span class="token operator">==</span> GOTO<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		breakrule <span class="token operator">=</span> rule<span class="token punctuation">;</span>
+		跳转到相应的chain，执行循环<span class="token number">1</span>
+	<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>result <span class="token operator">==</span> RETURN<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">break</span>返回调用chain，执行其breakrule的下一条rule
+	<span class="token punctuation">&#125;</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>可以发现，包过滤的流程最终要落实到规则匹配，而过滤的动作最终落实到了该规则的 target，前面的所有的 match 匹配返回结果就是 0 或者非 0 表示是否匹配，只有所有的 match 均匹配，才会执行 target。这也就导致了如果你想实现多个 target，就不得不写多条规则。</p>
+<h4 id="nftables"><a href="#nftables" class="headerlink" title="nftables"></a>nftables</h4><p>nftables 的规则去掉了“匹配所有的 match 之后执行一个 target”这样的限制，使一条规则真的成了“为一个数据包做一些事情”这样灵活的命令。我们来看一下 nftables 框架的执行流程：</p>
+<pre class="language-c" data-language="c"><code class="language-c">循环<span class="token number">1</span><span class="token operator">:</span>
+	<span class="token keyword">static</span> breakrule <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	遍历一个chain的每一条rule <span class="token punctuation">&#123;</span>
+	nomatch <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	reg<span class="token punctuation">[</span>MAX<span class="token punctuation">]</span>
+	循环<span class="token number">2</span><span class="token operator">:</span>遍历一条rule的每一个expression <span class="token punctuation">&#123;</span>
+			<span class="token keyword">void</span> rule<span class="token operator">-></span>expression<span class="token punctuation">[</span>curr<span class="token punctuation">]</span><span class="token operator">-></span>operations<span class="token operator">-></span><span class="token function">expr</span><span class="token punctuation">(</span>skb<span class="token punctuation">,</span> info<span class="token punctuation">,</span> reg<span class="token punctuation">)</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>reg<span class="token punctuation">[</span>VERDICT<span class="token punctuation">]</span> <span class="token operator">!=</span> CONTINUE<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+				<span class="token keyword">break</span><span class="token punctuation">;</span>
+			<span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span>reg<span class="token punctuation">[</span>VERDICT<span class="token punctuation">]</span> <span class="token operator">==</span> CONTINUE<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">continue</span>该chain的下一条rule<span class="token punctuation">;</span>
+	<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>reg<span class="token punctuation">[</span>VERDICT<span class="token punctuation">]</span> <span class="token operator">==</span> DROP<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">break</span>丢弃数据包
+	<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>reg<span class="token punctuation">[</span>VERDICT<span class="token punctuation">]</span> <span class="token operator">==</span> ACCEPT<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">break</span>接受数据包
+	<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>reg<span class="token punctuation">[</span>VERDICT<span class="token punctuation">]</span> <span class="token operator">==</span> GOTO<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		breakrule <span class="token operator">=</span> rule<span class="token punctuation">;</span>
+		跳转到相应的chain，执行循环<span class="token number">1</span>
+	<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>reg<span class="token punctuation">[</span>VERDICT<span class="token punctuation">]</span> <span class="token operator">==</span> RETURN<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">break</span>调用chain，执行其breakrule的下一条rule
+	<span class="token punctuation">&#125;</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>可以看到，nftables 没有 match 和 target，而是将一条 rule 抽象成了若干条的表达式，即 expression，所谓的表达式就是一个主语加谓词的式子，它是“可执行”的，它可以“做任何事情”，而不仅仅是计算一个匹配结果。除此之外，nftables 内置了一组寄存器，其中之一是 verdict 寄存器，它指示了“下一步要怎么做”。每一条 expression 执行完了之后，会取出该寄存器，由该寄存器的值来采取下一步的行动。这个 verdict 寄存器替换了 iptables 中 target 返回值，这就可以在一条 rule 中采取多个动作，每条动作可以解析成一个 expression，只要每一个 expression 在执行后将 verdict 寄存器设置为 CONTINUE 即可。</p>
+<p>除了执行流程的显著区别之外，nftables 最大的意义在于它对 expression 进行了抽象，nftables 的内核框架可以注册很多种的 expression，其中 expr 回调函数执行具体的 expression 表达式。</p>
+<h3 id="表达式-expression"><a href="#表达式-expression" class="headerlink" title="表达式 expression"></a>表达式 expression</h3><p>规则由表达式组成，表达式有匹配表达式，和动作表达式两种，但官方文档不是这么划分的，而是分成表达式和语句，其实表达式就是匹配表达式，语句就是动作表达式，下文如果没有特别说明，采用的是官方的说法。</p>
+<p>例如规则：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ip</span> saddr <span class="token number">10.1</span>.1.1 tcp dport <span class="token function">ssh</span> accept</code></pre>
+
+<p>就是由<code>ip sadd</code>、<code>tcp dpor</code>两条表达式和<code>accept</code>一条语句组成</p>
+<p><strong>每个表达式都有一个数据类型</strong></p>
+<h4 id="describe"><a href="#describe" class="headerlink" title="describe"></a>describe</h4><p>describe 命令可以显示表达式 或 数据类型的信息</p>
+<p>语法：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 列出表达式的信息</span>
+describe <span class="token operator">&lt;</span>expression<span class="token operator">></span>
+<span class="token comment"># 列出数据类型的信息</span>
+describe <span class="token operator">&lt;</span>datatype<span class="token operator">></span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># describe &lt;expression></span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> describe ct state
+ct expression, datatype ct_state <span class="token punctuation">(</span>conntrack state<span class="token punctuation">)</span> <span class="token punctuation">(</span>basetype bitmask, integer<span class="token punctuation">)</span>, <span class="token number">32</span> bits
+
+pre-defined symbolic constants <span class="token punctuation">(</span>in hexadecimal<span class="token punctuation">)</span>:
+        invalid                         0x00000001
+        new                             0x00000008
+        established                     0x00000002
+        related                         0x00000004
+        untracked                       0x00000040
+<span class="token comment"># describe &lt;datatype></span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> describe ct_state
+datatype ct_state <span class="token punctuation">(</span>conntrack state<span class="token punctuation">)</span> <span class="token punctuation">(</span>basetype bitmask, integer<span class="token punctuation">)</span>, <span class="token number">32</span> bits
+
+pre-defined symbolic constants <span class="token punctuation">(</span>in hexadecimal<span class="token punctuation">)</span>:
+        invalid                         0x00000001
+        new                             0x00000008
+        established                     0x00000002
+        related                         0x00000004
+        untracked                       0x00000040
+<span class="token comment"># describe &lt;expression></span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> describe tcp dport
+payload expression, datatype inet_service <span class="token punctuation">(</span>internet network <span class="token function">service</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>basetype integer<span class="token punctuation">)</span>, <span class="token number">16</span> bits
+<span class="token comment"># describe &lt;datatype></span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> describe inet_service
+datatype inet_service <span class="token punctuation">(</span>internet network <span class="token function">service</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>basetype integer<span class="token punctuation">)</span>, <span class="token number">16</span> bits</code></pre>
+
+<h4 id="datatype"><a href="#datatype" class="headerlink" title="datatype"></a><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#DATA_TYPES">datatype</a></h4><p>数据类型分级别，全局数据类型是最低阶的，有 integer、string 两种，高阶的数据类型从低阶的派生而来，例如：bitmask 从 integer 派生而来，ct_state 从 bitmask 派生而来。</p>
+<p>大部分数据类型固定长度，少部分不固定。</p>
+<p>一些高阶的数据类型具有预定义的符号常量，例如：boolean 类型，固定 size 1bit，取值 0 或 1，预定义了 exists 和 missing 两个字符常量，会被自动替换为 1 和 0；</p>
+<ul>
+<li>integer：用于数值，可以指定为十进制、十六进制或八进制，没有固定大小</li>
+<li>string：用于字符串，以字母开头，此外，双引号内的任何内容都被认为是字符串</li>
+<li>bitmask：用于位掩码，基于 integer，至于什么是位掩码，自行百度或参考文章：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/148827170">什么是掩码 BitMask</a></li>
+<li>boolean：用于布尔值，固定 size 1bit</li>
+<li>inet_service：用于服务端口，固定 size 16bit</li>
+<li>ipv4_addr：用于 IPv4 地址，固定 size 32bit，预定义字符常量 localhost</li>
+<li>icmp_type：用于 ICMP 类型，固定 size 8bit，取值 0-18，预定义了 echo-reply、echo-request 等 19 个字符常量，会被自动替换为 0-18</li>
+<li>链接跟踪<ul>
+<li>ct_state</li>
+<li>ct_status</li>
+<li>…</li>
+</ul>
+</li>
+<li>…</li>
+</ul>
+<h4 id="expression"><a href="#expression" class="headerlink" title="expression"></a>expression</h4><p>分为主表达式和有效负载表达式，不知道有什么区别，看起来好像在一条规则中，主表达式的位置在有效负载表达式的前面。</p>
+<p>以下是对所有表达式做一个全面但简略的记录，详细信息参考：<a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8">https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8</a></p>
+<h5 id="PRIMARY-EXPRESSIONS"><a href="#PRIMARY-EXPRESSIONS" class="headerlink" title="PRIMARY EXPRESSIONS"></a><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#PRIMARY_EXPRESSIONS">PRIMARY EXPRESSIONS</a></h5><ul>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#META_EXPRESSIONS">meta 表达式</a></p>
+<p>meta 就是数据包的元数据，元表达式有限定和非限定两种，限定不能省略 meta 关键字，非限定则可以省略</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># mete 关键字不可省略</span>
+meta <span class="token punctuation">&#123;</span>length <span class="token operator">|</span> nfproto <span class="token operator">|</span> l4proto <span class="token operator">|</span> protocol <span class="token operator">|</span> priority<span class="token punctuation">&#125;</span>
+<span class="token comment"># meta 关键字可以省略</span>
+<span class="token punctuation">[</span>meta<span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>mark <span class="token operator">|</span> iif <span class="token operator">|</span> iifname <span class="token operator">|</span> iiftype <span class="token operator">|</span> oif <span class="token operator">|</span> oifname <span class="token operator">|</span> oiftype <span class="token operator">|</span> skuid <span class="token operator">|</span> skgid <span class="token operator">|</span> nftrace <span class="token operator">|</span> rtclassid <span class="token operator">|</span> ibrname <span class="token operator">|</span> obrname <span class="token operator">|</span> pkttype <span class="token operator">|</span> cpu <span class="token operator">|</span> iifgroup <span class="token operator">|</span> oifgroup <span class="token operator">|</span> cgroup <span class="token operator">|</span> random <span class="token operator">|</span> ipsec <span class="token operator">|</span> iifkind <span class="token operator">|</span> oifkind <span class="token operator">|</span> <span class="token function">time</span> <span class="token operator">|</span> hour <span class="token operator">|</span> day <span class="token punctuation">&#125;</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> describe meta iif
+meta expression, datatype iface_index <span class="token punctuation">(</span>network interface index<span class="token punctuation">)</span> <span class="token punctuation">(</span>basetype integer<span class="token punctuation">)</span>, <span class="token number">32</span> bits
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> describe meta oif
+meta expression, datatype iface_index <span class="token punctuation">(</span>network interface index<span class="token punctuation">)</span> <span class="token punctuation">(</span>basetype integer<span class="token punctuation">)</span>, <span class="token number">32</span> bits
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> describe meta iifname
+meta expression, datatype ifname <span class="token punctuation">(</span>network interface name<span class="token punctuation">)</span> <span class="token punctuation">(</span>basetype string<span class="token punctuation">)</span>, <span class="token number">16</span> characters</code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#SOCKET_EXPRESSION">socket 表达式</a></p>
+<p>套接字表达式用于搜索已打开的 TCP&#x2F;UDP 套接字，及其与数据包关联的属性</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">socket <span class="token punctuation">&#123;</span>transparent <span class="token operator">|</span> mark<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#OSF_EXPRESSION">osf 表达式</a></p>
+<p>被动操作系统指纹识别。此表达式将数据包中的某些数据（窗口大小、MSS、选项及其顺序、DF 等）与 SYN 位集进行比较</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">osf <span class="token punctuation">[</span>ttl <span class="token punctuation">&#123;</span>loose <span class="token operator">|</span> skip<span class="token punctuation">&#125;</span><span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>name <span class="token operator">|</span> version<span class="token punctuation">&#125;</span></code></pre>
+
+<ul>
+<li>ttl：对包进行 TTL 检查以确定操作系统</li>
+<li>version：对包进行 OS 版本检查</li>
+<li>name：要匹配的操作系统签名的名称。所有的签名都可以在 pf.os 文件中找到。对表达式无法检测到的操作系统签名使用“unknown”</li>
+</ul>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#FIB_EXPRESSIONS">fib 表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">fib <span class="token punctuation">&#123;</span>saddr <span class="token operator">|</span> daddr <span class="token operator">|</span> mark <span class="token operator">|</span> iif <span class="token operator">|</span> oif<span class="token punctuation">&#125;</span> <span class="token punctuation">[</span>. <span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>oif <span class="token operator">|</span> oifname <span class="token operator">|</span> type<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#ROUTING_EXPRESSIONS">routing 表达式</a></p>
+<p>路由表达式指的是与数据包关联的路由数据</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">rt <span class="token punctuation">[</span>ip <span class="token operator">|</span> ip6<span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>classid <span class="token operator">|</span> nexthop <span class="token operator">|</span> mtu <span class="token operator">|</span> ipsec<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#IPSEC_EXPRESSIONS">ipsec 表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ipsec <span class="token punctuation">&#123;</span>in <span class="token operator">|</span> out<span class="token punctuation">&#125;</span> <span class="token punctuation">[</span> spnum NUM <span class="token punctuation">]</span>  <span class="token punctuation">&#123;</span>reqid <span class="token operator">|</span> spi<span class="token punctuation">&#125;</span>
+ipsec <span class="token punctuation">&#123;</span>in <span class="token operator">|</span> out<span class="token punctuation">&#125;</span> <span class="token punctuation">[</span> spnum NUM <span class="token punctuation">]</span>  <span class="token punctuation">&#123;</span>ip <span class="token operator">|</span> ip6<span class="token punctuation">&#125;</span> <span class="token punctuation">&#123;</span>saddr <span class="token operator">|</span> daddr<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#NUMGEN_EXPRESSION">numgen 表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">numgen <span class="token punctuation">&#123;</span>inc <span class="token operator">|</span> random<span class="token punctuation">&#125;</span> mod NUM <span class="token punctuation">[</span> offset NUM <span class="token punctuation">]</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#HASH_EXPRESSIONS">hash 表达式</a></p>
+<p>使用一个哈希函数来生成一个数字。可用的函数是 jhash（Jenkins 散列）和 symhash（对称散列）。<br>jhash 和 symhash 的典型用例是负载均衡</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">jhash <span class="token punctuation">&#123;</span>ip saddr <span class="token operator">|</span> ip6 daddr <span class="token operator">|</span> tcp dport <span class="token operator">|</span> udp sport <span class="token operator">|</span> ether saddr<span class="token punctuation">&#125;</span> <span class="token punctuation">[</span>. <span class="token punctuation">..</span>.<span class="token punctuation">]</span> mod NUM <span class="token punctuation">[</span> seed NUM <span class="token punctuation">]</span> <span class="token punctuation">[</span> offset NUM <span class="token punctuation">]</span>
+
+symhash mod NUM <span class="token punctuation">[</span> offset NUM <span class="token punctuation">]</span></code></pre></li>
+</ul>
+<h5 id="PRIMARY-EXPRESSIONS-1"><a href="#PRIMARY-EXPRESSIONS-1" class="headerlink" title="PRIMARY EXPRESSIONS"></a><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#PAYLOAD_EXPRESSIONS">PRIMARY EXPRESSIONS</a></h5><ul>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#ETHERNET_HEADER_EXPRESSION">以太网报头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ether <span class="token punctuation">&#123;</span>daddr <span class="token operator">|</span> saddr <span class="token operator">|</span> type<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#VLAN_HEADER_EXPRESSION">VLAN 头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">vlan <span class="token punctuation">&#123;</span>id <span class="token operator">|</span> cfi <span class="token operator">|</span> pcp <span class="token operator">|</span> type<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#ARP_HEADER_EXPRESSION">ARP 头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">arp <span class="token punctuation">&#123;</span>htype <span class="token operator">|</span> ptype <span class="token operator">|</span> hlen <span class="token operator">|</span> plen <span class="token operator">|</span> operation <span class="token operator">|</span> saddr <span class="token punctuation">&#123;</span> <span class="token function">ip</span> <span class="token operator">|</span> ether <span class="token punctuation">&#125;</span> <span class="token operator">|</span> daddr <span class="token punctuation">&#123;</span> <span class="token function">ip</span> <span class="token operator">|</span> ether <span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#IPV4_HEADER_EXPRESSION">IPV4 头表达</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ip</span> <span class="token punctuation">&#123;</span>version <span class="token operator">|</span> hdrlength <span class="token operator">|</span> dscp <span class="token operator">|</span> ecn <span class="token operator">|</span> length <span class="token operator">|</span> <span class="token function">id</span> <span class="token operator">|</span> frag-off <span class="token operator">|</span> ttl <span class="token operator">|</span> protocol <span class="token operator">|</span> checksum <span class="token operator">|</span> saddr <span class="token operator">|</span> daddr <span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#ICMP_HEADER_EXPRESSION">ICMP 头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">icmp <span class="token punctuation">&#123;</span>type <span class="token operator">|</span> code <span class="token operator">|</span> checksum <span class="token operator">|</span> <span class="token function">id</span> <span class="token operator">|</span> sequence <span class="token operator">|</span> gateway <span class="token operator">|</span> mtu<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#IGMP_HEADER_EXPRESSION">IGMP 头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">igmp <span class="token punctuation">&#123;</span>type <span class="token operator">|</span> mrt <span class="token operator">|</span> checksum <span class="token operator">|</span> group<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#IPV6_HEADER_EXPRESSION">IPV6 报头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ip6 <span class="token punctuation">&#123;</span>version <span class="token operator">|</span> dscp <span class="token operator">|</span> ecn <span class="token operator">|</span> flowlabel <span class="token operator">|</span> length <span class="token operator">|</span> nexthdr <span class="token operator">|</span> hoplimit <span class="token operator">|</span> saddr <span class="token operator">|</span> daddr<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#ICMPV6_HEADER_EXPRESSION">ICMPV6 头表达</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">icmpv6 <span class="token punctuation">&#123;</span>type <span class="token operator">|</span> code <span class="token operator">|</span> checksum <span class="token operator">|</span> parameter-problem <span class="token operator">|</span> packet-too-big <span class="token operator">|</span> <span class="token function">id</span> <span class="token operator">|</span> sequence <span class="token operator">|</span> max-delay<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#TCP_HEADER_EXPRESSION">TCP 报头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">tcp <span class="token punctuation">&#123;</span>sport <span class="token operator">|</span> dport <span class="token operator">|</span> sequence <span class="token operator">|</span> ackseq <span class="token operator">|</span> doff <span class="token operator">|</span> reserved <span class="token operator">|</span> flags <span class="token operator">|</span> window <span class="token operator">|</span> checksum <span class="token operator">|</span> urgptr<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#UDP_HEADER_EXPRESSION">UDP 报头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">udp <span class="token punctuation">&#123;</span>sport <span class="token operator">|</span> dport <span class="token operator">|</span> length <span class="token operator">|</span> checksum<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#UDP_-LITE_HEADER_EXPRESSION">UDP-LITE 头表达</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">udplite <span class="token punctuation">&#123;</span>sport <span class="token operator">|</span> dport <span class="token operator">|</span> checksum<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#SCTP_HEADER_EXPRESSION">SCTP 头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">sctp <span class="token punctuation">&#123;</span>sport <span class="token operator">|</span> dport <span class="token operator">|</span> vtag <span class="token operator">|</span> checksum<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#DCCP_HEADER_EXPRESSION">DCCP 头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">dccp <span class="token punctuation">&#123;</span>sport <span class="token operator">|</span> dport<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#AUTHENTICATION_HEADER_EXPRESSION">验证标题表达</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ah <span class="token punctuation">&#123;</span>nexthdr <span class="token operator">|</span> hdrlength <span class="token operator">|</span> reserved <span class="token operator">|</span> spi <span class="token operator">|</span> sequence<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#ENCRYPTED_SECURITY_PAYLOAD_HEADER_EXPRESSION">加密的安全有效负载头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">esp <span class="token punctuation">&#123;</span>spi <span class="token operator">|</span> sequence<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#IPCOMP_HEADER_EXPRESSION">IPCOMP 头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">comp <span class="token punctuation">&#123;</span>nexthdr <span class="token operator">|</span> flags <span class="token operator">|</span> cpi<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#RAW_PAYLOAD_EXPRESSION">原始载荷表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#EXTENSION_HEADER_EXPRESSIONS">扩展头表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">hbh <span class="token punctuation">&#123;</span>nexthdr <span class="token operator">|</span> hdrlength<span class="token punctuation">&#125;</span>
+frag <span class="token punctuation">&#123;</span>nexthdr <span class="token operator">|</span> frag-off <span class="token operator">|</span> more-fragments <span class="token operator">|</span> id<span class="token punctuation">&#125;</span>
+rt <span class="token punctuation">&#123;</span>nexthdr <span class="token operator">|</span> hdrlength <span class="token operator">|</span> <span class="token builtin class-name">type</span> <span class="token operator">|</span> seg-left<span class="token punctuation">&#125;</span>
+dst <span class="token punctuation">&#123;</span>nexthdr <span class="token operator">|</span> hdrlength<span class="token punctuation">&#125;</span>
+mh <span class="token punctuation">&#123;</span>nexthdr <span class="token operator">|</span> hdrlength <span class="token operator">|</span> checksum <span class="token operator">|</span> type<span class="token punctuation">&#125;</span>
+srh <span class="token punctuation">&#123;</span>flags <span class="token operator">|</span> tag <span class="token operator">|</span> sid <span class="token operator">|</span> seg-left<span class="token punctuation">&#125;</span>
+tcp option <span class="token punctuation">&#123;</span>eol <span class="token operator">|</span> noop <span class="token operator">|</span> maxseg <span class="token operator">|</span> window <span class="token operator">|</span> sack-permitted <span class="token operator">|</span> sack <span class="token operator">|</span> sack0 <span class="token operator">|</span> sack1 <span class="token operator">|</span> sack2 <span class="token operator">|</span> sack3 <span class="token operator">|</span> timestamp<span class="token punctuation">&#125;</span> tcp_option_field
+<span class="token function">ip</span> option <span class="token punctuation">&#123;</span> lsrr <span class="token operator">|</span> ra <span class="token operator">|</span> rr <span class="token operator">|</span> ssrr <span class="token punctuation">&#125;</span> ip_option_field
+<span class="token comment">#</span>
+exthdr <span class="token punctuation">&#123;</span>hbh <span class="token operator">|</span> frag <span class="token operator">|</span> rt <span class="token operator">|</span> dst <span class="token operator">|</span> mh<span class="token punctuation">&#125;</span>
+tcp option <span class="token punctuation">&#123;</span>eol <span class="token operator">|</span> noop <span class="token operator">|</span> maxseg <span class="token operator">|</span> window <span class="token operator">|</span> sack-permitted <span class="token operator">|</span> sack <span class="token operator">|</span> sack0 <span class="token operator">|</span> sack1 <span class="token operator">|</span> sack2 <span class="token operator">|</span> sack3 <span class="token operator">|</span> timestamp<span class="token punctuation">&#125;</span>
+<span class="token function">ip</span> option <span class="token punctuation">&#123;</span> lsrr <span class="token operator">|</span> ra <span class="token operator">|</span> rr <span class="token operator">|</span> ssrr <span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jlk.fjfi.cvut.cz/arch/manpages/man/nft.8#CONNTRACK_EXPRESSIONS">CONNTRACK 表达式</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct <span class="token punctuation">&#123;</span>state <span class="token operator">|</span> direction <span class="token operator">|</span> status <span class="token operator">|</span> mark <span class="token operator">|</span> expiration <span class="token operator">|</span> helper <span class="token operator">|</span> label<span class="token punctuation">&#125;</span>
+ct <span class="token punctuation">[</span>original <span class="token operator">|</span> reply<span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>l3proto <span class="token operator">|</span> protocol <span class="token operator">|</span> bytes <span class="token operator">|</span> packets <span class="token operator">|</span> avgpkt <span class="token operator">|</span> zone <span class="token operator">|</span> id<span class="token punctuation">&#125;</span>
+ct <span class="token punctuation">&#123;</span>original <span class="token operator">|</span> reply<span class="token punctuation">&#125;</span> <span class="token punctuation">&#123;</span>proto-src <span class="token operator">|</span> proto-dst<span class="token punctuation">&#125;</span>
+ct <span class="token punctuation">&#123;</span>original <span class="token operator">|</span> reply<span class="token punctuation">&#125;</span> <span class="token punctuation">&#123;</span>ip <span class="token operator">|</span> ip6<span class="token punctuation">&#125;</span> <span class="token punctuation">&#123;</span>saddr <span class="token operator">|</span> daddr<span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h3 id="添加规则"><a href="#添加规则" class="headerlink" title="添加规则"></a>添加规则</h3><p>语法：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft <span class="token punctuation">&#123;</span>add<span class="token operator">|</span>insert<span class="token punctuation">&#125;</span> rule <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span> <span class="token punctuation">[</span>handle <span class="token operator">&lt;</span>handle<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>expressions<span class="token operator">></span> <span class="token operator">&lt;</span>statements<span class="token operator">></span> <span class="token punctuation">[</span>comment <span class="token operator">&lt;</span>comment<span class="token operator">></span><span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li>handle：规则句柄，句柄是不变的，除非规则被删除，这就为规则提供了稳定的索引。add 添加规则到句柄规则后面，insert 添加规则到句柄规则的前面。如果省略，add 默认添加规则到链末尾，insert 默认添加规则到链的开头</li>
+<li>expression：负责匹配数据包</li>
+<li>statement：负责对匹配的数据包做后续处理</li>
+<li>comment：备注</li>
+</ul>
+<h4 id="expressions"><a href="#expressions" class="headerlink" title="expressions"></a>expressions</h4><p>expr 回调函数每处理完一条表达式，就修改 verdict 寄存器的值为 CONTINUE，继续处理下一条。</p>
+<p>上文 expression 章节中的表达式总结的很全面，下面对常用的表达式做详细的说明：</p>
+<h5 id="IP"><a href="#IP" class="headerlink" title="IP"></a>IP</h5><img data-src="//img.to2b.cn/blog/ljk/1600933365734.png" style="zoom:50%;" />
+
+<p>上图是 IPv4 报头图，除了最后的可选字段，其他每个字段 matches 都可以匹配，下面挑常用的介绍，后面的 ip6、tcp、udp 等等，也都是只介绍常用的，这点就不再赘述：</p>
+<ul>
+<li><p>protocol <protocol>：上层协议</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ip</span> protocol tcp
+<span class="token function">ip</span> protocol <span class="token number">6</span>
+<span class="token function">ip</span> protocol <span class="token operator">!=</span> tcp
+<span class="token function">ip</span> protocol <span class="token punctuation">&#123;</span> icmp, esp, ah, comp, udp, udplite, tcp, dccp, sctp <span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>saddr <ip source address>：Source IP Address</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ip</span> saddr <span class="token number">192.168</span>.2.0/24
+<span class="token function">ip</span> saddr <span class="token operator">!=</span> <span class="token number">192.168</span>.2.0/24
+<span class="token function">ip</span> saddr <span class="token number">192.168</span>.3.1 <span class="token function">ip</span> daddr <span class="token number">192.168</span>.3.100
+<span class="token function">ip</span> saddr <span class="token operator">!=</span> <span class="token number">1.1</span>.1.1
+<span class="token function">ip</span> saddr <span class="token number">1.1</span>.1.1
+<span class="token function">ip</span> saddr <span class="token operator">&amp;</span> 0xff <span class="token operator">==</span> <span class="token number">1</span>
+<span class="token function">ip</span> saddr <span class="token operator">&amp;</span> <span class="token number">0.0</span>.0.255 <span class="token operator">&lt;</span> <span class="token number">0.0</span>.0.127</code></pre>
+</li>
+<li><p>daddr <ip destination address>：Destination IP Address</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">
+<span class="token function">ip</span> daddr <span class="token number">192.168</span>.0.1
+<span class="token function">ip</span> daddr <span class="token operator">!=</span> <span class="token number">192.168</span>.0.1
+<span class="token function">ip</span> daddr <span class="token number">192.168</span>.0.1-192.168.0.250
+<span class="token function">ip</span> daddr <span class="token number">10.0</span>.0.0-10.255.255.255
+<span class="token function">ip</span> daddr <span class="token number">172.16</span>.0.0-172.31.255.255
+<span class="token function">ip</span> daddr <span class="token number">192.168</span>.3.1-192.168.4.250
+<span class="token function">ip</span> daddr <span class="token operator">!=</span> <span class="token number">192.168</span>.0.1-192.168.0.250
+<span class="token function">ip</span> daddr <span class="token punctuation">&#123;</span> <span class="token number">192.168</span>.0.1-192.168.0.250 <span class="token punctuation">&#125;</span>
+<span class="token function">ip</span> daddr <span class="token punctuation">&#123;</span> <span class="token number">192.168</span>.5.1, <span class="token number">192.168</span>.5.2, <span class="token number">192.168</span>.5.3 <span class="token punctuation">&#125;</span></code></pre></li>
+</ul>
+<h5 id="Ip6"><a href="#Ip6" class="headerlink" title="Ip6"></a>Ip6</h5><p><img data-src="//img.to2b.cn/blog/ljk/1600934961736.png"></p>
+<ul>
+<li><p>flowlabel <label>：Flow Label，占 20 位，用来标记报文的数据流类型，以便在网络层区分不同的报文。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ip6 flowlabel <span class="token number">22</span>
+ip6 flowlabel <span class="token operator">!=</span> <span class="token number">233</span>
+ip6 flowlabel <span class="token punctuation">&#123;</span> <span class="token number">33</span>, <span class="token number">55</span>, <span class="token number">67</span>, <span class="token number">88</span> <span class="token punctuation">&#125;</span>
+ip6 flowlabel <span class="token punctuation">&#123;</span> <span class="token number">33</span>-55 <span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>saddr <ip source address>：Source Address</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ip6 saddr <span class="token number">1234</span>:1234:1234:1234:1234:1234:1234:1234
+ip6 saddr ::1234:1234:1234:1234:1234:1234:1234
+ip6 saddr ::/64
+ip6 saddr ::1 ip6 daddr ::2</code></pre>
+</li>
+<li><p>daddr <ip destination address>：Destination Address</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ip6 daddr <span class="token number">1234</span>:1234:1234:1234:1234:1234:1234:1234
+ip6 daddr <span class="token operator">!=</span> ::1234:1234:1234:1234:1234:1234:1234-1234:1234::1234:1234:1234:1234:1234</code></pre></li>
+</ul>
+<h5 id="Tcp"><a href="#Tcp" class="headerlink" title="Tcp"></a>Tcp</h5><p><img data-src="//img.to2b.cn/blog/ljk/1600937199061.png"></p>
+<ul>
+<li><p>sport <source port>：Source port</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">tcp sport <span class="token number">22</span>
+tcp sport <span class="token operator">!=</span> <span class="token number">33</span>-45
+tcp sport <span class="token punctuation">&#123;</span> <span class="token number">33</span>, <span class="token number">55</span>, <span class="token number">67</span>, <span class="token number">88</span><span class="token punctuation">&#125;</span>
+tcp sport <span class="token punctuation">&#123;</span> <span class="token number">33</span>-55<span class="token punctuation">&#125;</span>
+tcp sport vmap <span class="token punctuation">&#123;</span> <span class="token number">25</span>:accept, <span class="token number">28</span>:drop <span class="token punctuation">&#125;</span>
+tcp sport <span class="token number">1024</span> tcp dport <span class="token number">22</span></code></pre>
+</li>
+<li><p>dport <destination port>：Destination port</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">tcp dport <span class="token number">22</span>
+tcp dport <span class="token operator">!=</span> <span class="token number">33</span>-45
+tcp dport <span class="token punctuation">&#123;</span> <span class="token number">33</span>-55 <span class="token punctuation">&#125;</span>
+tcp dport <span class="token punctuation">&#123;</span>telnet, ssh, http, https <span class="token punctuation">&#125;</span>
+tcp dport vmap <span class="token punctuation">&#123;</span> <span class="token number">22</span> <span class="token builtin class-name">:</span> accept, <span class="token number">23</span> <span class="token builtin class-name">:</span> drop <span class="token punctuation">&#125;</span>
+tcp dport vmap <span class="token punctuation">&#123;</span> <span class="token number">25</span>:accept, <span class="token number">28</span>:drop <span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>flags <flags>：TCP flags</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">tcp flags <span class="token punctuation">&#123;</span> fin, syn, rst, psh, ack, urg, ecn, cwr<span class="token punctuation">&#125;</span>
+tcp flags cwr
+tcp flags <span class="token operator">!=</span> cwr</code></pre></li>
+</ul>
+<h5 id="Udp"><a href="#Udp" class="headerlink" title="Udp"></a>Udp</h5><p><img data-src="//img.to2b.cn/blog/ljk/1600937935815.png"></p>
+<ul>
+<li>sport <source port>：Source port</li>
+<li>dport <destination port>：Destination port</li>
+</ul>
+<h5 id="Udplite"><a href="#Udplite" class="headerlink" title="Udplite"></a>Udplite</h5><h5 id="Sctp"><a href="#Sctp" class="headerlink" title="Sctp"></a>Sctp</h5><h5 id="Dccp"><a href="#Dccp" class="headerlink" title="Dccp"></a>Dccp</h5><h5 id="Ah"><a href="#Ah" class="headerlink" title="Ah"></a>Ah</h5><h5 id="Esp"><a href="#Esp" class="headerlink" title="Esp"></a>Esp</h5><h5 id="Comp"><a href="#Comp" class="headerlink" title="Comp"></a>Comp</h5><h5 id="Icmp"><a href="#Icmp" class="headerlink" title="Icmp"></a>Icmp</h5><p><img data-src="//img.to2b.cn/blog/ljk/1600938679478.png"><br><img data-src="//img.to2b.cn/blog/ljk/1600938925363.png"></p>
+<ul>
+<li><p>type &lt;type&gt;：ICMP packet type，也可以写数值，例如<code>icmp type echo-reply</code>等价于<code>icmp type 0</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">icmp <span class="token builtin class-name">type</span> <span class="token punctuation">&#123;</span>echo-reply, destination-unreachable, source-quench, redirect, echo-request, time-exceeded, parameter-problem, timestamp-request, timestamp-reply, info-request, info-reply, address-mask-request, address-mask-reply, router-advertisement, router-solicitation<span class="token punctuation">&#125;</span>
+icmp <span class="token builtin class-name">type</span> <span class="token number">8</span> reject <span class="token comment"># 禁止别人ping我</span></code></pre></li>
+<li><p>code &lt;code&gt;：ICMP packet code</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">icmp code <span class="token number">111</span>
+icmp code <span class="token operator">!=</span> <span class="token number">33</span>-55
+icmp code <span class="token punctuation">&#123;</span> <span class="token number">2</span>, <span class="token number">4</span>, <span class="token number">54</span>, <span class="token number">33</span>, <span class="token number">56</span><span class="token punctuation">&#125;</span></code></pre></li>
+<li><p>mtu <value>：ICMP packet mtu，最大传输单元</p>
+</li>
+<li><p>gateway <value>：ICMP packet gateway</p>
+</li>
+</ul>
+<h5 id="Icmpv6"><a href="#Icmpv6" class="headerlink" title="Icmpv6"></a>Icmpv6</h5><h5 id="Ether"><a href="#Ether" class="headerlink" title="Ether"></a>Ether</h5><h5 id="Dst"><a href="#Dst" class="headerlink" title="Dst"></a>Dst</h5><h5 id="Frag"><a href="#Frag" class="headerlink" title="Frag"></a>Frag</h5><h5 id="Hbh"><a href="#Hbh" class="headerlink" title="Hbh"></a>Hbh</h5><h5 id="Mh"><a href="#Mh" class="headerlink" title="Mh"></a>Mh</h5><h5 id="Rt"><a href="#Rt" class="headerlink" title="Rt"></a>Rt</h5><h5 id="Vlan"><a href="#Vlan" class="headerlink" title="Vlan"></a>Vlan</h5><h5 id="Arp"><a href="#Arp" class="headerlink" title="Arp"></a>Arp</h5><h5 id="Ct"><a href="#Ct" class="headerlink" title="Ct"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Matching_connection_tracking_stateful_metainformation">Ct</a></h5><p>Ct 是 Conntrack 的缩写，链接跟踪</p>
+<ul>
+<li><p>state <state>： State of the connection，这个匹配条件的作用和 iptables 的 state 模块一样</p>
+<pre class="language-none"><code class="language-none">ct state &#123; new, established, related, invalid，untracked &#125;
+ct state !&#x3D; related
+ct state established
+ct state 8</code></pre>
+</li>
+<li><p>direction <value>： Direction of the packet relative to the connection，数据包相对于链接的方向</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct direction original
+ct direction <span class="token operator">!=</span> original
+ct direction <span class="token punctuation">&#123;</span>reply, original<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>status <status>：Status of the connection</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct status expected
+ct status <span class="token operator">!=</span> expected
+ct status <span class="token punctuation">&#123;</span> expected,seen-reply,assured,confirmed,snat,dnat,dying <span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>mark [set]：Mark of the connection</p>
+</li>
+<li><p>expiration： Connection expiration time，连接过期时间</p>
+</li>
+<li><p>helper “<helper>“：Helper associated with the connection</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct helper <span class="token string">"ftp"</span></code></pre>
+</li>
+<li><p>[original|reply] bytes <value></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct original bytes <span class="token operator">></span> <span class="token number">100000</span>
+ct bytes <span class="token operator">></span> <span class="token number">100000</span></code></pre>
+</li>
+<li><p>[original|reply] packets <value>：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct reply packets <span class="token operator">&lt;</span> <span class="token number">100</span></code></pre>
+</li>
+<li><p>[original | reply] saddr <ip source address></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct original saddr <span class="token number">192.168</span>.0.1
+ct reply saddr <span class="token number">192.168</span>.0.1
+ct original saddr <span class="token number">192.168</span>.1.0/24
+ct reply saddr <span class="token number">192.168</span>.1.0/24</code></pre>
+</li>
+<li><p>[original | reply] daddr <ip destination address></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct original daddr <span class="token number">192.168</span>.0.1
+ct reply daddr <span class="token number">192.168</span>.0.1
+ct original daddr <span class="token number">192.168</span>.1.0/24
+ct reply daddr <span class="token number">192.168</span>.1.0/24</code></pre>
+</li>
+<li><p>[original | reply] l3proto <protocol></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct original l3proto ipv4</code></pre>
+</li>
+<li><p>[original | reply] protocol <protocol></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct original protocol <span class="token number">6</span></code></pre>
+</li>
+<li><p>[original | reply] proto-dst <port></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct original proto-dst <span class="token number">22</span></code></pre>
+</li>
+<li><p>[original | reply] proto-src <port></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ct reply proto-src <span class="token number">53</span></code></pre></li>
+</ul>
+<h5 id="Meta"><a href="#Meta" class="headerlink" title="Meta"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Matching_packet_metainformation">Meta</a></h5><p>匹配（某些情况下可以 设置）数据包的元信息，虽然我现在也不知道元信息是什么？</p>
+<ul>
+<li><p>不能省略 meta 关键字</p>
+<ul>
+<li>length – packet lenght</li>
+<li>protocol – packet protocol (as in skb-&gt;protocol)</li>
+<li>nfproto – netfilter packet protocol family (like ipv4, ipv6, etc..).</li>
+<li>l4proto – layer 4 protocol (tcp, udp, etc..)</li>
+<li>priority – packet priority, tc handle. <a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Setting_packet_metainformation">Can be set.</a></li>
+<li>random – match against a single&#x2F;simple random number</li>
+<li>secmark – packet secmark. <a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Setting_packet_metainformation">Can be set.</a></li>
+<li>ibrvproto – match the bridge protocol</li>
+<li>ibrpvid – match the bridge pvid</li>
+</ul>
+</li>
+<li><p>可以省略 meta 关键字</p>
+<ul>
+<li>mark – packet mark. <a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Setting_packet_metainformation">Can be set.</a></li>
+<li>iif – input interface index</li>
+<li>iifname – input interface name</li>
+<li>iiftype – input interface type</li>
+<li>oif – output interface index</li>
+<li>oifname – output interface name</li>
+<li>oiftype – output interface type</li>
+<li>skuid – socket uid</li>
+<li>skgid – socket gid</li>
+<li>nftrace – nftrace debugging bit. <a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Setting_packet_metainformation">Can be set.</a></li>
+<li>rtclassid – realm</li>
+<li>ibriport – input bridge port</li>
+<li>obriport – output bridge port</li>
+<li>ibridgename – input bridge name</li>
+<li>obridgename – output bridge name</li>
+<li>pkttype – packet type. <a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Setting_packet_metainformation">Can be set.</a></li>
+<li>cpu – cpu number</li>
+<li>iifgroup – input interface group</li>
+<li>oifgroup – output interface group</li>
+<li>cgroup – cgroup number</li>
+<li>ipsec – ipsec (secpath) packet or not</li>
+<li>time – packet timestamp</li>
+<li>day – packet timestamp</li>
+<li>hour – packet timestamp</li>
+</ul>
+</li>
+</ul>
+<p><strong>Matching packets by interface name 通过接口名称匹配数据包</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft <span class="token function">add</span> rule filter input meta oifname lo accept</code></pre>
+
+<p><strong>Matching packets by packet mark 通过数据标记匹配数据包</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft <span class="token function">add</span> rule filter output meta mark <span class="token number">123</span> counter</code></pre>
+
+<p><strong>Matching packets the socket UID 匹配套接字 UID 的数据包</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft <span class="token function">add</span> rule filter output meta skuid pablo counter
+nft <span class="token function">add</span> rule filter output meta skuid <span class="token number">1000</span> counter</code></pre>
+
+<p><strong>Matching packet priority 匹配数据包的优先级</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft <span class="token function">add</span> rule filter forward meta priority abcd:1234
+nft <span class="token function">add</span> rule filter forward meta priority none</code></pre>
+
+<h4 id="statements"><a href="#statements" class="headerlink" title="statements"></a>statements</h4><p>语句，分为两种，终结和非终结，终结语句不会再继续处理后面的表达式和规则，防火墙完成本次任务，而非终结语句会继续处理后面的表达式或者规则。</p>
+<ul>
+<li>Verdict：重定向</li>
+<li>Log：记录日志并继续处理请求</li>
+<li>Reject：停止处理并拒绝请求</li>
+<li>Counter：计数</li>
+<li>Limit：如果达到了接收数据包的匹配限制，则根据规则处理数据包</li>
+<li>Nat：NAT，分为 snat 和 dnat</li>
+<li>Queuea：停止处理并发送数据包到用户空间程序</li>
+</ul>
+<h5 id="verdict"><a href="#verdict" class="headerlink" title="verdict"></a>verdict</h5><p>每条 verdict 语句都与 verdict 寄存器的预设值一一对应，只负责控制已匹配数据包的重定向，如果在决定数据包的去向之前有任何操作，交给其他类型的语句负责</p>
+<p>expr 处理完 verdict 语句，会跳出当前表达式的循环（即上文 nftables 框架的执行流程中的循环 2）这样不管最终重定向到哪里，都会就此结束当前规则，所以 verdict 语句，要写在规则的最后。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Accepting_and_dropping_packets">accept</a>：终结语句，接受数据包</li>
+<li><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Accepting_and_dropping_packets">drop</a>：终结语句，接受数据包</li>
+<li>queue：将数据包排队到用户空间，queue 本身不是终结语句，但是需要搭配 accept 或者 drop 使用</li>
+<li>continue：跳过本条规则后面的表达式和语句，处理下一条规则</li>
+<li>return：<ul>
+<li>从一个 CHAIN 里可以 jump 到另一个 CHAIN, jump 到的那个 CHAIN 是子 CHAIN</li>
+<li>从子 CHAIN return 后，回到触发 jump 的那条规则，从那条规则的下一条继续匹配</li>
+<li>如果不是在子 CHAIN 里 return，而是在 main CHAIN，那么就以默认规则进行</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Jumping_to_chain">jump <chain></a>：跳转到指定的规则链，当执行完成或者返回时，返回到调用的规则链</li>
+<li><a href="(https://wiki.nftables.org/wiki-nftables/index.php/Jumping_to_chain)">goto <chain></a>：类似于跳转，发送到指定规则链但不返回</li>
+</ul>
+<h5 id="log"><a href="#log" class="headerlink" title="log"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Logging_traffic">log</a></h5><ul>
+<li><p>level [over] <value> <unit> [burst <value> <unit>]：Log level</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">log
+log level emerg
+log level alert
+log level crit
+log level err
+log level warn
+log level notice
+log level info
+log level debug</code></pre>
+</li>
+<li><p>group <value> [queue-threshold <value>] [snaplen <value>] [prefix “<prefix>“]</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">log prefix aaaaa-aaaaaa group <span class="token number">2</span> snaplen <span class="token number">33</span>
+log group <span class="token number">2</span> queue-threshold <span class="token number">2</span>
+log group <span class="token number">2</span> snaplen <span class="token number">33</span></code></pre></li>
+</ul>
+<h5 id="reject"><a href="#reject" class="headerlink" title="reject"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Rejecting_traffic">reject</a></h5><ul>
+<li><p>with <protocol> type <type></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">reject
+reject with icmp <span class="token builtin class-name">type</span> host-unreachable
+reject with icmp <span class="token builtin class-name">type</span> net-unreachable
+reject with icmp <span class="token builtin class-name">type</span> prot-unreachable
+reject with icmp <span class="token builtin class-name">type</span> port-unreachable
+reject with icmp <span class="token builtin class-name">type</span> net-prohibited
+reject with icmp <span class="token builtin class-name">type</span> host-prohibited
+reject with icmp <span class="token builtin class-name">type</span> admin-prohibited
+reject with icmpv6 <span class="token builtin class-name">type</span> no-route
+reject with icmpv6 <span class="token builtin class-name">type</span> admin-prohibited
+reject with icmpv6 <span class="token builtin class-name">type</span> addr-unreachable
+reject with icmpv6 <span class="token builtin class-name">type</span> port-unreachable
+reject with icmpx <span class="token builtin class-name">type</span> host-unreachable
+reject with icmpx <span class="token builtin class-name">type</span> no-route
+reject with icmpx <span class="token builtin class-name">type</span> admin-prohibited
+reject with icmpx <span class="token builtin class-name">type</span> port-unreachable
+<span class="token function">ip</span> protocol tcp reject with tcp reset</code></pre></li>
+</ul>
+<h5 id="counter"><a href="#counter" class="headerlink" title="counter"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Counters">counter</a></h5><p>按照数据包的大小递增字节计数器以及包计数器的值</p>
+<ul>
+<li><p>packets <packets> bytes <bytes></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># counter 和 counter packets 0 bytes 0 是等价的，都表示从0开始计数，</span>
+<span class="token comment"># 过一段时间再 nft list ruleset 查看过滤规则，packets 和 bytes 就会显示通过过滤的数据计数</span>
+counter
+counter packets <span class="token number">0</span> bytes <span class="token number">0</span></code></pre></li>
+</ul>
+<h5 id="Limit"><a href="#Limit" class="headerlink" title="Limit"></a>Limit</h5><p>等同于 iptables 中的 limit 条件匹配模块</p>
+<ul>
+<li><p>rate [over] <value> <unit> [burst <value> <unit>]：Rate limit，令牌桶算法限速</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">limit rate <span class="token number">400</span>/minute
+limit rate <span class="token number">400</span>/hour
+limit rate over <span class="token number">40</span>/day
+limit rate over <span class="token number">400</span>/week
+limit rate over <span class="token number">1023</span>/second burst <span class="token number">10</span> packets
+limit rate <span class="token number">1025</span> kbytes/second
+limit rate <span class="token number">1023000</span> mbytes/second
+limit rate <span class="token number">1025</span> bytes/second burst <span class="token number">512</span> bytes
+limit rate <span class="token number">1025</span> kbytes/second burst <span class="token number">1023</span> kbytes
+limit rate <span class="token number">1025</span> mbytes/second burst <span class="token number">1025</span> kbytes
+limit rate <span class="token number">1025000</span> mbytes/second burst <span class="token number">1023</span> mbytes</code></pre></li>
+</ul>
+<h5 id="nat"><a href="#nat" class="headerlink" title="nat"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_(NAT)">nat</a></h5><p>适用于 nat 链</p>
+<ul>
+<li><p>dnat <destination address>：Destination address translation，目标地址转换</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">dnat <span class="token number">192.168</span>.3.2
+dnat ct mark map <span class="token punctuation">&#123;</span> 0x00000014 <span class="token builtin class-name">:</span> <span class="token number">1.2</span>.3.4<span class="token punctuation">&#125;</span></code></pre>
+</li>
+<li><p>snat <ip source address>：Source address translation 源地址转换</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">snat <span class="token number">192.168</span>.3.2
+snat <span class="token number">2001</span>:838:35f:1::-2001:838:35f:2:::100</code></pre>
+</li>
+<li><p>masquerade [<type>] [to :<port>]：Masquerade，特殊的 snat，可以把 MASQUERADE 理解为动态的、自动化的 SNAT，如果没有动态 SNAT 的需求，没有必要使 MASQUERADE，因为 SNAT 更加高效</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">masquerade
+masquerade persistent,fully-random,random
+masquerade to :1024
+masquerade to :1024-2048</code></pre></li>
+</ul>
+<h5 id="queueaz"><a href="#queueaz" class="headerlink" title="queueaz"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Queueing_to_userspace">queueaz</a></h5><ul>
+<li><p>num <value> <scheduler></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">queue
+queue num <span class="token number">2</span>
+queue num <span class="token number">2</span>-3
+queue num <span class="token number">4</span>-5 fanout bypass
+queue num <span class="token number">4</span>-5 fanout
+queue num <span class="token number">4</span>-5 bypass</code></pre></li>
+</ul>
+<h5 id="tproxy"><a href="#tproxy" class="headerlink" title="tproxy"></a>tproxy</h5><h5 id="synproxy"><a href="#synproxy" class="headerlink" title="synproxy"></a>synproxy</h5><h5 id="flow"><a href="#flow" class="headerlink" title="flow"></a>flow</h5><h5 id="dup"><a href="#dup" class="headerlink" title="dup"></a>dup</h5><h5 id="fwd"><a href="#fwd" class="headerlink" title="fwd"></a>fwd</h5><h5 id="set"><a href="#set" class="headerlink" title="set"></a>set</h5><h5 id="map"><a href="#map" class="headerlink" title="map"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Multiple_NATs_using_nftables_maps">map</a></h5><h5 id="vmap"><a href="#vmap" class="headerlink" title="vmap"></a><a target="_blank" rel="noopener" href="https://wiki.nftables.org/wiki-nftables/index.php/Dictionaries">vmap</a></h5><h4 id="范例"><a href="#范例" class="headerlink" title="范例"></a>范例</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建filter表</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> <span class="token function">add</span> table <span class="token function">ip</span> filter
+
+<span class="token comment"># 添加input、forward、output三个基本链，input和forward的默认策略是drop，output的默认策略是accpet</span>
+nft <span class="token function">add</span> chain inet filter input <span class="token punctuation">&#123;</span>type filter hook input priority <span class="token number">0</span><span class="token punctuation">\</span><span class="token punctuation">;</span> policy drop<span class="token punctuation">\</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span>
+nft <span class="token function">add</span> chain inet filter forwad <span class="token punctuation">&#123;</span>type filter hook forward priority <span class="token number">0</span><span class="token punctuation">\</span><span class="token punctuation">;</span> policy drop<span class="token punctuation">\</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span>
+nft <span class="token function">add</span> chain inet filter output <span class="token punctuation">&#123;</span>type filter hook output priority <span class="token number">0</span><span class="token punctuation">\</span><span class="token punctuation">;</span> policy accept<span class="token punctuation">\</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span>
+
+<span class="token comment"># 添加两个与TCP和UDP关联的常规链</span>
+nft <span class="token function">add</span> chain inet filter TCP
+nft <span class="token function">add</span> chain inet filter UDP
+
+<span class="token comment"># related 和 established 的流量都accept</span>
+nft <span class="token function">add</span> rule inet filter input ct state related,established accept
+
+<span class="token comment"># loopback 接口流量会 accept，省略meta关键字</span>
+nft <span class="token function">add</span> rule inet filter input iif lo accept
+
+<span class="token comment"># 无效的流量都 drop</span>
+nft <span class="token function">add</span> rule inet filter input ct state invalid drop
+
+<span class="token comment"># 新的echo请求（ping）accept</span>
+nft <span class="token function">add</span> rule inet filter input <span class="token function">ip</span> protocol icmp icmp <span class="token builtin class-name">type</span> echo-request ct state new accept
+
+<span class="token comment"># 新的UDP流量跳转到UDP链</span>
+nft <span class="token function">add</span> rule inet filter input <span class="token function">ip</span> protocol udp ct state new jump UDP
+<span class="token comment"># 新的TCP流量跳转到TCP链</span>
+<span class="token comment"># &amp;：按位与；|：按位或</span>
+<span class="token comment"># fin、syn、rst、ack四个值按位或，统计有这四个值有几个为1，数据包与统计结果的flags按位与（为什么不按位或呢，因为flags有8位，其他四位不关心），如果结果只有syn位为1，就说明是tcp第一次握手</span>
+nft <span class="token function">add</span> rule inet filter input <span class="token function">ip</span> protocol tcp tcp flags <span class="token punctuation">\</span><span class="token operator">&amp;</span> <span class="token punctuation">\</span><span class="token punctuation">(</span>fin<span class="token punctuation">\</span><span class="token operator">|</span>syn<span class="token punctuation">\</span><span class="token operator">|</span>rst<span class="token punctuation">\</span><span class="token operator">|</span>ack<span class="token punctuation">\</span><span class="token punctuation">)</span> <span class="token operator">==</span> syn ct state new jump TCP
+
+<span class="token comment"># 未由其他规则处理的所有流量会reject</span>
+nft <span class="token function">add</span> rule inet filter input <span class="token function">ip</span> protocol udp reject
+nft <span class="token function">add</span> rule inet filter input <span class="token function">ip</span> protocol tcp reject with tcp reset
+nft <span class="token function">add</span> rule inet filter input counter reject with icmp <span class="token builtin class-name">type</span> prot-unreachable
+
+<span class="token comment"># 由TCP和UDP链处理，打开web服务器的连接端口</span>
+nft <span class="token function">add</span> rule inet filter TCP tcp dport <span class="token number">80</span> accept
+nft <span class="token function">add</span> rule inet filter TCP tcp dport <span class="token number">443</span> accept
+<span class="token comment"># 允许SSH连接端口22</span>
+nft <span class="token function">add</span> rule inet filter TCP tcp dport <span class="token number">22</span> accept
+<span class="token comment"># 允许传入DNS请求</span>
+nft <span class="token function">add</span> rule inet filter TCP tcp dport <span class="token number">53</span> accept
+nft <span class="token function">add</span> rule inet filter UDP udp dport <span class="token number">53</span> accept</code></pre>
+
+<h3 id="替换规则"><a href="#替换规则" class="headerlink" title="替换规则"></a>替换规则</h3><p>指定 handle，替换规则</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft replace rule <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span> handle <span class="token operator">&lt;</span>handle<span class="token operator">></span> <span class="token operator">&lt;</span>matches<span class="token operator">></span> <span class="token operator">&lt;</span>statements<span class="token operator">></span></code></pre>
+
+<h3 id="列出规则"><a href="#列出规则" class="headerlink" title="列出规则"></a>列出规则</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建filter表</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> <span class="token function">add</span> table <span class="token function">ip</span> filter
+<span class="token comment"># 新建INPUT链</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> <span class="token function">add</span> chain <span class="token function">ip</span> filter INPUT <span class="token punctuation">&#123;</span>type filter hook input priority <span class="token number">0</span><span class="token punctuation">\</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span>
+<span class="token comment"># 添加规则，禁ping</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> <span class="token function">add</span> rule <span class="token function">ip</span> filter INPUT icmp <span class="token builtin class-name">type</span> <span class="token number">8</span> reject
+
+<span class="token comment"># 列出指定链中的规则</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> list chain <span class="token function">ip</span> filter INPUT
+table <span class="token function">ip</span> filter <span class="token punctuation">&#123;</span>
+        chain INPUT <span class="token punctuation">&#123;</span>
+                <span class="token builtin class-name">type</span> filter hook input priority filter<span class="token punctuation">;</span> policy accept<span class="token punctuation">;</span>
+                icmp <span class="token builtin class-name">type</span> echo-request reject
+        <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token comment"># -a，--handle：显示句柄值；-n，--numeric：数字化输出</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> <span class="token parameter variable">-an</span> list chain <span class="token function">ip</span> filter INPUT
+table <span class="token function">ip</span> filter <span class="token punctuation">&#123;</span>
+        chain INPUT <span class="token punctuation">&#123;</span> <span class="token comment"># handle 4</span>
+                <span class="token builtin class-name">type</span> filter hook input priority <span class="token number">0</span><span class="token punctuation">;</span> policy accept<span class="token punctuation">;</span>
+                icmp <span class="token builtin class-name">type</span> <span class="token number">8</span> reject <span class="token comment"># handle 6</span>
+        <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 列出所有的规则</span>
+nft list ruleset</code></pre>
+
+<h3 id="删除规则"><a href="#删除规则" class="headerlink" title="删除规则"></a>删除规则</h3><p>删除规则只能通过 handle 值，所以删除之前需要先查询规则的 handle 值</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 语法</span>
+nft delete rule <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span> handle <span class="token operator">&lt;</span>handle<span class="token operator">></span>
+<span class="token comment"># 范例</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$nft</span> delete rule <span class="token function">ip</span> filter INPUT handle <span class="token number">7</span></code></pre>
+
+<h3 id="清空规则"><a href="#清空规则" class="headerlink" title="清空规则"></a>清空规则</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 清空链中的规则</span>
+nft flush chain <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>chain<span class="token operator">></span>
+<span class="token comment"># 清空所有规则</span>
+nft flush ruleset</code></pre>
+
+<h3 id="数据报文分组、分类的数据结构"><a href="#数据报文分组、分类的数据结构" class="headerlink" title="数据报文分组、分类的数据结构"></a>数据报文分组、分类的数据结构</h3><h4 id="表与命名空间"><a href="#表与命名空间" class="headerlink" title="表与命名空间"></a>表与命名空间</h4><p>在 nftables 中，每个表都是独立的命名空间，这就意味着不同的表中的链、集合、字典等名字可以相同。不同的应用就可以在相互不影响的情况下管理自己表中的规则，不过要注意，由于 nftables 将每个表都视为独立的防火墙，一个数据包必须被所有表中的规则放行才能真正通过，如果在一个 hook，出现两条优先级相同的链，就会进入竞争状态。</p>
+<h4 id="集合（sets）"><a href="#集合（sets）" class="headerlink" title="集合（sets）"></a>集合（sets）</h4><p>集合可以用来匹配多个 <code>IP</code> 地址、端口号、网卡或其他任何条件。<br>相对 <code>iptables</code> 来说，<code>nftables</code> 原生支持集合，并不需要借助 <code>ipset</code> 来实现。<br><code>nftables</code> 的集合分为匿名集合与命名集合。</p>
+<p>集合中的元素可能是连续的，也可能是不连续的，连续的使用 - 划分范围，不连续的使用 , 分割</p>
+<h5 id="匿名集合"><a href="#匿名集合" class="headerlink" title="匿名集合"></a>匿名集合</h5><p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">nft <span class="token function">add</span> rule <span class="token function">ip</span> filter output tcp dport <span class="token punctuation">&#123;</span> <span class="token number">22</span>, <span class="token number">23</span> <span class="token punctuation">&#125;</span> counter</code></pre>
+
+<p>如果写在文件中，通过 -f 加载，可以使用 define 关键字定义，使用 $ 关键字调用，范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">define CDN_EDGE <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    <span class="token number">192.168</span>.1.1,
+    <span class="token number">192.168</span>.1.2,
+    <span class="token number">192.168</span>.1.3,
+    <span class="token number">10.0</span>.0.0/8
+<span class="token punctuation">&#125;</span>
+
+define CDN_MONITORS <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    <span class="token number">192.168</span>.1.10,
+    <span class="token number">192.168</span>.1.20
+<span class="token punctuation">&#125;</span>
+
+define CDN <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+    <span class="token variable">$CDN_EDGE</span>,
+    <span class="token variable">$CDN_MONITORS</span>
+<span class="token punctuation">&#125;</span>
+table inet filter <span class="token punctuation">&#123;</span>
+	chain input <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> filter hook input priority filter<span class="token punctuation">;</span> policy drop<span class="token punctuation">;</span>
+		tcp dport <span class="token punctuation">&#123;</span> http, https <span class="token punctuation">&#125;</span> <span class="token function">ip</span> saddr <span class="token variable">$CDN</span> accept
+		udp dport <span class="token punctuation">&#123;</span> http, https <span class="token punctuation">&#125;</span> <span class="token function">ip</span> saddr <span class="token variable">$CDN</span> accept
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h5 id="命名集合"><a href="#命名集合" class="headerlink" title="命名集合"></a>命名集合</h5><h6 id="新建命名集合"><a href="#新建命名集合" class="headerlink" title="新建命名集合"></a>新建命名集合</h6><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">add</span> <span class="token builtin class-name">set</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>set<span class="token operator">></span> <span class="token punctuation">&#123;</span> <span class="token builtin class-name">type</span> <span class="token operator">&lt;</span>type<span class="token operator">></span> <span class="token operator">|</span> typeof <span class="token operator">&lt;</span>expression<span class="token operator">></span> <span class="token punctuation">;</span> <span class="token punctuation">[</span>flags <span class="token operator">&lt;</span>flags<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>timeout <span class="token operator">&lt;</span>timeout<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>gc-interval <span class="token operator">&lt;</span>gc-interval<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>elements <span class="token operator">=</span> <span class="token punctuation">&#123;</span> <span class="token operator">&lt;</span>element<span class="token operator">></span><span class="token punctuation">[</span>, <span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">&#125;</span> <span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>size <span class="token operator">&lt;</span>size<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>policy <span class="token operator">&lt;</span>policy<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>auto-merge <span class="token punctuation">;</span><span class="token punctuation">]</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<p>上文的 <strong>表达式 expression</strong> 章节介绍了 datatype 和 expression。集合中的 type 和 typeof 关键字功能类似，type 指定 datatype，typeof 指定 expression，推荐使用 typeof，更易读</p>
+<ul>
+<li><p>type：指定集合中元素的类型，当前支持的数据类型有：</p>
+</li>
+<li><p>ipv4_addr : IPv4 地址</p>
+<ul>
+<li>ipv6_addr : IPv6 地址</li>
+<li>ether_addr : 以太网（Ethernet）地址</li>
+<li>inet_proto : 网络协议</li>
+<li>inet_service : 网络服务</li>
+<li>mark : 标记类型</li>
+</ul>
+</li>
+<li><p>typeof：typeof 关键字从 0.9.4 版本开始用有效，允许使用表达式（参考下文的表达式章节），让 nftables 解析基本类型</p>
+</li>
+<li><p>flags：标志</p>
+<ul>
+<li>constant：内容不可变</li>
+<li>interval：内容包含区间集</li>
+<li>timeout：可以给元素设置一个过期时间</li>
+</ul>
+</li>
+<li><p>timeout：设置元素的过期时间</p>
+</li>
+<li><p>gc-interval：</p>
+</li>
+<li><p>elements：给初始化的集合填充元素</p>
+</li>
+<li><p>size：限制集合中元素的数量</p>
+</li>
+<li><p>policy：集合策略</p>
+<ul>
+<li>performance [default]</li>
+<li>memory</li>
+</ul>
+</li>
+<li><p>auto-merge：相邻&#x2F;重叠集元素自动合并(仅适用于区间集)</p>
+</li>
+<li><p>counter：给每个元素设置计数器</p>
+</li>
+</ul>
+<p>范例：</p>
+<p>使用 @ 关键字调用命名集合</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">flush ruleset
+table inet filter <span class="token punctuation">&#123;</span>
+	<span class="token builtin class-name">set</span> ip_saddrs <span class="token punctuation">&#123;</span>
+		typeof <span class="token function">ip</span> saddr
+		flags interval
+		elements <span class="token operator">=</span> <span class="token punctuation">&#123;</span> <span class="token number">10.0</span>.0.0/24, <span class="token number">192.168</span>.248.0/24 <span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+
+	<span class="token builtin class-name">set</span> tcp_dports <span class="token punctuation">&#123;</span>
+		typeof tcp dport
+		elements <span class="token operator">=</span> <span class="token punctuation">&#123;</span> <span class="token number">22</span>, <span class="token number">80</span>, <span class="token number">443</span> <span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+
+	chain input <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> filter hook input priority filter<span class="token punctuation">;</span> policy drop<span class="token punctuation">;</span>
+		<span class="token function">ip</span> saddr @ip_saddrs tcp dport @tcp_dports accept
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h6 id="列出命名集合"><a href="#列出命名集合" class="headerlink" title="列出命名集合"></a>列出命名集合</h6><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 默认列出全部集合</span>
+nft list sets <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span>
+<span class="token comment"># 列出一个集合</span>
+nft list <span class="token builtin class-name">set</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>family<span class="token operator">></span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>table<span class="token operator">></span> <span class="token operator">&lt;</span>set<span class="token operator">></span></code></pre>
+
+<h4 id="映射（Maps）"><a href="#映射（Maps）" class="headerlink" title="映射（Maps）"></a>映射（Maps）</h4><p>映射的元素形式是 key-value，key 和 vaule 之间的映射关系取决于映射的 type 或者 typeof</p>
+<p>配置文件中的语法格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">map <span class="token operator">&lt;</span>map<span class="token operator">></span> <span class="token punctuation">&#123;</span>
+	<span class="token builtin class-name">type</span> <span class="token operator">&lt;</span>type<span class="token operator">></span> <span class="token builtin class-name">:</span> <span class="token operator">&lt;</span>type<span class="token operator">></span>
+	<span class="token comment"># 或</span>
+	typeof <span class="token operator">&lt;</span>expression<span class="token operator">></span> <span class="token builtin class-name">:</span> <span class="token operator">&lt;</span>expression<span class="token operator">></span>
+	<span class="token comment"># 或</span>
+	<span class="token builtin class-name">type</span> <span class="token operator">&lt;</span>type<span class="token operator">></span> <span class="token builtin class-name">:</span> verdict
+
+	<span class="token punctuation">[</span>flags <span class="token operator">&lt;</span>flags<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span>
+	<span class="token punctuation">[</span>elements <span class="token operator">=</span> <span class="token punctuation">&#123;</span> <span class="token operator">&lt;</span>element<span class="token operator">></span><span class="token punctuation">[</span>, <span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">&#125;</span> <span class="token punctuation">;</span><span class="token punctuation">]</span>
+	<span class="token punctuation">[</span>size <span class="token operator">&lt;</span>size<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span>
+	<span class="token punctuation">[</span>policy <span class="token operator">&lt;</span>policy<span class="token operator">></span> <span class="token punctuation">;</span><span class="token punctuation">]</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>映射用于 map 和 vmap 语句，当键值均为表达式时，用于 map，当值为 verdict 语句时，用于 vmap。</p>
+<p>map 通常用于 nat 地址转换。</p>
+<ul>
+<li>type：指定 datatype，支持以下 datatype，注意 counter 和 quota 不能用于键<ul>
+<li>ipv4_addr : IPv4 地址</li>
+<li>ipv6_addr : IPv6 地址</li>
+<li>ether_addr : 以太网（Ethernet）地址</li>
+<li>inet_proto : 网络协议</li>
+<li>inet_service : 网络服务</li>
+<li>mark : 标记类型</li>
+<li>counter：</li>
+<li>quota：</li>
+</ul>
+</li>
+<li>typeof：指定 expression</li>
+<li>flags：标志<ul>
+<li>constant</li>
+<li>interval</li>
+</ul>
+</li>
+<li>elements：初始化映射中的元素</li>
+<li>size：限制映射中元素的数量</li>
+<li>policy：策略<ul>
+<li>performance [default]</li>
+<li>memory</li>
+</ul>
+</li>
+</ul>
+<p>范例：</p>
+<p>使用 @ 关键字调用映射</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">flush ruleset
+table inet filter <span class="token punctuation">&#123;</span>
+	<span class="token builtin class-name">set</span> tcp_dports <span class="token punctuation">&#123;</span>
+		typeof tcp dport
+		elements <span class="token operator">=</span> <span class="token punctuation">&#123;</span> <span class="token number">22</span>, <span class="token number">80</span>, <span class="token number">443</span> <span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+
+	map test_vmap <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> ipv4_addr <span class="token builtin class-name">:</span> verdict
+        flags interval
+		elements <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+            <span class="token number">192.168</span>.248.0/24 <span class="token builtin class-name">:</span> drop,
+            <span class="token number">10.0</span>.0.1/24 <span class="token builtin class-name">:</span> accept
+        <span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+
+	chain input <span class="token punctuation">&#123;</span>
+		<span class="token builtin class-name">type</span> filter hook input priority filter<span class="token punctuation">;</span> policy drop<span class="token punctuation">;</span>
+		<span class="token function">ip</span> saddr vmap @test_vmap tcp dport @tcp_dports accept
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h4 id="Concatenations"><a href="#Concatenations" class="headerlink" title="Concatenations"></a>Concatenations</h4><h4 id="Metering"><a href="#Metering" class="headerlink" title="Metering"></a>Metering</h4><p>以前称之为 flow tables</p>
+<h4 id="Updating-sets-from-the-packet-path"><a href="#Updating-sets-from-the-packet-path" class="headerlink" title="Updating sets from the packet path"></a>Updating sets from the packet path</h4><h4 id="Math-operations"><a href="#Math-operations" class="headerlink" title="Math operations"></a>Math operations</h4><h4 id="Stateful-objects"><a href="#Stateful-objects" class="headerlink" title="Stateful objects"></a>Stateful objects</h4><h4 id="Flowtable-the-fastpath-network-stack-bypass"><a href="#Flowtable-the-fastpath-network-stack-bypass" class="headerlink" title="Flowtable (the fastpath network stack bypass)"></a>Flowtable (the fastpath network stack bypass)</h4><h2 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h2><p>可以将规则写在文件中，通过<code>nft -f file</code>加载。推荐这种方式</p>
+<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><p>说明：以下练习 INPUT 和 OUTPUT 默认策略均为 DROP</p>
+<p>1、限制本地主机的 web 服务器在周一不允许访问；新请求的速率不能超过 100 个每秒；web 服务器包含了 admin 字符串的页面不允许访问；web 服务器仅允许响应报文离开本机</p>
+<p>2、在工作时间，即周一到周五的 8:30-18:00，开放本机的 ftp 服务给 172.16.0.0 网络中的主机访问；数据下载请求的次数每分钟不得超过 5 个</p>
+<p>3、开放本机的 ssh 服务给 172.16.x.1-172.16.x.100 中的主机，x 为你的学号，新请求建立的速率一分钟不得超过 2 个；仅允许响应报文通过其服务端口离开本机</p>
+<p>4、拒绝 TCP 标志位全部为 1 及全部为 0 的报文访问本机</p>
+<p>5、允许本机 ping 别的主机；但不开放别的主机 ping 本机</p>
+<p>6、判断下述规则的意义</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E9%98%B2%E7%81%AB%E5%A2%99/" rel="tag"><i class="fa fa-tag"></i> 防火墙</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/virt-install/" rel="prev" title="virt-install">
+                  <i class="fa fa-chevron-left"></i> virt-install
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/C/%E8%BD%AC%E8%BD%BD-gdb%E8%B0%83%E8%AF%95%E6%8C%87%E5%8D%97/" rel="next" title="转载-gdb调试指南">
+                  转载-gdb调试指南 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

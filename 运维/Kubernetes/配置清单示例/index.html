@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="资源清单是 yml 格式，api-server 会自动转成 json 格式 每个 API 对象都有 3 大类属性：元数据 metadata、规范 spec 和状态 status spec 是期望状态，status 是实际状态，如果实际状态和期望状态有出入，控制器（通常是 deployment 控制器）的控制循环就会监控到差异，然后将需要做出的更改提交到 apiserver，调度器 schedule">
+<meta property="og:type" content="article">
+<meta property="og:title" content="配置清单示例">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E9%85%8D%E7%BD%AE%E6%B8%85%E5%8D%95%E7%A4%BA%E4%BE%8B/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="资源清单是 yml 格式，api-server 会自动转成 json 格式 每个 API 对象都有 3 大类属性：元数据 metadata、规范 spec 和状态 status spec 是期望状态，status 是实际状态，如果实际状态和期望状态有出入，控制器（通常是 deployment 控制器）的控制循环就会监控到差异，然后将需要做出的更改提交到 apiserver，调度器 schedule">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-14T11:11:42.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E9%85%8D%E7%BD%AE%E6%B8%85%E5%8D%95%E7%A4%BA%E4%BE%8B/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E9%85%8D%E7%BD%AE%E6%B8%85%E5%8D%95%E7%A4%BA%E4%BE%8B/","path":"运维/Kubernetes/配置清单示例/","title":"配置清单示例"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>配置清单示例 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#deployment"><span class="nav-number">1.</span> <span class="nav-text">deployment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HorizontalPodAutoscaler"><span class="nav-number">2.</span> <span class="nav-text">HorizontalPodAutoscaler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#namespace"><span class="nav-number">3.</span> <span class="nav-text">namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nginx-%E4%B8%9A%E5%8A%A1-yaml-%E6%96%87%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">Nginx 业务 yaml 文件</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E9%85%8D%E7%BD%AE%E6%B8%85%E5%8D%95%E7%A4%BA%E4%BE%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="配置清单示例 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          配置清单示例
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-14 19:11:42" itemprop="dateCreated datePublished" datetime="2021-03-14T19:11:42+08:00">2021-03-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>资源清单是 yml 格式，api-server 会自动转成 json 格式</p>
+<p>每个 API 对象都有 3 大类属性：元数据 metadata、规范 spec 和状态 status</p>
+<p>spec 是期望状态，status 是实际状态，如果实际状态和期望状态有出入，控制器（通常是 deployment 控制器）的控制循环就会监控到差异，然后将需要做出的更改提交到 apiserver，调度器 scheduler 监控到 apiserver 中有未执行的操作，就会去找适合执行操作的 node，然后提交到 apiserver，kubelet 监控到 apiserver 中有关于自己节点的操作，就会执行操作，将执行结果返回给 apiserver，apiserver 再更新实际状态</p>
+<h2 id="deployment"><a href="#deployment" class="headerlink" title="deployment"></a>deployment</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"></code></pre>
+
+<h2 id="HorizontalPodAutoscaler"><a href="#HorizontalPodAutoscaler" class="headerlink" title="HorizontalPodAutoscaler"></a>HorizontalPodAutoscaler</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">kind</span><span class="token punctuation">:</span> HorizontalPodAutoscaler
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> autoscaling/v2beta1
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> linux42
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> tomcat<span class="token punctuation">-</span>app1<span class="token punctuation">-</span>podautoscaler
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> tomcat<span class="token punctuation">-</span>app1 <span class="token comment">#自定义app标签</span>
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> v2beta1 <span class="token comment">#自定义version标签</span>
+<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># 对象具体信息</span>
+  <span class="token key atrule">scaleTargetRef</span><span class="token punctuation">:</span> <span class="token comment">#定义水平伸缩的目标对象：Deployment、ReplicationController/ReplicaSet</span>
+    <span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment <span class="token comment">#目标对象类型为deployment</span>
+    <span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1 <span class="token comment">#API版本</span>
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> tomcat<span class="token punctuation">-</span>app1<span class="token punctuation">-</span>deployment <span class="token comment">#deployment的名称</span>
+  <span class="token key atrule">minReplicas</span><span class="token punctuation">:</span> <span class="token number">2</span> <span class="token comment">#最小pod数</span>
+  <span class="token key atrule">maxReplicas</span><span class="token punctuation">:</span> <span class="token number">5</span> <span class="token comment">#最大pod数</span>
+  <span class="token key atrule">metrics</span><span class="token punctuation">:</span> <span class="token comment">#需要安装metrics server</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> Resource <span class="token comment"># 类型为资源</span>
+      <span class="token key atrule">resource</span><span class="token punctuation">:</span> <span class="token comment"># 定义资源</span>
+        <span class="token key atrule">name</span><span class="token punctuation">:</span> cpu
+        <span class="token key atrule">targetAverageUtilization</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment">#CPU使用率，超过80%就增加pod</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> Resource
+      <span class="token key atrule">resource</span><span class="token punctuation">:</span>
+        <span class="token key atrule">name</span><span class="token punctuation">:</span> memory
+        <span class="token key atrule">targetAverageValue</span><span class="token punctuation">:</span> 1024Mi <span class="token comment"># 内存使用量，超过1024Mi就增加pod</span></code></pre>
+
+<h2 id="namespace"><a href="#namespace" class="headerlink" title="namespace"></a>namespace</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Namespace
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> test</code></pre>
+
+<h2 id="Nginx-业务-yaml-文件"><a href="#Nginx-业务-yaml-文件" class="headerlink" title="Nginx 业务 yaml 文件"></a>Nginx 业务 yaml 文件</h2><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> extensions/v1beta1 <span class="token comment"># API版本</span>
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment"># deployment元数据</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment <span class="token comment"># deployment名称，创建后的pdo名称是这个名称加随机字符串</span>
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> test <span class="token comment"># pod的namespace，默认是default</span>
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment"># 自定义deployment标签</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment<span class="token punctuation">-</span>label
+<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># deployment的详细信息</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment"># 创建出的pod的副本数，即多少个pod，默认值为1</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span> <span class="token comment"># Deployment如何查找要管理的Pods，它必须与pod模板的标签相匹配</span>
+    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span> <span class="token comment"># 定义匹配Pod的标签，pod模板的标签相匹配</span>
+      <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment"># 就是下面的 template.metadata.labels.app</span>
+  <span class="token key atrule">template</span><span class="token punctuation">:</span> <span class="token comment"># 定义模板，必须定义，用于描述要创建的pod</span>
+    <span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment"># pod元数据</span>
+      <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment"># 自定义pod的标签，主要用于service匹配</span>
+        <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment"># 自定义app标签</span>
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># pod详细信息</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span> <span class="token comment"># pod中容器列表，可以多个，至少一个，绝大部分情况是一个，pod不能动态增减容器</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>container <span class="token comment"># 容器名称</span>
+          <span class="token key atrule">image</span><span class="token punctuation">:</span>
+            harbor.magedu.net/test/nginx<span class="token punctuation">-</span>web1<span class="token punctuation">:</span>v1 <span class="token comment"># 镜像地址</span>
+            <span class="token comment"># command: ["/apps/tomcat/bin/run_tomcat.sh"]     # 容器启动执行的命令或脚本</span>
+            <span class="token comment"># imagePullPolicy: IfNotPresent</span>
+          <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> Always <span class="token comment"># 拉取镜像策略</span>
+          <span class="token key atrule">ports</span><span class="token punctuation">:</span> <span class="token comment"># 定义容器端口列表</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http <span class="token comment"># 端口名称</span>
+              <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
+              <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> https <span class="token comment"># 端口名称</span>
+              <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">443</span>
+              <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+          <span class="token key atrule">env</span><span class="token punctuation">:</span> <span class="token comment"># 配置环境变量</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> <span class="token string">"password"</span> <span class="token comment"># 变量名称。必须要用引号引起来</span>
+              <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"123456"</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> <span class="token string">"age"</span>
+              <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"18"</span>
+          <span class="token key atrule">resources</span><span class="token punctuation">:</span> <span class="token comment"># 对资源的请求设置和限制设置</span>
+            <span class="token key atrule">limits</span><span class="token punctuation">:</span> <span class="token comment"># 资源限制设置上限</span>
+              <span class="token key atrule">cpu</span><span class="token punctuation">:</span> <span class="token number">2</span> <span class="token comment"># cpu的限制，单位为core数，可以写0.5或者500m等CPU压缩值</span>
+              <span class="token key atrule">memory</span><span class="token punctuation">:</span> 2Gi <span class="token comment"># 内存限制，单位可以为Mib/Gib，将用于docker run --memory参数</span>
+            <span class="token key atrule">requests</span><span class="token punctuation">:</span> <span class="token comment"># 资源请求的设置</span>
+              <span class="token key atrule">cpu</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment"># cpu请求数，容器启动的初始可用数量,可以写0.5或者500m等CPU压缩值</span>
+              <span class="token key atrule">memory</span><span class="token punctuation">:</span> 512Mi <span class="token comment"># 内存请求大小，容器启动的初始可用数量，用于调度pod时候使用</span>
+<span class="token punctuation">---</span>
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1 <span class="token comment"># API版本</span>
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span> <span class="token comment"># service元数据</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>spec <span class="token comment"># service的名称，此名称会被DNS解析</span>
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> test <span class="token comment"># 该service隶属于的namespaces名称，即把service创建到哪个namespace里面</span>
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span> <span class="token comment"># 自定义service标签</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx
+<span class="token key atrule">spec</span><span class="token punctuation">:</span> <span class="token comment"># service的详细信息</span>
+  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort <span class="token comment"># service的类型，定义服务的访问方式，默认为ClusterIP</span>
+  <span class="token key atrule">ports</span><span class="token punctuation">:</span> <span class="token comment"># 定义访问端口</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http <span class="token comment"># 定义一个端口名称</span>
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># service 80端口</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP <span class="token comment"># 协议类型</span>
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># 目标pod的端口</span>
+      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30001</span> <span class="token comment"># node节点暴露的端口</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> https
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">443</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">443</span>
+      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30043</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span> <span class="token comment"># service的标签选择器，匹配Pod的标签</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>selector <span class="token comment"># 匹配定义了app标签且值为nginx-selector的Pod</span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%B7%A5%E5%85%B7/windows/MasterPDFEditor/" rel="prev" title="MasterPDFEditor">
+                  <i class="fa fa-chevron-left"></i> MasterPDFEditor
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/node/node/" rel="next" title="json">
+                  json <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

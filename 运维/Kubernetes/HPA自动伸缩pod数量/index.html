@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="HPA：Horizontal Pod Autoscaler，pod 的自动水平伸缩，特别适合无状态服务 HPA 会自动完成 pod 的扩缩容，当资源需求过高时，会自动创建出 pod 副本；当资源需求低时，会自动收缩 pod 副本数。 注意：通过集群内的资源监控系统（metrics-server），来获取集群中资源的使用状态，所以必须确保集群中已经安装 metrics-server 的组件 HPA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HPA自动伸缩pod数量">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/HPA%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9pod%E6%95%B0%E9%87%8F/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="HPA：Horizontal Pod Autoscaler，pod 的自动水平伸缩，特别适合无状态服务 HPA 会自动完成 pod 的扩缩容，当资源需求过高时，会自动创建出 pod 副本；当资源需求低时，会自动收缩 pod 副本数。 注意：通过集群内的资源监控系统（metrics-server），来获取集群中资源的使用状态，所以必须确保集群中已经安装 metrics-server 的组件 HPA">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1616237073888.png">
+<meta property="article:published_time" content="2021-03-17T14:07:20.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.494Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1616237073888.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/HPA%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9pod%E6%95%B0%E9%87%8F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/HPA%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9pod%E6%95%B0%E9%87%8F/","path":"运维/Kubernetes/HPA自动伸缩pod数量/","title":"HPA自动伸缩pod数量"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>HPA自动伸缩pod数量 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#metrics-server"><span class="nav-number">1.</span> <span class="nav-text">metrics-server</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2"><span class="nav-number">1.2.</span> <span class="nav-text">部署</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HPA-%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">HPA 示例</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/HPA%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9pod%E6%95%B0%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="HPA自动伸缩pod数量 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HPA自动伸缩pod数量
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-17 22:07:20" itemprop="dateCreated datePublished" datetime="2021-03-17T22:07:20+08:00">2021-03-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>HPA：Horizontal Pod Autoscaler，pod 的自动水平伸缩，<strong>特别适合无状态服务</strong></p>
+<p>HPA 会自动完成 pod 的扩缩容，当资源需求过高时，会自动创建出 pod 副本；当资源需求低时，会自动收缩 pod 副本数。</p>
+<p>注意：通过集群内的资源监控系统（metrics-server），来获取集群中资源的使用状态，所以必须确保集群中已经安装 metrics-server 的组件</p>
+<p>HPA 版本：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$kubectl</span> api-versions <span class="token operator">|</span> <span class="token function">grep</span> auto
+autoscaling/v1			<span class="token comment"># 只支持通过cpu为参考依据，来改变pod副本数</span>
+autoscaling/v2beta1		<span class="token comment"># 支持通过cpu、内存、连接数以及用户自定义的资源指标数据为参考依据</span>
+autoscaling/v2beta2		<span class="token comment"># 同上，小的变动</span></code></pre>
+
+<h2 id="metrics-server"><a href="#metrics-server" class="headerlink" title="metrics-server"></a>metrics-server</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>Metrics Server 是 Kubernetes 集群核心监控数据的聚合器，Metrics Server 从 Kubelet 收集资源指标，并通过 Merics API 在 Kubernetes APIServer 中提供给缩放资源对象 HPA 使用。也可以通过 Metrics API 提供的 Kubectl top 查看 Pod 资源占用情况，从而实现对资源的自动缩放。</p>
+<p>Metrics Server 是 Kubernetes 监控组件中的重要一部分，Metrics Server 主要分为 API 和 Server 两大部分。</p>
+<ul>
+<li>Metrics API：通过 APIServer 对外暴露 Pod 资源使用情况。为 HPA、kubectl top、Kubernetes dashboard 等提供数据来源</li>
+<li>Metrics Server ：定期通过 Summary API 从 Kubelet 所在集群节点获取服务指标，然后将指标汇总、存储到内存中，仅仅存储指标最新状态，一旦重启组件数据将会丢失</li>
+</ul>
+<img data-src="//img.to2b.cn/blog/ljk/1616237073888.png" style="zoom:50%;" />
+
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><p>最新的 metrics-server 是 v4.0.2，但是其依赖的镜像需要翻墙，而阿里云镜像和 mirrorgooglecontainers 中都没有最新版本，最新的只有 v0.3.6 版本，勉强用吧</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$docker</span> pull registry.aliyuncs.com/google_containers/metrics-server-amd64:v0.3.6
+<span class="token variable">$docker</span> tag registry.aliyuncs.com/google_containers/metrics-server-amd64 harbor.ljk.local/k8s/metrics-server-amd64:v0.3.6
+<span class="token variable">$docker</span> push harbor.ljk.local/k8s/metrics-server-amd64:v0.3.6
+
+<span class="token comment"># 下载 components.yaml</span>
+<span class="token variable">$wget</span> https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
+<span class="token variable">$vim</span> components.yaml
+<span class="token punctuation">..</span>.
+image: harbor.ljk.local/k8s/metrics-server-amd64:v0.3.6	 <span class="token comment">#修改为本地镜像</span>
+<span class="token punctuation">..</span>.
+<span class="token comment"># 安装</span>
+<span class="token variable">$kubectl</span> apply <span class="token parameter variable">-f</span> components.yaml
+
+<span class="token comment"># 测试</span>
+<span class="token variable">$nohup</span> kubectl proxy <span class="token operator">&amp;</span>
+<span class="token variable">$curl</span> http://localhost:8001/apis/metrics.k8s.io/v1beta1/nodes
+<span class="token variable">$curl</span> http://localhost:8001/apis/metrics.k8s.io/v1beta1/pods
+<span class="token variable">$kubectl</span> <span class="token function">top</span> <span class="token function">node</span>
+<span class="token variable">$kubectl</span> <span class="token function">top</span> pod <span class="token parameter variable">-A</span></code></pre>
+
+<h2 id="HPA-示例"><a href="#HPA-示例" class="headerlink" title="HPA 示例"></a>HPA 示例</h2><p>要求：我有个 deployment 叫 myapp 现在只有一个副本数，最多只能 8 个副本数，当 pod 的 cpu 平均利用率超过百分之 50 或内存平均值超过百分之 50 时，pod 将自动增加副本数以提供服务</p>
+<ol>
+<li><p>SVC、Deployment 资源清单：</p>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> svc<span class="token punctuation">-</span>hpa
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> default
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> myapp
+  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort <span class="token comment">##注意这里是NodePort，下面压力测试要用到。</span>
+  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span>
+<span class="token punctuation">---</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> myapp
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> default
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span>
+      <span class="token key atrule">app</span><span class="token punctuation">:</span> myapp
+  <span class="token key atrule">template</span><span class="token punctuation">:</span>
+    <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+      <span class="token key atrule">name</span><span class="token punctuation">:</span> myapp<span class="token punctuation">-</span>demo
+      <span class="token key atrule">namespace</span><span class="token punctuation">:</span> default
+      <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+        <span class="token key atrule">app</span><span class="token punctuation">:</span> myapp
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> myapp
+          <span class="token key atrule">image</span><span class="token punctuation">:</span> ikubernetes/myapp<span class="token punctuation">:</span>v1
+          <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> IfNotPresent
+          <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http
+              <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
+          <span class="token key atrule">resources</span><span class="token punctuation">:</span>
+            <span class="token key atrule">requests</span><span class="token punctuation">:</span>
+              <span class="token key atrule">cpu</span><span class="token punctuation">:</span> 50m
+              <span class="token key atrule">memory</span><span class="token punctuation">:</span> 50Mi
+            <span class="token key atrule">limits</span><span class="token punctuation">:</span>
+              <span class="token key atrule">cpu</span><span class="token punctuation">:</span> 50m
+              <span class="token key atrule">memory</span><span class="token punctuation">:</span> 50Mi</code></pre>
+</li>
+<li><p>HPA 资源清单：</p>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> autoscaling/v2beta1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> HorizontalPodAutoscaler
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> myapp<span class="token punctuation">-</span>hpa<span class="token punctuation">-</span>v2
+  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> default
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">minReplicas</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment">##至少1个副本</span>
+  <span class="token key atrule">maxReplicas</span><span class="token punctuation">:</span> <span class="token number">8</span> <span class="token comment">##最多8个副本</span>
+  <span class="token key atrule">scaleTargetRef</span><span class="token punctuation">:</span>
+    <span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
+    <span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> myapp
+  <span class="token key atrule">metrics</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> Resource
+      <span class="token key atrule">resource</span><span class="token punctuation">:</span>
+        <span class="token key atrule">name</span><span class="token punctuation">:</span> cpu
+        <span class="token key atrule">targetAverageUtilization</span><span class="token punctuation">:</span> <span class="token number">50</span> <span class="token comment">##注意此时是根据使用率，也可以根据使用量：targetAverageValue</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> Resource
+      <span class="token key atrule">resource</span><span class="token punctuation">:</span>
+        <span class="token key atrule">name</span><span class="token punctuation">:</span> memory
+        <span class="token key atrule">targetAverageUtilization</span><span class="token punctuation">:</span> <span class="token number">50</span> <span class="token comment">##注意此时是根据使用率，也可以根据使用量：targetAverageValue</span></code></pre></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/node/node/" rel="prev" title="json">
+                  <i class="fa fa-chevron-left"></i> json
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/Pod%E7%9A%84%E7%8A%B6%E6%80%81%E5%92%8C%E6%8E%A2%E9%92%88/" rel="next" title="Pod的状态和探针">
+                  Pod的状态和探针 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

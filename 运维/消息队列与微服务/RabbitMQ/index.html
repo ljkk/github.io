@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="阿里云消息队列：https:&#x2F;&#x2F;www.aliyun.com&#x2F;product&#x2F;ons  RabbitMQ 基于 erlang 语言开发，具有高并发优点、支持分布式具有消息确认机制、消息持久化机制，消息可靠性和集群可靠性高，简单易用、运行稳定、跨平台、多语言开源  Broker：接收和分发消息的应用，RabbitMQ Server 就是 Message BrokerVirtual host：出于多租">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/RabbitMQ/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="阿里云消息队列：https:&#x2F;&#x2F;www.aliyun.com&#x2F;product&#x2F;ons  RabbitMQ 基于 erlang 语言开发，具有高并发优点、支持分布式具有消息确认机制、消息持久化机制，消息可靠性和集群可靠性高，简单易用、运行稳定、跨平台、多语言开源  Broker：接收和分发消息的应用，RabbitMQ Server 就是 Message BrokerVirtual host：出于多租">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613872511226.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613871128154.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613871813675.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613882317923.png">
+<meta property="article:published_time" content="2021-02-21T13:56:47.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.510Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="MQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1613872511226.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/RabbitMQ/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/RabbitMQ/","path":"运维/消息队列与微服务/RabbitMQ/","title":"RabbitMQ"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>RabbitMQ | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RabbitMQ-%E4%B8%AD%E7%9A%84%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.</span> <span class="nav-text">RabbitMQ 中的生产者消费者示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RabbitMQ-%E5%8D%95%E6%9C%BA%E9%83%A8%E7%BD%B2"><span class="nav-number">2.</span> <span class="nav-text">RabbitMQ 单机部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RabbitMQ-%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2"><span class="nav-number">3.</span> <span class="nav-text">RabbitMQ 集群部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Ubuntu-1804-%E5%AE%89%E8%A3%85%E9%9B%86%E7%BE%A4%E7%89%88-RabbitMQ"><span class="nav-number">3.1.</span> <span class="nav-text">Ubuntu 1804 安装集群版 RabbitMQ</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RabbitMQ-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">RabbitMQ 常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RabbitMQ-API"><span class="nav-number">5.</span> <span class="nav-text">RabbitMQ API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RabbitMQ-Cluster-Monitor"><span class="nav-number">6.</span> <span class="nav-text">RabbitMQ Cluster Monitor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E7%8A%B6%E6%80%81%E7%9B%91%E6%8E%A7"><span class="nav-number">6.1.</span> <span class="nav-text">集群状态监控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8%E7%9B%91%E6%8E%A7"><span class="nav-number">6.2.</span> <span class="nav-text">内存使用监控</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/RabbitMQ/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="RabbitMQ | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RabbitMQ
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-21 21:56:47" itemprop="dateCreated datePublished" datetime="2021-02-21T21:56:47+08:00">2021-02-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">消息队列与微服务</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>阿里云消息队列：<a target="_blank" rel="noopener" href="https://www.aliyun.com/product/ons">https://www.aliyun.com/product/ons</a></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613872511226.png"></p>
+<p>RabbitMQ 基于 erlang 语言开发，具有高并发优点、支持分布式具有消息确认机制、消息持久化机制，消息可靠性和集群可靠性高，简单易用、运行稳定、跨平台、多语言开源</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613871128154.png"></p>
+<p><strong>Broker</strong>：接收和分发消息的应用，RabbitMQ Server 就是 Message Broker<br><strong>Virtual host</strong>：出于多租户和安全因素设计的，把 AMQP 的基本组件划分到一个虚拟的分组中，类似于网络中的 namespace 概念，当多个不同的用户使用同一个 RabbitMQ server 提供的服务时，可以划分出多个 vhost，每个用户在自己的 vhost 创建 exchange／queue 等<br><strong>Connection</strong>：publisher／consumer 和 broker 之间的 TCP 连接。<br><strong>Channel</strong>：如果每一次访问 RabbitMQ 都建立一个 Connection，在消息量大的时候建立 TCP Connection 的开销将是巨大的，效率也较低。Channel 是在 connection 内部建立的逻辑连接，如果应用程序支持多线程，通常每个 thread 创建单独的 channel 进行通讯，AMQP method 包含了 channel id 帮助客户端和 message broker 识别 channel，所以 channel 之间是完全隔离的。Channel 作为轻量级的 Connection 极大减少了操作系统建立 TCP connection 的开销。<br><strong>Exchange</strong>：message 到达 broker 的第一站，根据分发规则，匹配查询表中的 routing key，分发消息到 queue 中去。常用的类型有：direct (point-to-point), topic (publish-subscribe) and fanout (multicast)。<br><strong>Queue</strong>：消息最终被送到这里等待 consumer 取走，先进先出，可以持久化到磁盘节点服务器<br><strong>Binding</strong>：exchange 和 queue 之间的虚拟连接，binding 中可以包含 routing key。Binding 信息被保存到 exchange 中的查询表中，用于 message 的分发依据。</p>
+<h2 id="RabbitMQ-中的生产者消费者示例"><a href="#RabbitMQ-中的生产者消费者示例" class="headerlink" title="RabbitMQ 中的生产者消费者示例"></a>RabbitMQ 中的生产者消费者示例</h2><p><img data-src="//img.to2b.cn/blog/ljk/1613871813675.png"></p>
+<p>生产者发送消息到 broker server（RabbitMQ），在 Broker 内部，用户创建 Exchange／Queue，通过 Binding 规则将两者联系在一起，Exchange 分发消息，根据类型／binding 的不同分发策略有区别，消息最后来到 Queue 中，等待消费者取走</p>
+<h2 id="RabbitMQ-单机部署"><a href="#RabbitMQ-单机部署" class="headerlink" title="RabbitMQ 单机部署"></a>RabbitMQ 单机部署</h2><p>快速部署示例：<a target="_blank" rel="noopener" href="https://www.rabbitmq.com/install-debian.html#apt-bintray-quick-start">https://www.rabbitmq.com/install-debian.html#apt-bintray-quick-start</a></p>
+<ol>
+<li><p>主机名解析</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$hostname</span>
+mq1.ljk.cn
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$hostname</span> <span class="token parameter variable">-I</span>
+<span class="token number">10.0</span>.1.101
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/hosts
+<span class="token punctuation">..</span>.
+<span class="token number">10.0</span>.1.101 mq1.ljk.cn mq1</code></pre>
+</li>
+<li><p>时间原因，选择 apt 安装，直接执行以下脚本</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/sh</span>
+
+<span class="token comment">## If sudo is not available on the system,</span>
+<span class="token comment">## uncomment the line below to install it</span>
+<span class="token comment"># apt-get install -y sudo</span>
+
+<span class="token function">sudo</span> <span class="token function">apt-get</span> update <span class="token parameter variable">-y</span>
+
+<span class="token comment">## Install prerequisites</span>
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> <span class="token function">curl</span> gnupg <span class="token parameter variable">-y</span>
+
+<span class="token comment">## Install RabbitMQ signing key</span>
+<span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc <span class="token operator">|</span> <span class="token function">sudo</span> apt-key <span class="token function">add</span> -
+
+<span class="token comment">## Install apt HTTPS transport</span>
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> apt-transport-https
+
+<span class="token variable">$distribution</span><span class="token operator">=</span><span class="token string">'bionic'</span>		<span class="token comment"># ubuntu18.04</span>
+<span class="token function">sudo</span> <span class="token function">tee</span> /etc/apt/sources.list.d/bintray.rabbitmq.list <span class="token operator">&lt;&lt;</span><span class="token string">EOF
+## 默认安装最新版本的 erlang 23.x，可以指定版本例如：erlang-22.x
+deb https://dl.bintray.com/rabbitmq-erlang/debian <span class="token variable">$distribution</span> erlang
+## Installs latest RabbitMQ release
+deb https://dl.bintray.com/rabbitmq/debian <span class="token variable">$distribution</span> main
+EOF</span>
+
+<span class="token comment">## Update package indices</span>
+<span class="token function">sudo</span> <span class="token function">apt-get</span> update <span class="token parameter variable">-y</span>
+
+<span class="token comment">## Install rabbitmq-server and its dependencies</span>
+<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> rabbitmq-server <span class="token parameter variable">-y</span> --fix-missing</code></pre>
+</li>
+<li><p>安装成功</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zabbix src<span class="token punctuation">]</span><span class="token variable">$systemctl</span> status rabbitmq-server.service
+● rabbitmq-server.service - RabbitMQ broker
+   Loaded: loaded <span class="token punctuation">(</span>/lib/systemd/system/rabbitmq-server.service<span class="token punctuation">;</span> enabled<span class="token punctuation">;</span> vendor preset: enabled<span class="token punctuation">)</span>
+   Active: active <span class="token punctuation">(</span>running<span class="token punctuation">)</span> since Sun <span class="token number">2021</span>-02-21 02:41:45 UTC<span class="token punctuation">;</span> 1h 26min ago
+ Main PID: <span class="token number">5992</span> <span class="token punctuation">(</span>beam.smp<span class="token punctuation">)</span>
+   Status: <span class="token string">"Initialized"</span>
+    Tasks: <span class="token number">22</span> <span class="token punctuation">(</span>limit: <span class="token number">2289</span><span class="token punctuation">)</span>
+   CGroup: /system.slice/rabbitmq-server.service
+           ├─5992 /usr/lib/erlang/erts-11.1.8/bin/beam.smp <span class="token parameter variable">-W</span> w <span class="token parameter variable">-MBas</span> ageffcbf <span class="token parameter variable">-MHas</span> ageffcbf <span class="token parameter variable">-MBlmbcs</span> <span class="token number">512</span> <span class="token parameter variable">-MHlmbcs</span> <span class="token number">512</span> <span class="token parameter variable">-MMmcs</span> <span class="token number">30</span> <span class="token parameter variable">-P</span> <span class="token number">1048576</span> <span class="token parameter variable">-t</span> <span class="token number">5000000</span> <span class="token parameter variable">-stbt</span> db <span class="token parameter variable">-zd</span>
+           ├─6013 erl_child_setup <span class="token number">32768</span>
+           ├─6039 /usr/lib/erlang/erts-11.1.8/bin/epmd <span class="token parameter variable">-daemon</span>
+           ├─6058 inet_gethost <span class="token number">4</span>
+           └─6059 inet_gethost <span class="token number">4</span>
+<span class="token punctuation">..</span>.</code></pre>
+</li>
+<li><p>插件管理<br><a target="_blank" rel="noopener" href="https://www.rabbitmq.com/management.html">https://www.rabbitmq.com/management.html</a><br>开启 web 管理界面</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zabbix src<span class="token punctuation">]</span><span class="token variable">$which</span> rabbitmq-plugins
+/usr/sbin/rabbitmq-plugins
+<span class="token punctuation">[</span>root@zabbix src<span class="token punctuation">]</span><span class="token variable">$rabbitmq</span>-plugins <span class="token builtin class-name">enable</span> rabbitmq_management
+Enabling plugins on <span class="token function">node</span> rabbit@mq1:
+rabbitmq_management
+The following plugins have been configured:
+  rabbitmq_management
+  rabbitmq_management_agent
+  rabbitmq_web_dispatch
+Applying plugin configuration to rabbit@mq1<span class="token punctuation">..</span>.
+The following plugins have been enabled:
+  rabbitmq_management
+  rabbitmq_management_agent
+  rabbitmq_web_dispatch
+
+started <span class="token number">3</span> plugins.
+
+<span class="token comment"># 5672		消费者访问的 端口</span>
+<span class="token comment"># 15672		web 管理端口</span>
+<span class="token comment"># 25672		集群状态通信端口</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_users
+Listing <span class="token function">users</span> <span class="token punctuation">..</span>.
+user    tags
+guest   <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span>		<span class="token comment"># guest是初始化的用户，账号密码都是guest，但是只能使用localhost访问</span>
+
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> add_user ljk <span class="token number">123456</span>	<span class="token comment"># 添加用户</span>
+Adding user <span class="token string">"ljk"</span> <span class="token punctuation">..</span>.
+Done. Don<span class="token string">'t forget to grant the user permissions to some virtual hosts! See '</span>rabbitmqctl <span class="token builtin class-name">help</span> set_permissions' to learn more.
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> set_user_tags ljk administrator	<span class="token comment"># 用户授权</span>
+Setting tags <span class="token keyword">for</span> user <span class="token string">"ljk"</span> to <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span> <span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_users
+Listing <span class="token function">users</span> <span class="token punctuation">..</span>.
+user    tags
+ljk     <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span>		<span class="token comment"># 授权成功</span>
+guest   <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span></code></pre>
+
+<p>使用账号 ljk，密码 123456，成功登录 web 管理界面：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613882317923.png"></p>
+<p>登录之后，我们很少进行更改，主要是查看 rabbitmq 的运行状态</p>
+</li>
+</ol>
+<h2 id="RabbitMQ-集群部署"><a href="#RabbitMQ-集群部署" class="headerlink" title="RabbitMQ 集群部署"></a>RabbitMQ 集群部署</h2><ul>
+<li><strong>普通模式</strong>：创建好 RabbitMQ 集群之后的默认模式<br>所有的 mq 节点保存相同的元数据，即消息队列，但队列里的数据仅保存一份，消费者从 A 节点拉取消息，如果消息在 B 节点，那么 B 会将消息发送给 A 节点，然后消费者就能拉取到数据了<br>缺点：单点失败</li>
+<li><strong>镜像模式</strong>：把需要的队列做成镜像队列<br>在普通模式的基础上，增加一些镜像策略，消息实体会主动在镜像节点间同步，而不是在 consumer 取数据时临时拉取，解决了单点失败的问题，但是性能下降，增加集群内部网络消耗一个<br>队列想做成镜像队列，需要先设置 policy，然后客户端创建队列的时候，rabbitmq 集群根据“队列名称”自动设置是普通集群模式或镜像队列</li>
+</ul>
+<p><strong>推荐设计架构：</strong></p>
+<p>在一个 rabbitmq 集群里，有 3 台或以上机器，其中 1 台使用磁盘模式（数据保存到内存和磁盘），其它节点使用内存模式（数据只保存到内存），使用磁盘模式的节点，作为数据备份使用</p>
+<h3 id="Ubuntu-1804-安装集群版-RabbitMQ"><a href="#Ubuntu-1804-安装集群版-RabbitMQ" class="headerlink" title="Ubuntu 1804 安装集群版 RabbitMQ"></a>Ubuntu 1804 安装集群版 RabbitMQ</h3><pre class="language-none"><code class="language-none">10.0.1.101 mq1.ljk.cn mq1
+10.0.1.102 mq1.ljk.cn mq2
+10.0.1.103 mq1.ljk.cn mq3</code></pre>
+
+<p>Rabbitmq 的集群是依赖于 erlang 的集群来工作的，所以必须先构建起 erlang 的集群环境,而 Erlang 的集群中各节点是通过一个 magic cookie 来实现的，这个 cookie 存放在 &#x2F;var&#x2F;lib&#x2F;rabbitmq&#x2F;.erlang.cookie 中，文件是 400 的权限,所以必须保证各节点 cookie 保持一致，否则节点之间就无法通信</p>
+<ol>
+<li><p>各节点安装 RabbitMQ 并安装插件，参考上面单机部署</p>
+</li>
+<li><p>各服务器关闭 RabbitMQ</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> stop rabbitmq-server.service
+<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> stop rabbitmq-server.service
+<span class="token punctuation">[</span>root@mq3 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> stop rabbitmq-server.service</code></pre>
+</li>
+<li><p>在 mq1 同步.erlang.cookie 至其他两台服务器</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /var/lib/rabbitmq/
+<span class="token punctuation">[</span>root@mq1 rabbitmq<span class="token punctuation">]</span><span class="token variable">$scp</span> .erlang.cookie <span class="token number">10.0</span>.1.102:/var/lib/rabbitmq
+<span class="token punctuation">[</span>root@mq1 rabbitmq<span class="token punctuation">]</span><span class="token variable">$scp</span> .erlang.cookie <span class="token number">10.0</span>.1.103:/var/lib/rabbitmq</code></pre>
+</li>
+<li><p>各服务器启动 RabbitMQ</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start rabbitmq-server.service
+<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start rabbitmq-server.service
+<span class="token punctuation">[</span>root@mq3 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start rabbitmq-server.service</code></pre>
+</li>
+<li><p>查看当前集群状态</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status
+<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status
+<span class="token punctuation">[</span>root@mq3 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status</code></pre>
+</li>
+<li><p>创建 RabbitMQ 集群：mq1、mq2 作为内存节点，mq3 作为磁盘节点</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> stop_app 	<span class="token comment">#停止 app 服务</span>
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> reset 		<span class="token comment">#清空元数据</span>
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> join_cluster rabbit@mq3 <span class="token parameter variable">--ram</span> 	<span class="token comment">#将mq1添加到集群中，并成为内存节点，不加--ram默认是磁盘节点</span>
+<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> start_app	<span class="token comment">#启动 app 服务</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> stop_app
+<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> reset
+<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> join_cluster rabbit@mq3 <span class="token parameter variable">--ram</span>
+<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> start_app</code></pre>
+</li>
+<li><p>将集群设置为镜像模式，任意节点执行以下命令</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> set_policy ha-all <span class="token string">"#"</span> <span class="token string">'&#123;"ha-mode":"all"&#125;'</span></code></pre>
+</li>
+<li><p>查看集群状态</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status
+Cluster status of <span class="token function">node</span> rabbit@mq1 <span class="token punctuation">..</span>.
+Basics
+
+Cluster name: rabbit@mq3.ljk.cn
+
+Disk Nodes
+
+rabbit@mq3
+
+RAM Nodes
+
+rabbit@mq1
+rabbit@mq2
+
+Running Nodes
+
+rabbit@mq1
+rabbit@mq2
+rabbit@mq3
+
+Versions
+
+rabbit@mq1: RabbitMQ <span class="token number">3.8</span>.12 on Erlang <span class="token number">23.2</span>.5
+rabbit@mq2: RabbitMQ <span class="token number">3.8</span>.12 on Erlang <span class="token number">23.2</span>.5
+rabbit@mq3: RabbitMQ <span class="token number">3.8</span>.12 on Erlang <span class="token number">23.2</span>.5
+
+Maintenance status
+
+Node: rabbit@mq1, status: not under maintenance
+Node: rabbit@mq2, status: not under maintenance
+Node: rabbit@mq3, status: not under maintenance
+
+Alarms
+
+<span class="token punctuation">(</span>none<span class="token punctuation">)</span>
+
+Network Partitions
+
+<span class="token punctuation">(</span>none<span class="token punctuation">)</span>
+
+Listeners
+
+Node: rabbit@mq1, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">15672</span>, protocol: http, purpose: HTTP API
+Node: rabbit@mq1, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">25672</span>, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@mq1, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">5672</span>, protocol: amqp, purpose: AMQP <span class="token number">0</span>-9-1 and AMQP <span class="token number">1.0</span>
+Node: rabbit@mq2, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">25672</span>, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@mq2, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">5672</span>, protocol: amqp, purpose: AMQP <span class="token number">0</span>-9-1 and AMQP <span class="token number">1.0</span>
+Node: rabbit@mq2, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">15672</span>, protocol: http, purpose: HTTP API
+Node: rabbit@mq3, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">25672</span>, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@mq3, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">5672</span>, protocol: amqp, purpose: AMQP <span class="token number">0</span>-9-1 and AMQP <span class="token number">1.0</span>
+Node: rabbit@mq3, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">15672</span>, protocol: http, purpose: HTTP API
+
+Feature flags
+
+Flag: drop_unroutable_metric, state: enabled
+Flag: empty_basic_get_metric, state: enabled
+Flag: implicit_default_bindings, state: enabled
+Flag: maintenance_mode_status, state: enabled
+Flag: quorum_queue, state: enabled
+Flag: user_limits, state: enabled
+Flag: virtual_host_metadata, state: enabled</code></pre></li>
+</ol>
+<h2 id="RabbitMQ-常用命令"><a href="#RabbitMQ-常用命令" class="headerlink" title="RabbitMQ 常用命令"></a>RabbitMQ 常用命令</h2><ul>
+<li><p>创建 vhost</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> add_vhost <span class="token builtin class-name">test</span>
+Adding vhost <span class="token string">"test"</span> <span class="token punctuation">..</span>.</code></pre>
+</li>
+<li><p>列出所有 vhost</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_vhosts
+Listing vhosts <span class="token punctuation">..</span>.
+name
+/
+<span class="token builtin class-name">test</span></code></pre>
+</li>
+<li><p>列出所有队列</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_queues
+Timeout: <span class="token number">60.0</span> seconds <span class="token punctuation">..</span>.
+Listing queues <span class="token keyword">for</span> vhost / <span class="token punctuation">..</span>.</code></pre>
+</li>
+<li><p>删除指定 vhost</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> delete_vhost <span class="token builtin class-name">test</span>
+Deleting vhost <span class="token string">"test"</span> <span class="token punctuation">..</span>.</code></pre>
+</li>
+<li><p>添加账户 jack 密码为 123456</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> add_user jack <span class="token number">123456</span>
+Adding user <span class="token string">"jack"</span> <span class="token punctuation">..</span>.
+Done. Don<span class="token string">'t forget to grant the user permissions to some virtual hosts! See '</span>rabbitmqctl <span class="token builtin class-name">help</span> set_permissions' to learn more.</code></pre>
+</li>
+<li><p>更改用户密码</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> change_password jack <span class="token number">654321</span>
+Changing password <span class="token keyword">for</span> user <span class="token string">"jack"</span> <span class="token punctuation">..</span>.</code></pre>
+</li>
+<li><p>设置 jack 用户对 test 的 vhost 有读写权限，三个点为配置正则、读和写</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> set_permissions <span class="token parameter variable">-p</span> <span class="token builtin class-name">test</span> jack <span class="token string">".*"</span> <span class="token string">".*"</span> <span class="token string">".*"</span></code></pre></li>
+</ul>
+<h2 id="RabbitMQ-API"><a href="#RabbitMQ-API" class="headerlink" title="RabbitMQ API"></a>RabbitMQ API</h2><h2 id="RabbitMQ-Cluster-Monitor"><a href="#RabbitMQ-Cluster-Monitor" class="headerlink" title="RabbitMQ Cluster Monitor"></a>RabbitMQ Cluster Monitor</h2><h3 id="集群状态监控"><a href="#集群状态监控" class="headerlink" title="集群状态监控"></a>集群状态监控</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/env python</span>
+<span class="token comment"># coding:utf-8</span>
+<span class="token comment">#Author: ZhangJie</span>
+<span class="token function">import</span> subprocess
+
+running_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+error_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token boolean">false</span> <span class="token operator">=</span> <span class="token string">"false"</span>
+<span class="token boolean">true</span> <span class="token operator">=</span> <span class="token string">"true"</span>
+
+
+def get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>:
+    obj <span class="token operator">=</span> subprocess.Popen<span class="token punctuation">(</span>
+        <span class="token punctuation">(</span><span class="token string">"curl - s - u guest: guest http: // localhost: 15672/api/nodes &amp; > / dev/null"</span><span class="token punctuation">)</span>, <span class="token assign-left variable">shell</span><span class="token operator">=</span>True, <span class="token assign-left variable">stdout</span><span class="token operator">=</span>subprocess.PIPE<span class="token punctuation">)</span>
+
+    data <span class="token operator">=</span> obj.stdout.read<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    data1 <span class="token operator">=</span> eval<span class="token punctuation">(</span>data<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> data1:
+        <span class="token keyword">if</span> i.get<span class="token punctuation">(</span><span class="token string">"running"</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">"true"</span><span class="token builtin class-name">:</span>
+            running_list.append<span class="token punctuation">(</span>i.get<span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">))</span>
+        else:
+            error_list.append<span class="token punctuation">(</span>i.get<span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">))</span>
+
+
+def count_server<span class="token punctuation">(</span><span class="token punctuation">)</span>:
+    <span class="token keyword">if</span> len<span class="token punctuation">(</span>running_list<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">3</span>:   <span class="token comment"># 可以判断错误列表大于 0 或者运行列表小于 3，3未总计的节点数量</span>
+        print<span class="token punctuation">(</span><span class="token number">101</span><span class="token punctuation">)</span>              <span class="token comment"># 100 就是集群内有节点运行不正常了</span>
+    else:
+        print<span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span>               <span class="token comment"># 50 为所有节点全部运行正常</span>
+
+
+def main<span class="token punctuation">(</span><span class="token punctuation">)</span>:
+    get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    count_server<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">"__main__"</span><span class="token builtin class-name">:</span>
+    main<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
+
+<h3 id="内存使用监控"><a href="#内存使用监控" class="headerlink" title="内存使用监控"></a>内存使用监控</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cat rabbitmq_memory.py</span>
+<span class="token comment">#!/bin/env python</span>
+<span class="token comment"># coding:utf-8</span>
+<span class="token comment">#Author: ZhangJie</span>
+<span class="token function">import</span> subprocess
+<span class="token function">import</span> sys
+
+running_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+error_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token boolean">false</span> <span class="token operator">=</span> <span class="token string">"false"</span>
+<span class="token boolean">true</span> <span class="token operator">=</span> <span class="token string">"true"</span>
+
+
+def get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>:
+    obj <span class="token operator">=</span> subprocess.Popen<span class="token punctuation">(</span>
+        <span class="token punctuation">(</span><span class="token string">"curl - s - u guest: guest http: // localhost: 15672/api/nodes &amp; > / dev/null"</span><span class="token punctuation">)</span>, <span class="token assign-left variable">shell</span><span class="token operator">=</span>True, <span class="token assign-left variable">stdout</span><span class="token operator">=</span>subprocess.PIPE<span class="token punctuation">)</span>
+
+    data <span class="token operator">=</span> obj.stdout.read<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    data1 <span class="token operator">=</span> eval<span class="token punctuation">(</span>data<span class="token punctuation">)</span>
+    <span class="token comment"># print(data1)</span>
+    <span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> data1:
+        <span class="token keyword">if</span> i.get<span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">)</span> <span class="token operator">==</span> sys.argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>:
+            print<span class="token punctuation">(</span>i.get<span class="token punctuation">(</span><span class="token string">"mem_used"</span><span class="token punctuation">))</span>
+
+
+def main<span class="token punctuation">(</span><span class="token punctuation">)</span>:
+    get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">"__main__"</span><span class="token builtin class-name">:</span>
+    main<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+root@mq-server3: ~  <span class="token comment"># python3 rabbitmq_memory.py rabbit@mq-server1</span>
+<span class="token number">85774336</span>
+root@mq-server3: ~  <span class="token comment"># python3 rabbitmq_memory.py rabbit@mq-server2</span>
+<span class="token number">91099136</span>
+root@mq-server3: ~  <span class="token comment"># python3 rabbitmq_memory.py rabbit@mq-server3</span>
+<span class="token number">96428032</span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MQ/" rel="tag"><i class="fa fa-tag"></i> MQ</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/MQ/" rel="prev" title="MQ">
+                  <i class="fa fa-chevron-left"></i> MQ
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/ZooKeeper/" rel="next" title="ZooKeeper">
+                  ZooKeeper <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

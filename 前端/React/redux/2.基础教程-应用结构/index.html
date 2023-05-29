@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="创建 Redux StoreRedux Slice“slice” 是应用中单个功能的 Redux reducer 逻辑和 action 的集合, 通常一起定义在一个文件中。 比如，在一个博客应用中，store 的配置大致长这样： import &amp;#123; configureStore &amp;#125; from &quot;@reduxjs&#x2F;toolkit&quot; import usersReducer from">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2.基础教程-应用结构">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/2.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%BA%94%E7%94%A8%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="创建 Redux StoreRedux Slice“slice” 是应用中单个功能的 Redux reducer 逻辑和 action 的集合, 通常一起定义在一个文件中。 比如，在一个博客应用中，store 的配置大致长这样： import &amp;#123; configureStore &amp;#125; from &quot;@reduxjs&#x2F;toolkit&quot; import usersReducer from">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-29T08:13:25.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:22.370Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="redux">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/2.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%BA%94%E7%94%A8%E7%BB%93%E6%9E%84/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/2.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%BA%94%E7%94%A8%E7%BB%93%E6%9E%84/","path":"前端/React/redux/2.基础教程-应用结构/","title":"2.基础教程-应用结构"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>2.基础教程-应用结构 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-Redux-Store"><span class="nav-number">1.</span> <span class="nav-text">创建 Redux Store</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redux-Slice"><span class="nav-number">1.1.</span> <span class="nav-text">Redux Slice</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-Slice-Reducer-%E5%92%8C-Action"><span class="nav-number">2.</span> <span class="nav-text">创建 Slice Reducer 和 Action</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reducer-%E7%9A%84%E8%A7%84%E5%88%99"><span class="nav-number">3.</span> <span class="nav-text">Reducer 的规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reducer-%E4%B8%8E-Immutable-%E6%9B%B4%E6%96%B0"><span class="nav-number">4.</span> <span class="nav-text">Reducer 与 Immutable 更新</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link"><span class="nav-number">4.0.0.1.</span> <span class="nav-text"> 警告</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8-Thunk-%E7%BC%96%E5%86%99%E5%BC%82%E6%AD%A5%E9%80%BB%E8%BE%91"><span class="nav-number">5.</span> <span class="nav-text">用 Thunk 编写异步逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#React-Counter-%E7%BB%84%E4%BB%B6"><span class="nav-number">6.</span> <span class="nav-text">React Counter 组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-useSelector-%E6%8F%90%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">6.1.</span> <span class="nav-text">使用 useSelector 提取数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-useDispatch-%E6%9D%A5-dispatch-action"><span class="nav-number">6.2.</span> <span class="nav-text">使用 useDispatch 来 dispatch action</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6-State-%E4%B8%8E%E8%A1%A8%E5%8D%95"><span class="nav-number">7.</span> <span class="nav-text">组件 State 与表单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Providing-the-Store"><span class="nav-number">8.</span> <span class="nav-text">Providing the Store</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/redux/2.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E5%BA%94%E7%94%A8%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="2.基础教程-应用结构 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          2.基础教程-应用结构
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-05-29 16:13:25 / 修改时间：16:58:22" itemprop="dateCreated datePublished" datetime="2023-05-29T16:13:25+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/" itemprop="url" rel="index"><span itemprop="name">React</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/redux/" itemprop="url" rel="index"><span itemprop="name">redux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="创建-Redux-Store"><a href="#创建-Redux-Store" class="headerlink" title="创建 Redux Store"></a>创建 Redux Store</h2><h3 id="Redux-Slice"><a href="#Redux-Slice" class="headerlink" title="Redux Slice"></a>Redux Slice</h3><p><strong>“slice” 是应用中单个功能的 Redux reducer 逻辑和 action 的集合</strong>, 通常一起定义在一个文件中。</p>
+<p>比如，在一个博客应用中，store 的配置大致长这样：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">&#123;</span> configureStore <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"@reduxjs/toolkit"</span>
+<span class="token keyword">import</span> usersReducer <span class="token keyword">from</span> <span class="token string">"../features/users/usersSlice"</span>
+<span class="token keyword">import</span> postsReducer <span class="token keyword">from</span> <span class="token string">"../features/posts/postsSlice"</span>
+<span class="token keyword">import</span> commentsReducer <span class="token keyword">from</span> <span class="token string">"../features/comments/commentsSlice"</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token function">configureStore</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span>
+	reducer<span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+		users<span class="token operator">:</span> usersReducer<span class="token punctuation">,</span>
+		posts<span class="token operator">:</span> postsReducer<span class="token punctuation">,</span>
+		comments<span class="token operator">:</span> commentsReducer<span class="token punctuation">,</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span></code></pre>
+
+<h2 id="创建-Slice-Reducer-和-Action"><a href="#创建-Slice-Reducer-和-Action" class="headerlink" title="创建 Slice Reducer 和 Action"></a>创建 Slice Reducer 和 Action</h2><pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">&#123;</span> createSlice <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"@reduxjs/toolkit"</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> counterSlice <span class="token operator">=</span> <span class="token function">createSlice</span><span class="token punctuation">(</span><span class="token punctuation">&#123;</span>
+	name<span class="token operator">:</span> <span class="token string">"counter"</span><span class="token punctuation">,</span>
+	initialState<span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+		value<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+	reducers<span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+		<span class="token function-variable function">increment</span><span class="token operator">:</span> state <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+			<span class="token comment">// Redux Toolkit 允许我们在 reducers 写 "可变" 逻辑。</span>
+			<span class="token comment">// 并不是真正的改变 state 因为它使用了 immer 库</span>
+			<span class="token comment">// 当 immer 检测到 "draft state" 改变时，会基于这些改变去创建一个新的不可变的 state</span>
+			state<span class="token punctuation">.</span>value <span class="token operator">+=</span> <span class="token number">1</span>
+		<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+		<span class="token function-variable function">decrement</span><span class="token operator">:</span> state <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+			state<span class="token punctuation">.</span>value <span class="token operator">-=</span> <span class="token number">1</span>
+		<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+		<span class="token function-variable function">incrementByAmount</span><span class="token operator">:</span> <span class="token punctuation">(</span>state<span class="token punctuation">,</span> action<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+			state<span class="token punctuation">.</span>value <span class="token operator">+=</span> action<span class="token punctuation">.</span>payload
+		<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span> increment<span class="token punctuation">,</span> decrement<span class="token punctuation">,</span> incrementByAmount <span class="token punctuation">&#125;</span> <span class="token operator">=</span> counterSlice<span class="token punctuation">.</span>actions
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> counterSlice<span class="token punctuation">.</span>reducer</code></pre>
+
+<p>Redux Toolkit 有一个名为 <code>createSlice</code> 的函数，它负责生成 action 类型字符串、action creator 函数和 action 对象。</p>
+<p><code>createSlice</code> 内部使用了一个名为 <a target="_blank" rel="noopener" href="https://immerjs.github.io/immer/">Immer</a> 的库。 Immer 使用一种 “Proxy” 包装你提供的数据，当你尝试 ”mutate“ 这些数据的时候，<strong>Immer 会跟踪你尝试进行的所有更改，然后使用该更改列表返回一个安全的、不可变的更新值</strong>，就好像你手动编写了所有不可变的更新逻辑一样。</p>
+<h2 id="Reducer-的规则"><a href="#Reducer-的规则" class="headerlink" title="Reducer 的规则"></a>Reducer 的规则</h2><ul>
+<li>仅使用 <code>state</code> 和 <code>action</code> 参数计算新的状态值</li>
+<li>禁止直接修改 <code>state</code>。必须通过复制现有的 <code>state</code> 并对复制的值进行更改的方式来做 _不可变更新（immutable updates）_。</li>
+<li>禁止任何异步逻辑、依赖随机值或导致其他“副作用”的代码</li>
+</ul>
+<p>“不可变更新（Immutable Updates）” 这个规则尤其重要，值得进一步讨论。</p>
+<h2 id="Reducer-与-Immutable-更新"><a href="#Reducer-与-Immutable-更新" class="headerlink" title="Reducer 与 Immutable 更新"></a>Reducer 与 Immutable 更新</h2><p>在 Redux 中，**<em>永远</em> 不允许在 reducer 中直接更改 state 的原始对象！**</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token comment">// ❌ 非法 - 默认情况下，这将更改 state！</span>
+state<span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token number">123</span></code></pre>
+
+<p><strong>这就是为什么 Redux Toolkit 的 createSlice 函数可以让你以更简单的方式编写不可变更新！</strong></p>
+<blockquote>
+<h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span> 警告</h5>
+
+<p><strong>你 <em>只能</em> 在 Redux Toolkit 的 <code>createSlice</code> 和 <code>createReducer</code> 中编写 “mutation” 逻辑，因为它们在内部使用 Immer！如果你在没有 Immer 的 reducer 中编写 mutation 逻辑，它 <em>将</em> 改变状态并导致错误！</strong></p>
+</blockquote>
+<h2 id="用-Thunk-编写异步逻辑"><a href="#用-Thunk-编写异步逻辑" class="headerlink" title="用 Thunk 编写异步逻辑"></a>用 Thunk 编写异步逻辑</h2><p>到目前为止，我们应用程序中的所有逻辑都是同步的：</p>
+<ol>
+<li>dispatch action</li>
+<li>store 调用 reducer 来计算新状态</li>
+<li>dispatch 函数完成并结束</li>
+</ol>
+<p>但是，我们的应用程序通常具有异步逻辑，我们需要一个地方在我们的 Redux 应用程序中放置异步逻辑。</p>
+<p><strong>thunk</strong> 是一种特定类型的 Redux 函数，可以包含异步逻辑。Thunk 是使用两个函数编写的：</p>
+<ul>
+<li>一个内部 thunk 函数，它以 <code>dispatch</code> 和 <code>getState</code> 作为参数</li>
+<li>外部创建者函数，它创建并返回 thunk 函数</li>
+</ul>
+<p>示例：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token comment">// 外部的 thunk creator 函数, 它使我们可以执行异步逻辑</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token function-variable function">incrementAsync</span> <span class="token operator">=</span> amount <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+	<span class="token comment">// 内部的 thunk 函数</span>
+	<span class="token keyword">return</span> <span class="token punctuation">(</span>dispatch<span class="token punctuation">,</span> getState<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+		<span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+			<span class="token function">dispatch</span><span class="token punctuation">(</span><span class="token function">incrementByAmount</span><span class="token punctuation">(</span>amount<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 调用dispatch修改store</span>
+		<span class="token punctuation">&#125;</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span>
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>显然，<code>incrementAsync()</code> 返回的不是 action（action 是具有<code>type</code>字段的纯函数），而是一个函数，但它的使用方式和普通的 action 是一样的：</p>
+<pre class="language-tsx" data-language="tsx"><code class="language-tsx"><span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">Counter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	  <span class="token keyword">const</span> dispatch <span class="token operator">=</span> <span class="token function">useAppDispatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+	  <span class="token keyword">return</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span></span><span class="token punctuation">></span></span><span class="token plain-text">
+	  	&lt;button onClick=()=>dispatch(increment()) >+</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span><span class="token plain-text">
+	  	&lt;button onClick=()=>dispatch(incrementAsync()) >+</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span><span class="token plain-text">
+	  </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span></span><span class="token punctuation">></span></span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>这是依赖 “<strong>middleware</strong>” 机制实现的，Redux 的 store 可以使用 “middleware” 进行扩展，中间件是一种可以添加额外功能的附加组件或插件。其最常见的用途就是实现异步逻辑，同时仍能与 store 对话。</p>
+<p>Redux Thunk 中间件，代码很短：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">const</span> <span class="token function-variable function">thunkMiddleware</span> <span class="token operator">=</span>
+	<span class="token punctuation">(</span><span class="token punctuation">&#123;</span> dispatch<span class="token punctuation">,</span> getState <span class="token punctuation">&#125;</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+	next <span class="token operator">=></span>
+	action <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> action <span class="token operator">===</span> <span class="token string">"function"</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+			<span class="token keyword">return</span> <span class="token function">action</span><span class="token punctuation">(</span>dispatch<span class="token punctuation">,</span> getState<span class="token punctuation">)</span> <span class="token comment">// 这里面允许调用dispatch修改store</span>
+		<span class="token punctuation">&#125;</span>
+
+		<span class="token keyword">return</span> <span class="token function">next</span><span class="token punctuation">(</span>action<span class="token punctuation">)</span>
+	<span class="token punctuation">&#125;</span></code></pre>
+
+<p>它先判断传入 <code>dispatch</code> 的 action 是函数还是对象。如果是一个函数，则调用函数，并返回结果。否则，传入的是普通 action 对象，就把这个 action 传递给 store 处理。</p>
+<h2 id="React-Counter-组件"><a href="#React-Counter-组件" class="headerlink" title="React Counter 组件"></a>React Counter 组件</h2><pre class="language-tsx" data-language="tsx"><code class="language-tsx"><span class="token keyword">import</span> React<span class="token punctuation">,</span> <span class="token punctuation">&#123;</span> useState <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"react"</span>
+<span class="token keyword">import</span> <span class="token punctuation">&#123;</span> useSelector<span class="token punctuation">,</span> useDispatch <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"react-redux"</span>
+<span class="token keyword">import</span> <span class="token punctuation">&#123;</span> decrement<span class="token punctuation">,</span> increment<span class="token punctuation">,</span> incrementByAmount<span class="token punctuation">,</span> incrementAsync<span class="token punctuation">,</span> selectCount <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"./counterSlice"</span>
+<span class="token keyword">import</span> styles <span class="token keyword">from</span> <span class="token string">"./Counter.module.css"</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">Counter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">const</span> count <span class="token operator">=</span> <span class="token function">useSelector</span><span class="token punctuation">(</span>selectCount<span class="token punctuation">)</span>
+	<span class="token keyword">const</span> dispatch <span class="token operator">=</span> <span class="token function">useDispatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">const</span> <span class="token punctuation">[</span>incrementAmount<span class="token punctuation">,</span> setIncrementAmount<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useState</span><span class="token punctuation">(</span><span class="token string">"2"</span><span class="token punctuation">)</span>
+
+	<span class="token keyword">return</span> <span class="token punctuation">(</span>
+		<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span><span class="token plain-text">
+			</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">className</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">&#123;</span>styles<span class="token punctuation">.</span>row<span class="token punctuation">&#125;</span></span><span class="token punctuation">></span></span><span class="token plain-text">
+				</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">className</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">&#123;</span>styles<span class="token punctuation">.</span>button<span class="token punctuation">&#125;</span></span> <span class="token attr-name">aria-label</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Increment value<span class="token punctuation">"</span></span> <span class="token attr-name">onClick</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">dispatch</span><span class="token punctuation">(</span><span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#125;</span></span><span class="token punctuation">></span></span><span class="token plain-text">
+					+
+				</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span><span class="token plain-text">
+				</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>span</span> <span class="token attr-name">className</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">&#123;</span>styles<span class="token punctuation">.</span>value<span class="token punctuation">&#125;</span></span><span class="token punctuation">></span></span><span class="token punctuation">&#123;</span>count<span class="token punctuation">&#125;</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>span</span><span class="token punctuation">></span></span><span class="token plain-text">
+				</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">className</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">&#123;</span>styles<span class="token punctuation">.</span>button<span class="token punctuation">&#125;</span></span> <span class="token attr-name">aria-label</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Decrement value<span class="token punctuation">"</span></span> <span class="token attr-name">onClick</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">dispatch</span><span class="token punctuation">(</span><span class="token function">decrement</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">&#125;</span></span><span class="token punctuation">></span></span><span class="token plain-text">
+					-
+				</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span><span class="token plain-text">
+			</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span class="token plain-text">
+			</span><span class="token punctuation">&#123;</span><span class="token comment">/* 这里省略了额外的 render 代码 */</span><span class="token punctuation">&#125;</span><span class="token plain-text">
+		</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+	<span class="token punctuation">)</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="使用-useSelector-提取数据"><a href="#使用-useSelector-提取数据" class="headerlink" title="使用 useSelector 提取数据"></a>使用 useSelector 提取数据</h3><p><code>useSelector</code> 这个 hook 让我们的组件从 Redux 的 store 状态树中提取它需要的任何数据。</p>
+<p>我们默认 组件中不能引入 store。所以<code>useSelector</code>负责在幕后与 Redux store 对话。</p>
+<p>示例：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">const</span> countPlusTwo <span class="token operator">=</span> <span class="token function">useSelector</span><span class="token punctuation">(</span>state <span class="token operator">=></span> state<span class="token punctuation">.</span>counter<span class="token punctuation">.</span>value <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">)</span></code></pre>
+
+<p><code>useSelector</code> 会调用 <code>store.getState()</code> 获取 state，然后返回 <code>state.counter.value + 2</code> 的值。</p>
+<p>每当一个 action 被 dispatch 并且 Redux store 被更新时，<code>useSelector</code> 将重新运行我们的选择器函数。如果选择器返回的值与上次不同，<code>useSelector</code> 将确保我们的组件使用新值重新渲染。</p>
+<h3 id="使用-useDispatch-来-dispatch-action"><a href="#使用-useDispatch-来-dispatch-action" class="headerlink" title="使用 useDispatch 来 dispatch action"></a>使用 useDispatch 来 dispatch action</h3><p>类似地，我们知道如果我们可以访问 Redux store，可以 <code>store.dispatch(increment())</code>。</p>
+<p>由于我们无法访问 store 本身，因此我们需要某种方式来访问 <code>dispatch</code> 方法。</p>
+<p><code>useDispatch</code> hook 为我们完成了这项工作，并从 Redux store 中为我们提供了实际的 <code>dispatch</code> 方法：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">const</span> dispatch <span class="token operator">=</span> <span class="token function">useDispatch</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
+
+<h2 id="组件-State-与表单"><a href="#组件-State-与表单" class="headerlink" title="组件 State 与表单"></a>组件 State 与表单</h2><p><strong>在 React + Redux 应用中，你的全局状态应该放在 Redux store 中，你的本地状态应该保留在 React 组件中。</strong></p>
+<p><strong>大多数表单的 state 不应该保存在 Redux 中。</strong> 相反，在编辑表单的时候把数据存到表单组件中，当用户提交表单的时候再 dispatch action 来更新 store。</p>
+<h2 id="Providing-the-Store"><a href="#Providing-the-Store" class="headerlink" title="Providing the Store"></a>Providing the Store</h2><p>我们已经看到我们的组件可以使用 <code>useSelector</code> 和 <code>useDispatch</code> 这两个 hook 与 Redux 的 store 通信。奇怪的是，我们并没有导入 store，那么这些 hooks 怎么知道要与哪个 Redux store 对话呢？</p>
+<p>答案是使用 <code>Context</code>：</p>
+<pre class="language-tsx" data-language="tsx"><code class="language-tsx"><span class="token keyword">import</span> React <span class="token keyword">from</span> <span class="token string">"react"</span>
+<span class="token keyword">import</span> <span class="token punctuation">&#123;</span> createRoot <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"react-dom/client"</span>
+<span class="token keyword">import</span> <span class="token punctuation">&#123;</span> Provider <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"react-redux"</span>
+<span class="token keyword">import</span> <span class="token punctuation">&#123;</span> store <span class="token punctuation">&#125;</span> <span class="token keyword">from</span> <span class="token string">"app/store"</span>
+<span class="token keyword">import</span> App <span class="token keyword">from</span> <span class="token string">"./App"</span>
+
+<span class="token keyword">const</span> container <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">"root"</span><span class="token punctuation">)</span><span class="token operator">!</span>
+<span class="token keyword">const</span> root <span class="token operator">=</span> <span class="token function">createRoot</span><span class="token punctuation">(</span>container<span class="token punctuation">)</span>
+
+root<span class="token punctuation">.</span><span class="token function">render</span><span class="token punctuation">(</span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">React.StrictMode</span></span><span class="token punctuation">></span></span><span class="token plain-text">
+		</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">Provider</span></span> <span class="token attr-name">store</span><span class="token script language-javascript"><span class="token script-punctuation punctuation">=</span><span class="token punctuation">&#123;</span>store<span class="token punctuation">&#125;</span></span><span class="token punctuation">></span></span><span class="token plain-text">
+			</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">App</span></span> <span class="token punctuation">/></span></span><span class="token plain-text">
+		</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">Provider</span></span><span class="token punctuation">></span></span><span class="token plain-text">
+	</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span><span class="token class-name">React.StrictMode</span></span><span class="token punctuation">></span></span>
+<span class="token punctuation">)</span></code></pre>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><p>我们可以使用 Redux Toolkit configureStore API 创建一个 Redux store</p>
+<ul>
+<li><code>configureStore</code> 接收 <code>reducer</code> 函数来作为命名参数</li>
+<li><code>configureStore</code> 自动使用默认值来配置 store</li>
+</ul>
+</li>
+<li><p>在 slice 文件中编写 Redux 逻辑</p>
+<ul>
+<li>一个 slice 包含一个特定功能或部分的 state 相关的 reducer 逻辑和 action</li>
+<li>Redux Toolkit 的 <code>createSlice</code> API 为你提供的每个 reducer 函数生成 action creator 和 action 类型</li>
+</ul>
+</li>
+<li><p>Redux reducer 必须遵循以下原则</p>
+<ul>
+<li>必须依赖 <code>state</code> 和 <code>action</code> 参数去计算出一个新 state</li>
+<li>如果要修改 state，只能先拷贝 state 副本，然后去修改副本</li>
+<li>不能包含任何异步逻辑或其他副作用</li>
+<li>Redux Toolkit 的 <code>createSlice</code> API 内部使用了 Immer 库才达到表面上直接修改（”mutating”）state 也实现不可变更新（_immutable updates_）的效果</li>
+</ul>
+</li>
+<li><p>一般使用 “thunks” 来开发特定的异步逻辑</p>
+<ul>
+<li>Thunks 接收 <code>dispatch</code> 和 <code>getState</code> 作为参数</li>
+<li>Redux Toolkit 内置并默认启用了 <code>redux-thunk</code> 中间件</li>
+</ul>
+</li>
+<li><p>使用 React-Redux 来做 React 组件和 Redux store 的通信</p>
+<ul>
+<li>在应用程序根组件包裹 <code>&lt;Provider store=&#123;store&#125;&gt;</code> 使得所有组件都能访问到 store</li>
+<li>全局状态应该维护在 Redux store 内，局部状态应该维护在局部 React 组件内</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/redux/" rel="tag"><i class="fa fa-tag"></i> redux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%B7%A5%E5%85%B7/ubuntu/ubuntu2022.04%E5%AE%89%E8%A3%85SecureCRT9.3/" rel="prev" title="ubuntu2022.04安装SecureCRT9.3">
+                  <i class="fa fa-chevron-left"></i> ubuntu2022.04安装SecureCRT9.3
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/React/redux/3.%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B-%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9F%BA%E7%A1%80/" rel="next" title="3.基础教程-数据流基础">
+                  3.基础教程-数据流基础 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

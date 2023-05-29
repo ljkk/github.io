@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="安全机制加密算法 对称加密 非对称(公钥)加密 单向加密 认证协议  对称加密将原始数据分割成固定大小的块，逐个进行加密；加密和解密使用同一个密钥。 优点：效率高。 缺点：因为加密和解密使用同一个密钥，所以需要通信的一方生成密钥并发送给对方，才能进行通信。万一密钥被截获，那别人就即可以给你发送加密信息，也可以破解你的加密信息。 常见的对称加算法：DES、3DES、AES、Blowfish,Twof">
+<meta property="og:type" content="article">
+<meta property="og:title" content="加密和安全">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="安全机制加密算法 对称加密 非对称(公钥)加密 单向加密 认证协议  对称加密将原始数据分割成固定大小的块，逐个进行加密；加密和解密使用同一个密钥。 优点：效率高。 缺点：因为加密和解密使用同一个密钥，所以需要通信的一方生成密钥并发送给对方，才能进行通信。万一密钥被截获，那别人就即可以给你发送加密信息，也可以破解你的加密信息。 常见的对称加算法：DES、3DES、AES、Blowfish,Twof">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599297423578.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599395635747.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599398161213.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599483726731.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599483856018.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599738636243.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599903443135.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599904397703.png">
+<meta property="article:published_time" content="2020-12-09T15:02:30.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="加密和安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1599297423578.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/","path":"运维/基础/加密和安全/加密和安全/","title":"加密和安全"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>加密和安全 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">安全机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">加密算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.1.</span> <span class="nav-text">对称加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.2.</span> <span class="nav-text">非对称加密</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hash"><span class="nav-number">1.2.</span> <span class="nav-text">hash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D"><span class="nav-number">1.3.</span> <span class="nav-text">数字签名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6-CA"><span class="nav-number">1.4.</span> <span class="nav-text">签名证书 CA</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%81%E4%B9%A6"><span class="nav-number">1.4.1.</span> <span class="nav-text">证书</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#https"><span class="nav-number">1.4.2.</span> <span class="nav-text">https</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gpg"><span class="nav-number">1.5.</span> <span class="nav-text">gpg</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL-x2F-TLS"><span class="nav-number">2.</span> <span class="nav-text">SSL &#x2F; TLS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PKI"><span class="nav-number">2.1.</span> <span class="nav-text">PKI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SSL-x2F-TLS-%E7%BB%84%E6%88%90%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">SSL&#x2F;TLS 组成：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS-%E5%AE%9E%E7%8E%B0%E8%BF%87%E7%A8%8B"><span class="nav-number">2.3.</span> <span class="nav-text">TLS 实现过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTPS"><span class="nav-number">3.</span> <span class="nav-text">HTTPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Base64-%E7%BC%96%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">Base64 编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenSSL"><span class="nav-number">5.</span> <span class="nav-text">OpenSSL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#openssl"><span class="nav-number">5.1.</span> <span class="nav-text">openssl</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ssh-%E6%9C%8D%E5%8A%A1"><span class="nav-number">6.</span> <span class="nav-text">ssh 服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SSH-%E5%8D%8F%E8%AE%AE-%E5%92%8C-SSL-x2F-TLS-%E5%8D%8F%E8%AE%AE"><span class="nav-number">6.1.</span> <span class="nav-text">SSH 协议 和 SSL&#x2F;TLS 协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OpenSSH"><span class="nav-number">6.2.</span> <span class="nav-text">OpenSSH</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dropbear"><span class="nav-number">6.3.</span> <span class="nav-text">Dropbear</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ssh-%E5%85%B6%E4%BB%96%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7"><span class="nav-number">6.4.</span> <span class="nav-text">ssh 其他相关工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#sshfs"><span class="nav-number">6.4.1.</span> <span class="nav-text">sshfs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sshpass"><span class="nav-number">6.4.2.</span> <span class="nav-text">sshpass</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%8C%96%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7-pssh"><span class="nav-number">6.4.3.</span> <span class="nav-text">自动化运维工具 pssh</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#pssh"><span class="nav-number">6.4.3.1.</span> <span class="nav-text">pssh</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#pdsh"><span class="nav-number">6.4.3.2.</span> <span class="nav-text">pdsh</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#mussh"><span class="nav-number">6.4.3.3.</span> <span class="nav-text">mussh</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#pscp-pssh"><span class="nav-number">6.4.3.4.</span> <span class="nav-text">pscp.pssh</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#pslurp"><span class="nav-number">6.4.3.5.</span> <span class="nav-text">pslurp</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%AE%8C%E6%95%B4%E6%80%A7%E8%B0%83%E6%9F%A5-AIDE"><span class="nav-number">7.</span> <span class="nav-text">文件完整性调查 AIDE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#aide"><span class="nav-number">7.1.</span> <span class="nav-text">aide</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sudo"><span class="nav-number">8.</span> <span class="nav-text">sudo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sudo-%E7%89%B9%E6%80%A7"><span class="nav-number">8.1.</span> <span class="nav-text">sudo 特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sudo-%E7%BB%84%E6%88%90"><span class="nav-number">8.2.</span> <span class="nav-text">sudo 组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sudo-%E5%91%BD%E4%BB%A4"><span class="nav-number">8.3.</span> <span class="nav-text">sudo 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sudo-%E6%8E%88%E6%9D%83%E8%A7%84%E5%88%99%E9%85%8D%E7%BD%AE"><span class="nav-number">8.4.</span> <span class="nav-text">sudo 授权规则配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8C%83%E4%BE%8B"><span class="nav-number">8.5.</span> <span class="nav-text">范例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PAM"><span class="nav-number">9.</span> <span class="nav-text">PAM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PAM-%E6%9E%B6%E6%9E%84"><span class="nav-number">9.1.</span> <span class="nav-text">PAM 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PAM-%E7%9B%B8%E5%85%B3%E6%96%87%E4%BB%B6"><span class="nav-number">9.2.</span> <span class="nav-text">PAM 相关文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#x2F-lib64-x2F-security-x2F-so"><span class="nav-number">9.2.1.</span> <span class="nav-text">&#x2F;lib64&#x2F;security&#x2F;*.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#x2F-etc-x2F-security-x2F"><span class="nav-number">9.2.2.</span> <span class="nav-text">&#x2F;etc&#x2F;security&#x2F;</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#x2F-etc-x2F-pam-conf"><span class="nav-number">9.2.3.</span> <span class="nav-text">&#x2F;etc&#x2F;pam.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#x2F-etc-x2F-pam-d-x2F-APP-NAME"><span class="nav-number">9.2.4.</span> <span class="nav-text">&#x2F;etc&#x2F;pam.d&#x2F;APP_NAME</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PAM-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">9.3.</span> <span class="nav-text">PAM 工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PAM-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E"><span class="nav-number">9.4.</span> <span class="nav-text">PAM 配置文件格式说明</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#type"><span class="nav-number">9.4.1.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#control"><span class="nav-number">9.4.2.</span> <span class="nav-text">control</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#arguments"><span class="nav-number">9.4.3.</span> <span class="nav-text">arguments</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84-PAM-%E6%A8%A1%E5%9D%97"><span class="nav-number">9.5.</span> <span class="nav-text">常用的 PAM 模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-rootok-so"><span class="nav-number">9.5.1.</span> <span class="nav-text">pam_rootok.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-access-so"><span class="nav-number">9.5.2.</span> <span class="nav-text">pam_access.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-listfile-so"><span class="nav-number">9.5.3.</span> <span class="nav-text">pam_listfile.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-time-so"><span class="nav-number">9.5.4.</span> <span class="nav-text">pam_time.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-tally2-so"><span class="nav-number">9.5.5.</span> <span class="nav-text">pam_tally2.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-limits-so"><span class="nav-number">9.5.6.</span> <span class="nav-text">pam_limits.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-shells-so"><span class="nav-number">9.5.7.</span> <span class="nav-text">pam_shells.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-securetty-so"><span class="nav-number">9.5.8.</span> <span class="nav-text">pam_securetty.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-nologin-so"><span class="nav-number">9.5.9.</span> <span class="nav-text">pam_nologin.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-succeed-if-so"><span class="nav-number">9.5.10.</span> <span class="nav-text">pam_succeed_if.so</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pam-google-authenticator"><span class="nav-number">9.5.11.</span> <span class="nav-text">pam_google_authenticator</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E6%9C%8D%E5%8A%A1"><span class="nav-number">10.</span> <span class="nav-text">时间同步服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#chrony"><span class="nav-number">10.1.</span> <span class="nav-text">chrony</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#chrony-%E7%BB%84%E6%88%90%E6%96%87%E4%BB%B6"><span class="nav-number">10.1.1.</span> <span class="nav-text">chrony 组成文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-chrony-conf"><span class="nav-number">10.1.2.</span> <span class="nav-text">配置文件 chrony.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#chronyc"><span class="nav-number">10.1.3.</span> <span class="nav-text">chronyc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%AC%E5%85%B1-ntp-%E6%9C%8D%E5%8A%A1"><span class="nav-number">10.1.4.</span> <span class="nav-text">公共 ntp 服务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-Warpper"><span class="nav-number">11.</span> <span class="nav-text">TCP Warpper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SELinux"><span class="nav-number">12.</span> <span class="nav-text">SELinux</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="加密和安全 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          加密和安全
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:02:30" itemprop="dateCreated datePublished" datetime="2020-12-09T23:02:30+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">加密和安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="安全机制"><a href="#安全机制" class="headerlink" title="安全机制"></a>安全机制</h2><h3 id="加密算法"><a href="#加密算法" class="headerlink" title="加密算法"></a>加密算法</h3><ul>
+<li>对称加密</li>
+<li>非对称(公钥)加密</li>
+<li>单向加密</li>
+<li>认证协议</li>
+</ul>
+<h4 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h4><p>将原始数据分割成固定大小的块，逐个进行加密；加密和解密使用同一个密钥。</p>
+<p>优点：效率高。</p>
+<p>缺点：因为加密和解密使用同一个密钥，所以需要通信的一方生成密钥并发送给对方，才能进行通信。万一密钥被截获，那别人就即可以给你发送加密信息，也可以破解你的加密信息。</p>
+<p>常见的对称加算法：DES、3DES、AES、Blowfish,Twofish、IDEA,RC6,CAST5。</p>
+<h4 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h4><p>密钥成对出现：公钥和私钥成，公钥加密只有对应的私钥才能解密，反之依然。</p>
+<ol>
+<li>通信双方 A 和 B，分别生成自己的公钥和私钥。</li>
+<li>A 将公钥 A 发送给 B，B 将公钥 B 发送给 A。</li>
+<li>A 将发送给 B 的信息用公钥 B 加密；B 将发送给 A 的信息用公钥 A 加密。</li>
+<li>B 收到信息后用私钥 B 解密；A 接收到信息用私钥 A 解密。</li>
+</ol>
+<p>默认：数据使用公钥加密，私钥解密，签名使用私钥加密，公钥解密。</p>
+<p>优点：私钥只存储在本机不发送给任何人，所以即使公钥被截获，没有对应的私钥也无法破解信息。可以说非对称加密是绝对安全的。</p>
+<p>缺点：密钥长，算法复杂；加密解密效率低。</p>
+<p>常见非对称加密算法：RSA、ECC、DSA<br>RSA：国际标准算法，算法简单，应用早，兼容性好，一般采用 2048 位的加密长度。<br>ECC：椭圆加密算法，算法复杂，除了兼容性，其他各方面都优于 RSA，未来肯定会取代 RSA。<br>DSA：只能用于签名&#x2F;认证，不能用于加密&#x2F;解密，性能比 RSA 好，RSA 既能签名&#x2F;认证，也能加密&#x2F;解密。</p>
+<p><strong>综上：</strong>使用对称加密加密信息，效率高，只有在发送密钥的时候使用非对称加密，保证安全。</p>
+<p>加密过的信息即使被截获，也看不懂里面的内容，因为没有对应的私钥，是无法解密的，但是因为公钥是公开的，所以非法用户可以冒充正常用户发送信息，这个问题可以使用数字签名解决。</p>
+<h3 id="hash"><a href="#hash" class="headerlink" title="hash"></a>hash</h3><p>哈希算法:也称为散列算法,将任意数据缩小成固定大小的“指纹”,称为 digest,即摘要。</p>
+<p>特性:</p>
+<ul>
+<li>任意长度输入,固定长度输出</li>
+<li>若修改数据,指纹也会改变,且有雪崩效应,数据的一点微小改变,生成的指纹值变化非常大。</li>
+<li>无法从指纹中重新生成数据,即不要逆,具有单向性</li>
+</ul>
+<p>功能:数据完整性</p>
+<p>常见算法：md5: 128bits、sha1: 160bits、sha224、sha256、sha384、sha512</p>
+<h3 id="数字签名"><a href="#数字签名" class="headerlink" title="数字签名"></a>数字签名</h3><p>B 收到信息后，使用私钥 B 解密，解密后的信息中有 token 或 id 或 cookie 证明这条信息来自 A，但这是不可信的，因为这条信息完全可能是 C 发送的。而数字签名可以解决这问题。</p>
+<p>生成数字签名的算法有两种：RSA 和<a target="_blank" rel="noopener" href="https://blog.csdn.net/aaqian1/article/details/89299520">DSA</a>。</p>
+<p>数字签名有两个作用：1.证明消息来源；2.校验发送数据的完整性。</p>
+<p>A 把发送的数据的哈希值使用私钥 A 加密，生成数字签名。数字签名和数据拼接在一起发送给 B，有两种方式拼接方式：1. 数字签名和加密后的数据拼接；2. 数字签名和明文拼接，再总体加密。</p>
+<p>假设使用第一种拼接方式，那 B 收到信息后把数字签名取下，使用公钥 A 进行校验，下面以 DSA 算法为例简要介绍生成数字签名和校验数字签名的过程：</p>
+<p>公钥 A 中包含 p<sub>A</sub>、g<sub>A</sub>、q<sub>A</sub>、y<sub>A</sub> 四个值<br>私钥 A 是 x<sub>A</sub> 一个值<br>发送的数据是 m</p>
+<p>生成数字签名：<br>针对 m 生成一个随机数 k(key)，把 p<sub>A</sub>、g<sub>A</sub>、q<sub>A</sub>、y<sub>A</sub>、k 带入生成算法中出 r、s 两个值，所以数字签名由 r、s、k 三部分组成</p>
+<p>校验数字签名：<br>把 p<sub>A</sub>、g<sub>A</sub>、q<sub>A</sub>、y<sub>A</sub>、r、s、m 带入校验算法中得出 v，如果 v&#x3D;r 则说明校验通过，否则校验不通过。<br>因为 p<sub>A</sub>、g<sub>A</sub>、q<sub>A</sub>、y<sub>A</sub>、r、s、m 中有公钥 A、数据 m 以及基于 m 和 k 生成的 r、s，所以如果通过校验，就说明信息一定来自 A（除非 A 把自己的私钥泄露了）、数据一定是完整的。</p>
+<p>注意：每次个签名都需要一个新值 k，并且该值必须是随机选择的。如果不同的 m 使用了重复的 k，那么就会被破解出 k 值，然后推算出私钥 x</p>
+<p><strong>综上：</strong>使用对称加密加密信息，效率高，只有在发送对称加密密钥的时候使用非对称加密（RSA）加密密钥，为密钥生成数字签名，确保密钥安全发送。</p>
+<h3 id="签名证书-CA"><a href="#签名证书-CA" class="headerlink" title="签名证书 CA"></a>签名证书 CA</h3><p>数字签名通过校验的公钥确定信息来源。可是如果公钥被替换了呢，例如中间人攻击：</p>
+<img data-src="//img.to2b.cn/blog/ljk/1599297423578.png" style="zoom: 80%;" />
+
+<p>数字证书一般由数字证书认证机构（certificate authority，简称 CA）颁发，数字证书使用 CA 的私钥加密，其中包含了申请者的公钥和网址等信息。</p>
+<p>A 给 B 发送证书，B 用 CA 公钥解密后取出公钥，以及网址等其他信息，进行校验，如果证书中的公钥 A 和本机存储的公钥 A 一致，然后网址等其他信息都对，说明本机存储的公钥 A 确实是真正的公钥 A，以后只要用公钥 A 校验通过的数字签名，就能证明信息来源是真的 A。</p>
+<p>有同学问了，如果 B 储存的公钥 A 被替换成了公钥 C，然后 C 把 A 的证书截获下来，给 B 发送自己的证书 C，以此来冒充 A 不可以吗？答：显然不可以，因为证书中不只有公钥，即使证书中的公钥和 B 本机的公钥一致，其他的信息也校验不过关。</p>
+<h4 id="证书"><a href="#证书" class="headerlink" title="证书"></a>证书</h4><p><code>lujinkai.com</code>使用 openssl 生成了一对证书和私钥，证书中包含了以下信息：</p>
+<ul>
+<li>公钥</li>
+<li>host</li>
+<li>地区</li>
+<li>过期时间</li>
+<li>…</li>
+<li>使用私钥（注意是此证书签发机构的私钥，而非此证书中公钥对应的私钥）加密以上所有信息的哈希，生成签名</li>
+</ul>
+<h4 id="https"><a href="#https" class="headerlink" title="https"></a>https</h4><ol>
+<li><p>用户浏览器访问<code>https://lujinkai.com</code>，<code>lujinkai.com</code>将以下数据返回给浏览器：</p>
+<ol>
+<li>证书</li>
+<li>server 随机数</li>
+<li>server DH 参数：这里应该是不用私钥加密的，毕竟公钥是公开的，加密没有意义。</li>
+<li>server DH 参数的签名：使用私钥加密 server DH 参数的哈希值。签名保证了 server DH 合法完整。</li>
+</ol>
+</li>
+<li><p>浏览器确认证书的有效性，如果证书有问题，浏览器会告警提示用户；</p>
+</li>
+<li><p>如果证书没有问题，浏览器从证书中解析出公钥，使用公钥对 server DH 参数进行验签，确认 server DH 参数没问题后，将以下数据发送给服务器：</p>
+<ol>
+<li>client DH 参数：用公钥解密 server DH 参数，使用 server DH 参数生成 client DH 参数</li>
+<li>client 随机数</li>
+</ol>
+<p>这里不太清楚 client DH 参数和 client 随机数是否需要公钥加密。我估计应该是加密的。</p>
+</li>
+<li><p>双方现在都有以下数据：</p>
+<ul>
+<li>client 随机数</li>
+<li>server 随机数</li>
+<li>client DH 参数</li>
+<li>server DH 参数</li>
+</ul>
+<p>双方根据 client DH 参数和 server DH 参数生成 Session key，然后 Session key、client 随机数、server 随机数生成“对话密钥”，这个“对话密钥”其实就是对称加密的口令。</p>
+</li>
+<li><p>后续的通信均使用“对话密钥”进行加解密。</p>
+</li>
+</ol>
+<h3 id="gpg"><a href="#gpg" class="headerlink" title="gpg"></a>gpg</h3><p>gpg 实现加密通信，对称加密和非对称加密。下面的示范是 centos7 下的 gpg</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">gpg <span class="token punctuation">[</span>--homedir dir<span class="token punctuation">]</span> <span class="token punctuation">[</span>--options file<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token builtin class-name">command</span> <span class="token punctuation">[</span>args<span class="token punctuation">]</span></code></pre>
+
+<p>–homedir dir：指定家目录</p>
+<p>-option file：因为 gpg 的 option 众多，所以支持从文件中读取 options</p>
+<p><strong>options：</strong></p>
+<p>gpg.conf：在 homefir 下新建 gpg.conf，将长 option 写入其中，以后每次执行 gpg 命令都会自动加上 gpg.conf 中的 option，但是不能将 command 写入其中，没有意义。</p>
+<p>范例：默认加密成二进制，修改为默认加密成 ASCII</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~/data/test$ gpg <span class="token parameter variable">-c</span> a.log
+lujinkai@Z510:~/data/test$ <span class="token function">cat</span> a.log.gpg
+	H���ݒ��O�v<span class="token operator">=</span>��F���<span class="token comment">#�`u&amp;����in��1��P_14޷1�N��kh�D�>�4���</span>
+                                                                     ��F��v�i����I�<span class="token punctuation">]</span>�$����
+lujinkai@Z510:~/data/test$ <span class="token builtin class-name">echo</span> <span class="token string">'armor'</span> <span class="token operator">>></span> ~/.gnupg/gpg.conf
+lujinkai@Z510:~/data/test$ <span class="token function">cat</span> a.log.asc
+-----BEGIN PGP MESSAGE-----
+
+jA0ECQMCJBg8BY1yU6H/0k8BkJltvEvtfDi1XjjUfcRg6UC+TBU+YPighRYT9KXD
+7pzT6/vdM46wigfOLHB33Ip8rlvl2tALTAt/YMcUKyEEKbnnf/b3j9K/RhGd5t3c
+<span class="token operator">=</span>VKIs
+-----END PGP MESSAGE-----</code></pre>
+
+<ul>
+<li>-a|–armor：Create ASCII armored output. The default is to create the binary OpenPGP format.</li>
+<li>–cipher-algo name：指定对称加密的算法，算法列表使用<code>--version</code>查看</li>
+<li>-r|–recipient name name：指定加密使用的公钥，为了防止重名，不要使用 uid，推荐使用 uid 加密后的字符串代替 uid。如果不指定则使用默认公钥，如果没有设置默认公钥，则交互式要求指定公钥</li>
+<li>-o|–output file：输出到文件</li>
+</ul>
+<p><strong>command：</strong></p>
+<ul>
+<li>–version：查看 gpg 版本、支持的加密算法等信息</li>
+<li>–dump-options：列出所有的 command 和 options</li>
+<li>-e|–encrypt [file]：非对称加密，如果指定 file 则表示加密文件，如果不指定，我也不知道。。。</li>
+<li>-c|–symmetric [file]：对称加密</li>
+<li>-d|–decrypt：解密，会自动判读对称加密还是非对称加密，对称加密会自动识加密算法，非对称加密会自动判断使用哪个私钥解密（一台主机可以生成多个密钥对）</li>
+<li>-k|–list-keys|–list-public-keys：列出已有公钥</li>
+<li>-K|–list-secret-keys：列出已有私钥</li>
+<li>–export [name]：导出公钥，不指定公钥则导出所有公钥到一个文件</li>
+<li>–export-secret-keys|–export-secret-subkeys：导出私钥，注意只有 root 用户才能导出私钥，普通用户使用 sudo 也不行</li>
+<li>–impor|–fast-import [密钥文件]：除了生成自己的密钥，还需要将他人的公钥或者你的其他密钥输入系统</li>
+<li>–delete-keys name：删除指定公钥</li>
+<li>–delete-secret-keys name：删除指定私钥</li>
+<li>–delete-secret-and-public-key name：删除指定的密钥对，即公钥和私钥都删除</li>
+</ul>
+<p>对称加密：指定对称加密的算法，然后输入密码即可生成加密文件，解密的时候指定同样的算法，然后输入密码即可生成解密文件。可以认为对称加密的密钥就是 算法 + 密码</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用AES 加密 a.log</span>
+gpg --cipher-algo AES <span class="token parameter variable">-c</span> a.log
+
+<span class="token comment"># 解密</span>
+gpg <span class="token parameter variable">-d</span> a.log</code></pre>
+
+<p>非对称加密：公钥加密，私钥解密，加密需要指定公钥，解密不需要指定私钥，会自动判断</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 导出公钥lujinkai到文件lujinkai.pubkey</span>
+lujinkai@Z510:~/data/test$ gpg <span class="token parameter variable">-o</span> lujinkai.pubkey  <span class="token parameter variable">--export</span> lujinkai
+<span class="token comment"># 导出私钥lujinkai到文件lujinkai.subkey</span>
+lujinkai@Z510:~/data/test$ gpg <span class="token parameter variable">-o</span> lujinkai.subkey  --export-secret-keys lujinkai
+
+<span class="token comment"># 将公钥发送给centos7</span>
+lujinkai@Z510:~/data/test$ <span class="token function">scp</span> lujinkai.pubkey root@10.0.0.7:~/data
+<span class="token comment"># centos7将公钥导入自己的系统，然后用它加密文件，再将文件发给Z510</span>
+<span class="token punctuation">[</span>root@centos7 data<span class="token punctuation">]</span><span class="token comment">#gpg --import ./lujinkai.pubkey</span>
+<span class="token punctuation">[</span>root@centos7 data<span class="token punctuation">]</span><span class="token comment">#seq 10 > a.log</span>
+lujinkai@Z510:~/data/test$ <span class="token function">scp</span> root@10.0.0.7:/root/data/a.log.asc ./
+a.log.asc                                                                             <span class="token number">100</span>%  <span class="token number">409</span>   <span class="token number">804</span>.2KB/s   00:00
+
+<span class="token comment"># Z510解密成功</span>
+lujinkai@Z510:~/data/test$ gpg <span class="token parameter variable">-d</span> a.log.asc
+gpg: encrypted with <span class="token number">1024</span>-bit RSA key, ID 1BB25A5FFEAB69DD, created <span class="token number">2020</span>-09-06
+      <span class="token string">"lujinkai &lt;ljkk@qq.com>"</span>
+<span class="token number">1</span>
+<span class="token number">2</span>
+<span class="token number">3</span>
+<span class="token number">4</span>
+<span class="token number">5</span>
+<span class="token number">6</span>
+<span class="token number">7</span>
+<span class="token number">8</span>
+<span class="token number">9</span>
+<span class="token number">10</span></code></pre>
+
+<h2 id="SSL-x2F-TLS"><a href="#SSL-x2F-TLS" class="headerlink" title="SSL &#x2F; TLS"></a><a target="_blank" rel="noopener" href="https://www.sohu.com/a/117550504_505818">SSL &#x2F; TLS</a></h2><h3 id="PKI"><a href="#PKI" class="headerlink" title="PKI"></a><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/30136885">PKI</a></h3><p>PKI：Public Key Infrastructure 公共密钥加密体系，构成 PKI 的三个要素：</p>
+<ol>
+<li>证书：一对密钥，通常把公钥叫做证书</li>
+<li>认证机关：CA</li>
+<li>证书库：</li>
+</ol>
+<p><strong>证书类型：</strong></p>
+<ul>
+<li>证书授权机构的证书：根证书和中间证书，跟证书颁发中间证书，机构给自己颁发根证书。</li>
+<li>服务器证书：ssl 证书，就是一对密钥，私钥保存，公钥公开，通常把公钥叫做证书。</li>
+<li>用户证书：以支付宝的数字证书为例，是支付宝签发给用户的一对密钥，使用的是 RSA 算法，2048 位，私钥安装到 windows 系统，所以只能安装到 ie 浏览器，不可到处，所以只能在这一台电脑上使用。</li>
+</ul>
+<p><strong>X.509：</strong>定义证书的结构以及认证协议标准</p>
+<ul>
+<li>版本号</li>
+<li>序列号</li>
+<li>签名算法</li>
+<li>颁发者</li>
+<li>有效期限</li>
+<li>主体名称</li>
+</ul>
+<p><strong>获取证书两种方法：</strong></p>
+<ol>
+<li><p>自签名的证书： 自已签发自己的公钥</p>
+</li>
+<li><p>使用证书授权机构：</p>
+<ol>
+<li><p>生成证书请求（csr）</p>
+</li>
+<li><p>将证书请求 csr 发送给 CA</p>
+</li>
+<li><p>CA 签名颁发证书</p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="SSL-x2F-TLS-组成："><a href="#SSL-x2F-TLS-组成：" class="headerlink" title="SSL&#x2F;TLS 组成："></a>SSL&#x2F;TLS 组成：</h3><p>SSL&#x2F;TLS 位于传输层与应用层之间，主要是传输层，对网络传输进行加密。</p>
+<img data-src="//img.to2b.cn/blog/ljk/1599395635747.png"  />
+
+<ul>
+<li><p>Handshake 协议:包括协商安全参数和密码套件、服务器身份认证(客户端身份认证可选)、密钥交换</p>
+</li>
+<li><p>ChangeCipherSpec 协议:一条消息表明握手协议已经完成</p>
+</li>
+<li><p>Alert 协议:对握手协议中一些异常的错误提醒,分为 fatal 和 warning 两个级别,fatal 类型错误会直接中断 SSL 链接,而 warning 级别的错误 SSL 链接仍可继续,只是会给出错误警告</p>
+</li>
+<li><p>Record 协议:包括对消息的分段、压缩、消息认证和完整性保护、加密等</p>
+</li>
+</ul>
+<h3 id="TLS-实现过程"><a href="#TLS-实现过程" class="headerlink" title="TLS 实现过程"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lv6965/p/7859925.html">TLS 实现过程</a></h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 data<span class="token punctuation">]</span><span class="token comment">#curl https://www.baidu.com</span></code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1599398161213.png"></p>
+<h2 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h2><p><img data-src="//img.to2b.cn/blog/ljk/1599483726731.png"></p>
+<h2 id="Base64-编码"><a href="#Base64-编码" class="headerlink" title="Base64 编码"></a>Base64 编码</h2><p>base64 是编码，不是加密。</p>
+<img data-src="//img.to2b.cn/blog/ljk/1599483856018.png"  />
+
+<p>编号 0-63，一共 64 个，2<sup>6</sup>&#x3D;64，将数据的二进制以每 6 位一组划分，高位添俩 0，凑 8 位就是一个字节，将字节转成十进制，然后对照上表，生成 base64 编码。</p>
+<h2 id="OpenSSL"><a href="#OpenSSL" class="headerlink" title="OpenSSL"></a>OpenSSL</h2><p>OpenSSL 是一个开放源代码的软件库包，应用程序可以使用这个包来进行安全通信，避免窃听，同时确认另一端连线者的身份。这个包广泛被应用在互联网的网页服务器上。</p>
+<p>其主要库是以 C 语言所写成，实现了基本的加密功能，实现了 SSL 与 TLS 协议。</p>
+<p>包括三个组件：</p>
+<ul>
+<li>libcrypto：用于实现加密和解密的库</li>
+<li>libssl：用于实现 ssl 通信协议的安全库</li>
+<li>openssl：多用途命令行工具</li>
+</ul>
+<h3 id="openssl"><a href="#openssl" class="headerlink" title="openssl"></a>openssl</h3><p>openssl 是 OpenSSL 的命令行工具。</p>
+<h2 id="ssh-服务"><a href="#ssh-服务" class="headerlink" title="ssh 服务"></a>ssh 服务</h2><p>知识补充：</p>
+<ul>
+<li>MAC: Message Authentication Code，单向加密的一种延伸应用，用于实现网络通信中保证所传输数据的完整性机制</li>
+<li>HMAC：hash-based MAC，使用哈希算法</li>
+</ul>
+<p>SSH: secure shell protocol, 22&#x2F;tcp, 安全的远程登录，实现加密通信，代替传统的 telnet 协议。</p>
+<p>SSH 协议位于应用层与传输层之间，默认监听 22 端口号，安全的远程登录。</p>
+<p>软件实现：1. OpenSSH，CentOS 默认安装；2. dropbear，更加轻量级。</p>
+<h3 id="SSH-协议-和-SSL-x2F-TLS-协议"><a href="#SSH-协议-和-SSL-x2F-TLS-协议" class="headerlink" title="SSH 协议 和 SSL&#x2F;TLS 协议"></a>SSH 协议 和 SSL&#x2F;TLS 协议</h3><p><strong>SSH：</strong></p>
+<p>SSH 协议比较简单，简单的代价就是 SSH 无法判断 Server 公钥的真伪，需要人工判断，手动保存。</p>
+<p>SSH 是专为 shell 设计的一种通信协议，只有 SSH 客户端和 SSH 服务端之间通信才使用这个协议。</p>
+<p><strong>SSL&#x2F;TLS：</strong></p>
+<p>SSL&#x2F;LTS 依赖 KPI 体系，利用数字证书确保 Server 公钥的合法性。</p>
+<p>而 SSL&#x2F;TLS 是一种更加通用的安全协议，它的目标是建立一种对上层应用协议透明的，可以依赖的安全协议。</p>
+<p>HTTP、FTP、电子邮件协议以及其他所有应用层协议，都可结合 SSL&#x2F;TLS 实现加密通信。</p>
+<h3 id="OpenSSH"><a href="#OpenSSH" class="headerlink" title="OpenSSH"></a>OpenSSH</h3><p>CentOS 默认安装 OpenSSH，比较常用</p>
+<h3 id="Dropbear"><a href="#Dropbear" class="headerlink" title="Dropbear"></a>Dropbear</h3><p>Dropbear 是一个相对较小的 SSH 服务器和客户端。它运行在一个基于 POSIX 的各种平台。 Dropbear 是开源软件，期望在存储器与运算能力有限的情况下取代 OpenSSH，尤其是嵌入式系统</p>
+<h3 id="ssh-其他相关工具"><a href="#ssh-其他相关工具" class="headerlink" title="ssh 其他相关工具"></a>ssh 其他相关工具</h3><h4 id="sshfs"><a href="#sshfs" class="headerlink" title="sshfs"></a>sshfs</h4><p>EPEL 源提供，目前 CentOS8 还没有提供，可以利用 ssh 协议挂载远程目录</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#yum install fuse-sshfs</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#sshfs 10.0.0.8:/data /mnt</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#df /mnt</span>
+Filesystem 1K-blocks Used Available Use% Mounted on
+<span class="token number">10.0</span>.0.8:/data <span class="token number">52403200</span> <span class="token number">398576</span> <span class="token number">52004624</span> <span class="token number">1</span>% /mnt</code></pre>
+
+<h4 id="sshpass"><a href="#sshpass" class="headerlink" title="sshpass"></a>sshpass</h4><p>EPEL 源提供，ssh 登陆不能在命令行中指定密码。sshpass 的出现，解决了这一问题。sshpass 用于非交互 SSH 的密码验证，一般用在 sh 脚本中，无须再次输入密码（本机 known_hosts 文件中有的主机才能生效）。使用 -p 参数指定明文密码，然后直接登录远程服务器，支持密码从命令行、文件、环境变量中读取</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">sshpass <span class="token punctuation">[</span>option<span class="token punctuation">]</span> <span class="token builtin class-name">command</span> parameters</code></pre>
+
+<ul>
+<li>-p password #后跟密码它允许你用 -p 参数指定明文密码，然后直接登录远程服务器</li>
+<li>-f filename #后跟保存密码的文件名，密码是文件内容的第一行。</li>
+<li>-e #将环境变量 SSHPASS 作为密码</li>
+</ul>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$sshpass</span> <span class="token parameter variable">-p</span> <span class="token number">123456</span> <span class="token function">ssh</span> <span class="token parameter variable">-o</span> <span class="token assign-left variable">StrictHostKeyChecking</span><span class="token operator">=</span>no root@10.0.0.7
+Warning: Permanently added <span class="token string">'10.0.0.7'</span> <span class="token punctuation">(</span>ECDSA<span class="token punctuation">)</span> to the list of known hosts.
+Last login: Thu Sep <span class="token number">10</span> <span class="token number">14</span>:59:43 <span class="token number">2020</span> from <span class="token number">10.0</span>.0.1
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#</span></code></pre>
+
+<p>范例：批量修改多台主机的 root 密码为随机密码</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#cat sshpass.sh</span>
+<span class="token comment">#!/bin/bash</span>
+<span class="token assign-left variable">HOSTS</span><span class="token operator">=</span><span class="token string">"
+10.0.0.6
+10.0.0.7
+10.0.0.18
+10.0.0.28
+"</span>
+<span class="token assign-left variable">PASS</span><span class="token operator">=</span>magedu
+ssh-keygen <span class="token parameter variable">-P</span> <span class="token string">""</span> <span class="token parameter variable">-f</span> /root/.ssh/id_rsa <span class="token operator">&amp;></span>/dev/null
+<span class="token function">rpm</span> <span class="token parameter variable">-q</span> sshpass <span class="token operator">&amp;></span>/dev/null <span class="token operator">||</span> yum <span class="token parameter variable">-y</span> <span class="token function">install</span> sshpass <span class="token operator">&amp;></span>/dev/null
+<span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> <span class="token variable">$HOSTS</span><span class="token punctuation">;</span> <span class="token keyword">do</span>
+	<span class="token punctuation">&#123;</span>
+		sshpass <span class="token parameter variable">-p</span> <span class="token variable">$PASS</span> ssh-copy-id <span class="token parameter variable">-o</span> <span class="token assign-left variable">StrictHostKeyChecking</span><span class="token operator">=</span>no <span class="token parameter variable">-i</span> /root/.ssh/id_rsa.pub <span class="token variable">$i</span> <span class="token operator">&amp;></span>/dev/null
+	<span class="token punctuation">&#125;</span> <span class="token operator">&amp;</span>
+<span class="token keyword">done</span>
+<span class="token function">wait</span>	<span class="token comment"># 等待所有子后台进程结束</span>
+<span class="token comment"># 说明：使用 &amp; + wait 实现“多进程”并发执行</span></code></pre>
+
+<h4 id="自动化运维工具-pssh"><a href="#自动化运维工具-pssh" class="headerlink" title="自动化运维工具 pssh"></a>自动化运维工具 pssh</h4><p>EPEL 源中提供了多个自动化运维工具：pssh、pdsh、mussh</p>
+<p>如果机器不多，这些自动化运维工具还是好用的。</p>
+<h5 id="pssh"><a href="#pssh" class="headerlink" title="pssh"></a>pssh</h5><p>基于 python 编写，可在多台服务器上执行命令的工具，也可实现文件复制，提供了基于 ssh 和 scp 的多个并行工具，项目：<a target="_blank" rel="noopener" href="http://code.google.com/p/parallel-ssh/">http://code.google.com/p/parallel-ssh/</a></p>
+<p>ssh 能用的选项 pssh 也能用，pssh 命令选项如下：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-H</span>        <span class="token comment"># 主机字符串，内容格式”[user@]host[:port]”</span>
+<span class="token parameter variable">-h</span> <span class="token function">file</span>   <span class="token comment"># 主机列表文件，内容格式”[user@]host[:port]”</span>
+<span class="token parameter variable">-A</span>        <span class="token comment"># 手动输入密码模式</span>
+<span class="token parameter variable">-i</span>        <span class="token comment"># 每个服务器内部处理信息输出</span>
+<span class="token parameter variable">-l</span>        <span class="token comment"># 登录使用的用户名</span>
+<span class="token parameter variable">-p</span>        <span class="token comment"># 并发的线程数【可选】</span>
+<span class="token parameter variable">-o</span>        <span class="token comment"># 输出的文件目录【可选】</span>
+<span class="token parameter variable">-e</span>        <span class="token comment"># 错误输出文件【可选】</span>
+<span class="token parameter variable">-t</span>        <span class="token comment"># TIMEOUT 超时时间设置，0无限制【可选】</span>
+<span class="token parameter variable">-O</span>        <span class="token comment"># SSH的选项</span>
+<span class="token parameter variable">-P</span>        <span class="token comment"># 打印出服务器返回信息</span>
+<span class="token parameter variable">-v</span>        <span class="token comment"># 详细模式</span>
+<span class="token parameter variable">--version</span> <span class="token comment"># 查看版本</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 最好先设置免密登录，否则需要使用sshpass</span>
+
+<span class="token comment"># 一台主机：用 ssh remote_host command 也能实现同样的效果</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$pssh</span> <span class="token parameter variable">-H</span> root@10.0.0.7 <span class="token parameter variable">-i</span> <span class="token function">hostname</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> 05:56:05 <span class="token punctuation">[</span>SUCCESS<span class="token punctuation">]</span> root@10.0.0.7
+centos7.magedu.org
+
+<span class="token comment"># 多台主机</span>
+<span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token variable">$cat</span> host.list
+root@10.0.0.7:22
+lujinkai@10.0.0.101:22
+<span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token variable">$pssh</span> <span class="token parameter variable">-h</span> host.list <span class="token parameter variable">-i</span> <span class="token function">hostname</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> 06:05:10 <span class="token punctuation">[</span>SUCCESS<span class="token punctuation">]</span> root@10.0.0.7:22
+centos7.magedu.org
+<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> 06:05:10 <span class="token punctuation">[</span>SUCCESS<span class="token punctuation">]</span> lujinkai@10.0.0.101:22
+ubuntu1804</code></pre>
+
+<h5 id="pdsh"><a href="#pdsh" class="headerlink" title="pdsh"></a>pdsh</h5><p>Parallel remote shell program，是一个多线程远程 shell 客户端，可以并行执行多个远程主机上的命令。 可使用几种不同的远程 shell 服务，包括 rsh，Kerberos IV 和 ssh，项目： <a target="_blank" rel="noopener" href="https://pdsh.googlecode.com/">https://pdsh.googlecode.com/</a></p>
+<h5 id="mussh"><a href="#mussh" class="headerlink" title="mussh"></a>mussh</h5><p>Multihost SSH wrapper，是一个 shell 脚本，允许使用命令在多个主机上通过 ssh 执行命令。 可使用 ssh-agent 和 RSA&#x2F;DSA 密钥，以减少输入密码，项目：<a target="_blank" rel="noopener" href="http://www.sourceforge.net/projects/mussh">http://www.sourceforge.net/projects/mussh</a></p>
+<h5 id="pscp-pssh"><a href="#pscp-pssh" class="headerlink" title="pscp.pssh"></a>pscp.pssh</h5><p>pscp.pssh 功能是将本地文件批量复制到远程主机</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#将本地curl.sh 复制到/app/目录</span>
+pscp.pssh <span class="token parameter variable">-h</span> host.txt /root/test/curl.sh /app/
+<span class="token comment">#将本地多个文件批量复制到/app/目录</span>
+pscp.pssh <span class="token parameter variable">-h</span> host.txt /root/f1.sh /root/f2.sh /app/
+<span class="token comment">#将本地目录批量复制到/app/目录</span>
+pscp.pssh <span class="token parameter variable">-h</span> host.txt <span class="token parameter variable">-r</span> /root/test/ /app/</code></pre>
+
+<h5 id="pslurp"><a href="#pslurp" class="headerlink" title="pslurp"></a>pslurp</h5><p>pslurp 功能是将远程主机的文件批量复制到本地</p>
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+<h2 id="文件完整性调查-AIDE"><a href="#文件完整性调查-AIDE" class="headerlink" title="文件完整性调查 AIDE"></a>文件完整性调查 AIDE</h2><p>AIDE（Advanced Intrusion Detection Environment 高级入侵检测环境）是一个入侵检测工具，主要用途是检查文件的完整性，审计计算机上的那些文件被更改过了</p>
+<p>AIDE 能够构造一个指定文件的数据库，它使用 aide.conf 作为其配置文件。AIDE 数据库能够保存文件的各种属性，包括：权限(permission)、索引节点序号(inode number)、所属用户(user)、所属用户组(group)、文件大小、最后修改时间(mtime)、创建时间(ctime)、最后访问时间(atime)、增加的大小以及连接数。AIDE 还能够使用下列算法：sha1、md5、rmd160、tiger，以密文形式建立每个文件的校验码或散列号</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1599738636243.png"></p>
+<p>这个数据库不应该保存那些经常变动的文件信息，例如：日志文件、邮件、&#x2F;proc 文件系统、用户起始目录以及临时目录</p>
+<p>配置文件：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/etc/aide.conf</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">@@define DBDIR /var/lib/aide	<span class="token comment"># 数据库目录</span>
+@@define LOGDIR /var/log/aide	<span class="token comment"># 日志目录</span>
+
+<span class="token assign-left variable">database</span><span class="token operator">=</span>file:@@<span class="token punctuation">&#123;</span>DBDIR<span class="token punctuation">&#125;</span>/aide.db.gz	<span class="token comment"># 数据库文件，真正生效的文件</span>
+<span class="token assign-left variable">database_out</span><span class="token operator">=</span>file:@@<span class="token punctuation">&#123;</span>DBDIR<span class="token punctuation">&#125;</span>/aide.db.new.gz	<span class="token comment"># 命令生成数据库文件，需要改成aide.db.gz才能生效</span>
+
+<span class="token comment"># 默认属性</span>
+<span class="token comment">#p:      permissions</span>
+<span class="token comment">#i:      inode:</span>
+<span class="token comment">#n:      number of links</span>
+<span class="token comment">#u:      user</span>
+<span class="token comment">#g:      group</span>
+<span class="token comment">#s:      size</span>
+<span class="token comment">#b:      block count</span>
+<span class="token comment">#m:      mtime</span>
+<span class="token comment">#a:      atime</span>
+<span class="token comment">#c:      ctime</span>
+<span class="token comment">#S:      check for growing size</span>
+<span class="token comment">#acl:           Access Control Lists</span>
+<span class="token comment">#selinux        SELinux security context</span>
+<span class="token comment">#xattrs:        Extended file attributes</span>
+<span class="token comment">#md5:    md5 checksum</span>
+<span class="token comment">#sha1:   sha1 checksum</span>
+<span class="token comment">#sha256:        sha256 checksum</span>
+<span class="token comment">#sha512:        sha512 checksum</span>
+<span class="token comment">#rmd160: rmd160 checksum</span>
+<span class="token comment">#tiger:  tiger checksum</span>
+
+<span class="token comment">#haval:  haval checksum (MHASH only)</span>
+<span class="token comment">#gost:   gost checksum (MHASH only)</span>
+<span class="token comment">#crc32:  crc32 checksum (MHASH only)</span>
+<span class="token comment">#whirlpool:     whirlpool checksum (MHASH only)</span>
+<span class="token comment">#R:             p+i+n+u+g+s+m+c+acl+selinux+xattrs+md5</span>
+<span class="token comment">#L:             p+i+n+u+g+acl+selinux+xattrs</span>
+<span class="token comment">#E:             Empty group</span>
+<span class="token comment">#>:             Growing logfile p+u+g+i+n+S+acl+selinux+xattrs</span>
+
+
+<span class="token comment"># 各种预定义规则，指定需要保存的属性，可以删除，可以参考格式自定义</span>
+ALLXTRAHASHES <span class="token operator">=</span> sha1+rmd160+sha256+sha512+tiger
+EVERYTHING <span class="token operator">=</span> R+ALLXTRAHASHES
+NORMAL <span class="token operator">=</span> p+i+n+u+g+s+m+c+acl+selinux+xattrs+sha512
+DIR <span class="token operator">=</span> p+i+n+u+g+acl+selinux+xattrs
+<span class="token punctuation">..</span>.
+
+<span class="token comment"># 默认监控的文件和目录，按照指定的规则保存文件的各种属性，可以删除，可以自定义</span>
+/boot        CONTENT_EX
+/opt/        CONTENT
+/root/<span class="token punctuation">\</span><span class="token punctuation">..</span>* PERMS	<span class="token comment"># 支持正则</span>
+/usr/    CONTENT_EX
+<span class="token operator">!</span>/usr/src/	<span class="token comment"># ！表示不监控此文件或目录</span>
+<span class="token operator">!</span>/usr/tmp/
+/etc/hosts$      CONTENT_EX		<span class="token comment"># $匹配结尾，说明只监控单个文件</span>
+/etc/host.conf$  CONTENT_EX
+/etc/hostname$   CONTENT_EX</code></pre>
+
+<h3 id="aide"><a href="#aide" class="headerlink" title="aide"></a>aide</h3><pre class="language-bash" data-language="bash"><code class="language-bash">aide <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token builtin class-name">command</span></code></pre>
+
+<p>command：</p>
+<ul>
+<li>-i：初始化，按照 aide.conf 中的设置 对指定目录 按照指定规则 保存快照到数据库</li>
+<li>-C：检查，把数据库中保存的文件状态 和 现在的文件 做对比，发现那些文件的那些属性发生了变化</li>
+<li>-u：更新数据库</li>
+<li>-E：比较两个数据库</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 初始化默认的AIDE的库</span>
+/usr/local/bin/aide <span class="token parameter variable">-i</span> <span class="token operator">|</span> <span class="token parameter variable">--init</span>
+
+<span class="token comment"># 生成检查数据库（建议初始数据库存放到安全的地方）</span>
+<span class="token builtin class-name">cd</span> /var/lib/aide
+<span class="token function">mv</span> aide.db.new.gz aide.db.gz
+
+<span class="token comment"># 检测</span>
+/usr/local/bin/aide <span class="token parameter variable">-C</span> <span class="token operator">|</span> <span class="token parameter variable">--check</span>
+
+<span class="token comment"># 更新数据库</span>
+aide <span class="token parameter variable">-u</span> <span class="token operator">|</span> <span class="token parameter variable">--update</span></code></pre>
+
+<h2 id="sudo"><a href="#sudo" class="headerlink" title="sudo"></a>sudo</h2><p>sudo 即 superuser do，允许系统管理员让普通用户执行一些或者全部的 root 命令的一个工具，相比 su 命令，sudo 不需要告知普通用户 root 用户的密码。</p>
+<h3 id="sudo-特性"><a href="#sudo-特性" class="headerlink" title="sudo 特性"></a>sudo 特性</h3><ul>
+<li>sudo 能够授权指定用户在指定主机上运行某些命令。如果未授权用户尝试使用 sudo，会提示联系管理员</li>
+<li>sudo 提供了丰富的日志，详细地记录了每个用户干了什么。它能够将日志传到中心主机或者日志服务器</li>
+<li>sudo 使用时间戳文件来执行类似的“检票”系统。当用户调用 sudo 并且输入它的密码时，用户获得了一张存活期为 5 分钟的票</li>
+<li>sudo 的配置文件是 sudoers 文件，它允许系统管理员集中的管理用户的使用权限和使用的主机。它所存放的位置默认是在&#x2F;etc&#x2F;sudoers，属性必须为 0440</li>
+</ul>
+<h3 id="sudo-组成"><a href="#sudo-组成" class="headerlink" title="sudo 组成"></a>sudo 组成</h3><ul>
+<li><p>配置文件：&#x2F;etc&#x2F;sudo.conf</p>
+</li>
+<li><p>授权规则配置文件：&#x2F;etc&#x2F;sudoers、&#x2F;etc&#x2F;sudoers.d</p>
+</li>
+<li><p>安全编辑授权规则文件和语法检查工具：&#x2F;usr&#x2F;sbin&#x2F;visudo</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 检查语法</span>
+visudo <span class="token parameter variable">-c</span>
+
+<span class="token comment"># 检查指定配置文件语法</span>
+visudo <span class="token parameter variable">-f</span> /etc/sudoers.d/test</code></pre>
+</li>
+<li><p>授权编辑规则文件的工具：&#x2F;usr&#x2F;bin&#x2F;sudoedit</p>
+<p>相当于用默认编辑器（可以修改）打开配置文件，只不过有检查语法格式的功能</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@ubuntu1804:~<span class="token comment"># export EDITOR=vim	# 修改ubuntu的visudo的默认编辑器为vim</span></code></pre>
+</li>
+<li><p>执行授权命令：&#x2F;usr&#x2F;bin&#x2F;sudo</p>
+</li>
+<li><p>时间戳文件：&#x2F;var&#x2F;db&#x2F;sudo</p>
+</li>
+<li><p>日志文件：&#x2F;var&#x2F;log&#x2F;secure</p>
+</li>
+</ul>
+<h3 id="sudo-命令"><a href="#sudo-命令" class="headerlink" title="sudo 命令"></a>sudo 命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token parameter variable">-h</span> <span class="token operator">|</span> <span class="token parameter variable">-K</span> <span class="token operator">|</span> <span class="token parameter variable">-k</span> <span class="token operator">|</span> <span class="token parameter variable">-V</span>
+<span class="token function">sudo</span> <span class="token parameter variable">-l</span> <span class="token punctuation">[</span>-AknS<span class="token punctuation">]</span> <span class="token punctuation">[</span>-g group<span class="token punctuation">]</span> <span class="token punctuation">[</span>-h host<span class="token punctuation">]</span> <span class="token punctuation">[</span>-p prompt<span class="token punctuation">]</span> <span class="token punctuation">[</span>-U user<span class="token punctuation">]</span> <span class="token punctuation">[</span>-u user<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
+<span class="token function">sudo</span> <span class="token punctuation">[</span>-u user<span class="token punctuation">]</span> COMMAND
+<span class="token function">sudo</span> <span class="token parameter variable">-i</span> <span class="token parameter variable">-u</span> wang</code></pre>
+
+<ul>
+<li>-V：显示版本信息等配置信息</li>
+<li>-K：第一次使用 sudo 需要输入密码，输入密码后会在&#x2F;run&#x2F;sudo&#x2F;ts 目录下生成一个时间戳文件，这个时间戳文件缓存密码，超时缓存会失效。-K 会删除对应的时间戳缓存文件，也就是说下次使用 sudo 需要输入密码。</li>
+<li>-k：让对应的时间戳文件失效，也是也是下次使用 sudo 需要输入密码。</li>
+<li>-i：登录，默认登录到 root 用户，如果是登录到其它用户，需配合 -u user 指定用户</li>
+<li>-l|ll：列出用户在主机上可用的和被禁止的命令</li>
+<li>-u：指定用户，默认是 root 用户</li>
+<li>-b：后台执行命令</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 etc<span class="token punctuation">]</span><span class="token variable">$whoami</span>
+root
+<span class="token punctuation">[</span>root@centos8 etc<span class="token punctuation">]</span><span class="token variable">$sudo</span> <span class="token parameter variable">-u</span> lujinkai <span class="token function">whoami</span>	<span class="token comment"># 指定lujinkai用户执行whoami命令</span>
+lujinkai
+
+<span class="token punctuation">[</span>root@centos8 etc<span class="token punctuation">]</span><span class="token variable">$sudo</span> <span class="token parameter variable">-i</span> <span class="token parameter variable">-u</span> lujinkai	<span class="token comment"># 切换到lujinkai用户</span>
+<span class="token punctuation">[</span>lujinkai@centos8 ~<span class="token punctuation">]</span>$</code></pre>
+
+<h3 id="sudo-授权规则配置"><a href="#sudo-授权规则配置" class="headerlink" title="sudo 授权规则配置"></a>sudo 授权规则配置</h3><p>配置文件格式说明：&#x2F;etc&#x2F;sudoers, &#x2F;etc&#x2F;sudoers.d&#x2F;</p>
+<p>配置文件中支持使用通配符 glob</p>
+<p>配置文件规则有两类：</p>
+<ol>
+<li>别名定义：用于应对比较复杂的授权情况，不是必须的</li>
+<li>授权规则：必须的</li>
+</ol>
+<p>sudoers 授权规则格式：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">用户 登入主机<span class="token operator">=</span><span class="token punctuation">(</span>代表用户<span class="token punctuation">)</span> 命令
+user <span class="token assign-left variable">host</span><span class="token operator">=</span><span class="token punctuation">(</span>runas<span class="token punctuation">)</span> <span class="token builtin class-name">command</span></code></pre>
+
+<ul>
+<li>user 和 (runas)</li>
+<li>用户： 用户名 <code>username</code>，或者 uid <code>#uid</code><ul>
+<li>用户组：组名 <code>%group_name</code>，或者 gid <code>%#id</code></li>
+<li>user_alias|runas_alias</li>
+</ul>
+</li>
+<li>host<ul>
+<li>ip 或 域名</li>
+<li>网段，例如：10.0.0.0&#x2F;24 表示 10 网段</li>
+<li>host_alias</li>
+</ul>
+</li>
+<li>command<ul>
+<li>命令</li>
+<li>directory</li>
+<li>sudoedit</li>
+<li>Cmnd_Alias</li>
+</ul>
+</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># root用户可以登入任何主机，代表任何用户，执行任何命令，当然这条规则是多余的，root用户本来就拥有无限的权限</span>
+root <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL<span class="token punctuation">)</span> ALL</code></pre>
+
+<p>别名有四种，别名必须是大写字母开头：</p>
+<ul>
+<li>User_Alias</li>
+<li>Runas_Alias</li>
+<li>Host_Alias</li>
+<li>Cmnd_Alias</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Alias_Type NAME1 <span class="token operator">=</span> item1,item2,item3 <span class="token builtin class-name">:</span> NAME2 <span class="token operator">=</span> item4, item5</code></pre>
+
+<h3 id="范例"><a href="#范例" class="headerlink" title="范例"></a>范例</h3><pre class="language-bash" data-language="bash"><code class="language-bash">Student <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL<span class="token punctuation">)</span> ALL	<span class="token comment"># Student用户</span>
+%wheel <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL<span class="token punctuation">)</span> ALL	<span class="token comment"># wheel用户组</span>
+
+User_Alias <span class="token assign-left variable">NETADMIN</span><span class="token operator">=</span> netuser1,netuser2		<span class="token comment"># 定义用户别名：NETADMIN</span>
+Cmnd_Alias NETCMD <span class="token operator">=</span> /usr/sbin/ip,/usr/sbin/ifconfig		<span class="token comment"># 定义命令别名：NETCMD</span>
+NETADMIN <span class="token assign-left variable">ALL</span><span class="token operator">=</span>（root） NETCMD	<span class="token comment"># NETADMIN 中的用户可以在所有主机上，代表root执行NETCMD 中的命令</span>
+
+User_Alias <span class="token assign-left variable">SYSADER</span><span class="token operator">=</span>wang,mage,%admins	<span class="token comment"># 定义用户别名：SYSADER</span>
+User_Alias <span class="token assign-left variable">DISKADER</span><span class="token operator">=</span>tom		<span class="token comment"># 定义用户别名：DISKADER</span>
+Host_Alias <span class="token assign-left variable">SERS</span><span class="token operator">=</span>www.magedu.com,172.16.0.0/24	<span class="token comment"># 定义主机别名：SERS</span>
+Runas_Alias <span class="token assign-left variable">OP</span><span class="token operator">=</span>root		<span class="token comment"># 定义代表用户：OP</span>
+Cmnd_Alias <span class="token assign-left variable">SYDCMD</span><span class="token operator">=</span>/bin/chown,/bin/chmod		<span class="token comment"># 定义命令别名：SYDCMD</span>
+Cmnd_Alias <span class="token assign-left variable">DSKCMD</span><span class="token operator">=</span>/sbin/parted,/sbin/fdisk	<span class="token comment"># 定义命令别名：DSKCMD</span>
+<span class="token comment"># wang,mage,%admins 这三个用户可以在 www.magedu.com,172.16.0.0/24 主机上代表任何用户（空缺表示ALL）执行 /bin/chown,/bin/chmod 和 /sbin/parted,/sbin/fdisk 这些命令</span>
+SYSADER <span class="token assign-left variable">SERS</span><span class="token operator">=</span> SYDCMD,DSKCMD
+<span class="token comment"># tom 可以在所有主机上代表 root 执行 /sbin/parted,/sbin/fdisk 这两个命令</span>
+DISKADER <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>OP<span class="token punctuation">)</span> DSKCMD
+
+User_Alias ADMINUSER <span class="token operator">=</span> adminuser1,adminuser2
+<span class="token comment"># 可以使用正则，！表示禁止执行这条命令</span>
+Cmnd_Alias ADMINCMD <span class="token operator">=</span> /usr/sbin/useradd，/usr/sbin/usermod, /usr/bin/passwd <span class="token punctuation">[</span>a-zA-Z<span class="token punctuation">]</span>*, <span class="token operator">!</span>/usr/bin/passwd root
+<span class="token comment"># NOPASSWD: 表示不需要输入密码</span>
+<span class="token comment"># adminuser1,adminuser2 可以在任何主机代表root执行useradd、usermod、passwd这三个命令（passwd命令修改的密码只能是字母开头，且不能修改root的密码），而且不需要输入密码</span>
+ADMINUSER <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>root<span class="token punctuation">)</span> NOPASSWD:ADMINCMD，PASSWD:/usr/sbin/userdel
+
+<span class="token comment"># wang用户可以代表tom和jerry用户，如果-u不指定则默认表示tom</span>
+Defaults:wang <span class="token assign-left variable">runas_default</span><span class="token operator">=</span>tom
+wang <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>tom,jerry<span class="token punctuation">)</span> ALL
+
+<span class="token comment"># wang可以代表root在192.168.1.6,192.168.1.8两台主机上执行/usr/sbin/目录下的所有命令，除了useradd</span>
+wang <span class="token number">192.168</span>.1.6,192.168.1.8<span class="token operator">=</span><span class="token punctuation">(</span>root<span class="token punctuation">)</span> /usr/sbin/,<span class="token operator">!</span>/usr/sbin/useradd</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 这时一条危险的授权命令，如何解决？</span>
+wang <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL<span class="token punctuation">)</span> /bin/cat /var/log/messages*</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># wang可以使用sudoedit命令，表示wang可以修改授权文件，通过修改授权文件，wang可以拥有所有权限</span>
+Wang <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL<span class="token punctuation">)</span> sudoedit</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>wang@centos8 ~<span class="token punctuation">]</span><span class="token variable">$sudo</span> <span class="token function">cat</span> /var/log/messages
+<span class="token punctuation">[</span>sudo<span class="token punctuation">]</span> password <span class="token keyword">for</span> wang:
+<span class="token comment"># 修改sudo 提示符格式</span>
+<span class="token punctuation">[</span>wang@centos8 ~<span class="token punctuation">]</span><span class="token variable">$sudo</span> <span class="token parameter variable">-p</span> <span class="token string">"password on %h for user %p: "</span> <span class="token function">cat</span> /var/log/messages
+password on centos8 <span class="token keyword">for</span> user wang:</code></pre>
+
+<p>ubuntu 用户默认拥有 sudo 权限</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># admin组的成员可以获得root权限</span>
+<span class="token comment"># sudo组的成员可以执行任何命令</span>
+<span class="token punctuation">[</span>lujinkai@ubuntu1804 sudo<span class="token punctuation">]</span><span class="token variable">$sudo</span> <span class="token function">sed</span> <span class="token parameter variable">-n</span> <span class="token string">'/^[^#]/p'</span> /etc/sudoers
+Defaults        env_reset
+Defaults        mail_badpass
+Defaults        <span class="token assign-left variable">secure_path</span><span class="token operator">=</span><span class="token string">"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"</span>
+root    <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL:ALL<span class="token punctuation">)</span> ALL
+%admin <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL<span class="token punctuation">)</span> ALL
+%sudo   <span class="token assign-left variable">ALL</span><span class="token operator">=</span><span class="token punctuation">(</span>ALL:ALL<span class="token punctuation">)</span> ALL
+<span class="token punctuation">[</span>lujinkai@ubuntu1804 sudo<span class="token punctuation">]</span>$
+<span class="token punctuation">[</span>lujinkai@ubuntu1804 sudo<span class="token punctuation">]</span><span class="token variable">$getent</span> group <span class="token function">sudo</span>
+sudo:x:27:lujinkai</code></pre>
+
+<h2 id="PAM"><a href="#PAM" class="headerlink" title="PAM"></a>PAM</h2><p>PAM：Pluggable Authentication Modules，插件式的验证模块，Sun 公司于 1995 年开发的一种与认证相关的通用框架机制。PAM 只关注如何为服务验证用户的 API，通过提供一些动态链接库和一套统一的 API，将系统提供的服务和该服务的认证方式分开，使得系统管理员可以灵活地根据需要给不同的服务配置不同的认证方式而无需更改服务程序一种认证框架，自身不做认证。</p>
+<h3 id="PAM-架构"><a href="#PAM-架构" class="headerlink" title="PAM 架构"></a>PAM 架构</h3><p><img data-src="//img.to2b.cn/blog/ljk/1599903443135.png"></p>
+<p>PAM 提供了对所有服务进行认证的中央机制，适用于本地登录，远程登录，如：telnet、rlogin、fsh、ftp、点对点协议 PPP、su 等应用程序中。系统管理员通过 PAM 配置文件来制定不同应用程序的不同认证策略；应用程序开发者通过在服务程序中使用 PAM API(pam_xxxx( ))来实现对认证方法的调用；而 PAM 服务模块的开发者则利用 PAM SPI 来编写模块（主要调用函数 pam_sm_xxxx( )供 PAM 接口库调用，将不同的认证机制加入到系统中；PAM 接口库（libpam）则读取配置文件，将应用程序和相应的 PAM 服务模块联系起来</p>
+<h3 id="PAM-相关文件"><a href="#PAM-相关文件" class="headerlink" title="PAM 相关文件"></a>PAM 相关文件</h3><ul>
+<li>&#x2F;lib64&#x2F;security&#x2F;*.so</li>
+<li>&#x2F;etc&#x2F;security&#x2F;</li>
+<li>&#x2F;etc&#x2F;pam.conf</li>
+<li>&#x2F;etc&#x2F;pam.d&#x2F;APP_NAME</li>
+</ul>
+<h4 id="x2F-lib64-x2F-security-x2F-so"><a href="#x2F-lib64-x2F-security-x2F-so" class="headerlink" title="&#x2F;lib64&#x2F;security&#x2F;*.so"></a>&#x2F;lib64&#x2F;security&#x2F;*.so</h4><p>模块文件，使用 man 可以查看模块的详细信息，例如：<code>man 8 pam_ftp.so</code></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ls /lib64/security/</span>
+pam_access.so     pam_ftp.so        pam_permit.so          pam_tally2.so
+pam_cap.so        pam_group.so      pam_postgresok.so      pam_time.so
+pam_chroot.so     pam_issue.so      pam_pwhistory.so       pam_timestamp.so
+pam_console.so    pam_keyinit.so    pam_pwquality.so       pam_tty_audit.so
+pam_cracklib.so   pam_lastlog.so    pam_rhosts.so          pam_umask.so
+pam_debug.so      pam_limits.so     pam_rootok.so          pam_unix_acct.so
+pam_deny.so       pam_listfile.so   pam_securetty.so       pam_unix_auth.so
+pam_echo.so       pam_localuser.so  pam_selinux_permit.so  pam_unix_passwd.so
+pam_env.so        pam_loginuid.so   pam_selinux.so         pam_unix_session.so
+pam_exec.so       pam_mail.so       pam_sepermit.so        pam_unix.so
+pam_faildelay.so  pam_mkhomedir.so  pam_shells.so          pam_userdb.so
+pam_faillock.so   pam_motd.so       pam_stress.so          pam_warn.so
+pam_filter        pam_namespace.so  pam_succeed_if.so      pam_wheel.so
+pam_filter.so     pam_nologin.so    pam_systemd.so         pam_xauth.so</code></pre>
+
+<h4 id="x2F-etc-x2F-security-x2F"><a href="#x2F-etc-x2F-security-x2F" class="headerlink" title="&#x2F;etc&#x2F;security&#x2F;"></a>&#x2F;etc&#x2F;security&#x2F;</h4><p>有些模块比较复杂，需要配备专门的配置文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ls /etc/security/</span>
+access.conf       console.perms    limits.d        opasswd         time.conf
+chroot.conf       console.perms.d  namespace.conf  pam_env.conf
+console.apps      group.conf       namespace.d     pwquality.conf
+console.handlers  limits.conf      namespace.init  sepermit.conf</code></pre>
+
+<h4 id="x2F-etc-x2F-pam-conf"><a href="#x2F-etc-x2F-pam-conf" class="headerlink" title="&#x2F;etc&#x2F;pam.conf"></a>&#x2F;etc&#x2F;pam.conf</h4><p>主配置文件，默认不存在，一般不使用主配置</p>
+<h4 id="x2F-etc-x2F-pam-d-x2F-APP-NAME"><a href="#x2F-etc-x2F-pam-d-x2F-APP-NAME" class="headerlink" title="&#x2F;etc&#x2F;pam.d&#x2F;APP_NAME"></a>&#x2F;etc&#x2F;pam.d&#x2F;APP_NAME</h4><p>应用程序单独的 pam 认证配置文件，以应用名命名；<br>&#x2F;etc&#x2F;pam.d 目录存在，&#x2F;etc&#x2F;pam.conf 将失效。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ls /etc/pam.d/</span>
+chfn                 <span class="token function">passwd</span>            runuser-l          sudo-i
+chsh                 password-auth     smartcard-auth     su-l
+config-util          password-auth-ac  smartcard-auth-ac  system-auth
+crond                polkit-1          smtp               system-auth-ac
+fingerprint-auth     postlogin         smtp.postfix       systemd-user
+fingerprint-auth-ac  postlogin-ac      sshd               vlock
+login                remote            <span class="token function">su</span>
+other                runuser           <span class="token function">sudo</span></code></pre>
+
+<h3 id="PAM-工作原理"><a href="#PAM-工作原理" class="headerlink" title="PAM 工作原理"></a>PAM 工作原理</h3><p>PAM 认证一般遵循这样的顺序：Service(服务)→PAM(配置文件)→pam_*.so</p>
+<p>PAM 认证首先要确定那一项服务，然后加载相应的 PAM 的配置文件(位于&#x2F;etc&#x2F;pam.d 下)，最后调用认证文件(位于&#x2F;lib64&#x2F;security 下)进行安全认证</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1599904397703.png"></p>
+<p>查看程序是否支持 PAM：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 支持PAM</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ldd `which sshd` |grep libpam</span>
+libpam.so.0 <span class="token operator">=</span><span class="token operator">></span> /lib64/libpam.so.0 <span class="token punctuation">(</span>0x00007fea8e70d000<span class="token punctuation">)</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ldd `which passwd` |grep pam</span>
+libpam.so.0 <span class="token operator">=</span><span class="token operator">></span> /lib64/libpam.so.0 <span class="token punctuation">(</span>0x00007f045b805000<span class="token punctuation">)</span>
+libpam_misc.so.0 <span class="token operator">=</span><span class="token operator">></span> /lib64/libpam_misc.so.0 <span class="token punctuation">(</span>0x00007f045b601000<span class="token punctuation">)</span>
+<span class="token comment"># 不支持PAM</span>
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token comment">#ldd /usr/sbin/httpd |grep pam</span>
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token comment">#</span></code></pre>
+
+<p>以 passwd 命令为例，说明 pam 认证过程：</p>
+<ol>
+<li>使用者执行&#x2F;usr&#x2F;bin&#x2F;passwd 程序，并输入密码</li>
+<li>passwd 根据其 PAM 配置文件（一般是&#x2F;etc&#x2F;pam.d&#x2F;passwd），调用相关 PAM 模块</li>
+<li>将验证结果回传给 passwd 这个程序，而 passwd 这个程序会根据 PAM 回传的结果决定下一个动作（重新输入密码或者通过验证）</li>
+</ol>
+<h3 id="PAM-配置文件格式说明"><a href="#PAM-配置文件格式说明" class="headerlink" title="PAM 配置文件格式说明"></a>PAM 配置文件格式说明</h3><p>通用配置文件&#x2F;etc&#x2F;pam.conf 格式,此格式不使用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">service</span> <span class="token builtin class-name">type</span> control module-path arguments</code></pre>
+
+<p>专用配置文件&#x2F;etc&#x2F;pam.d&#x2F; 格式</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">type</span> control module-path module-arguments</code></pre>
+
+<ul>
+<li>service：指服务名，如：telnet、login、ftp 等，服务名字“OTHER”代表所有没有在该文件中明确配置的其它服务</li>
+<li>type：module-type，指模块类型，即功能</li>
+<li>control ：PAM 库该如何处理与该服务相关的 PAM 模块的成功或失败情况，一个关健词实现</li>
+<li>module-path： 指定模块，绝对路径和相对路径都可以，相对路径是相对于&#x2F;lib64&#x2F;security&#x2F;</li>
+<li>arguments： 用来传递给该模块的参数</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 pam.d<span class="token punctuation">]</span><span class="token comment">#cat passwd</span>
+<span class="token comment">#%PAM-1.0</span>
+auth       include      system-auth
+account    include      system-auth
+password   substack     system-auth
+<span class="token parameter variable">-password</span>   optional    pam_gnome_keyring.so use_authtok
+password   substack     postlogin
+
+<span class="token punctuation">[</span>root@centos7 pam.d<span class="token punctuation">]</span><span class="token comment">#cat system-auth</span>
+<span class="token comment">#%PAM-1.0</span>
+<span class="token comment"># This file is auto-generated.</span>
+<span class="token comment"># User changes will be destroyed the next time authconfig is run.</span>
+auth        required      pam_env.so
+auth        required      pam_faildelay.so <span class="token assign-left variable">delay</span><span class="token operator">=</span><span class="token number">2000000</span>
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        requisite     pam_succeed_if.so uid <span class="token operator">>=</span> <span class="token number">1000</span> quiet_success
+auth        required      pam_deny.so
+
+account     required      pam_unix.so
+account     sufficient    pam_localuser.so
+account     sufficient    pam_succeed_if.so uid <span class="token operator">&lt;</span> <span class="token number">1000</span> quiet
+account     required      pam_permit.so
+
+password    requisite     pam_pwquality.so try_first_pass local_users_only <span class="token assign-left variable">retry</span><span class="token operator">=</span><span class="token number">3</span> <span class="token assign-left variable">authtok_type</span><span class="token operator">=</span>
+password    sufficient    pam_unix.so sha512 shadow nullok try_first_pass use_authtok
+password    required      pam_deny.so
+
+session     optional      pam_keyinit.so revoke
+session     required      pam_limits.so
+<span class="token parameter variable">-session</span>     optional      pam_systemd.so
+session     <span class="token punctuation">[</span>success<span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">default</span><span class="token operator">=</span>ignore<span class="token punctuation">]</span> pam_succeed_if.so <span class="token function">service</span> <span class="token keyword">in</span> crond quiet use_uid
+session     required      pam_unix.so</code></pre>
+
+<h4 id="type"><a href="#type" class="headerlink" title="type"></a>type</h4><ul>
+<li>auth：账号的认证和授权</li>
+<li>account：帐户的有效性，与账号管理相关的非认证类的功能，如：用来限制&#x2F;允许用户对某个服务的访问时间，限制用户的位置(例如：root 用户只能从控制台登录)</li>
+<li>password：用户修改密码时密码复杂度检查机制等功能</li>
+<li>session：用户会话期间的控制，如：最多打开的文件数，最多的进程数等</li>
+</ul>
+<p>-type：表示因为缺失而不能加载的模块将不记录到系统日志,对于那些不总是安装在系统上的模块有用，例如-password、-session</p>
+<h4 id="control"><a href="#control" class="headerlink" title="control"></a>control</h4><ul>
+<li>required：必要条件。此关不过，仍需检测同一个栈中的其他模块，最后返回 failure，认证失败。拥有参考其他模块意见基础之上的一票否决权。可以通过其它模块来检查为什么验证没有通过。</li>
+<li>requisite：必要条件。一票否决，该模块必须返回成功才能通过认证，但是一旦该模块返回失败，将不再执行同一 type 内的任何模块，而是直接将控制权返回给应用程序。</li>
+<li>sufficient：充分条件，验证成功则立即返回 OK，不再继续验证，否则忽略 sufficient 的结果并继续其它。换句话说，sufficient 的验证失败对整个验证没有任何影响。</li>
+<li>optional：可选条件，无论验证结果如何，均不会影响。通常用于 session 类型。</li>
+<li>include：包含另外一个配置文件中类型相同的行。换句话说，包含进来指定的其他配置文件中同名栈中的规则，并以之进行验证。</li>
+<li>substack：俗称子栈，这个控制流程俺没有用过，基本上也用不到，我们可以忽略。</li>
+</ul>
+<h4 id="arguments"><a href="#arguments" class="headerlink" title="arguments"></a>arguments</h4><ul>
+<li>debug ：该模块应当用 syslog( )将调试信息写入到系统日志文件中</li>
+<li>no_warn ：表明该模块不应把警告信息发送给应用程序</li>
+<li>use_first_pass ：该模块不能提示用户输入密码，只能从前一个模块得到输入密码</li>
+<li>try_first_pass ：该模块首先用前一个模块从用户得到密码，如果该密码验证不通过，再提示用户输入新密码</li>
+<li>use_mapped_pass 该模块不能提示用户输入密码，而是使用映射过的密码</li>
+<li>expose_account 允许该模块显示用户的帐号名等信息，一般只能在安全的环境下使用，因为泄漏用户名会对安全造成一定程度的威胁</li>
+</ul>
+<p>注意：修改 PAM 配置文件将马上生效<br>建议：编辑 pam 规则时，保持至少打开一个 root 会话，以防止 root 身份验证错误</p>
+<h3 id="常用的-PAM-模块"><a href="#常用的-PAM-模块" class="headerlink" title="常用的 PAM 模块"></a><a target="_blank" rel="noopener" href="https://www.cnblogs.com/yinzhengjie/p/8395279.html">常用的 PAM 模块</a></h3><h4 id="pam-rootok-so"><a href="#pam-rootok-so" class="headerlink" title="pam_rootok.so"></a>pam_rootok.so</h4><p>功能：用户 UID 是 0，返回成功</p>
+<p>案例展示：（限制 root 切换用户也需要密码）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># more /etc/pam.d/su | grep  pam_rootok.so</span>
+ <span class="token number">2</span> <span class="token comment">#auth           sufficient      pam_rootok.so</span>
+ <span class="token number">3</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span>
+ <span class="token number">4</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># su yinzhengjie</span>
+ <span class="token number">5</span> Password:
+ <span class="token number">6</span> <span class="token punctuation">[</span>yinzhengjie@yinzhengjie root<span class="token punctuation">]</span>$ <span class="token builtin class-name">exit</span>
+ <span class="token number">7</span> <span class="token builtin class-name">exit</span>
+ <span class="token number">8</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span>
+ <span class="token number">9</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># more /etc/pam.d/su | grep  pam_rootok.so</span>
+<span class="token number">10</span> auth            sufficient      pam_rootok.so
+<span class="token number">11</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># su yinzhengjie</span>
+<span class="token number">12</span> <span class="token punctuation">[</span>yinzhengjie@yinzhengjie root<span class="token punctuation">]</span>$
+<span class="token number">13</span> <span class="token punctuation">[</span>yinzhengjie@yinzhengjie root<span class="token punctuation">]</span>$ <span class="token builtin class-name">exit</span>
+<span class="token number">14</span> <span class="token builtin class-name">exit</span>
+<span class="token number">15</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span></code></pre>
+
+<h4 id="pam-access-so"><a href="#pam-access-so" class="headerlink" title="pam_access.so"></a>pam_access.so</h4><p>功能：访问控制，默认配置文件为“&#x2F;etc&#x2F;security&#x2F;access.conf ”，通常作用于登陆程序，如 su、login、gdm、sshd 等等。</p>
+<p>案例展示：（控制访问的源 IP 地址）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># more /etc/pam.d/sshd | grep pam_access.so</span>
+<span class="token number">2</span> auth       required     pam_access.so
+<span class="token number">3</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span>
+<span class="token number">4</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># tail -4 /etc/security/access.conf</span>
+<span class="token number">5</span> <span class="token comment">#Add by yinzhengjie</span>
+<span class="token number">6</span> -:root:ALL EXCEPT <span class="token number">10.0</span>.0.0/24            <span class="token comment">#只让root从10.0.0.0/24的网段访问</span>
+<span class="token number">7</span> <span class="token comment">#-:root:10.0.0.0/24                    #拒绝从10.0.0.0/24这个C的地址访问过来。</span>
+<span class="token number">8</span> <span class="token comment">#-:root:ALL EXCEPT 10.10.0.161        #拒绝从10.10.0.161这个IP访问过来。</span>
+<span class="token number">9</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span></code></pre>
+
+<h4 id="pam-listfile-so"><a href="#pam-listfile-so" class="headerlink" title="pam_listfile.so"></a>pam_listfile.so</h4><p>功能：基于自定义文件允许或拒绝访问资源限制</p>
+<p>案例展示：（sshd 的黑名单或白名单）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># grep listfile /etc/pam.d/sshd</span>
+ <span class="token number">2</span> auth       required     pam_listfile.so <span class="token assign-left variable">item</span><span class="token operator">=</span>user <span class="token assign-left variable">sense</span><span class="token operator">=</span>allow <span class="token assign-left variable">file</span><span class="token operator">=</span>/etc/yinzhengjie_ssh_users <span class="token assign-left variable">onerr</span><span class="token operator">=</span>fail             <span class="token comment">#注意，“onerr=fail”表示当文件“/etc/yinzhengjie_ssh_users”不存在时，默认为fail。</span>
+ <span class="token number">3</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># > /var/log/secure</span>
+ <span class="token number">4</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># tail -10f /var/log/secure</span>
+ <span class="token number">5</span> Feb  <span class="token number">4</span> <span class="token number">23</span>:13:36 yinzhengjie sshd<span class="token punctuation">[</span><span class="token number">6509</span><span class="token punctuation">]</span>: reverse mapping checking getaddrinfo <span class="token keyword">for</span> bogon <span class="token punctuation">[</span><span class="token number">10.0</span>.0.161<span class="token punctuation">]</span> failed - POSSIBLE BREAK-IN ATTEMPT<span class="token operator">!</span>
+ <span class="token number">6</span> Feb  <span class="token number">4</span> <span class="token number">23</span>:13:36 yinzhengjie sshd<span class="token punctuation">[</span><span class="token number">6509</span><span class="token punctuation">]</span>: pam_listfile<span class="token punctuation">(</span>sshd:auth<span class="token punctuation">)</span>: Couldn<span class="token string">'t open /etc/yinzhengjie_ssh_users
+ 7 Feb  4 23:13:38 yinzhengjie sshd[6509]: Failed password for root from 10.0.0.161 port 55937 ssh2
+ 8 Feb  4 23:13:44 yinzhengjie sshd[6510]: Received disconnect from 10.0.0.161: 13: The user canceled authentication.
+ 9 ^C
+10 [root@yinzhengjie ~]# echo root > /etc/yinzhengjie_ssh_users
+11 [root@yinzhengjie ~]#
+12 [root@yinzhengjie ~]# tail -10f /var/log/secure
+13 Feb  4 23:13:36 yinzhengjie sshd[6509]: reverse mapping checking getaddrinfo for bogon [10.0.0.161] failed - POSSIBLE BREAK-IN ATTEMPT!
+14 Feb  4 23:13:36 yinzhengjie sshd[6509]: pam_listfile(sshd:auth): Couldn'</span>t <span class="token function">open</span> /etc/yinzhengjie_ssh_users
+<span class="token number">15</span> Feb  <span class="token number">4</span> <span class="token number">23</span>:13:38 yinzhengjie sshd<span class="token punctuation">[</span><span class="token number">6509</span><span class="token punctuation">]</span>: Failed password <span class="token keyword">for</span> root from <span class="token number">10.0</span>.0.161 port <span class="token number">55937</span> ssh2
+<span class="token number">16</span> Feb  <span class="token number">4</span> <span class="token number">23</span>:13:44 yinzhengjie sshd<span class="token punctuation">[</span><span class="token number">6510</span><span class="token punctuation">]</span>: Received disconnect from <span class="token number">10.0</span>.0.161: <span class="token number">13</span>: The user canceled authentication.
+<span class="token number">17</span> Feb  <span class="token number">4</span> <span class="token number">23</span>:14:13 yinzhengjie sshd<span class="token punctuation">[</span><span class="token number">6513</span><span class="token punctuation">]</span>: Accepted password <span class="token keyword">for</span> root from <span class="token number">10.0</span>.0.161 port <span class="token number">55960</span> ssh2
+<span class="token number">18</span> Feb  <span class="token number">4</span> <span class="token number">23</span>:14:13 yinzhengjie sshd<span class="token punctuation">[</span><span class="token number">6513</span><span class="token punctuation">]</span>: pam_unix<span class="token punctuation">(</span>sshd:session<span class="token punctuation">)</span>: session opened <span class="token keyword">for</span> user root by <span class="token punctuation">(</span>uid<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span>
+<span class="token number">19</span> ^C
+<span class="token number">20</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span>
+</code></pre>
+
+<h4 id="pam-time-so"><a href="#pam-time-so" class="headerlink" title="pam_time.so"></a>pam_time.so</h4><p>功能：基于时间的访问控制，默认文件“&#x2F;etc&#x2F;security&#x2F;time.conf ”</p>
+<p>案例展示：（基于时间限制 sshd 的访问）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># tail -2 /etc/security/time.conf</span>
+<span class="token number">2</span> <span class="token comment">#Add by yinzhengjie</span>
+<span class="token number">3</span> sshd<span class="token punctuation">;</span>*<span class="token punctuation">;</span>*<span class="token punctuation">;</span>SaSu0900-1800        <span class="token comment">#表示sshd服务的所有终端的所有用户只能在8-18点可以正登陆。</span>
+<span class="token number">4</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span></code></pre>
+
+<h4 id="pam-tally2-so"><a href="#pam-tally2-so" class="headerlink" title="pam_tally2.so"></a>pam_tally2.so</h4><p>功能：登陆统计</p>
+<p>案例展示：（实现防止对 sshd 暴力破解）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># grep pam_tally2.so /etc/pam.d/sshd</span>
+<span class="token number">2</span> auth       required     pam_tally2.so <span class="token assign-left variable">deny</span><span class="token operator">=</span><span class="token number">2</span> even_deny_root <span class="token assign-left variable">root_unlock_time</span><span class="token operator">=</span><span class="token number">60</span> <span class="token assign-left variable">unlock_time</span><span class="token operator">=</span><span class="token number">60</span>   <span class="token comment">#表示当用户输入次数超过2次时，锁定用户60秒，因此这里的“even_deny_root ”表示包括root用户，“root_unlock_time”表示root用户锁定的时间，“unlock_time”表示其他用户锁定的时间。</span>
+<span class="token number">3</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span>
+<span class="token number">4</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment"># pam_tally2 --reset -u root            #这里表示手动解锁。</span>
+<span class="token number">5</span> Login           Failures Latest failure     From
+<span class="token number">6</span> root                <span class="token number">0</span>
+<span class="token number">7</span> <span class="token punctuation">[</span>root@yinzhengjie ~<span class="token punctuation">]</span><span class="token comment">#</span></code></pre>
+
+<h4 id="pam-limits-so"><a href="#pam-limits-so" class="headerlink" title="pam_limits.so"></a>pam_limits.so</h4><p>功能：限制用户会话过程中对各种资源的使用情况。缺省情况下该模块的配置文件是<code>/etc/security/limits.conf</code>和<code>/etc/security/limits.d/*.conf</code>。在用户级别实现对其可使用的资源的限制，例如：可打开的文件数量，可运行的进程数量，可用内存空间</p>
+<h4 id="pam-shells-so"><a href="#pam-shells-so" class="headerlink" title="pam_shells.so"></a>pam_shells.so</h4><p>功能：检查有效 shell，登录用户的 shell 不在&#x2F;etc&#x2F;shells 中则为非法 shell</p>
+<p>案例：不允许使用&#x2F;bin&#x2F;csh 的用户本地登录</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#yum -y install csh</span>
+
+<span class="token comment"># 新建用户并设置密码</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#useradd -s /bin/csh testuser</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token number">123456</span> <span class="token operator">|</span> <span class="token function">passwd</span> <span class="token parameter variable">--stdin</span> testuser
+
+<span class="token comment"># auth required pam_shells.so 表示校验登录用户的shell</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#echo "auth required pam_shells.so" >> /etc/pam.d/login</span>
+
+<span class="token comment"># 将shells中的csh注释</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$sed</span> <span class="token parameter variable">-Ei</span> <span class="token string">'s/^\/bin\/csh/#&amp;/'</span> /etc/shells
+
+<span class="token comment"># testuser因为shell为csh，不在/etc/shells中，pam_shells.so模块校验不通过，所以无法登录</span>
+</code></pre>
+
+<h4 id="pam-securetty-so"><a href="#pam-securetty-so" class="headerlink" title="pam_securetty.so"></a>pam_securetty.so</h4><p>功能：只允许 root 用户在&#x2F;etc&#x2F;securetty 列出的安全终端上登陆</p>
+<h4 id="pam-nologin-so"><a href="#pam-nologin-so" class="headerlink" title="pam_nologin.so"></a>pam_nologin.so</h4><p>功能：如果&#x2F;etc&#x2F;nologin 文件存在,将导致非 root 用户不能登陆,当该用户登陆时，会显示&#x2F;etc&#x2F;nologin 文<br>件内容，并拒绝登陆</p>
+<h4 id="pam-succeed-if-so"><a href="#pam-succeed-if-so" class="headerlink" title="pam_succeed_if.so"></a>pam_succeed_if.so</h4><p>功能：根据参数中的所有条件都满足才返回成功</p>
+<p>案例：ubuntu 默认不允许 root 登录桌面图形</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">用root登录桌面失败，查看日志，可看到Pam原因
+Vim /etc/pam.d/gdm-passwd
+<span class="token comment">#将下面行注释</span>
+<span class="token comment">#auth requried pam_succeed_if.so user !=root quiet_success</span></code></pre>
+
+<h4 id="pam-google-authenticator"><a href="#pam-google-authenticator" class="headerlink" title="pam_google_authenticator"></a>pam_google_authenticator</h4><p>实现 SSH 登录的两次身份验证，先验证 APP 的数字码，再验证 root 用户的密码，都通过才可以登录。目前只支持口令验证，不支持基于 key 验证</p>
+<p>需要安装，官方网站：<a target="_blank" rel="noopener" href="https://github.com/google/google-authenticator-android">https://github.com/google/google-authenticator-android</a></p>
+<h2 id="时间同步服务"><a href="#时间同步服务" class="headerlink" title="时间同步服务"></a>时间同步服务</h2><p>多主机协作工作时，各个主机的时间同步很重要，时间不一致会造成很多重要应用的故障，如：加密协议，日志，集群等， 利用 NTP（Network Time Protocol） 协议使网络中的各个计算机时间达到同步。目前 NTP 协议属于运维基础架构中必备的基本服务之一。</p>
+<p>ntp 和 chrony 都可以搭建时间同步服务，chrony 更优秀。</p>
+<h3 id="chrony"><a href="#chrony" class="headerlink" title="chrony"></a>chrony</h3><h4 id="chrony-组成文件"><a href="#chrony-组成文件" class="headerlink" title="chrony 组成文件"></a>chrony 组成文件</h4><p>两个主要程序：chronyc、chronyd</p>
+<ul>
+<li>&#x2F;usr&#x2F;bin&#x2F;chronyc：命令行用户工具，用于监控性能并进行多样化的配置。</li>
+<li>&#x2F;usr&#x2F;sbin&#x2F;chronyd：后台运行的守护进程，调整内核中运行的系统时钟和时钟服务器同步。它确定计算机增减时间的比率，并对此进行补偿。</li>
+</ul>
+<p>服务 unit 文件： &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;chronyd.service<br>监听端口： 323&#x2F;udp，123&#x2F;udp<br>配置文件： &#x2F;etc&#x2F;chrony.conf</p>
+<h4 id="配置文件-chrony-conf"><a href="#配置文件-chrony-conf" class="headerlink" title="配置文件 chrony.conf"></a><a target="_blank" rel="noopener" href="https://chrony.tuxfamily.org/doc/3.5/chrony.conf.html">配置文件 chrony.conf</a></h4><ul>
+<li><p>server hostname [option]…</p>
+<p>指定单个 NTP 服务器。iburst：可加快初始同步速度</p>
+</li>
+<li><p>pool name [option]…</p>
+<p>指定 NTP 服务器池</p>
+</li>
+<li><p>rtcsync</p>
+<p>启用内核模式，系统时间每 11 分钟会拷贝到实时时钟（RTC）</p>
+</li>
+<li><p>allow [all] [subnet]</p>
+<p>指定一台主机、子网，或者网络以允许或拒绝访问本服务器</p>
+</li>
+<li><p>…</p>
+</li>
+</ul>
+<h4 id="chronyc"><a href="#chronyc" class="headerlink" title="chronyc"></a>chronyc</h4><p>ntp 客户端工具，chronyc 可以运行在交互式和非交互式两种方式，支持以下命令：</p>
+<ul>
+<li>help 命令可以查看更多 chronyc 的交互命令</li>
+<li>accheck 检查是否对特定主机可访问当前服务器</li>
+<li>activity 显示有多少 NTP 源在线&#x2F;离线</li>
+<li>sources [-v] 显示当前时间源的同步信息</li>
+<li>sourcestats [-v]显示当前时间源的同步统计信息</li>
+<li>add server 手动添加一台新的 NTP 服务器</li>
+<li>clients 报告已访问本服务器的客户端列表</li>
+<li>delete 手动移除 NTP 服务器或对等服务器</li>
+<li>settime 手动设置守护进程时间</li>
+<li>tracking 显示系统时间信息</li>
+</ul>
+<h4 id="公共-ntp-服务"><a href="#公共-ntp-服务" class="headerlink" title="公共 ntp 服务"></a>公共 ntp 服务</h4><ul>
+<li>阿里云公共 NTP 服务器：ntp.aliyun.com，ntp1-7.aliyun.com</li>
+<li>腾讯公共 NTP 服务器：time1-5.cloud.tencent.com</li>
+<li>大学 ntp 服务：<ul>
+<li>s1a.time.edu.cn 北京邮电大学</li>
+<li>s1b.time.edu.cn 清华大学</li>
+<li>s1c.time.edu.cn 北京大学</li>
+</ul>
+</li>
+<li>国家授时中心服务器：210.72.145.44</li>
+</ul>
+<p>范例：centos7 和 8 作为 ntp 服务器，其他服务器就不从公共 ntp 服务器同步时间，而是从 centos7 和 8 同步时间</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># centos7、8</span>
+<span class="token comment"># 修改/etc/chrony.conf的server为公共ntp服务器，allow为允许同步的其他服务器</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$sed</span> <span class="token parameter variable">-n</span> <span class="token string">'/^[^#]/p'</span> /etc/chrony.conf
+server ntp.aliyun.com iburst
+server time1.cloud.tencent.com iburst
+driftfile /var/lib/chrony/drift
+makestep <span class="token number">1.0</span> <span class="token number">3</span>
+rtcsync
+allow <span class="token number">10.0</span>.0.0/24
+keyfile /etc/chrony.keys
+leapsectz right/UTC
+logdir /var/log/chrony
+
+<span class="token comment"># 其他服务器，修改/etc/chrony.conf的server为centos7、8</span>
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token comment">#grep '^[^#]' /etc/chrony.conf</span>
+server <span class="token number">10.0</span>.0.7 iburst
+server <span class="token number">10.0</span>.0.8 iburst
+driftfile /var/lib/chrony/drift
+makestep <span class="token number">1.0</span> <span class="token number">3</span>
+rtcsync
+logdir /var/log/chrony</code></pre>
+
+<h2 id="TCP-Warpper"><a href="#TCP-Warpper" class="headerlink" title="TCP Warpper"></a>TCP Warpper</h2><h2 id="SELinux"><a href="#SELinux" class="headerlink" title="SELinux"></a>SELinux</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" rel="tag"><i class="fa fa-tag"></i> 加密和安全</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BF%9B%E7%A8%8B%E5%92%8C%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/" rel="prev" title="计划任务">
+                  <i class="fa fa-chevron-left"></i> 计划任务
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/DH%20(Diffie-Hellman)/" rel="next" title="DH (Diffie-Hellman)">
+                  DH (Diffie-Hellman) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

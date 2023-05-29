@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="pwd[root@centos7 bin]# pwd &#x2F;bin [root@centos7 bin]# pwd -P		# -P 显示真实的物理路径 &#x2F;usr&#x2F;bin  basename 和 dirname[root@4710419222 vhost]# pwd &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;vhost [root@4710419222 vhost]# basename &#96;pwd&#96;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件操作相关命令">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E4%BB%B6/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="pwd[root@centos7 bin]# pwd &#x2F;bin [root@centos7 bin]# pwd -P		# -P 显示真实的物理路径 &#x2F;usr&#x2F;bin  basename 和 dirname[root@4710419222 vhost]# pwd &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;conf&#x2F;vhost [root@4710419222 vhost]# basename &#96;pwd&#96;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1596026223412.png">
+<meta property="article:published_time" content="2021-02-04T08:33:25.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="文件管理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1596026223412.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E4%BB%B6/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E4%BB%B6/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/","path":"运维/基础/文件/相关命令/","title":"文件操作相关命令"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>文件操作相关命令 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#pwd"><span class="nav-number">1.</span> <span class="nav-text">pwd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#basename-%E5%92%8C-dirname"><span class="nav-number">2.</span> <span class="nav-text">basename 和 dirname</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cd"><span class="nav-number">3.</span> <span class="nav-text">cd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ls"><span class="nav-number">4.</span> <span class="nav-text">ls</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#stat"><span class="nav-number">5.</span> <span class="nav-text">stat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#file"><span class="nav-number">6.</span> <span class="nav-text">file</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hexdump"><span class="nav-number">7.</span> <span class="nav-text">hexdump</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E9%80%9A%E9%85%8D%E7%AC%A6-glob"><span class="nav-number">8.</span> <span class="nav-text">文件通配符 glob</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#touch"><span class="nav-number">9.</span> <span class="nav-text">touch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cp"><span class="nav-number">10.</span> <span class="nav-text">cp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mv"><span class="nav-number">11.</span> <span class="nav-text">mv</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rename"><span class="nav-number">12.</span> <span class="nav-text">rename</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rm"><span class="nav-number">13.</span> <span class="nav-text">rm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tree"><span class="nav-number">14.</span> <span class="nav-text">tree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#df"><span class="nav-number">15.</span> <span class="nav-text">df</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mkdir"><span class="nav-number">16.</span> <span class="nav-text">mkdir</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rmdir"><span class="nav-number">17.</span> <span class="nav-text">rmdir</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tee"><span class="nav-number">18.</span> <span class="nav-text">tee</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lsof"><span class="nav-number">19.</span> <span class="nav-text">lsof</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#seq"><span class="nav-number">20.</span> <span class="nav-text">seq</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%83%E4%B9%A0%E9%A2%98"><span class="nav-number">21.</span> <span class="nav-text">练习题</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E4%BB%B6/%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="文件操作相关命令 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          文件操作相关命令
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-04 16:33:25" itemprop="dateCreated datePublished" datetime="2021-02-04T16:33:25+08:00">2021-02-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">文件</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="pwd"><a href="#pwd" class="headerlink" title="pwd"></a>pwd</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 bin<span class="token punctuation">]</span><span class="token comment"># pwd</span>
+/bin
+<span class="token punctuation">[</span>root@centos7 bin<span class="token punctuation">]</span><span class="token comment"># pwd -P		# -P 显示真实的物理路径</span>
+/usr/bin</code></pre>
+
+<h2 id="basename-和-dirname"><a href="#basename-和-dirname" class="headerlink" title="basename 和 dirname"></a>basename 和 dirname</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 vhost<span class="token punctuation">]</span><span class="token comment"># pwd</span>
+/usr/local/nginx/conf/vhost
+<span class="token punctuation">[</span>root@4710419222 vhost<span class="token punctuation">]</span><span class="token comment"># basename `pwd` 	# 显示文件名</span>
+vhost
+<span class="token punctuation">[</span>root@4710419222 vhost<span class="token punctuation">]</span><span class="token comment"># basename `pwd`\/to2b.cn.conf	# 显示路径</span>
+to2b.cn.conf
+<span class="token punctuation">[</span>root@4710419222 vhost<span class="token punctuation">]</span><span class="token comment"># dirname $(pwd)</span>
+/usr/local/nginx/conf</code></pre>
+
+<h2 id="cd"><a href="#cd" class="headerlink" title="cd"></a>cd</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># cd -P /bin/	# -P 切换至物理路径, 而非软链接目录</span>
+<span class="token punctuation">[</span>root@4710419222 bin<span class="token punctuation">]</span><span class="token comment"># pwd</span>
+/usr/bin</code></pre>
+
+<p>切换到来时的目录：<code>cd -</code></p>
+<h2 id="ls"><a href="#ls" class="headerlink" title="ls"></a>ls</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@47105171233 ~<span class="token punctuation">]</span><span class="token comment"># ll -A		# 显示隐藏文件,但是不显示.和..</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># ll -t		# 按照mtime从新到旧排序</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># ll -tr		# 按照mtime从旧到新排序</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># ll -ut /	# 按照atime从新到旧排序</span>
+<span class="token punctuation">[</span>root@4710419222 /<span class="token punctuation">]</span><span class="token comment"># ll -S		# 按照从大到小排序</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># ll -R		# 递归遍历目录下所有文件</span></code></pre>
+
+<p>说明: ls 查看不同后缀文件时的颜色由 &#x2F;etc&#x2F;DIR_COLORS 和 @LS_COLORS 变量定义</p>
+<h2 id="stat"><a href="#stat" class="headerlink" title="stat"></a>stat</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># stat test.php</span>
+  File: ‘test.php’
+  Size: <span class="token number">96</span>              Blocks: <span class="token number">8</span>          IO Block: <span class="token number">4096</span>   regular <span class="token function">file</span>
+Device: fd01h/64769d    Inode: <span class="token number">138598</span>      Links: <span class="token number">1</span>
+Access: <span class="token punctuation">(</span>0644/-rw-r--r--<span class="token punctuation">)</span>  Uid: <span class="token punctuation">(</span>    <span class="token number">0</span>/    root<span class="token punctuation">)</span>   Gid: <span class="token punctuation">(</span>    <span class="token number">0</span>/    root<span class="token punctuation">)</span>
+Access: <span class="token number">2020</span>-07-26 <span class="token number">18</span>:48:51.780437746 +0800		<span class="token comment"># 文件最近一次被访问的时间</span>
+Modify: <span class="token number">2020</span>-07-25 <span class="token number">17</span>:21:15.970280822 +0800		<span class="token comment"># 文件内容最近一次被修改的时间</span>
+Change: <span class="token number">2020</span>-07-25 <span class="token number">17</span>:21:15.973280860 +0800		<span class="token comment"># 文件属性最近一次被修改的时间</span>
+ Birth: -</code></pre>
+
+<h2 id="file"><a href="#file" class="headerlink" title="file"></a>file</h2><p>判断文件的类型不能依靠后缀，可以使用 file 命令判断文件的类型</p>
+<h2 id="hexdump"><a href="#hexdump" class="headerlink" title="hexdump"></a>hexdump</h2><p>一般用来查看“二进制”文件的十六进制编码，但实际上它能查看任何文件，而不只限于二进制文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># hexdump -C test.txt	# -C 输出规范的十六进制和ASCII码</span>
+00000000  0a                                                <span class="token operator">|</span><span class="token builtin class-name">.</span><span class="token operator">|</span>
+00000001</code></pre>
+
+<h2 id="文件通配符-glob"><a href="#文件通配符-glob" class="headerlink" title="文件通配符 glob"></a>文件通配符 glob</h2><p>文件通配符可以用来匹配符合条件的多个文件，方便批量管理文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"> <span class="token comment"># * 匹配零个或多个字符, 但不匹配隐藏文件</span>
+<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># ll -a *</span>
+-rw-r--r-- <span class="token number">1</span> root root        <span class="token number">863</span> Oct <span class="token number">17</span>  <span class="token number">2019</span> clear_history.php
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">244205697</span> Oct <span class="token number">24</span>  <span class="token number">2018</span> oneinstack-full.tar.gz
+lrwxrwxrwx <span class="token number">1</span> root root         <span class="token number">27</span> Jul <span class="token number">18</span>  <span class="token number">2019</span> python-learn -<span class="token operator">></span> /data/wwwroot/python-learn/
+-rw-r--r-- <span class="token number">1</span> root root <span class="token number">1073741824</span> Oct <span class="token number">31</span>  <span class="token number">2018</span> swapfile
+-rw-r--r-- <span class="token number">1</span> root root      <span class="token number">11195</span> Sep <span class="token number">27</span>  <span class="token number">2019</span> testparm-v.txt
+ <span class="token comment"># ? 匹配任何单个字符</span>
+ <span class="token comment"># [0-9]</span>
+ <span class="token comment"># [a-z] a、A、b、B...x、X、y、Y、z、Z</span>
+ <span class="token comment"># [lujinkai]</span>
+ <span class="token comment"># [^lujinkai]</span></code></pre>
+
+<p>此外, 还有预定义的字符类: <code>man 7 glob</code></p>
+<pre class="language-none"><code class="language-none">[:digit:]：任意数字，相当于0-9
+[:lower:]：任意小写字母,表示 a-z
+[:upper:]: 任意大写字母,表示 A-Z
+[:alpha:]: 任意大小写字母
+[:alnum:]：任意数字或字母
+[:blank:]：水平空白字符
+[:space:]：水平或垂直空白字符
+[:punct:]：标点符号
+[:print:]：可打印字符
+[:cntrl:]：控制（非打印）字符
+[:graph:]：图形字符
+[:xdigit:]：十六进制字符</code></pre>
+
+<p><strong>文件通配符（glob）和正则表达式（regex）：</strong></p>
+<ul>
+<li>文件通配符就是<code>* ? []</code> 这三个，正则表达式则功能强大</li>
+<li>**对于<code>*</code> **文件通配符中<code>*</code>匹配 0 个或多个字符，可以单独使用。而在正则表达式中<code>*</code>是匹配前面的 0 次或多次，前面必须由内容，不能单独使用</li>
+<li><strong>对于<code>?</code></strong> 和<code>*</code>一样，文件通配符中，<code>?</code>可以单独使用，正则表达式中不可以</li>
+<li>**对于<code>[]</code> **文件通配符<code>[]</code>中的内容是按照 ASCII 统计的，例如<code>[a-z]</code>会匹配 a、A、b、B…y、Y、z，而正则表达式<code>[]</code>中的内容是按照人类的方式统计，例如<code>[a-z]</code>会匹配 a、b、c、d、e…x、y、z</li>
+<li><strong>对于<code>.</code></strong> 文件通配符中<code>.</code>就是<code>.</code>，没有别的意思，正则表达式中<code>.</code>匹配单个字符</li>
+</ul>
+<h2 id="touch"><a href="#touch" class="headerlink" title="touch"></a>touch</h2><p>创建空文件和 <strong>刷新文件时间</strong></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># -a 仅改变 atime和ctime</span>
+<span class="token comment"># -m 仅改变 mtime和ctime</span>
+<span class="token comment"># -t [[CC]YY]MMDDhhmm[.ss] 指定atime和mtime的时间戳</span>
+<span class="token comment"># -c 如果文件不存在，则不予创建</span></code></pre>
+
+<h2 id="cp"><a href="#cp" class="headerlink" title="cp"></a>cp</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-a</span>                <span class="token comment"># 归档，相当于-dR --preserv=all，常用于备份功能</span>
+<span class="token parameter variable">-u</span> <span class="token parameter variable">--update</span>       <span class="token comment"># 只复制源比目标先更新文件或目标不存在的文件</span>
+<span class="token parameter variable">-b</span>                <span class="token comment"># 目标存在, 覆盖前先备份, 默认形式为`filename~`, 只保留最近一个备份</span>
+<span class="token parameter variable">--backup</span><span class="token operator">=</span>numbered <span class="token comment"># 目标存在, 覆盖前先备份加数字后缀, 形式为`filename.~#~`, 可以保留多个版本</span></code></pre>
+
+<p>注意：不同类型的文件不能覆盖，例如普通文件可以覆盖普通文件，但是不能覆盖目录</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ll</span>
+drwxr-xr-x <span class="token number">2</span> root root   <span class="token number">12288</span> Jul <span class="token number">29</span> <span class="token number">15</span>:32 <span class="token builtin class-name">test</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># \cp -a --backup=numbered /test ./xxx</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># \cp -a --backup=numbered /test ./xxx</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># \cp -a --backup=numbered /test ./xxx</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ll</span>
+drwxr-xr-x <span class="token number">2</span> root root   <span class="token number">12288</span> Jul <span class="token number">29</span> <span class="token number">15</span>:32 <span class="token builtin class-name">test</span>
+-rw-r--r-- <span class="token number">1</span> root root      <span class="token number">11</span> Jul <span class="token number">29</span> <span class="token number">15</span>:30 xxx
+-rw-r--r-- <span class="token number">1</span> root root      <span class="token number">11</span> Jul <span class="token number">29</span> <span class="token number">15</span>:30 xxx.~1~
+-rw-r--r-- <span class="token number">1</span> root root      <span class="token number">11</span> Jul <span class="token number">29</span> <span class="token number">15</span>:30 xxx.~2~</code></pre>
+
+<h2 id="mv"><a href="#mv" class="headerlink" title="mv"></a>mv</h2><p>移动和重命名文件，同一分区移动会很快</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mv</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>-T<span class="token punctuation">]</span> SOURCE DEST       <span class="token comment"># 移动并重命名</span>
+<span class="token function">mv</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. SOURCE<span class="token punctuation">..</span>. DIRECTORY    <span class="token comment"># 移动到目录</span>
+<span class="token function">mv</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token parameter variable">-t</span> DIRECTORY SOURCE<span class="token punctuation">..</span>. <span class="token comment"># 目的目录参数在前, 要移动的文件参数在后</span>
+
+<span class="token parameter variable">-b</span>  <span class="token comment"># 目标存在, 覆盖前先备份</span></code></pre>
+
+<p><code>mv</code> 和 <code>rename</code>：<br><code>mv</code> 一次只能重命名一个文件，<code>rename</code> 可以批量重命名文件</p>
+<h2 id="rename"><a href="#rename" class="headerlink" title="rename"></a>rename</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">rename</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>expression<span class="token operator">></span> <span class="token operator">&lt;</span>replacement<span class="token operator">></span> <span class="token operator">&lt;</span>file<span class="token operator">></span><span class="token punctuation">..</span>.
+
+<span class="token comment"># 示例</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ll</span>
+total <span class="token number">4</span>
+-rw-r--r-- <span class="token number">1</span> root root <span class="token number">18</span> Jul <span class="token number">29</span> <span class="token number">19</span>:36 a.txt
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">0</span> Jul <span class="token number">29</span> <span class="token number">19</span>:14 b.txt
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># rename '.txt' '.log' ./*	# 修改后缀</span>
+<span class="token punctuation">[</span>root@4710419222 test<span class="token punctuation">]</span><span class="token comment"># ll</span>
+total <span class="token number">4</span>
+-rw-r--r-- <span class="token number">1</span> root root <span class="token number">18</span> Jul <span class="token number">29</span> <span class="token number">19</span>:36 a.log
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">0</span> Jul <span class="token number">29</span> <span class="token number">19</span>:14 b.log</code></pre>
+
+<p>这个命令好像可以使用正则，但是我试了一下，不行，可能是版本的问题</p>
+<h2 id="rm"><a href="#rm" class="headerlink" title="rm"></a>rm</h2><img data-src="//img.to2b.cn/blog/ljk/1596026223412.png" style="zoom: 80%;" />
+
+<p>此命令非常危险, 建议使用 mv 替代 rm</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">alias</span> <span class="token assign-left variable">rm</span><span class="token operator">=</span><span class="token string">'DIR=/data/backup`date +%F%T`;mkdir $DIR;mv -t $DIR'</span></code></pre>
+
+<p>rm 虽然删除了文件，但是在安全场景要求较高的情况下，可以使用 shred 命令安全删除文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#shred -zvun 5 passwords.txt</span>
+<span class="token comment"># -z 最后一次覆盖添加0，以隐藏覆盖操作</span>
+<span class="token comment"># -v 能够显示操作进度</span>
+<span class="token comment"># -u 覆盖后截断并删除文件</span>
+<span class="token comment"># -n 指定覆盖文件内容的次数（默认值是3次）</span></code></pre>
+
+<h2 id="tree"><a href="#tree" class="headerlink" title="tree"></a>tree</h2><p>显示目录树</p>
+<h2 id="df"><a href="#df" class="headerlink" title="df"></a>df</h2><p>查看文件系统，显示磁盘占用情况和 inode 使用情况</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token punctuation">[</span>选项列表<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>文件列表<span class="token punctuation">]</span><span class="token punctuation">..</span>.</code></pre>
+
+<ul>
+<li>-a –all</li>
+<li>-h –human-readable</li>
+<li>-i –inodes 显示 inode 信息而非块使用量</li>
+</ul>
+<p>关于 df 和 lsblk：</p>
+<pre class="language-none"><code class="language-none">lsblk 查看的是block device,也就是逻辑磁盘大小。df查看的是file system, 也就是文件系统层的磁盘大小</code></pre>
+
+<h2 id="mkdir"><a href="#mkdir" class="headerlink" title="mkdir"></a>mkdir</h2><pre class="language-none"><code class="language-none">-p 目录如果不存在，创建，如果存在，不报错
+-m 创建目录时直接指定权限</code></pre>
+
+<h2 id="rmdir"><a href="#rmdir" class="headerlink" title="rmdir"></a>rmdir</h2><pre class="language-none"><code class="language-none">-p 递归删除父空目录</code></pre>
+
+<p>挂载点不能删除</p>
+<h2 id="tee"><a href="#tee" class="headerlink" title="tee"></a>tee</h2><p>从标准输入读入并写往标准输出和文件，把标准输入的数据复制到文件列表中的每一个文件，同时送往标准输出</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">tee</span> <span class="token punctuation">[</span>选项<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>文件列表<span class="token punctuation">]</span><span class="token punctuation">..</span>.
+
+<span class="token parameter variable">-a</span> <span class="token parameter variable">--append</span>    <span class="token comment"># 追加到给出的文件。功能：保存不同阶段的输出；复杂管道的故障排除；同时查看和记录输出</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#cat &lt;&lt;EOF | tee /etc/motd</span>
+<span class="token operator">></span> welcome to magedu
+<span class="token operator">></span> happy new year
+<span class="token operator">></span> EOF
+welcome to magedu
+happy new year</code></pre>
+
+<h2 id="lsof"><a href="#lsof" class="headerlink" title="lsof"></a>lsof</h2><p>linux 下万物皆文件，网络也是文件，lsof 的作用是列出打开的文件</p>
+<p>lsof 的参数巨多，下面列举常用的参数：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">lsof</span> <span class="token function">file</span>        <span class="token comment"># 查看文件被哪些进程占用</span>
+<span class="token function">lsof</span> <span class="token parameter variable">-i</span>          <span class="token comment"># 列出所有的网络连接</span>
+<span class="token function">lsof</span> <span class="token parameter variable">-i:port</span>     <span class="token comment"># 列出指定端口</span>
+<span class="token function">lsof</span> <span class="token parameter variable">-i</span> tcp      <span class="token comment"># 列出所有的tcp网络连接</span></code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master ~<span class="token punctuation">]</span><span class="token variable">$lsof</span> <span class="token parameter variable">-i:10252</span>
+COMMAND   PID <span class="token environment constant">USER</span>   FD   TYPE DEVICE SIZE/OFF NODE NAME
+kube-cont <span class="token number">883</span> root    7u  IPv4  <span class="token number">32376</span>      0t0  TCP localhost:10252 <span class="token punctuation">(</span>LISTEN<span class="token punctuation">)</span></code></pre>
+
+<h2 id="seq"><a href="#seq" class="headerlink" title="seq"></a>seq</h2><p><a target="_blank" rel="noopener" href="https://www.zsythink.net/archives/128/">https://www.zsythink.net/archives/128/</a></p>
+<p>输出连续的数字，或者固定间隔的数字，或者指定格式的数字</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># seq 0 9</span>
+<span class="token number">0</span>
+<span class="token number">1</span>
+<span class="token number">2</span>
+<span class="token number">3</span>
+<span class="token number">4</span>
+<span class="token number">5</span>
+<span class="token number">6</span>
+<span class="token number">7</span>
+<span class="token number">8</span>
+<span class="token number">9</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># seq -s ' ' 0 9	# -s 指定输出的分隔符，默认为\n</span>
+<span class="token number">0</span> <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span> <span class="token number">6</span> <span class="token number">7</span> <span class="token number">8</span> <span class="token number">9</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># seq -s ' ' 0 2 9</span>
+<span class="token number">0</span> <span class="token number">2</span> <span class="token number">4</span> <span class="token number">6</span> <span class="token number">8</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># seq -s + 1 100 | bc</span>
+<span class="token number">5050</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># seq -s + 1 2 100 | bc</span>
+<span class="token number">2500</span></code></pre>
+
+<h2 id="练习题"><a href="#练习题" class="headerlink" title="练习题"></a>练习题</h2><ol>
+<li><p>将&#x2F;etc&#x2F;issue 文件中的内容转换为大写后保存至&#x2F;tmp&#x2F;issue.out 文件中</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 test<span class="token punctuation">]</span><span class="token comment"># cat /etc/issue | tr 'a-z' 'A-Z' > /tmp/issue.out</span></code></pre>
+</li>
+<li><p>将当前系统登录用户的信息转换为大写后保存至&#x2F;tmp&#x2F;who.out 文件中</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 test<span class="token punctuation">]</span><span class="token comment"># whoami | tr 'a-z' 'A-Z' > /tmp/who.out</span></code></pre>
+</li>
+<li><p>一个 linux 用户给 root 发邮件，要求邮件标题为”help”，邮件正文如下：</p>
+<blockquote>
+<p>Hello，I am 用户名，The system version is here，please help me to check it，thanks!<br>操作系统版本信息</p>
+</blockquote>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># echo -e "Hello, I am `whoami`,The system version is here,please help me to check it ,thanks! \n`cat /etc/os-release`" | mail -s hello root</span></code></pre>
+</li>
+<li><p>将&#x2F;root&#x2F;下文件列表，显示成一行，并文件名之间用空格隔开</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 /<span class="token punctuation">]</span><span class="token comment"># ls -A /root | tr '\n' ' '</span></code></pre>
+</li>
+<li><p>计算 1+2+3+…+99+100 的总和</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token comment"># seq -s + 1 100 | bc</span>
+<span class="token number">5050</span></code></pre>
+</li>
+<li><p>删除 Windows 文本文件中的回车字符 ，即“\r”</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> a.log <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">'\r'</span> <span class="token string">' '</span></code></pre>
+</li>
+<li><p>处理字符串“xt.,l 1 jr#!$mn 2 c*&#x2F;fe 3 uz 4”，只保留其中的数字和空格</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token comment"># echo 'xt.,l 1 jr#!$mn 2 c*/fe 3 uz 4' | tr -dc '0-9 '</span>
+ <span class="token number">1</span>  <span class="token number">2</span>  <span class="token number">3</span>  <span class="token number">4</span><span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token comment">#</span></code></pre>
+</li>
+<li><p>将 PATH 变量每个目录显示在独立的一行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token comment"># echo $PATH | tr ':' '\n'</span></code></pre>
+</li>
+<li><p>将指定文件中 0-9 分别替代成 a-j</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token comment"># cat a.log | tr '0-9' 'a-j'</span></code></pre>
+</li>
+<li><p>将文件&#x2F;etc&#x2F;centos-release 中每个单词（由字母组成）显示在独立一行，并无空行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 test<span class="token punctuation">]</span><span class="token comment"># cat /etc/centos-release | tr -c "[:alpha:]" " " | tr -s " " "\n"</span>
+CentOS
+Linux
+release
+Core</code></pre>
+</li>
+<li><p><code>ls</code> 输出的内容明明是分行的, 为什么显示出来就不分行了?</p>
+<p>不单<code> ls</code> 会这样，不少其他命令也会这样。它们会使用 isatty 函数查询输出是否指向终端，对输出到终端和非终端的处理，可能不一样</p>
+<p>常见的比如：<br>1、输出到终端时，使用 color，非终端则不用；<br>2、输出到终端时，使用 text 方式，非终端则用 binary。</p>
+<p>如果需要一致的输出，应当明确使用相关参数</p>
+<p>這取決於 stdout 是不是終端。如果是終端就可以讀取終端的寬度，根據寬度排版。</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 文件管理</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%96%87%E4%BB%B6/%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E5%92%8CIO%E9%87%8D%E5%AE%9A%E5%90%91/" rel="prev" title="文件管理和IO重定向">
+                  <i class="fa fa-chevron-left"></i> 文件管理和IO重定向
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E6%9D%83%E9%99%90/%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/" rel="next" title="权限管理">
+                  权限管理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

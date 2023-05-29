@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="可变状态： let objA &#x3D; &amp;#123; name: &quot;xiaoming&quot; &amp;#125; let objB &#x3D; objA objB.name &#x3D; &quot;lihua&quot; console.log(objA.name) &#x2F;&#x2F; lihua  我们只修改了 objB 的 name，发现 ojbA 也发生了改变。这个就是可变状态。 可变状态间接修改了其它对象，会造成代码隐患。 解决方案：  深度拷贝 使用 i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="immer">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/immer/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="可变状态： let objA &#x3D; &amp;#123; name: &quot;xiaoming&quot; &amp;#125; let objB &#x3D; objA objB.name &#x3D; &quot;lihua&quot; console.log(objA.name) &#x2F;&#x2F; lihua  我们只修改了 objB 的 name，发现 ojbA 也发生了改变。这个就是可变状态。 可变状态间接修改了其它对象，会造成代码隐患。 解决方案：  深度拷贝 使用 i">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-29T08:20:07.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:22.370Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/immer/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/immer/","path":"前端/React/immer/","title":"immer"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>immer | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AF%E5%8F%98%E6%95%B0%E6%8D%AE-immutable"><span class="nav-number">1.</span> <span class="nav-text">不可变数据 immutable</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#immutable-js"><span class="nav-number">2.</span> <span class="nav-text">immutable.js</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#immer"><span class="nav-number">3.</span> <span class="nav-text">immer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#immer-%E5%8E%9F%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">immer 原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#immer-%E4%B8%AD%E7%9A%84-proxy"><span class="nav-number">3.2.</span> <span class="nav-text">immer 中的 proxy</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#freeze"><span class="nav-number">3.2.1.</span> <span class="nav-text">freeze</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E5%89%8D%E7%AB%AF/React/immer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="immer | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          immer
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-05-29 16:20:07 / 修改时间：16:58:22" itemprop="dateCreated datePublished" datetime="2023-05-29T16:20:07+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/React/" itemprop="url" rel="index"><span itemprop="name">React</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>可变状态：</p>
+<pre class="language-javascript" data-language="javascript"><code class="language-javascript"><span class="token keyword">let</span> objA <span class="token operator">=</span> <span class="token punctuation">&#123;</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">"xiaoming"</span> <span class="token punctuation">&#125;</span>
+<span class="token keyword">let</span> objB <span class="token operator">=</span> objA
+objB<span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">"lihua"</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>objA<span class="token punctuation">.</span>name<span class="token punctuation">)</span> <span class="token comment">// lihua</span></code></pre>
+
+<p>我们只修改了 objB 的 name，发现 ojbA 也发生了改变。这个就是可变状态。</p>
+<p>可变状态间接修改了其它对象，会造成代码隐患。</p>
+<p><strong>解决方案：</strong></p>
+<ul>
+<li>深度拷贝</li>
+<li>使用 immer、immutable-js 等处理不可变数据的库</li>
+</ul>
+<h2 id="不可变数据-immutable"><a href="#不可变数据-immutable" class="headerlink" title="不可变数据 immutable"></a>不可变数据 immutable</h2><p>当我们使用 deepClone 或 immer &#x2F; immutable-js 创建一个新对象，新对象进行有副作用（side effect）的操作都不会影响到原来的数据。这就是 immutable。</p>
+<p>deepClone 虽然实现了 immutable，但是开销太大，因为它完全创建了一个新的对象出来，其实，对于不会进行赋值操作的 value 保持引用也没关系。</p>
+<p>所以在 2014 年，facebook 的 immutable-js 横空出世，即保证了 immutable ，在运行时判断数据间的引用情况，又兼顾了性能。</p>
+<h2 id="immutable-js"><a href="#immutable-js" class="headerlink" title="immutable.js"></a>immutable.js</h2><p>immutable-js 使用了另一套数据结构的 API ，与我们的常见操作有些许不同，它将所有的原生数据类型（Object， Array 等）都会转化成 immutable-js 的内部对象（Map，List 等），并且任何操作最终都会返回一个新的 immutable 的值。</p>
+<h2 id="immer"><a href="#immer" class="headerlink" title="immer"></a>immer</h2><blockquote>
+<p><a href="https://link.juejin.cn/?target=https://github.com/mweststrate/immer">Immer</a> 是 mobx 的作者写的一个 immutable 库，核心实现是利用 ES6 的 proxy，几乎以最小的成本实现了 js 的不可变数据结构，简单易用、体量小巧、设计巧妙，满足了我们对 JS 不可变数据结构的需求。</p>
+</blockquote>
+<p>与 immutable-js 最大的不同，immer 是使用原生数据结构的 API 而不是像 immutable-js 那样转化为内置对象之后使用内置的 API，举个简单例子：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">const</span> produce <span class="token operator">=</span> <span class="token keyword">require</span><span class="token punctuation">(</span><span class="token string">"immer"</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> state <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+	done<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+	val<span class="token operator">:</span> <span class="token string">"string"</span><span class="token punctuation">,</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">// 所有具有副作用的操作，都可以放入 produce 函数的第二个参数内进行</span>
+<span class="token comment">// 最终返回的结果并不影响原来的数据</span>
+<span class="token keyword">const</span> newState <span class="token operator">=</span> <span class="token function">produce</span><span class="token punctuation">(</span>state<span class="token punctuation">,</span> draft <span class="token operator">=></span> <span class="token punctuation">&#123;</span>
+	draft<span class="token punctuation">.</span>done <span class="token operator">=</span> <span class="token boolean">true</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
+
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>state<span class="token punctuation">.</span>done<span class="token punctuation">)</span> <span class="token comment">// false</span>
+<span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>newState<span class="token punctuation">.</span>done<span class="token punctuation">)</span> <span class="token comment">// true</span></code></pre>
+
+<p>通过上面的例子我们能发现，所有具有副作用的逻辑都可以放进 produce 的第二个参数的函数内部进行处理。在这个函数内部对原来的数据进行任何操作，都不会对原对象产生任何影响。</p>
+<h3 id="immer-原理"><a href="#immer-原理" class="headerlink" title="immer 原理"></a>immer 原理</h3><p>Immer 使用了 ES6 的新特性 Proxy 。</p>
+<p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy">https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy</a></p>
+<p><strong>Proxy</strong> 对象用于创建一个对象的代理，从而实现基本操作的拦截和自定义（如属性查找、赋值、枚举、函数调用等）。</p>
+<h3 id="immer-中的-proxy"><a href="#immer-中的-proxy" class="headerlink" title="immer 中的 proxy"></a>immer 中的 proxy</h3><p>immer 的做法就是维护一份 state 在内部，劫持所有操作，内部来判断是否有变化从而最终决定如何返回。下面这个例子就是一个构造函数，如果将它的实例传入 Proxy 对象作为第一个参数，后面处理对象时，就可以使用其中的方法：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">Store</span> <span class="token punctuation">&#123;</span>
+	<span class="token function">constructor</span><span class="token punctuation">(</span>state<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>modified <span class="token operator">=</span> <span class="token boolean">false</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>source <span class="token operator">=</span> state
+		<span class="token keyword">this</span><span class="token punctuation">.</span>copy <span class="token operator">=</span> <span class="token keyword">null</span>
+	<span class="token punctuation">&#125;</span>
+	<span class="token function">get</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>modified<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">[</span>key<span class="token punctuation">]</span>
+		<span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>copy<span class="token punctuation">[</span>key<span class="token punctuation">]</span>
+	<span class="token punctuation">&#125;</span>
+	<span class="token function">set</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>modified<span class="token punctuation">)</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">modifing</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>copy<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> value<span class="token punctuation">)</span>
+	<span class="token punctuation">&#125;</span>
+	<span class="token function">modifing</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>modified<span class="token punctuation">)</span> <span class="token keyword">return</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>modified <span class="token operator">=</span> <span class="token boolean">true</span>
+		<span class="token comment">// 这里使用原生的 API 实现一层 immutable，</span>
+		<span class="token comment">// 数组使用 slice 则会创建一个新数组。对象则使用解构</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>copy <span class="token operator">=</span> <span class="token builtin">Array</span><span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token keyword">this</span><span class="token punctuation">.</span>source<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token punctuation">&#123;</span> <span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>source <span class="token punctuation">&#125;</span>
+	<span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>modified，source，copy 三个属性；get，set，modifing 三个方法。</p>
+<p>modified 作为内置的 flag，判断如何进行设置和返回。</p>
+<p>里面最关键的就应该是 modifing 这个函数，在第一次 set 的时候，实现一次 copy，copy 后的数据也是 immutable。</p>
+<p>对于 Proxy 的第二个参数，简单做一层转发，任何对元素的读取和写入都转发到 store 实例内部方法去处理：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">const</span> <span class="token constant">PROXY_FLAG</span> <span class="token operator">=</span> <span class="token string">"@@SYMBOL_PROXY_FLAG"</span>
+<span class="token keyword">const</span> handler <span class="token operator">=</span> <span class="token punctuation">&#123;</span>
+	<span class="token function">get</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token comment">// 如果遇到了这个 flag 我们直接返回我们操作的 target</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span>key <span class="token operator">===</span> <span class="token constant">PROXY_FLAG</span><span class="token punctuation">)</span> <span class="token keyword">return</span> target
+		<span class="token keyword">return</span> target<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+	<span class="token function">set</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">,</span> value<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+		<span class="token keyword">return</span> target<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value<span class="token punctuation">)</span>
+	<span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>这里在 getter 里面加一个 flag 的目的就在于将来从 proxy 对象中获取 store 实例更加方便。</p>
+<p>最终我们能够完成这个 produce 函数：</p>
+<pre class="language-typescript" data-language="typescript"><code class="language-typescript"><span class="token keyword">function</span> <span class="token function">produce</span><span class="token punctuation">(</span>state<span class="token punctuation">,</span> producer<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">const</span> store <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Store</span><span class="token punctuation">(</span>state<span class="token punctuation">)</span>
+	<span class="token keyword">const</span> proxy <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Proxy</span><span class="token punctuation">(</span>store<span class="token punctuation">,</span> handler<span class="token punctuation">)</span>
+
+	<span class="token comment">// 执行我们传入的 producer 函数，我们实际操作的都是 proxy 实例，所有有副作用的操作都会在 proxy 内部进行判断，是否最终要对 store 进行改动。</span>
+	<span class="token function">producer</span><span class="token punctuation">(</span>proxy<span class="token punctuation">)</span>
+
+	<span class="token comment">// 处理完成之后，通过 flag 拿到 store 实例</span>
+	<span class="token keyword">const</span> newState <span class="token operator">=</span> proxy<span class="token punctuation">[</span><span class="token constant">PROXY_FLAG</span><span class="token punctuation">]</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span>newState<span class="token punctuation">.</span>modified<span class="token punctuation">)</span> <span class="token keyword">return</span> newState<span class="token punctuation">.</span>copy
+	<span class="token keyword">return</span> newState<span class="token punctuation">.</span>source
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>这样，Store 构造函数、handler 处理对象，produce 处理 state，这三个模块最简版就完成了，将它们组合起来就是一个最 tiny 的 immer。真正的 immer 内部还有其他的功能。</p>
+<p>当然，Proxy 作为一个新的 API，并不是所有环境都支持，Proxy 也无法 polyfill，所以 immer 在不支持 Proxy 的环境中，使用 Object.defineProperty 来进行一个兼容。</p>
+<h4 id="freeze"><a href="#freeze" class="headerlink" title="freeze"></a>freeze</h4><p>freeze 表示状态树在生成之后就被冻结不可继续操作。对于普通 JS 对象，我们可以使用 Object.freeze 来冻结我们生成的状态树对象，当然像 immer &#x2F; immutable-js 内部自己有冻结的方法和逻辑。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/React/redux/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B/" rel="prev" title="快速开始">
+                  <i class="fa fa-chevron-left"></i> 快速开始
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/JavaScript/js%E5%87%BD%E6%95%B0/" rel="next" title="js函数">
+                  js函数 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

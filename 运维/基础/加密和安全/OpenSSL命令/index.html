@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="openssl command [ command_opts ] [ command_args ]  两种运行模式：交互模式、批处理模式 直接输入 openssl 回车进入交互模式，输入带命令选项的 openssl 进入批处理模式。 OpenSSL 整个软件包大概可以分成三个主要的功能部分：密码算法库、SSL 协议库以及应用程序。OpenSSL 的目录结构自然也是围绕这三个功能部分进行规划的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenSSL命令">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/OpenSSL%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="openssl command [ command_opts ] [ command_args ]  两种运行模式：交互模式、批处理模式 直接输入 openssl 回车进入交互模式，输入带命令选项的 openssl 进入批处理模式。 OpenSSL 整个软件包大概可以分成三个主要的功能部分：密码算法库、SSL 协议库以及应用程序。OpenSSL 的目录结构自然也是围绕这三个功能部分进行规划的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1599473431892.png">
+<meta property="article:published_time" content="2020-12-09T15:03:59.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="OpenSSL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1599473431892.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/OpenSSL%E5%91%BD%E4%BB%A4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/OpenSSL%E5%91%BD%E4%BB%A4/","path":"运维/基础/加密和安全/OpenSSL命令/","title":"OpenSSL命令"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>OpenSSL命令 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#command"><span class="nav-number">1.</span> <span class="nav-text">command</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.1.</span> <span class="nav-text">对称加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%91%98%E8%A6%81%E7%AE%97%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">摘要算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.3.</span> <span class="nav-text">非对称加密</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DH%EF%BC%88Diffie-Hellman%EF%BC%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">DH（Diffie-Hellman）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DSA"><span class="nav-number">1.3.2.</span> <span class="nav-text">DSA</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RSA"><span class="nav-number">1.4.</span> <span class="nav-text">RSA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81"><span class="nav-number">1.5.</span> <span class="nav-text">生成用户密码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%9A%8F%E6%9C%BA%E6%95%B0"><span class="nav-number">1.6.</span> <span class="nav-text">生成随机数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-CentOS8-%E4%B8%8A%E5%AE%9E%E7%8E%B0%E7%A7%81%E6%9C%89-CA-%E5%92%8C%E8%AF%81%E4%B9%A6%E7%94%B3%E8%AF%B7%E9%A2%81%E5%8F%91"><span class="nav-number">1.7.</span> <span class="nav-text">在 CentOS8 上实现私有 CA 和证书申请颁发</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E7%A7%81%E6%9C%89-CA"><span class="nav-number">1.7.1.</span> <span class="nav-text">1. 创建私有 CA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%94%B3%E8%AF%B7%E8%AF%81%E4%B9%A6%E5%B9%B6%E9%A2%81%E5%8F%91%E8%AF%81%E4%B9%A6"><span class="nav-number">1.7.2.</span> <span class="nav-text">2. 申请证书并颁发证书</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E8%AF%B4%E6%98%8E"><span class="nav-number">1.7.3.</span> <span class="nav-text">3. 说明</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS7-%E5%88%9B%E5%BB%BA%E8%87%AA%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6"><span class="nav-number">1.8.</span> <span class="nav-text">CentOS7 创建自签名证书</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/OpenSSL%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OpenSSL命令 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenSSL命令
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:03:59" itemprop="dateCreated datePublished" datetime="2020-12-09T23:03:59+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">加密和安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p><img data-src="//img.to2b.cn/blog/ljk/1599473431892.png"></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">openssl <span class="token builtin class-name">command</span> <span class="token punctuation">[</span> command_opts <span class="token punctuation">]</span> <span class="token punctuation">[</span> command_args <span class="token punctuation">]</span></code></pre>
+
+<p>两种运行模式：交互模式、<strong>批处理模式</strong></p>
+<p>直接输入 openssl 回车进入交互模式，输入带命令选项的 openssl 进入批处理模式。</p>
+<p>OpenSSL 整个软件包大概可以分成三个主要的功能部分：<strong>密码算法库</strong>、<strong>SSL 协议库</strong>以及<strong>应用程序</strong>。OpenSSL 的目录结构自然也是围绕这三个功能部分进行规划的。</p>
+<p>openssl 子命令分为三类：1、标准命令、2、消息摘要命令、3、加密命令</p>
+<p>标准命令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> list <span class="token parameter variable">-commands</span>
+asn1parse         ca                ciphers           cms
+crl               crl2pkcs7         dgst              dhparam
+dsa               dsaparam          ec                ecparam
+enc               engine            errstr            gendsa
+genpkey           genrsa            <span class="token builtin class-name">help</span>              list
+nseq              ocsp              <span class="token function">passwd</span>            pkcs12
+pkcs7             pkcs8             pkey              pkeyparam
+pkeyutl           prime             rand              rehash
+req               rsa               rsautl            s_client
+s_server          s_time            sess_id           smime
+speed             spkac             srp               storeutl
+ts                verify            version           x509</code></pre>
+
+<p>消息摘要命令：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> list -digest-commands
+blake2b512        blake2s256        gost              md2
+md4               md5               rmd160            sha1
+sha224            sha256            sha3-224          sha3-256
+sha3-384          sha3-512          sha384            sha512
+sha512-224        sha512-256        shake128          shake256
+sm3</code></pre>
+
+<p>加密命令：对称加密和 base64 编码</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> list -cipher-commands
+aes-128-cbc       aes-128-ecb       aes-192-cbc       aes-192-ecb
+aes-256-cbc       aes-256-ecb       aria-128-cbc      aria-128-cfb
+aria-128-cfb1     aria-128-cfb8     aria-128-ctr      aria-128-ecb
+aria-128-ofb      aria-192-cbc      aria-192-cfb      aria-192-cfb1
+aria-192-cfb8     aria-192-ctr      aria-192-ecb      aria-192-ofb
+aria-256-cbc      aria-256-cfb      aria-256-cfb1     aria-256-cfb8
+aria-256-ctr      aria-256-ecb      aria-256-ofb      base64
+bf                bf-cbc            bf-cfb            bf-ecb
+bf-ofb            camellia-128-cbc  camellia-128-ecb  camellia-192-cbc
+camellia-192-ecb  camellia-256-cbc  camellia-256-ecb  cast
+cast-cbc          cast5-cbc         cast5-cfb         cast5-ecb
+cast5-ofb         des               des-cbc           des-cfb
+des-ecb           des-ede           des-ede-cbc       des-ede-cfb
+des-ede-ofb       des-ede3          des-ede3-cbc      des-ede3-cfb
+des-ede3-ofb      des-ofb           des3              desx
+idea              idea-cbc          idea-cfb          idea-ecb
+idea-ofb          rc2               rc2-40-cbc        rc2-64-cbc
+rc2-cbc           rc2-cfb           rc2-ecb           rc2-ofb
+rc4               rc4-40            rc5               rc5-cbc
+rc5-cfb           rc5-ecb           rc5-ofb           seed
+seed-cbc          seed-cfb          seed-ecb          seed-ofb
+zlib</code></pre>
+
+<p>消息摘要命令和加密命令初学不推荐直接使用，推荐通过标准命令 dgst 和 enc 调用。</p>
+<h2 id="command"><a href="#command" class="headerlink" title="command"></a>command</h2><pre class="language-bash" data-language="bash"><code class="language-bash">version  <span class="token comment"># 查看版本信息</span>
+enc      <span class="token comment"># 对称加密</span>
+dgst     <span class="token comment"># 摘要</span>
+dhparam  <span class="token comment"># 生成DH参数文件</span>
+dsaparam <span class="token comment"># 生成DSA参数文件</span>
+gendsa   <span class="token comment"># 从DSA参数文件生成DSA私钥</span>
+dsa      <span class="token comment"># 管理DSA密钥，可以给解密加密的私钥，可以给私钥设置密码，还可以从DSA私钥中生成公钥</span>
+<span class="token function">passwd</span>   <span class="token comment"># 生成密码</span>
+rand     <span class="token comment"># 生成随机数</span>
+ca       <span class="token comment"># CA管理，例如对证书进行签名</span>
+req      <span class="token comment"># 主要用于创建和处理PKCS#10格式的证书请求，可以创建自签名证书</span>
+x509     <span class="token comment"># 显示证书信息、将证书转换为各种形式、签署类似“迷你CA”的证书请求或编辑证书信任设置</span></code></pre>
+
+<p><a target="_blank" rel="noopener" href="http://linux.51yip.com/search/openssl">http://linux.51yip.com/search/openssl</a></p>
+<p><strong>1. 对称加密：</strong></p>
+<blockquote>
+<p>OpenSSL 一共提供了 8 种对称加密算法，DES 是最常用的。</p>
+</blockquote>
+<p><strong>2. 非对称加密：</strong></p>
+<blockquote>
+<p>OpenSSL 一共实现了 4 种非对称加密算法，包括 DH 算法、RSA 算法、DSA 算法和椭圆曲线算法（EC）。DH 算法一般用户密钥交换。RSA 算法既可以用于密钥交换，也可以用于数字签名，当然，如果你能够忍受其缓慢的速度，那么也可以用于数据加密。DSA 算法则一般只用于数字签名。</p>
+</blockquote>
+<p><strong>3. 信息摘要算法：</strong></p>
+<blockquote>
+<p>OpenSSL 实现了 5 种信息摘要算法，分别是 MD2、MD5、MDC2、SHA（SHA1）和 RIPEMD。SHA 算法事实上包括了 SHA 和 SHA1 两种信息摘要算法，此外，OpenSSL 还实现了 DSS 标准中规定的两种信息摘要算法 DSS 和 DSS1。</p>
+</blockquote>
+<p><strong>4. 密钥和证书管理：</strong></p>
+<p>OpenSSL 为密钥和证书提供了丰富的功能，支持多种标准。</p>
+<blockquote>
+<p>首先，OpenSSL 实现了 ASN.1 的证书和密钥相关标准，提供了对证书、公钥、私钥、证书请求以及 CRL 等数据对象的 DER、PEM 和 BASE64 的编解码功能。OpenSSL 提供了产生各种公开密钥对和对称密钥的方法、函数和应用程序，同时提供了对公钥和私钥的 DER 编解码功能。并实现了私钥的 PKCS#12 和 PKCS#8 的编解码功能。OpenSSL 在标准中提供了对私钥的加密保护功能，使得密钥可以安全地进行存储和分发。</p>
+<p>在此基础上，OpenSSL 实现了对证书的 X.509 标准编解码、PKCS#12 格式的编解码以及 PKCS#7 的编解码功能。并提供了一种文本数据库，支持证书的管理功能，包括证书密钥产生、请求产生、证书签发、吊销和验证等功能。</p>
+<p><strong>事实上，OpenSSL 提供的 CA 应用程序就是一个小型的证书管理中心（CA），实现了证书签发的整个流程和证书管理的大部分机制。</strong></p>
+</blockquote>
+<h3 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h3><p>openssl 提供了两种方式调用对称加密算法：</p>
+<p>一种就是直接调用对称加密指令；一种是使用 enc，对称加密指令作为 enc 的参数。例如下面两种写法是完全一样的：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">openssl des-cbc <span class="token parameter variable">-in</span> plain.txt <span class="token parameter variable">-out</span> encrypt.txt <span class="token parameter variable">-pass</span> pass:12345678</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">openssl enc -des-cbc <span class="token parameter variable">-in</span> plain.txt <span class="token parameter variable">-out</span> encrypt.txt <span class="token parameter variable">-pass</span> pass:12345678</code></pre>
+
+<p>初学推荐使用 enc，更宜读</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">openssl enc <span class="token punctuation">[</span>option<span class="token punctuation">]</span><span class="token punctuation">..</span>.</code></pre>
+
+<ul>
+<li><p>-help</p>
+</li>
+<li><p>-ciphers：列出所有 enc 的对称加密算法 option，上面的示例中的 -des-cba 就在其中</p>
+</li>
+<li><p>-in file：从 file 中读取内容，默认是从标准输入中读取</p>
+</li>
+<li><p>-out file：输出到 file，默认是输出到标准输出</p>
+</li>
+<li><p>-pass arg：设置加密或解密密码</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 加密</span>
+openssl enc <span class="token parameter variable">-des3</span> <span class="token parameter variable">-in</span> a.log <span class="token parameter variable">-out</span> b.bin <span class="token parameter variable">-pass</span> pass:123456
+<span class="token comment"># 解密</span>
+openssl enc <span class="token parameter variable">-des3</span> <span class="token parameter variable">-d</span> <span class="token parameter variable">-in</span> b.bin <span class="token parameter variable">-out</span> b.log <span class="token parameter variable">-pass</span> pass:123456
+<span class="token comment"># 命令行输入密码</span>
+pass:123456
+<span class="token comment"># 文件输入密码</span>
+file:passwd.txt
+<span class="token comment"># 环境变量输入密码</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">passwd</span><span class="token operator">=</span><span class="token number">123456</span>
+env:passwd
+<span class="token comment"># 从文件描述符输入密码</span>
+fd:1
+<span class="token comment"># 从标准输入输入密码</span>
+<span class="token comment"># stdin</span></code></pre>
+</li>
+<li><p>-e：加密，默认选项，可以省略</p>
+</li>
+<li><p>-d：解密</p>
+</li>
+<li><p>-a：base64 虽然不是加密，但是 enc 也支持了 base64 编码</p>
+</li>
+<li><p>-base64：同 -a</p>
+</li>
+<li><p>-A：如果设置了-a，则-A 让 base64 输出的结果不分行</p>
+</li>
+<li><p>-k：已淘汰</p>
+</li>
+<li><p>-md：指定 hash 算法，将 hash 处理后的 passwd 作为密码</p>
+</li>
+<li><p>-S：手动指定盐值</p>
+</li>
+</ul>
+<h3 id="摘要算法"><a href="#摘要算法" class="headerlink" title="摘要算法"></a>摘要算法</h3><p>支持的摘要算法命令使用<code>openssl list -digest-commands</code>查看，可以作为 openssl 的子命令直接调用，也可以作为 dgst 的<strong>短选项</strong>调用。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> list -digest-commands
+blake2b512        blake2s256        gost              md2
+md4               md5               rmd160            sha1
+sha224            sha256            sha3-224          sha3-256
+sha3-384          sha3-512          sha384            sha512
+sha512-224        sha512-256        shake128          shake256
+sm3</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">dgst <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>file<span class="token punctuation">..</span>.<span class="token punctuation">]</span></code></pre>
+
+<p>file…：files to digest (default is stdin)</p>
+<ul>
+<li>-help Display this summary</li>
+<li>-c 输出的摘要信息以分号隔离，和-hex 同时使用</li>
+<li>-out outfile 指定输出文件，默认标准输出</li>
+<li>-、、、</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 标准输入 生成摘要</span>
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token punctuation">&#123;</span><span class="token number">0</span><span class="token punctuation">..</span><span class="token number">10</span><span class="token punctuation">&#125;</span> <span class="token operator">|</span> openssl md5
+<span class="token punctuation">(</span>stdin<span class="token punctuation">)</span><span class="token operator">=</span> da0feb828a99053332f6d08e0a58f33e
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token punctuation">&#123;</span><span class="token number">0</span><span class="token punctuation">..</span><span class="token number">10</span><span class="token punctuation">&#125;</span> <span class="token operator">|</span> openssl dgst <span class="token parameter variable">-md5</span>
+<span class="token punctuation">(</span>stdin<span class="token punctuation">)</span><span class="token operator">=</span> da0feb828a99053332f6d08e0a58f33e
+<span class="token comment"># 文件内容 生成摘要</span>
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token punctuation">&#123;</span><span class="token number">0</span><span class="token punctuation">..</span><span class="token number">10</span><span class="token punctuation">&#125;</span> <span class="token operator">></span> a.log
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> dgst <span class="token parameter variable">-md5</span> ./a.log
+MD5<span class="token punctuation">(</span>./a.log<span class="token punctuation">)</span><span class="token operator">=</span> da0feb828a99053332f6d08e0a58f33e
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> dgst <span class="token parameter variable">-out</span> a.md5 <span class="token parameter variable">-md5</span> ./a.log
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$cat</span> a.md5
+MD5<span class="token punctuation">(</span>./a.log<span class="token punctuation">)</span><span class="token operator">=</span> da0feb828a99053332f6d08e0a58f33e</code></pre>
+
+<p>补充：coreutils 包提供了很多核心工具，例如 cat、cp、ls 等等，其中也有摘要算法相关的工具：md5sum，sha1sum，sha224sum，sha256sum ，sha384sum，sha512sum 等，以 md5 为例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">md5sum <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>FILE<span class="token punctuation">]</span><span class="token punctuation">..</span>.</code></pre>
+
+<h3 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h3><p>非对称加密相关命令都是 openssl 的标准命令，没有额外再单独设置一个命令管理它们。</p>
+<ul>
+<li>dhparam：生成 DH 参数文件</li>
+<li>dsaparam：生成 DSA 参数文件</li>
+<li>gendsa：从 DSA 参数文件生成 DSA 私钥</li>
+<li>dsa：管理 DSA 密钥，可以给解密加密的私钥，可以给私钥设置密码，还可以从 DSA 私钥中生成公钥</li>
+<li>genrsa：生成 RSA 私钥</li>
+<li>rsa：管理 RSA 密钥</li>
+</ul>
+<h4 id="DH（Diffie-Hellman）"><a href="#DH（Diffie-Hellman）" class="headerlink" title="DH（Diffie-Hellman）"></a>DH（Diffie-Hellman）</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用生成因子2和随机的1024-bit的素数产生D0ffie-Hellman参数</span>
+<span class="token comment"># 输出保存到文件dhparam.pem</span>
+openssl dhparam <span class="token parameter variable">-out</span> dhparam.pem <span class="token parameter variable">-2</span> <span class="token number">1024</span>
+
+<span class="token comment"># 从dhparam.pem中读取Diffie-Hell参数，以C代码的形式</span>
+<span class="token comment"># 输出到stdout</span>
+penssl dhparam <span class="token parameter variable">-in</span> dhparam.pem <span class="token parameter variable">-noout</span> <span class="token parameter variable">-C</span></code></pre>
+
+<h4 id="DSA"><a href="#DSA" class="headerlink" title="DSA"></a>DSA</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成1024位DSA参数集，并输出到文件dsaparam.pem</span>
+openssl dsaparam <span class="token parameter variable">-out</span> dsaparam.pem <span class="token number">1024</span>
+
+<span class="token comment"># 使用参数文件dsaparam.pem生成DSA私钥匙，</span>
+<span class="token comment"># 采用3DES加密后输出到文件dsaprivatekey.pem</span>
+openssl gendsa <span class="token parameter variable">-out</span> dsaprivatekey.pem <span class="token parameter variable">-des3</span> dsaparam.pem
+
+<span class="token comment"># 使用私钥匙dsaprivatekey.pem生成公钥匙，</span>
+<span class="token comment"># 输出到dsapublickey.pem</span>
+openssl dsa <span class="token parameter variable">-in</span> dsaprivatekey.pem <span class="token parameter variable">-pubout</span> <span class="token parameter variable">-out</span> dsapublickey.pem
+
+<span class="token comment"># 从dsaprivatekey.pem中读取私钥匙，解密并输入新口令进行加密，</span>
+<span class="token comment"># 然后写回文件dsaprivatekey.pem</span>
+openssl dsa <span class="token parameter variable">-in</span> dsaprivatekey.pem <span class="token parameter variable">-out</span> dsaprivatekey.pem <span class="token parameter variable">-des3</span> <span class="token parameter variable">-passin</span></code></pre>
+
+<h3 id="RSA"><a href="#RSA" class="headerlink" title="RSA"></a>RSA</h3><p>生成私钥，并 3des 加密：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> genrsa <span class="token parameter variable">-out</span> rsa.key <span class="token parameter variable">-des3</span> <span class="token number">1024</span>
+Generating RSA private key, <span class="token number">1024</span> bit long modulus <span class="token punctuation">(</span><span class="token number">2</span> primes<span class="token punctuation">)</span>
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+++++
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+++++
+e is <span class="token number">65537</span> <span class="token punctuation">(</span>0x010001<span class="token punctuation">)</span>
+Enter pass phrase <span class="token keyword">for</span> rsa.key:
+Verifying - Enter pass phrase <span class="token keyword">for</span> rsa.key:
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$cat</span> rsa.key
+-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: <span class="token number">4</span>,ENCRYPTED
+DEK-Info: DES-EDE3-CBC,B81F9992681E3346
+
+fi2XSHajJUAhKHNeUFB+nJqog0R8qiBfQ3yEljQHadyq7U7P+7evDV9JQxpwtDC1
+gZ3BpjY1+4NmN1lXbzoADLwx/tRIgHqQXgkIgY/tSeKTOtaaFbRsg7DZXjcq3YMX
+seo8DoZEbyyzAVIYVdR/Z40niYNoaEWiXiwzT8Wz11BORftqJER+07s2NRDSpQNj
+8Q7R9L6uT+RWnde5IeCZjZ9X9cj9ZBlMw1trKpiwbqTeq1YtRHcpKLSyg69f5ERy
+sW9qaf00qNHR6LTHL3Hgw+EBo9JYmspflvhGWO0QmWKNbBLnjEGS6QgbxgxQT0mP
+d0Imwn/3Xit8c/ACdoHZiqwYkzrreR9K7CHD2USiMlun08vcWyal3EzPOAfshZWq
+g6MXdLSs3nOA03dkP4mjjb3iCca8xxSFKQPWb3viZzg14gWRAlVo1Fp9+0d+U1An
+hHpqX/64MiPZakRPyGfPA6uycJgxIxKzhnam/mKSAFkQoxt61zKst9JFKWwCnEAv
+ucKZXIGPJGsMW5bXkVFdMdnx3iUZDHFBQmFLuA5+w8CQTBw3wLY1PKfvtpoLY2S3
+qP9xnqqjPzg+RzBgNvWPIQ+y5SECZq5CdnGK/vLrysUBy3eUdfgiyZ5h7i2Bugnu
+wieFH5FvaGHAljN6tcGo4xPjfPb+SEujkl+Ot6R1lCzHXvEgvaCBVBN5qx5rFH9H
+CQ8ZeIKjs/jscCvgMhqhzRfOkhzvKruShQ1G3t1prvZ5JNZCy0ePkh/g9PMxIaVv
+DIZbEiA+Yy5NrXmkCxHmVIACg4mxetPJCtg7yTG4P/dQKE/3PPLwZA<span class="token operator">==</span>
+-----END RSA PRIVATE KEY-----</code></pre>
+
+<p>解密私钥：</p>
+<p>不需要指定加密用的算法</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> rsa <span class="token parameter variable">-in</span> rsa.key
+Enter pass phrase <span class="token keyword">for</span> rsa.key:
+writing RSA key
+-----BEGIN RSA PRIVATE KEY-----
+MIICXAIBAAKBgQC3SFoUHD+Jk8dt2l7MWqDvhDUF/jMlzCMs2VhnWytPdWWjTHeO
+zNj0rt6L8uMq45C3CmTzaBz6v6fdAH5RKLkv78ZqjhxfRwIgRtUCRCa+b+lqq0qc
+9paKTFl+gAnSAkx0ua90XAx65DAs9XpL5HkGHI7Jj7Cb0ERluZNV0Sv8YwIDAQAB
+AoGAfB61UfUnWiYH4m8Fz+J4Jnwj5GEXhjtOfurZoXTuSas5H3ODa+Nx8ZITCDd+
+e+cMc8jIQMZ7CZyNM29IG/I2JgkXEk6apyLy7UAiQF0CbYljLOy7qBkrcYCo2RBa
+IGUoTX7RJwC+3Dxa3/12Tx4ufqZ5/+RAJoqqV90rx8EFLnECQQDat+/KaEte9xJ0
++NgmOGna68p4B1zNR/LQ5/n3yEweBLaseOke2o3BnsIAcL5LLNC5d3jun9UWyl2R
+Xtflcly/AkEA1oYgAs//M4M/o3bZxYBaQkWiC+u+YsKMwMA+DPYs/H2fzwprP+4N
+mjoKYrjL214nchuDE1fM1YErcvkn5AN1XQJBAJCDVBbizloS2ckb2oV2ZMrXXNHt
+221vioppnAoR9+klqCVRRoayVVOHOBveYn19QPQqcmcIiF0knKo+hlv+MjUCQDw/
+syHXFM983xSjvomvgKn4MIi0juXhyfIgi8zMHtpS1d0qCfEMhJl6D4ymZeqYSO/N
+NkTqdcbI3lEOFNv+9KkCQHGLnBuVcZ6IaneTIl6Dj5fuSH4JcTgWpeXJNbfWO+iR
+<span class="token assign-left variable">7bpy5LnVqTM2rrvEjAdhMOD5xLbaxwRxSAMnG9lDyD8</span><span class="token operator">=</span>
+-----END RSA PRIVATE KEY-----</code></pre>
+
+<p>从私钥中生成公钥：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> rsa <span class="token parameter variable">-in</span> rsa.key <span class="token parameter variable">-pubout</span> <span class="token parameter variable">-out</span> rsa.key.pub
+Enter pass phrase <span class="token keyword">for</span> rsa.key:
+writing RSA key
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$cat</span> rsa.key.pub
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC3SFoUHD+Jk8dt2l7MWqDvhDUF
+/jMlzCMs2VhnWytPdWWjTHeOzNj0rt6L8uMq45C3CmTzaBz6v6fdAH5RKLkv78Zq
+jhxfRwIgRtUCRCa+b+lqq0qc9paKTFl+gAnSAkx0ua90XAx65DAs9XpL5HkGHI7J
+j7Cb0ERluZNV0Sv8YwIDAQAB
+-----END PUBLIC KEY-----</code></pre>
+
+<h3 id="生成用户密码"><a href="#生成用户密码" class="headerlink" title="生成用户密码"></a>生成用户密码</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">passwd</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>passwords<span class="token punctuation">&#125;</span></code></pre>
+
+<p>默认使用 标准 Unix 密码算法 生成密码：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> <span class="token function">passwd</span> <span class="token number">123456</span>
+pPVKzob9muWhI
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> <span class="token function">passwd</span> <span class="token number">123456</span>
+RGMogKjCYuqRo
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> <span class="token function">passwd</span> <span class="token number">123456</span> admin
+RmxJ4CJbLmGUs
+ziknRF1V5vFSs</code></pre>
+
+<p><strong>options：</strong></p>
+<ul>
+<li>-in file：从文件中读入密码，默认交互式输入</li>
+<li>-stdin：从标准输入读取密码，默认交互式输入</li>
+<li>-salt val：加盐，指定盐值</li>
+<li>-6：SHA512</li>
+<li>-5：SHA256</li>
+<li>-1：MD5</li>
+<li>-、、、</li>
+</ul>
+<h3 id="生成随机数"><a href="#生成随机数" class="headerlink" title="生成随机数"></a>生成随机数</h3><p>&#x2F;dev&#x2F;random 和&#x2F;dev&#x2F;urandom 根据硬件信息生成随机数，是伪随机数生成器，openssl rand 是真随机数生成器</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">rand <span class="token punctuation">[</span>options<span class="token punctuation">]</span> num</code></pre>
+
+<p>num：指定随机数的字节数。</p>
+<p><strong>options：</strong></p>
+<ul>
+<li>-out file：将输出的随机数写入到文件</li>
+<li>-base64：将输出的随机数转成 base64 格式</li>
+<li>-hex：将输出的随机数转成 16 进制格式</li>
+</ul>
+<p>范例：生成 10 位随机数</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#openssl rand -hex 5</span>
+2ce882e4e7
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#openssl rand -base64 9 |head -c10</span>
+7yTjuE+FAC</code></pre>
+
+<h3 id="在-CentOS8-上实现私有-CA-和证书申请颁发"><a href="#在-CentOS8-上实现私有-CA-和证书申请颁发" class="headerlink" title="在 CentOS8 上实现私有 CA 和证书申请颁发"></a>在 CentOS8 上实现私有 CA 和证书申请颁发</h3><p>相关文件：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 tls<span class="token punctuation">]</span><span class="token variable">$rpm</span> <span class="token parameter variable">-ql</span> openssl-libs
+/etc/pki/tls
+/etc/pki/tls/certs
+/etc/pki/tls/ct_log_list.cnf
+/etc/pki/tls/misc
+/etc/pki/tls/openssl.cnf	<span class="token comment"># 配置文件</span>
+/etc/pki/tls/private</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 私有CA 目录</span>
+
+./demoCA                       - main CA directory
+./demoCA/cacert.pem            - 证书，也就是自签名公钥
+./demoCA/private/cakey.pem     - 自签名私钥
+./demoCA/serial                - CA serial number <span class="token function">file</span>
+./demoCA/serial.old            - CA serial number backup <span class="token function">file</span>
+./demoCA/index.txt             - 数据库文件
+./demoCA/index.txt.old         - CA text database backup <span class="token function">file</span>
+./demoCA/certs                 - 颁发的证书存放目录
+./demoCA/.rnd                  - CA random seed information</code></pre>
+
+<h4 id="1-创建私有-CA"><a href="#1-创建私有-CA" class="headerlink" title="1. 创建私有 CA"></a>1. 创建私有 CA</h4><p>私有 CA 的目录位置在 openssl.conf 中可以更改，默认设置如下，我们就不改了。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span> CA_default <span class="token punctuation">]</span>
+
+<span class="token function">dir</span>             <span class="token operator">=</span> /etc/pki/CA           <span class="token comment"># Where everything is kept</span>
+certs           <span class="token operator">=</span> <span class="token variable">$dir</span>/certs            <span class="token comment"># Where the issued certs are kept</span>
+crl_dir         <span class="token operator">=</span> <span class="token variable">$dir</span>/crl              <span class="token comment"># Where the issued crl are kept</span>
+database        <span class="token operator">=</span> <span class="token variable">$dir</span>/index.txt        <span class="token comment"># database index file.</span>
+<span class="token comment">#unique_subject = no                    # Set to 'no' to allow creation of</span>
+                                        <span class="token comment"># several certs with same subject.</span>
+new_certs_dir   <span class="token operator">=</span> <span class="token variable">$dir</span>/newcerts         <span class="token comment"># default place for new certs.</span>
+
+certificate     <span class="token operator">=</span> <span class="token variable">$dir</span>/cacert.pem       <span class="token comment"># The CA certificate</span>
+serial          <span class="token operator">=</span> <span class="token variable">$dir</span>/serial           <span class="token comment"># The current serial number</span>
+crlnumber       <span class="token operator">=</span> <span class="token variable">$dir</span>/crlnumber        <span class="token comment"># the current crl number</span>
+                                        <span class="token comment"># must be commented out to leave a V1 CRL</span>
+crl             <span class="token operator">=</span> <span class="token variable">$dir</span>/crl.pem          <span class="token comment"># The current CRL</span>
+private_key     <span class="token operator">=</span> <span class="token variable">$dir</span>/private/cakey.pem<span class="token comment"># The private key</span></code></pre>
+
+<ol>
+<li>按照 openssl.conf 中的设置，创建私有 CA 目录及相关文件</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$mkdir</span> /etc/pki/CA
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /etc/pki/CA
+<span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span><span class="token variable">$mkdir</span> certs crl newcerts private
+<span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span><span class="token variable">$touch</span> index.txt
+<span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span><span class="token variable">$echo</span> 01 <span class="token operator">></span> serial	<span class="token comment"># 指定第一个颁发证书的序列号</span></code></pre>
+
+<ol start="2">
+<li>生成私钥，这里选择 RSA 私钥，比较简单</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span><span class="token variable">$openssl</span> genrsa <span class="token parameter variable">-out</span> private/cakey.pem <span class="token number">2048</span>
+Generating RSA private key, <span class="token number">2048</span> bit long modulus <span class="token punctuation">(</span><span class="token number">2</span> primes<span class="token punctuation">)</span>
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+++++
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+++++
+e is <span class="token number">65537</span> <span class="token punctuation">(</span>0x010001<span class="token punctuation">)</span></code></pre>
+
+<ol start="3">
+<li>生成 CA 自签名证书</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span><span class="token variable">$openssl</span> req <span class="token parameter variable">-new</span> <span class="token parameter variable">-x509</span> <span class="token parameter variable">-key</span> private/cakey.pem <span class="token parameter variable">-days</span> <span class="token number">3650</span> <span class="token parameter variable">-out</span> cacert.pem
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter <span class="token string">'.'</span>, the field will be left blank.
+-----
+Country Name <span class="token punctuation">(</span><span class="token number">2</span> letter code<span class="token punctuation">)</span> <span class="token punctuation">[</span>XX<span class="token punctuation">]</span>:CN
+State or Province Name <span class="token punctuation">(</span>full name<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>:henan
+Locality Name <span class="token punctuation">(</span>eg, city<span class="token punctuation">)</span> <span class="token punctuation">[</span>Default City<span class="token punctuation">]</span>:
+Organization Name <span class="token punctuation">(</span>eg, company<span class="token punctuation">)</span> <span class="token punctuation">[</span>Default Company Ltd<span class="token punctuation">]</span>:
+Organizational Unit Name <span class="token punctuation">(</span>eg, section<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>:
+Common Name <span class="token punctuation">(</span>eg, your name or your server's <span class="token function">hostname</span><span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>:ljk
+Email Address <span class="token punctuation">[</span><span class="token punctuation">]</span>:ljk@qq.com
+<span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span>$
+<span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span><span class="token variable">$openssl</span> x509 <span class="token parameter variable">-noout</span> <span class="token parameter variable">-in</span> cacert.pem <span class="token parameter variable">-text</span>
+Certificate:
+    Data:
+        Version: <span class="token number">3</span> <span class="token punctuation">(</span>0x2<span class="token punctuation">)</span>
+        Serial Number:
+            <span class="token number">26</span>:c2:97:d3:b0:0e:f4:8d:d7:3e:1c:a1:e2:95:08:31:20:aa:f1:b7
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C <span class="token operator">=</span> CN, ST <span class="token operator">=</span> henan, L <span class="token operator">=</span> Default City, O <span class="token operator">=</span> Default Company Ltd, CN <span class="token operator">=</span> ljk, emailAddress <span class="token operator">=</span> ljk@qq.com
+        Validity
+            Not Before: Sep  <span class="token number">8</span> 08:17:04 <span class="token number">2020</span> GMT
+            Not After <span class="token builtin class-name">:</span> Sep  <span class="token number">6</span> 08:17:04 <span class="token number">2030</span> GMT
+        Subject: C <span class="token operator">=</span> CN, ST <span class="token operator">=</span> henan, L <span class="token operator">=</span> Default City, O <span class="token operator">=</span> Default Company Ltd, CN <span class="token operator">=</span> ljk, emailAddress <span class="token operator">=</span> ljk@qq.com
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                RSA Public-Key: <span class="token punctuation">(</span><span class="token number">2048</span> bit<span class="token punctuation">)</span>
+                Modulus:
+                    00:bc:30:93:e4:81:8f:aa:ed:c7:27:c3:66:6b:17:
+                    7d:f2:40:f2:1c:5e:12:86:89:5a:ca:e1:d2:6d:61:
+                    fa:3c:0e:36:d6:88:bc:c3:1c:e9:a3:a4:f7:28:14:
+                    4b:7f:5a:48:e0:1f:3e:3a:dc:45:12:27:a9:ef:94:
+                    <span class="token number">51</span>:95:1b:84:79:ae:6b:11:3d:77:92:a4:72:ee:4a:
+                    <span class="token number">47</span>:c9:c6:13:84:03:f7:be:48:48:8d:ac:d4:b5:7b:
+                    fd:36:04:6a:90:22:6f:5d:06:cc:52:c6:21:a2:0f:
+                    <span class="token number">48</span>:fb:d1:cb:5b:66:f7:05:e5:35:10:14:6a:07:bc:
+                    <span class="token number">35</span>:66:fd:d9:c4:30:35:91:bb:ca:6c:bb:77:79:4d:
+                    e2:9e:03:71:72:e4:bd:7b:cf:2e:96:30:0e:7e:2d:
+                    <span class="token number">10</span>:c4:5a:b3:66:03:7a:68:95:78:e1:31:28:86:35:
+                    <span class="token number">43</span>:f6:be:7c:b8:d2:36:8f:ed:d0:0e:0a:98:49:59:
+                    <span class="token number">63</span>:42:45:70:f2:a1:8d:30:b9:6b:6f:b2:49:c9:e2:
+                    ae:0c:08:b2:47:bf:48:c7:be:d6:e8:26:8c:21:07:
+                    e4:a9:16:e9:f1:c6:30:e0:41:de:3c:d8:81:fd:fe:
+                    <span class="token number">86</span>:b2:6f:b1:04:35:73:ac:67:36:a8:39:ee:ff:15:
+                    6b:4c:30:7e:6f:dd:9e:02:16:af:ae:46:e1:5c:e9:
+                    b1:e5
+                Exponent: <span class="token number">65537</span> <span class="token punctuation">(</span>0x10001<span class="token punctuation">)</span>
+        X509v3 extensions:
+            X509v3 Subject Key Identifier:
+                <span class="token number">62</span>:CE:34:13:29:DA:F0:67:D8:CB:8D:6C:90:1A:3C:C8:E5:15:4D:D9
+            X509v3 Authority Key Identifier:
+                keyid:62:CE:34:13:29:DA:F0:67:D8:CB:8D:6C:90:1A:3C:C8:E5:15:4D:D9
+
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+    Signature Algorithm: sha256WithRSAEncryption
+         4c:87:4d:25:3f:3d:5f:b9:9e:b1:35:2f:7e:be:26:da:6b:e0:
+         4a:77:56:79:80:9e:a7:8b:80:02:71:75:1c:12:28:e7:73:49:
+         c8:b4:44:41:3f:1a:b4:b6:db:8e:33:8e:29:8f:01:2f:9e:dc:
+         <span class="token number">34</span>:1c:45:78:a2:8c:82:25:9e:da:5f:69:fb:3c:15:98:db:36:
+         d7:a7:41:09:bc:b0:36:b7:ae:77:10:7a:7a:0e:00:ed:cd:22:
+         <span class="token number">28</span>:99:d3:a1:28:47:cd:6a:01:88:e5:d4:cc:42:be:d5:2a:16:
+         <span class="token number">72</span>:af:44:d8:b0:b9:83:99:e9:f3:08:c1:ea:f6:b1:11:ee:51:
+         d7:83:b8:1e:7c:45:47:25:0d:bc:5e:9d:78:cc:c1:26:0c:33:
+         5b:78:e5:1a:5f:31:79:11:54:a7:42:3a:dc:ed:43:66:b5:6c:
+         e1:f5:61:82:d5:92:19:f6:6c:e8:20:01:b4:0a:07:9f:5b:63:
+         1e:29:49:f0:58:4a:ed:ef:1a:67:a3:f1:ec:e3:e6:b3:50:3a:
+         c4:5b:ef:23:55:13:69:0a:ac:42:77:22:4b:0b:34:c1:f4:e9:
+         <span class="token number">80</span>:89:ff:ff:43:af:84:4e:a7:ef:f0:28:7a:14:c0:ce:f9:4b:
+         aa:db:29:4b:fb:5c:ac:bf:c9:5f:ce:cd:45:62:dc:6e:18:a0:
+         cc:f5:07:e9
+<span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span>$
+<span class="token punctuation">[</span>root@centos8 CA<span class="token punctuation">]</span><span class="token variable">$tree</span>
+<span class="token builtin class-name">.</span>
+├── cacert.pem
+├── certs
+├── crl
+├── index.txt
+├── newcerts
+├── private
+│   └── cakey.pem
+└── serial
+
+<span class="token number">4</span> directories, <span class="token number">4</span> files</code></pre>
+
+<p><strong>req</strong>：主要用于创建和处理 PKCS#10 格式的证书请求，可以创建自签名证书</p>
+<ul>
+<li>-new：生成新证书签署请求</li>
+<li>-x509：专用于 CA 生成自签证书</li>
+<li>-key：生成请求时用到的私钥文件</li>
+<li>-days n：证书的有效期限</li>
+<li>-out &#x2F;PATH&#x2F;TO&#x2F;SOMECERTFILE: 证书的保存路径</li>
+<li>-key val：指定已有的秘钥文件生成秘钥请求，只与-new 配合</li>
+<li>-newkey：与 <code>-key</code> 互斥，在生成证书请求或者自签名证书的时候自动生成密钥，生成的密钥名称由 <code>-keyout</code> 参数指定。当指定<code>-newkey</code> 选项时，后面指定 <code>rsa:bits</code> 说明产生 <code>rsa</code> 密钥，位数由 <code>bits</code> 指定。 <strong>如果没有指定选项<code>-key</code> 和<code>-newkey</code>，默认<code>-newkey</code></strong></li>
+<li>-nodes：如果指定 <code>-newkey</code>，那么 <code>-nodes</code> 选项说明生成的秘钥不需要加密</li>
+</ul>
+<p><strong>x509</strong>：显示证书信息、将证书转换为各种形式、签署类似“迷你 CA”的证书请求或编辑证书信任设置</p>
+<h4 id="2-申请证书并颁发证书"><a href="#2-申请证书并颁发证书" class="headerlink" title="2. 申请证书并颁发证书"></a>2. 申请证书并颁发证书</h4><ol>
+<li>申请证书，就是申请一个认证过的公钥，首先生成私钥</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> genrsa <span class="token parameter variable">-out</span> test.key <span class="token number">2048</span>
+Generating RSA private key, <span class="token number">2048</span> bit long modulus <span class="token punctuation">(</span><span class="token number">2</span> primes<span class="token punctuation">)</span>
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+++++
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+++++
+e is <span class="token number">65537</span> <span class="token punctuation">(</span>0x010001<span class="token punctuation">)</span></code></pre>
+
+<ol start="2">
+<li>使用私钥生成证书申请文件</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> req <span class="token parameter variable">-new</span> <span class="token parameter variable">-key</span> ./test.key <span class="token parameter variable">-out</span> ./test.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter <span class="token string">'.'</span>, the field will be left blank.
+-----
+Country Name <span class="token punctuation">(</span><span class="token number">2</span> letter code<span class="token punctuation">)</span> <span class="token punctuation">[</span>XX<span class="token punctuation">]</span>:CN
+State or Province Name <span class="token punctuation">(</span>full name<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>:henan
+Locality Name <span class="token punctuation">(</span>eg, city<span class="token punctuation">)</span> <span class="token punctuation">[</span>Default City<span class="token punctuation">]</span>:
+Organization Name <span class="token punctuation">(</span>eg, company<span class="token punctuation">)</span> <span class="token punctuation">[</span>Default Company Ltd<span class="token punctuation">]</span>:
+Organizational Unit Name <span class="token punctuation">(</span>eg, section<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>:
+Common Name <span class="token punctuation">(</span>eg, your name or your server<span class="token string">'s hostname) []:ljk
+Email Address []:ljk@qq.com
+
+Please enter the following '</span>extra' attributes
+to be sent with your certificate request
+A challenge password <span class="token punctuation">[</span><span class="token punctuation">]</span>:123456
+An optional company name <span class="token punctuation">[</span><span class="token punctuation">]</span>:ljk
+</code></pre>
+
+<p>三种策略：默认是 match</p>
+<ul>
+<li>match：要求申请填写的信息跟 CA 设置信息必须一致，</li>
+<li>optional：可有可无，跟 CA 设置信息可不一致</li>
+<li>supplied：必须填写这项申请信息</li>
+</ul>
+<ol start="3">
+<li>CA 签署证书</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token variable">$openssl</span> ca <span class="token parameter variable">-in</span> ./test.csr <span class="token parameter variable">-out</span> /etc/pki/CA/certs/test.pem <span class="token parameter variable">-days</span> <span class="token number">100</span></code></pre>
+
+<ol start="4">
+<li>吊销证书</li>
+</ol>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看serial与subject信息，对比检验是否与index.txt文件中的信息一致，一致则删除</span>
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$openssl</span> x509 <span class="token parameter variable">-in</span> ./test.crt <span class="token parameter variable">-noout</span> <span class="token parameter variable">-serial</span> <span class="token parameter variable">-subject</span>
+<span class="token assign-left variable">serial</span><span class="token operator">=</span>01
+<span class="token assign-left variable">subject</span><span class="token operator">=</span>C <span class="token operator">=</span> CN, ST <span class="token operator">=</span> henan, O <span class="token operator">=</span> Default Company Ltd, CN <span class="token operator">=</span> ljk, emailAddress <span class="token operator">=</span> ljk@qq.com
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span>$
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$cat</span> <span class="token punctuation">..</span>/index.txt
+V       201217092506Z           01      unknown /C<span class="token operator">=</span>CN/ST<span class="token operator">=</span>henan/O<span class="token operator">=</span>Default Company Ltd/CN<span class="token operator">=</span>ljk/emailAddress<span class="token operator">=</span>ljk@qq.com
+
+<span class="token comment"># 吊销之前，查看一下状态</span>
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$openssl</span> ca <span class="token parameter variable">-status</span> <span class="token number">1</span>
+Using configuration from /etc/pki/tls/openssl.cnf
+<span class="token assign-left variable">01</span><span class="token operator">=</span>Valid <span class="token punctuation">(</span>V<span class="token punctuation">)</span>
+
+<span class="token comment"># 吊销，注意目录</span>
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$openssl</span> ca <span class="token parameter variable">-revoke</span> <span class="token punctuation">..</span>/newcerts/01.pem
+Using configuration from /etc/pki/tls/openssl.cnf
+Revoking Certificate 01.
+Data Base Updated
+
+<span class="token comment"># 吊销之后，再看一下状态</span>
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$openssl</span> ca <span class="token parameter variable">-status</span> <span class="token number">1</span>
+Using configuration from /etc/pki/tls/openssl.cnf
+<span class="token assign-left variable">01</span><span class="token operator">=</span>Revoked <span class="token punctuation">(</span>R<span class="token punctuation">)</span>
+
+<span class="token comment"># 指定第一个吊销证书的编号,注意：第一次更新证书吊销列表前，才需要执行</span>
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$echo</span> 01 <span class="token operator">></span> /etc/pki/CA/crlnumber
+<span class="token comment"># 更新证书吊销列表</span>
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$openssl</span> ca <span class="token parameter variable">-gencrl</span> <span class="token parameter variable">-out</span> /etc/pki/CA/crl.pem
+Using configuration from /etc/pki/tls/openssl.cnf
+
+<span class="token comment"># 查看crl文件</span>
+<span class="token punctuation">[</span>root@centos8 certs<span class="token punctuation">]</span><span class="token variable">$openssl</span> crl <span class="token parameter variable">-in</span> /etc/pki/CA/crl.pem <span class="token parameter variable">-noout</span> <span class="token parameter variable">-text</span>
+Certificate Revocation List <span class="token punctuation">(</span>CRL<span class="token punctuation">)</span>:
+        Version <span class="token number">2</span> <span class="token punctuation">(</span>0x1<span class="token punctuation">)</span>
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C <span class="token operator">=</span> CN, ST <span class="token operator">=</span> henan, L <span class="token operator">=</span> Default City, O <span class="token operator">=</span> Default Company Ltd, CN <span class="token operator">=</span> ljk, emailAddress <span class="token operator">=</span> ljk@qq.com
+        Last Update: Sep  <span class="token number">8</span> 09:39:42 <span class="token number">2020</span> GMT
+        Next Update: Oct  <span class="token number">8</span> 09:39:42 <span class="token number">2020</span> GMT
+        CRL extensions:
+            X509v3 CRL Number:
+                <span class="token number">1</span>
+Revoked Certificates:
+    Serial Number: 01
+        Revocation Date: Sep  <span class="token number">8</span> 09:35:55 <span class="token number">2020</span> GMT
+    Signature Algorithm: sha256WithRSAEncryption
+         09:a1:00:89:ed:5a:4d:71:3d:39:f0:34:72:7a:df:49:91:a1:
+         <span class="token number">82</span>:86:4f:76:7f:f9:b9:54:13:b1:b5:05:18:aa:4b:88:28:33:
+         7a:cf:0e:e5:ff:e4:41:36:33:62:95:82:20:aa:de:1e:76:f5:
+         <span class="token number">61</span>:10:11:d7:1e:da:19:2e:cc:b5:3a:96:17:4d:98:b2:f3:23:
+         <span class="token number">78</span>:1a:af:20:7b:e9:f9:eb:3a:a7:b5:58:46:67:c1:60:8c:e6:
+         2f:79:3b:16:24:f6:09:fc:09:12:96:de:60:09:2e:78:60:e4:
+         <span class="token number">18</span>:1a:36:aa:b2:eb:a1:31:23:7c:33:9a:dc:59:7c:b0:dd:a6:
+         fa:a6:72:23:9b:35:b7:4e:d3:98:44:49:44:66:9c:d4:82:56:
+         07:0d:23:da:1e:62:3e:6e:87:de:9e:6e:88:0f:0d:e7:50:3f:
+         <span class="token number">67</span>:9f:3f:86:89:c3:6a:bc:b8:bc:89:c4:8e:e8:d6:7b:12:81:
+         7f:85:07:3b:e0:34:d7:29:fd:67:fb:cb:7f:f3:51:f2:3f:a4:
+         <span class="token number">68</span>:ce:e2:f1:3c:c2:49:fd:72:e0:27:f5:e6:23:e8:ae:a6:8f:
+         b4:ba:eb:bc:1b:c3:4b:dd:1b:9e:39:5e:a8:ed:87:1d:5b:9f:
+         ef:42:02:68:2a:b4:c3:2d:31:24:3c:85:e7:d7:66:40:e2:07:
+         2e:61:77:0f</code></pre>
+
+<h4 id="3-说明"><a href="#3-说明" class="headerlink" title="3. 说明"></a>3. 说明</h4><p>以上是常规的步骤，为了方便，还有其他简单的操作，例如在一个目录中创建 CA，并给 harbor 主机颁发证书，只需要三步：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">root@u1:~$ <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /usr/local/harbor/certs
+root@u1:~$ <span class="token builtin class-name">cd</span> /usr/local/harbor/certs
+root@u1:/usr/local/harbor/certs$
+<span class="token comment"># 1. 创建私有CA</span>
+root@u1:/usr/local/harbor/certs$ openssl req <span class="token punctuation">\</span>
+<span class="token parameter variable">-newkey</span> rsa:1024 <span class="token parameter variable">-nodes</span> <span class="token parameter variable">-sha256</span> <span class="token parameter variable">-keyout</span> ca.key <span class="token parameter variable">-x509</span> <span class="token parameter variable">-subj</span> <span class="token string">"/CN=ca.ljk.org"</span> <span class="token parameter variable">-days</span> <span class="token number">3650</span> <span class="token parameter variable">-out</span> ca.crt
+Generating a RSA private key
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+++++
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+++++
+writing new private key to <span class="token string">'ca.key'</span>
+-----
+root@u1:/usr/local/harbor/certs$ <span class="token function">ls</span>
+ca.crt  ca.key
+<span class="token comment"># 2. 生成harbor主机的证书申请</span>
+root@u1:/usr/local/harbor/certs$ openssl req <span class="token punctuation">\</span>
+<span class="token parameter variable">-newkey</span> rsa:1024 <span class="token parameter variable">-nodes</span> <span class="token parameter variable">-sha256</span> <span class="token parameter variable">-subj</span> <span class="token string">"/CN=harbor.ljk.org"</span> <span class="token parameter variable">-keyout</span> harbor.ljk.org.key <span class="token parameter variable">-out</span> harbor.ljk.org.csr
+Generating a RSA private key
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.+++++
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>+++++
+writing new private key to <span class="token string">'harbor.ljk.org.key'</span>
+-----
+root@u1:/usr/local/harbor/certs$ <span class="token function">ls</span>
+ca.crt  ca.key  harbor.ljk.org.csr  harbor.ljk.org.key
+<span class="token comment"># 3. 给harbor主机颁发证书</span>
+root@u1:/usr/local/harbor/certs$ openssl x509 <span class="token parameter variable">-req</span> <span class="token parameter variable">-in</span> harbor.ljk.org.csr <span class="token parameter variable">-CA</span> ca.crt <span class="token parameter variable">-CAkey</span> ca.key <span class="token parameter variable">-CAcreateserial</span> <span class="token parameter variable">-out</span> harbor.ljk.org.crt
+Signature ok
+<span class="token assign-left variable">subject</span><span class="token operator">=</span>CN <span class="token operator">=</span> harbor.ljk.org
+Getting CA Private Key
+root@u1:/usr/local/harbor/certs$ tree
+<span class="token builtin class-name">.</span>
+├── ca.crt
+├── ca.key
+├── ca.srl
+├── harbor.ljk.org.crt
+├── harbor.ljk.org.csr
+└── harbor.ljk.org.key
+
+<span class="token number">0</span> directories, <span class="token number">6</span> files</code></pre>
+
+<h3 id="CentOS7-创建自签名证书"><a href="#CentOS7-创建自签名证书" class="headerlink" title="CentOS7 创建自签名证书"></a>CentOS7 创建自签名证书</h3><p>CentOS7 和 8 步骤不一样。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/OpenSSL/" rel="tag"><i class="fa fa-tag"></i> OpenSSL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/OpenSSH%E6%9C%8D%E5%8A%A1/" rel="prev" title="OpenSSH服务">
+                  <i class="fa fa-chevron-left"></i> OpenSSH服务
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/ulimit/" rel="next" title="ulimit">
+                  ulimit <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

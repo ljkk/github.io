@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="https:&#x2F;&#x2F;zookeeper.apache.org&#x2F; ZooKeeper 是一个分布式服务框架，它主要是用来解决分布式应用中经常遇到的一些数据管理问题，如：命名服务、状态同步、配置中心、集群管理等 命名服务命名服务是分布式系统最基本的公共服务之一。在分布式系统中，被命名的实体通常可以是集群中的机器、提供的服务地址或远程对象等，这些我们都可以统称它们为名字（Name），其中较为常见的就是一些分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZooKeeper">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/ZooKeeper/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="https:&#x2F;&#x2F;zookeeper.apache.org&#x2F; ZooKeeper 是一个分布式服务框架，它主要是用来解决分布式应用中经常遇到的一些数据管理问题，如：命名服务、状态同步、配置中心、集群管理等 命名服务命名服务是分布式系统最基本的公共服务之一。在分布式系统中，被命名的实体通常可以是集群中的机器、提供的服务地址或远程对象等，这些我们都可以统称它们为名字（Name），其中较为常见的就是一些分">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613916145189.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613916728374.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613922190627.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613922779811.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1613922800778.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614046764563.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614046817443.png">
+<meta property="article:published_time" content="2021-02-21T13:57:24.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="ZooKeeper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1613916145189.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/ZooKeeper/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/ZooKeeper/","path":"运维/消息队列与微服务/ZooKeeper/","title":"ZooKeeper"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ZooKeeper | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E5%90%8D%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">命名服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%90%8C%E6%AD%A5"><span class="nav-number">1.1.</span> <span class="nav-text">状态同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83"><span class="nav-number">1.2.</span> <span class="nav-text">配置中心</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">集群管理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZooKeeper-%E5%8D%95%E6%9C%BA%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">ZooKeeper 单机安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZooKeeper-%E9%9B%86%E7%BE%A4%E7%AE%80%E4%BB%8B"><span class="nav-number">3.</span> <span class="nav-text">ZooKeeper 集群简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper-%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2"><span class="nav-number">4.</span> <span class="nav-text">Zookeeper 集群部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#zookeeper-%E9%9B%86%E7%BE%A4%E9%80%89%E4%B8%BE%E8%BF%87%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">zookeeper 集群选举过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper-%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5"><span class="nav-number">5.</span> <span class="nav-text">zookeeper 数据增删改查</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper-%E5%AE%A2%E6%88%B7%E7%AB%AF-ZooInspector"><span class="nav-number">6.</span> <span class="nav-text">zookeeper 客户端 ZooInspector</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/ZooKeeper/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ZooKeeper | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ZooKeeper
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-21 21:57:24" itemprop="dateCreated datePublished" datetime="2021-02-21T21:57:24+08:00">2021-02-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">消息队列与微服务</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p><a target="_blank" rel="noopener" href="https://zookeeper.apache.org/">https://zookeeper.apache.org/</a></p>
+<p>ZooKeeper 是一个分布式服务框架，它主要是用来解决分布式应用中经常遇到的一些数据管理问题，如：命名服务、状态同步、配置中心、集群管理等</p>
+<h2 id="命名服务"><a href="#命名服务" class="headerlink" title="命名服务"></a>命名服务</h2><p>命名服务是分布式系统最基本的公共服务之一。在分布式系统中，被命名的实体通常可以是集群中的机器、提供的服务地址或远程对象等，这些我们都可以统称它们为名字（Name），其中较为常见的就是一些分布式服务框架（如 RPC、RMI）中的服务地址列表，通过使用命名服务，客户端应用能够根据指定名字来获取资源的实体、服务地址和提供者的信息等</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613916145189.png"></p>
+<h3 id="状态同步"><a href="#状态同步" class="headerlink" title="状态同步"></a>状态同步</h3><p>每个节点除了存储数据内容和 node 节点状态信息之外，还存储了已经注册的 APP 的状态信息，当有些节点或 APP 不可用，就将当前状态同步给其他服务</p>
+<h3 id="配置中心"><a href="#配置中心" class="headerlink" title="配置中心"></a>配置中心</h3><p>现在我们大多数应用都是采用的是分布式开发的应用，搭建到不同的服务器上，可以使用 ZooKeeper 来实现配置中心，ZooKeeper 采用的是推拉相结合的方式： 客户端向服务端注册自己需要关注的节点，一旦该节点的数据发生变更，那么服务端就会向相应的客户端发送 Watcher 事件通知，客户端接收到这个消息通知后，需要主动到服务端获取最新的数据</p>
+<h4 id="集群管理"><a href="#集群管理" class="headerlink" title="集群管理"></a>集群管理</h4><p>所谓集群管理，包括 <strong>集群监控</strong> 与 <strong>集群控制</strong> 两部分，前者侧重对集群运行时状态的收集，后者则是对集群进行操作与控制</p>
+<ul>
+<li>客户端如果对 ZooKeepe 的一个数据节点注册 Watcher 监听，那么当该数据节点的内容或是其子节点列表发生变更时，ZooKeeper 服务器就会向订阅的客户端发送变更通知</li>
+<li>对在 ZooKeeper 上创建的临时节点，一旦客户端与服务器之间的会话失效，该临时节点也就被自动除</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Watcher（事件监听器）：Zookeeper中很重要的特性。Zookeeper允许用户在指定节点上注册一些Watcher，并且在一些特定事件触发的时候，ZooKeeper服务端会将事件通知到感兴趣的客户端上去，该机制是 Zookeeper实现分布式协调服务的重要特性</code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1613916728374.png"></p>
+<p>0、生产者启动<br>1、生产者注册至 zookeeper<br>2、消费者启动并订阅频道<br>3、zookeeper 通知消费者事件<br>4、消费者调用生产者<br>5、监控中心负责统计和监控服务状态</p>
+<h2 id="ZooKeeper-单机安装"><a href="#ZooKeeper-单机安装" class="headerlink" title="ZooKeeper 单机安装"></a>ZooKeeper 单机安装</h2><p>ZooKeeper 依赖 Java 环境，要求 JDK1.7 及以上</p>
+<ol>
+<li><p>配置 java 环境</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 ~<span class="token punctuation">]</span><span class="token variable">$java</span> <span class="token parameter variable">-version</span>
+<span class="token function">java</span> version <span class="token string">"1.8.0_271"</span>
+Java<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> SE Runtime Environment <span class="token punctuation">(</span>build <span class="token number">1.8</span>.0_271-b09<span class="token punctuation">)</span>
+Java HotSpot<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> <span class="token number">64</span>-Bit Server VM <span class="token punctuation">(</span>build <span class="token number">25.271</span>-b09, mixed mode<span class="token punctuation">)</span></code></pre>
+</li>
+<li><p>部署 ZooKeeper<br>官网下载地址：<a target="_blank" rel="noopener" href="https://archive.apache.org/dist/zookeeper/">https://archive.apache.org/dist/zookeeper/</a><br>注意，要下载带 bin 的包，不带 bin 的只是源码包，不包含必要的 jar 包</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613922190627.png"></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$tar</span> zxf apache-zookeeper-3.5.9-bin.tar.gz
+<span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$mv</span> apache-zookeeper-3.5.9-bin
+<span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$mv</span> apache-zookeeper-3.5.9-bin /usr/local/zookeeper
+<span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/conf/
+<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$cp</span> zoo_sample.cfg zoo.cfg
+<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$grep</span> ^<span class="token punctuation">[</span>a-Z<span class="token punctuation">]</span> ./zoo.cfg
+<span class="token assign-left variable">tickTime</span><span class="token operator">=</span><span class="token number">2000</span>
+<span class="token assign-left variable">initLimit</span><span class="token operator">=</span><span class="token number">10</span>
+<span class="token assign-left variable">syncLimit</span><span class="token operator">=</span><span class="token number">5</span>
+<span class="token assign-left variable">dataDir</span><span class="token operator">=</span>/tmp/zookeeper
+<span class="token assign-left variable">clientPort</span><span class="token operator">=</span><span class="token number">2181</span>
+<span class="token assign-left variable">admin.serverPort</span><span class="token operator">=</span><span class="token number">8180</span>		<span class="token comment"># AdminServer监听的端口，默认8080，因为tomcat默认端口也是8080，为了避免冲突，这里修改为8180</span></code></pre></li>
+</ol>
+<pre class="language-none"><code class="language-none">
+   关于AdminServer：https:&#x2F;&#x2F;zookeeper.apache.org&#x2F;doc&#x2F;r3.5.0-alpha&#x2F;zookeeperAdmin.html#sc_adminserver_config
+
+   ![](&#x2F;&#x2F;img.to2b.cn&#x2F;blog&#x2F;ljk&#x2F;1614092973758.png)
+
+3. 启动 ZooKeeper
+
+   &#96;&#96;&#96;bash
+   # zkServer.sh 	用于启动、重启、停止 ZooKeeper
+   [root@zk1 bin]$pwd
+   &#x2F;usr&#x2F;local&#x2F;zookeeper&#x2F;bin
+   [root@zk1 bin]$.&#x2F;zkServer.sh start
+   ZooKeeper JMX enabled by default
+   Using config: &#x2F;usr&#x2F;local&#x2F;zookeeper&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
+   Starting zookeeper ... STARTED</code></pre>
+
+<ol start="4">
+<li><p>验证 Zookeeper 状态</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
+Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
+Mode: standalone</code></pre></li>
+</ol>
+<h2 id="ZooKeeper-集群简介"><a href="#ZooKeeper-集群简介" class="headerlink" title="ZooKeeper 集群简介"></a>ZooKeeper 集群简介</h2><p>集群架构：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613922779811.png"></p>
+<p>集群角色：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1613922800778.png"></p>
+<h2 id="Zookeeper-集群部署"><a href="#Zookeeper-集群部署" class="headerlink" title="Zookeeper 集群部署"></a>Zookeeper 集群部署</h2><p>整个集群中只要有超过集群数量一半的 zookeeper 工作只正常的，那么整个集群对外就是可用的</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">zk1.ljk.cn:10.0.1.101
+zk2.ljk.cn:10.0.1.102
+zk3.ljk.cn:10.0.1.103</code></pre>
+
+<ol>
+<li><p>各个节点安装 zookeeper，参考上面单机部署，但是先不要启动</p>
+</li>
+<li><p>各个节点创建数据目录</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/
+<span class="token punctuation">[</span>root@zk1 zookeeper<span class="token punctuation">]</span><span class="token variable">$mkdir</span> data
+
+<span class="token punctuation">[</span>root@zk2 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/
+<span class="token punctuation">[</span>root@zk2 zookeeper<span class="token punctuation">]</span><span class="token variable">$mkdir</span> data
+
+<span class="token punctuation">[</span>root@zk3 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/
+<span class="token punctuation">[</span>root@zk3 zookeeper<span class="token punctuation">]</span><span class="token variable">$mkdir</span> data</code></pre>
+</li>
+<li><p>各个节点配置文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$grep</span> ^<span class="token punctuation">[</span>a-Z<span class="token punctuation">]</span> ./zoo.cfg
+<span class="token assign-left variable">tickTime</span><span class="token operator">=</span><span class="token number">2000</span>                     <span class="token comment"># 心跳检测周期，单位为毫秒</span>
+<span class="token assign-left variable">initLimit</span><span class="token operator">=</span><span class="token number">10</span>                      <span class="token comment"># leader与follower初始连接心跳次数，即多少个2000毫秒</span>
+<span class="token assign-left variable">syncLimit</span><span class="token operator">=</span><span class="token number">5</span>                       <span class="token comment"># leader与follower连接完成之后，后期检测发送和应答的心跳次数，即该follower在5*2000毫秒内不能与leader进行通信，那么此follower将被视为不可用</span>
+<span class="token assign-left variable">dataDir</span><span class="token operator">=</span>/usr/local/zookeeper/data <span class="token comment"># 自定义的zookeeper保存数据的目录</span>
+<span class="token assign-left variable">clientPort</span><span class="token operator">=</span><span class="token number">2181</span>                   <span class="token comment"># 客户端连接Zookeeper服务器的端口，Zookeeper会监听这个端口，接受客户端的访问请求</span>
+<span class="token assign-left variable">maxClientCnxns</span><span class="token operator">=</span><span class="token number">128</span>                <span class="token comment"># 单个客户端IP可以和zookeeper保持的连接数</span>
+<span class="token assign-left variable">autopurge.snapRetainCount</span><span class="token operator">=</span><span class="token number">3</span>       <span class="token comment"># 保存快照的数量，启用后ZooKeeper只保存最新的几个快照，其余的会自动清除，最新快照和相应的事务日志分别保留在dataDir和dataLogDir中，默认值为 3。最小值为 3</span>
+<span class="token assign-left variable">autopurge.purgeInterval</span><span class="token operator">=</span><span class="token number">1</span>         <span class="token comment"># 自动清理日志和快照文件的频率，单位小时，默认0，不开启自动清理</span>
+<span class="token assign-left variable">server.1</span><span class="token operator">=</span><span class="token number">10.0</span>.1.101:2888:3888     <span class="token comment"># server.服务器编号=服务器IP:LF数据同步端口:LF选举端口</span>
+<span class="token assign-left variable">server.2</span><span class="token operator">=</span><span class="token number">10.0</span>.1.102:2888:3888     <span class="token comment"># hostname也可以，只要dns能解析到就行</span>
+<span class="token assign-left variable">server.3</span><span class="token operator">=</span><span class="token number">10.0</span>.1.103:2888:3888
+
+<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$scp</span> ./zoo.cfg <span class="token number">10.0</span>.1.102:/usr/local/zookeeper/conf
+<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$scp</span> ./zoo.cfg <span class="token number">10.0</span>.1.103:/usr/local/zookeeper/conf</code></pre>
+</li>
+<li><p>集群 id</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token number">1</span> <span class="token operator">></span> myid
+
+<span class="token punctuation">[</span>root@zk2 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token number">2</span> <span class="token operator">></span> myid
+
+<span class="token punctuation">[</span>root@zk3 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token number">3</span> <span class="token operator">></span> myid</code></pre>
+</li>
+<li><p>启动 zookeeper</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkServer.sh start
+
+<span class="token punctuation">[</span>root@zk2 bin<span class="token punctuation">]</span>$./zkServer.sh start
+
+<span class="token punctuation">[</span>root@zk3 bin<span class="token punctuation">]</span>$./zkServer.sh start</code></pre>
+</li>
+<li><p>验证 Zookeeper 状态</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
+Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
+Mode: follower		<span class="token comment"># follower</span>
+
+<span class="token punctuation">[</span>root@zk2 bin<span class="token punctuation">]</span>$./zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
+Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
+Mode: follower		<span class="token comment"># follower</span>
+
+<span class="token punctuation">[</span>root@zk3 bin<span class="token punctuation">]</span>$./zkServer.sh status
+ZooKeeper JMX enabled by default
+Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
+Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
+Mode: leader		<span class="token comment"># leader</span></code></pre></li>
+</ol>
+<h3 id="zookeeper-集群选举过程"><a href="#zookeeper-集群选举过程" class="headerlink" title="zookeeper 集群选举过程"></a>zookeeper 集群选举过程</h3><p>节点角色状态：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">LOOKING   <span class="token comment"># 寻找 Leader 状态，处于该状态需要进入选举流程</span>
+LEADING   <span class="token comment"># 领导者状态，处于该状态的节点说明是角色已经是 Leader</span>
+FOLLOWING <span class="token comment"># 跟随者状态，表示 Leader 已经选举出来，当前节点角色是 follower</span>
+OBSERVER  <span class="token comment"># 观察者状态，表明当前节点角色是 observer</span></code></pre>
+
+<p>选举 ID：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ZXID	<span class="token comment"># zookeeper transaction id，每个改变Zookeeper状态的操作都会形成一个对应的zxid</span>
+myid	<span class="token comment"># 服务器的唯一标识(SID)，通过配置myid文件指定，集群中唯一</span></code></pre>
+
+<h2 id="zookeeper-数据增删改查"><a href="#zookeeper-数据增删改查" class="headerlink" title="zookeeper 数据增删改查"></a>zookeeper 数据增删改查</h2><p>任意一台 zookeeper 节点进行以下操作：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkCli.sh <span class="token parameter variable">-server</span> <span class="token number">10.0</span>.1.102:2181
+<span class="token punctuation">..</span>.
+Welcome to ZooKeeper<span class="token operator">!</span>
+JLine support is enabled
+<span class="token punctuation">[</span>zk: <span class="token number">10.0</span>.1.102:2181<span class="token punctuation">(</span>CONNECTING<span class="token punctuation">)</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token builtin class-name">help</span>
+ZooKeeper <span class="token parameter variable">-server</span> host:port cmd args
+        addauth scheme auth
+        close
+        config <span class="token punctuation">[</span>-c<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> <span class="token punctuation">[</span>-s<span class="token punctuation">]</span>
+        connect host:port
+        create <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-e<span class="token punctuation">]</span> <span class="token punctuation">[</span>-c<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t ttl<span class="token punctuation">]</span> path <span class="token punctuation">[</span>data<span class="token punctuation">]</span> <span class="token punctuation">[</span>acl<span class="token punctuation">]</span>
+        delete <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> path
+        deleteall path
+        delquota <span class="token punctuation">[</span>-n<span class="token operator">|</span>-b<span class="token punctuation">]</span> path
+        get <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> path
+        getAcl <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> path
+        <span class="token function">history</span>
+        listquota path
+        <span class="token function">ls</span> <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> <span class="token punctuation">[</span>-R<span class="token punctuation">]</span> path
+        ls2 path <span class="token punctuation">[</span>watch<span class="token punctuation">]</span>
+        printwatches on<span class="token operator">|</span>off
+        quit
+        reconfig <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">[</span>-file path<span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token punctuation">[</span>-members <span class="token assign-left variable">serverID</span><span class="token operator">=</span>host:port1:port2<span class="token punctuation">;</span>port3<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span>*<span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token punctuation">[</span>-add <span class="token assign-left variable">serverId</span><span class="token operator">=</span>host:port1:port2<span class="token punctuation">;</span>port3<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span class="token punctuation">]</span>* <span class="token punctuation">[</span>-remove serverId<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span>*<span class="token punctuation">]</span>
+        redo cmdno
+        removewatches path <span class="token punctuation">[</span>-c<span class="token operator">|</span>-d<span class="token operator">|</span>-a<span class="token punctuation">]</span> <span class="token punctuation">[</span>-l<span class="token punctuation">]</span>
+        rmr path
+        <span class="token builtin class-name">set</span> <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> path data
+        setAcl <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> <span class="token punctuation">[</span>-R<span class="token punctuation">]</span> path acl
+        setquota -n<span class="token operator">|</span>-b val path
+        <span class="token function">stat</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> path
+        <span class="token function">sync</span> path</code></pre>
+
+<h2 id="zookeeper-客户端-ZooInspector"><a href="#zookeeper-客户端-ZooInspector" class="headerlink" title="zookeeper 客户端 ZooInspector"></a>zookeeper 客户端 ZooInspector</h2><p>Linux：<a target="_blank" rel="noopener" href="https://github.com/zzhang5/zooinspector">https://github.com/zzhang5/zooinspector</a><br>Windows：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/weiyiming007/p/11951591.html">https://www.cnblogs.com/weiyiming007/p/11951591.html</a></p>
+<ol>
+<li>下载、解压、双击 <code>build/zookeeper-dev-ZooInspector.jar </code><br><img data-src="//img.to2b.cn/blog/ljk/1614046764563.png"></li>
+<li>连接成功<br><img data-src="//img.to2b.cn/blog/ljk/1614046817443.png"></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ZooKeeper/" rel="tag"><i class="fa fa-tag"></i> ZooKeeper</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/RabbitMQ/" rel="prev" title="RabbitMQ">
+                  <i class="fa fa-chevron-left"></i> RabbitMQ
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1/kafka/" rel="next" title="kafka">
+                  kafka <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

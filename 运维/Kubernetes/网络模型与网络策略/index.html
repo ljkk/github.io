@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="VXLANvxlan 是属于 overlay 中的一种隧道封装技术，实际上将 L2(数据链路层)的以太网帧封装成 L4(传输层)的 UDP 数据报文，然后在 L3 网络层传输，最终实现的效果就类似于在 L2 的以太网传输报文一样，但是不受 L3 网络层限制 为什么是在L3传输？ 因为传输是基于路由表，路由只涉及ip，不涉及端口  vxlan 标志位有 24 位，可以划分 2^24 个虚拟局域网">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络模型与网络策略">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BD%91%E7%BB%9C%E7%AD%96%E7%95%A5/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="VXLANvxlan 是属于 overlay 中的一种隧道封装技术，实际上将 L2(数据链路层)的以太网帧封装成 L4(传输层)的 UDP 数据报文，然后在 L3 网络层传输，最终实现的效果就类似于在 L2 的以太网传输报文一样，但是不受 L3 网络层限制 为什么是在L3传输？ 因为传输是基于路由表，路由只涉及ip，不涉及端口  vxlan 标志位有 24 位，可以划分 2^24 个虚拟局域网">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615481012212.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615485312659.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615564694360.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/same-pod.gif">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615534030113.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615534089377.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615563474041.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615560029213.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615539857199.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615539372246.png">
+<meta property="article:published_time" content="2021-03-11T16:49:04.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1615481012212.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BD%91%E7%BB%9C%E7%AD%96%E7%95%A5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BD%91%E7%BB%9C%E7%AD%96%E7%95%A5/","path":"运维/Kubernetes/网络模型与网络策略/","title":"网络模型与网络策略"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>网络模型与网络策略 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#VXLAN"><span class="nav-number">1.</span> <span class="nav-text">VXLAN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">网络模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#docker-%E7%9A%84%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">docker 的网络模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubernetes-%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">kubernetes 网络模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Pod-%E5%86%85%E9%80%9A%E4%BF%A1"><span class="nav-number">2.2.1.</span> <span class="nav-text">Pod 内通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Pod-%E9%97%B4%E9%80%9A%E4%BF%A1-%E2%98%85%E2%98%85%E2%98%85"><span class="nav-number">2.2.2.</span> <span class="nav-text">Pod 间通信 ★★★</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#flannel"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">flannel</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#calico"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">calico</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Service-%E4%B8%8E-Pod-%E9%80%9A%E4%BF%A1"><span class="nav-number">2.2.3.</span> <span class="nav-text">Service 与 Pod 通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%A4%96%E9%83%A8%E4%B8%8E-Service-%E9%80%9A%E4%BF%A1"><span class="nav-number">2.2.4.</span> <span class="nav-text">集群外部与 Service 通信</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">网络策略</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BD%91%E7%BB%9C%E7%AD%96%E7%95%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="网络模型与网络策略 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络模型与网络策略
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-12 00:49:04" itemprop="dateCreated datePublished" datetime="2021-03-12T00:49:04+08:00">2021-03-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="VXLAN"><a href="#VXLAN" class="headerlink" title="VXLAN"></a>VXLAN</h2><p>vxlan 是属于 overlay 中的一种隧道封装技术，实际上将 L2(数据链路层)的以太网帧封装成 L4(传输层)的 UDP 数据报文，然后在 L3 网络层传输，最终实现的效果就类似于在 L2 的以太网传输报文一样，但是不受 L3 网络层限制</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">为什么是在L3传输？
+因为传输是基于路由表，路由只涉及ip，不涉及端口</code></pre>
+
+<p>vxlan 标志位有 24 位，可以划分 2^24 个虚拟局域网</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615481012212.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615485312659.png"></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615564694360.png"></p>
+<pre class="language-none"><code class="language-none">1. 感觉封装UDP是多余的，只靠IP也能通信
+因为Vxlan的封装思维是将原始数据报文当做用户数据包，VTEP当做大二层接入，那么VTEP会依次进行传输层封装，网络层封装，以太网头部封装，如果直接进行IP封装则跳过了传输层的封装过程，会在传输的过程中遇到一些困难，很多数据中心里都会有大量的冗余链路，交换机面对多条等价路径时会进行基于五元组进行HASH,此时会出现问题；其次，在遇到NAT设备时，无法穿透也会造成影响
+
+2. 为什么封装成UDP，而不是TCP
+因为封装UDP开销比较小，至于TCP比UDP更可靠，但是依靠原始数据报文的TCP也可以实现可靠性的要求</code></pre>
+
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><h3 id="docker-的网络模型"><a href="#docker-的网络模型" class="headerlink" title="docker 的网络模型"></a>docker 的网络模型</h3><ul>
+<li>Bridge：桥接</li>
+<li>Host：主机</li>
+<li>Container：容器</li>
+</ul>
+<h3 id="kubernetes-网络模型"><a href="#kubernetes-网络模型" class="headerlink" title="kubernetes 网络模型"></a>kubernetes 网络模型</h3><p>kubernetes 的网络模型主要用于解决四类通信需求</p>
+<h4 id="Pod-内通信"><a href="#Pod-内通信" class="headerlink" title="Pod 内通信"></a>Pod 内通信</h4><p>命名空间：linux 底层概念，在内核层实现，容器使用 namespce 技术实现容器间相互隔离</p>
+<ul>
+<li>mnt namespace：隔离根，即 chroot 技术</li>
+<li>ipc namespace：隔离进程间通信</li>
+<li>uts namespace：隔离系统信息，主机名等信息</li>
+<li>pid namespace：隔离进程号</li>
+<li>net namespace：隔离网络</li>
+<li>user namespce：隔离用户</li>
+</ul>
+<p>运行在同一个 pod 内的容器，共享 net、ipc、uts、一组存储卷，亲密关系，同进同退</p>
+<img data-src="//img.to2b.cn/blog/ljk/same-pod.gif" style="zoom: 67%;" />
+
+<h4 id="Pod-间通信-★★★"><a href="#Pod-间通信-★★★" class="headerlink" title="Pod 间通信 ★★★"></a>Pod 间通信 ★★★</h4><p>网络模型：<strong>所有 Pod 在一个平面网络中，每个 Pod 拥有一个集群全局唯一的地址，可直接与其他 Pod 通信</strong></p>
+<p>k8s 设计了网络模型，但将其实现交给网络插件，主流的网络插件有：flannel、calico、kube-router 等</p>
+<h5 id="flannel"><a href="#flannel" class="headerlink" title="flannel"></a>flannel</h5><p>早期版本的 Flannel 使用 UDP 封装完成报文的跨越主机转发，其安全性及性能略有不足，现在已经废弃这种方式了，现在只能通过 vxlan 或 host-gw 进行通信</p>
+<ul>
+<li><p>flannel VXLAN 后端：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615534030113.png"></p>
+</li>
+<li><p>flannel VXLAN Direct Routing 后端：</p>
+<p>Directrouting 为在同一个二层网络中的 node 节点启用直接路由机制，类似于 host-gw 模式</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615534089377.png"></p>
+</li>
+<li><p>host-gw 后端：</p>
+<p>类似 calico，通过路由表完成报文转发</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615563474041.png"></p>
+</li>
+</ul>
+<h5 id="calico"><a href="#calico" class="headerlink" title="calico"></a>calico</h5><p>Calico 本身是一个三层的虚拟网络方案，它将每个节点都当作路由器（router），将每个节点的容器都当作是“节点路由器”的一个终端并为其分配一个 IP 地址，各节点路由器通过<strong>BGP</strong>（BorderGateway Protocol）学习生成路由规则，从而将不同节点上的容器连接起来</p>
+<img data-src="//img.to2b.cn/blog/ljk/1615560029213.png" style="zoom: 45%;" />
+
+<p>BGP 是互联网上一个核心的去中心化自治路由协议，性能非常高，需要物理路由器的支持，这也是公有云不提供 calico 的原因，因为公有云上节点连接的都是虚拟路由器</p>
+<p>calico 核心组件：</p>
+<ul>
+<li>Felix：calico 的 agent，维护路由规则、汇报当前节点状态</li>
+<li>Etcd：路由规则储存在 etcd</li>
+<li>BGP Client：运行在每个 node 上，负责监听由 felix 生成的路由信息，然后通过 BGP 协议广播至其他 node 节点，其他 node 的 Felix 会自动更新路由规则，从而实现路由的相互学习</li>
+<li>Route Reflector：集中式的路由反射器，维护全网的路由规则，替换路由广播，如果节点非常多，可以考虑使用</li>
+</ul>
+<p>BGP 模式下 calico 的通信过程：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># traceroute命令查看请求ip为10.10.74.193的pod</span>
+/ $ <span class="token function">traceroute</span> <span class="token number">10.10</span>.74.193
+<span class="token function">traceroute</span> to <span class="token number">10.10</span>.74.193 <span class="token punctuation">(</span><span class="token number">10.10</span>.74.193<span class="token punctuation">)</span>, <span class="token number">30</span> hops max, <span class="token number">46</span> byte packets
+ <span class="token number">1</span>  <span class="token number">10.0</span>.1.32 <span class="token punctuation">(</span><span class="token number">10.0</span>.1.32<span class="token punctuation">)</span>  <span class="token number">0.005</span> ms  <span class="token number">0.006</span> ms  <span class="token number">0.002</span> ms		<span class="token comment"># 当前pod所在节点的ip</span>
+ <span class="token number">2</span>  <span class="token number">10.0</span>.1.33 <span class="token punctuation">(</span><span class="token number">10.0</span>.1.33<span class="token punctuation">)</span>  <span class="token number">1.220</span> ms  <span class="token number">0.254</span> ms  <span class="token number">0.147</span> ms		<span class="token comment"># 对方pod所在节点的ip</span>
+ <span class="token number">3</span>  <span class="token number">10.10</span>.74.193 <span class="token punctuation">(</span><span class="token number">10.10</span>.74.193<span class="token punctuation">)</span>  <span class="token number">0.207</span> ms  <span class="token number">0.308</span> ms  <span class="token number">0.163</span> ms	<span class="token comment"># 对方pod的ip</span></code></pre>
+
+<p>如果 node 需要跨网段通信，Calico 也提供了<strong>IPIP</strong>模式，IPIP 模式下，calico 会在每个节点上创建一个 tunl0 接口（TUN 类型虚拟设备）用于封装三层隧道报文。节点上每创建一个 Pod 资源，都自动创建一对虚拟以太网接口（TAP 类型的虚拟设备），其中一个附加于 Pod 的网络名称空间，另一个（名称以 cali 为前缀后跟随机字串）留置在节点的根网络名称空间，并经由 tunl0 封装或解封三层隧道报文，Calico IPIP 模式如下图：</p>
+<img data-src="//img.to2b.cn/blog/ljk/1615539857199.png" style="zoom:50%;" />
+
+<p>IPIP 模式下 calico 的通信过程：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/ $ <span class="token function">traceroute</span> <span class="token number">10.10</span>.58.65		<span class="token comment"># 请求ip为10.10.58.65的pod</span>
+<span class="token function">traceroute</span> to <span class="token number">10.10</span>.58.65 <span class="token punctuation">(</span><span class="token number">10.10</span>.58.65<span class="token punctuation">)</span>, <span class="token number">30</span> hops max, <span class="token number">46</span> byte packets
+ <span class="token number">1</span>  <span class="token number">172.31</span>.6.210 <span class="token punctuation">(</span><span class="token number">172.31</span>.6.210<span class="token punctuation">)</span>  <span class="token number">0.004</span> ms  <span class="token number">0.004</span> ms  <span class="token number">0.002</span> ms	<span class="token comment"># 当前pod所在node地址</span>
+ <span class="token number">2</span>  <span class="token number">10.10</span>.58.64 <span class="token punctuation">(</span><span class="token number">10.10</span>.58.64<span class="token punctuation">)</span>  <span class="token number">0.003</span> ms  <span class="token number">0.432</span> ms  <span class="token number">0.497</span> ms	<span class="token comment"># 对方pod所在node的tunl0地址</span>
+ <span class="token number">3</span>  <span class="token number">10.10</span>.58.65 <span class="token punctuation">(</span><span class="token number">10.10</span>.58.65<span class="token punctuation">)</span>  <span class="token number">0.553</span> ms  <span class="token number">2.114</span> ms  <span class="token number">0.775</span> ms	<span class="token comment"># 对方pod地址</span></code></pre>
+
+<p>BGP 模式则直接使用物理机作为虚拟路由路（vRouter），请求直接通过路由跳转，不再创建额外的 tunnel，没有 tunnel 封装、解封的步骤，所以 BGP 的性能会比 IPIP 高很多，建议禁用 IPIP</p>
+<h4 id="Service-与-Pod-通信"><a href="#Service-与-Pod-通信" class="headerlink" title="Service 与 Pod 通信"></a>Service 与 Pod 通信</h4><p><img data-src="//img.to2b.cn/blog/ljk/1615539372246.png"></p>
+<h4 id="集群外部与-Service-通信"><a href="#集群外部与-Service-通信" class="headerlink" title="集群外部与 Service 通信"></a>集群外部与 Service 通信</h4><p>请求流量首先到达外部负载均衡器，由其调度至某个工作节点之上，而后再由工作节点的 netfilter（kube-proxy）组件上的规则（iptables 或 ipvs）调度至某个目标 Pod 对象</p>
+<p>集群外的流量先进入<strong>节点网络</strong>，再进入<strong>service 网络</strong>，最后进入<strong>pod 网络</strong></p>
+<h2 id="网络策略"><a href="#网络策略" class="headerlink" title="网络策略"></a>网络策略</h2><p>网络策略（Network Policy）是用于控制分组的 Pod 资源彼此之间如何进行通信，以及分组的 Pod 资源如何与其他网络端点进行通信的规范。它用于为 Kubernetes 实现更为精细的流量控制，实现租户隔离机制。Kubernetes 使用标准的资源对象“NetworkPolicy”供管理员按需定义网络访问控制策略</p>
+<p>Kubernetes 的网络策略功能由其所使用的网络插件实现，Calico、Canal 及 kube-router 支持网络策略，而 flannel 不支持</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/etcdctl/" rel="prev" title="etcdctl">
+                  <i class="fa fa-chevron-left"></i> etcdctl
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%B7%A5%E5%85%B7/windows/MasterPDFEditor/" rel="next" title="MasterPDFEditor">
+                  MasterPDFEditor <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

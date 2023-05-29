@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="安装和删除方法官方文档：https:&#x2F;&#x2F;docs.docker.com&#x2F;engine&#x2F;install&#x2F;ubuntu：https:&#x2F;&#x2F;docs.docker.com&#x2F;engine&#x2F;install&#x2F;ubuntu&#x2F;centos：https:&#x2F;&#x2F;docs.docker.com&#x2F;install&#x2F;linux&#x2F;docker-ce&#x2F;centos&#x2F;阿里云文档：https:&#x2F;&#x2F;developer.aliyun.com">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker安装">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.1.docker%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="安装和删除方法官方文档：https:&#x2F;&#x2F;docs.docker.com&#x2F;engine&#x2F;install&#x2F;ubuntu：https:&#x2F;&#x2F;docs.docker.com&#x2F;engine&#x2F;install&#x2F;ubuntu&#x2F;centos：https:&#x2F;&#x2F;docs.docker.com&#x2F;install&#x2F;linux&#x2F;docker-ce&#x2F;centos&#x2F;阿里云文档：https:&#x2F;&#x2F;developer.aliyun.com">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605701276549.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/lujinkai/1669884233046.png">
+<meta property="article:published_time" content="2021-01-08T03:27:09.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.486Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1605701276549.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.1.docker%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.1.docker%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/","path":"运维/Docker/1.1.docker安装及基础命令/","title":"docker安装"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>docker安装 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%92%8C%E5%88%A0%E9%99%A4%E6%96%B9%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">安装和删除方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-%E5%91%BD%E4%BB%A4%E5%B8%AE%E5%8A%A9"><span class="nav-number">3.</span> <span class="nav-text">docker 命令帮助</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF"><span class="nav-number">4.</span> <span class="nav-text">docker 相关信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker0-%E7%BD%91%E5%8D%A1"><span class="nav-number">5.</span> <span class="nav-text">docker0 网卡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">6.</span> <span class="nav-text">docker 存储引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-%E6%9C%8D%E5%8A%A1%E8%BF%9B%E7%A8%8B"><span class="nav-number">7.</span> <span class="nav-text">docker 服务进程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#containerd-shim-%E5%91%BD%E4%BB%A4"><span class="nav-number">7.1.</span> <span class="nav-text">containerd-shim 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8E%E7%AE%A1%E7%90%86%E8%BF%87%E7%A8%8B"><span class="nav-number">7.2.</span> <span class="nav-text">容器的创建与管理过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gRPC"><span class="nav-number">7.3.</span> <span class="nav-text">gRPC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-%E6%9C%8D%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="nav-number">8.</span> <span class="nav-text">docker 服务管理</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/1.1.docker%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="docker安装 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          docker安装
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 11:27:09" itemprop="dateCreated datePublished" datetime="2021-01-08T11:27:09+08:00">2021-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="安装和删除方法"><a href="#安装和删除方法" class="headerlink" title="安装和删除方法"></a>安装和删除方法</h2><p>官方文档：<a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/">https://docs.docker.com/engine/install/</a><br>ubuntu：<a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/ubuntu/">https://docs.docker.com/engine/install/ubuntu/</a><br>centos：<a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/">https://docs.docker.com/install/linux/docker-ce/centos/</a><br>阿里云文档：<a target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/docker-ce">https://developer.aliyun.com/mirror/docker-ce</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># ubuntuu</span>
+$ <span class="token function">sudo</span> <span class="token function">apt</span> update
+$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> <span class="token punctuation">\</span>
+    apt-transport-https <span class="token punctuation">\</span>
+    ca-certificates <span class="token punctuation">\</span>
+    <span class="token function">curl</span> <span class="token punctuation">\</span>
+    gnupg-agent <span class="token punctuation">\</span>
+    software-properties-common
+<span class="token comment">#$ curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -	# ubuntu22.04中废弃了apt-key命令</span>
+$ <span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg <span class="token operator">|</span> <span class="token function">sudo</span> gpg <span class="token parameter variable">--dearmor</span> <span class="token parameter variable">-o</span> /etc/apt/trusted.gpg.d/docker.gpg
+
+$ <span class="token function">sudo</span> add-apt-repository <span class="token punctuation">\</span>
+    <span class="token string">"deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu \
+    <span class="token variable"><span class="token variable">$(</span>lsb_release <span class="token parameter variable">-cs</span><span class="token variable">)</span></span> \
+    stable"</span>
+$ <span class="token function">sudo</span> <span class="token function">apt</span> update
+$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> docker-ce
+
+<span class="token comment"># 以上是直接安装最新版本，推荐安装时指定版本</span>
+$ <span class="token function">apt-cache</span> madison docker-ce
+$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> docker-ce<span class="token operator">=</span><span class="token operator">&lt;</span>VERSION_STRING<span class="token operator">></span></code></pre>
+
+<p>二进制安装：<a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/binaries/">https://docs.docker.com/install/linux/docker-ce/binaries/</a><br><a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/docker-ce/linux/static/stable/x86_64/">https://mirrors.aliyun.com/docker-ce/linux/static/stable/x86_64/</a></p>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>docker-ce 配置文件：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/etc/docker/daemon.json</code></pre>
+
+<p>docker registry 配置文件：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># ubuntu，来自containerd.io软件包</span>
+/etc/containerd/config.toml
+<span class="token comment"># centos</span>
+/etc/containers/registries.conf</code></pre>
+
+<h2 id="docker-命令帮助"><a href="#docker-命令帮助" class="headerlink" title="docker 命令帮助"></a>docker 命令帮助</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/reference/">https://docs.docker.com/reference/</a></p>
+<p>新版 docker 命令采用结构化格式，虽然老版命令依旧可以使用，但是还是推荐结构化的使用命令，更加规范有效的使用。</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">docker</span> <span class="token builtin class-name">help</span>
+
+Usage:  <span class="token function">docker</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> COMMAND
+
+A self-sufficient runtime <span class="token keyword">for</span> containers
+
+Options:
+      <span class="token parameter variable">--config</span> string      Location of client config files <span class="token punctuation">(</span>default <span class="token string">"/root/.docker"</span><span class="token punctuation">)</span>
+  -c, <span class="token parameter variable">--context</span> string     Name of the context to use to connect to the daemon <span class="token punctuation">(</span>overrides DOCKER_HOST <span class="token function">env</span> var and default context <span class="token builtin class-name">set</span>
+                           with <span class="token string">"docker context use"</span><span class="token punctuation">)</span>
+  -D, <span class="token parameter variable">--debug</span>              Enable debug mode
+  -H, <span class="token parameter variable">--host</span> list          Daemon socket<span class="token punctuation">(</span>s<span class="token punctuation">)</span> to connect to
+  -l, --log-level string   Set the logging level <span class="token punctuation">(</span><span class="token string">"debug"</span><span class="token operator">|</span><span class="token string">"info"</span><span class="token operator">|</span><span class="token string">"warn"</span><span class="token operator">|</span><span class="token string">"error"</span><span class="token operator">|</span><span class="token string">"fatal"</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>default <span class="token string">"info"</span><span class="token punctuation">)</span>
+      <span class="token parameter variable">--tls</span>                Use TLS<span class="token punctuation">;</span> implied by <span class="token parameter variable">--tlsverify</span>
+      <span class="token parameter variable">--tlscacert</span> string   Trust certs signed only by this CA <span class="token punctuation">(</span>default <span class="token string">"/root/.docker/ca.pem"</span><span class="token punctuation">)</span>
+      <span class="token parameter variable">--tlscert</span> string     Path to TLS certificate <span class="token function">file</span> <span class="token punctuation">(</span>default <span class="token string">"/root/.docker/cert.pem"</span><span class="token punctuation">)</span>
+      <span class="token parameter variable">--tlskey</span> string      Path to TLS key <span class="token function">file</span> <span class="token punctuation">(</span>default <span class="token string">"/root/.docker/key.pem"</span><span class="token punctuation">)</span>
+      <span class="token parameter variable">--tlsverify</span>          Use TLS and verify the remote
+  -v, <span class="token parameter variable">--version</span>            Print version information and quit
+
+Management Commands:
+  app*        Docker App <span class="token punctuation">(</span>Docker Inc., v0.9.1-beta3<span class="token punctuation">)</span>
+  builder     Manage builds
+  buildx*     Docker Buildx <span class="token punctuation">(</span>Docker Inc., v0.9.1-docker<span class="token punctuation">)</span>
+  config      Manage Docker configs		<span class="token comment"># 管理docker配置</span>
+  container   Manage containers			<span class="token comment"># 管理容器</span>
+  context     Manage contexts
+  image       Manage images				<span class="token comment"># 管理镜像</span>
+  manifest    Manage Docker image manifests and manifest lists
+  network     Manage networks			<span class="token comment"># 管理网络</span>
+  <span class="token function">node</span>        Manage Swarm nodes		<span class="token comment"># 管理Swarm节点</span>
+  plugin      Manage plugins			<span class="token comment"># 管理插件</span>
+  scan*       Docker Scan <span class="token punctuation">(</span>Docker Inc., v0.21.0<span class="token punctuation">)</span>
+  secret      Manage Docker secrets		<span class="token comment"># 管理docker安全</span>
+  <span class="token function">service</span>     Manage services			<span class="token comment"># 管理服务</span>
+  stack       Manage Docker stacks
+  swarm       Manage Swarm				<span class="token comment"># 管理Swarm集群</span>
+  system      Manage Docker				<span class="token comment"># 管理docker系统</span>
+  trust       Manage trust on Docker images		<span class="token comment"># 管理镜像信任</span>
+  volume      Manage volumes					<span class="token comment"># 管理卷</span>
+
+Commands:
+  attach      Attach <span class="token builtin class-name">local</span> standard input, output, and error streams to a running container
+  build       Build an image from a Dockerfile
+  commit      Create a new image from a container<span class="token string">'s changes
+  cp          Copy files/folders between a container and the local filesystem
+  create      Create a new container
+  diff        Inspect changes to files or directories on a container'</span>s filesystem
+  events      Get real <span class="token function">time</span> events from the server
+  <span class="token builtin class-name">exec</span>        Run a <span class="token builtin class-name">command</span> <span class="token keyword">in</span> a running container
+  <span class="token builtin class-name">export</span>      Export a container<span class="token string">'s filesystem as a tar archive
+  history     Show the history of an image
+  images      List images
+  import      Import the contents from a tarball to create a filesystem image
+  info        Display system-wide information
+  inspect     Return low-level information on Docker objects
+  kill        Kill one or more running containers
+  load        Load an image from a tar archive or STDIN
+  login       Log in to a Docker registry
+  logout      Log out from a Docker registry
+  logs        Fetch the logs of a container
+  pause       Pause all processes within one or more containers
+  port        List port mappings or a specific mapping for the container
+  ps          List containers
+  pull        Pull an image or a repository from a registry
+  push        Push an image or a repository to a registry
+  rename      Rename a container
+  restart     Restart one or more containers
+  rm          Remove one or more containers
+  rmi         Remove one or more images
+  run         Run a command in a new container
+  save        Save one or more images to a tar archive (streamed to STDOUT by default)
+  search      Search the Docker Hub for images
+  start       Start one or more stopped containers
+  stats       Display a live stream of container(s) resource usage statistics
+  stop        Stop one or more running containers
+  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+  top         Display the running processes of a container
+  unpause     Unpause all processes within one or more containers
+  update      Update configuration of one or more containers
+  version     Show the Docker version information
+  wait        Block until one or more containers stop, then print their exit codes
+
+Run '</span><span class="token function">docker</span> COMMAND --help' <span class="token keyword">for</span> <span class="token function">more</span> information on a command.
+
+To get <span class="token function">more</span> <span class="token builtin class-name">help</span> with docker, check out our guides at https://docs.docker.com/go/guides/</code></pre>
+
+<h2 id="docker-相关信息"><a href="#docker-相关信息" class="headerlink" title="docker 相关信息"></a>docker 相关信息</h2><pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ <span class="token function">sudo</span> <span class="token function">docker</span> system info
+Client:
+ Debug Mode: <span class="token boolean">false</span>	<span class="token comment">#client 端是否开启 debug</span>
+
+Server:
+ Containers: <span class="token number">3</span>	<span class="token comment">#当前主机运行的容器总数</span>
+  Running: <span class="token number">0</span>	<span class="token comment">#有几个容器是正在运行的</span>
+  Paused: <span class="token number">0</span>		<span class="token comment">#有几个容器是暂停的</span>
+  Stopped: <span class="token number">3</span>	<span class="token comment">#有几个容器是停止的</span>
+ Images: <span class="token number">4</span>		<span class="token comment">#当前服务器的镜像数</span>
+ Server Version: <span class="token number">19.03</span>.13	<span class="token comment">#服务端版本</span>
+ Storage Driver: overlay2	<span class="token comment">#正在使用的存储引擎</span>
+  Backing Filesystem: extfs	<span class="token comment">#后端文件系统,即服务器的磁盘文件系统</span>
+  Supports d_type: <span class="token boolean">true</span>		<span class="token comment">#是否支持 d_type</span>
+  Native Overlay Diff: <span class="token boolean">true</span>	<span class="token comment">#是否支持差异数据存储</span>
+ Logging Driver: json-file	<span class="token comment">#日志类型</span>
+ Cgroup Driver: cgroupfs	<span class="token comment">#Cgroups 类型</span>
+ Plugins:					<span class="token comment">#插件</span>
+  Volume: <span class="token builtin class-name">local</span>				<span class="token comment">#卷</span>
+  Network: bridge <span class="token function">host</span> ipvlan macvlan null overlay	<span class="token comment"># overlay 跨主机通信</span>
+  <span class="token comment">#日志类型</span>
+  Log: awslogs fluentd gcplogs gelf journald json-file <span class="token builtin class-name">local</span> logentries splunk syslog
+ Swarm: inactive	<span class="token comment">#是否支持 swarm</span>
+ Runtimes: runc		<span class="token comment">#已安装的runtime</span>
+ Default Runtime: runc	<span class="token comment">#默认使用的容器runtime</span>
+ Init Binary: docker-init	<span class="token comment">#初始化容器的守护进程,即 pid 为 1 的进程</span>
+ containerd version: 8fba4e9a7d01810a393d5d25a3621dc101981175	<span class="token comment">#版本</span>
+ runc version: dc9208a3303feef5b3839f4323d9beb36df0a9dd	<span class="token comment">#runc 版本</span>
+ init version: fec3683	<span class="token comment">#init 版本</span>
+ Security Options:	<span class="token comment">#安全选项</span>
+  apparmor	<span class="token comment">#安全模块,https://docs.docker.com/engine/security/apparmor/</span>
+  seccomp	<span class="token comment">#安全计算模块,即制容器操作，https://docs.docker.com/engine/security/seccomp/</span>
+   Profile: default		<span class="token comment">#默认的配置文件</span>
+ Kernel Version: <span class="token number">5.4</span>.0-53-generic		<span class="token comment">#宿主机内核版本</span>
+ Operating System: Ubuntu <span class="token number">20.04</span>.1 LTS	<span class="token comment">#宿主机操作系统</span>
+ OSType: linux			<span class="token comment">#宿主机操作系统类型</span>
+ Architecture: x86_64	<span class="token comment">#宿主机架构</span>
+ CPUs: <span class="token number">4</span>	<span class="token comment">#宿主机 CPU 数量</span>
+ Total Memory: <span class="token number">15</span>.56GiB		<span class="token comment">#宿主机总内存</span>
+ Name: Z510		<span class="token comment">#宿主机 hostname</span>
+ ID: 7FJX:7VKN:2YGG:VKRB:5KKA:DB7C:KNLC:UW2N:XH3E:EVEG:OSQJ:EEKV	<span class="token comment">#宿主机 ID</span>
+ Docker Root Dir: /var/lib/docker	<span class="token comment">#宿主机关于docker数据的保存目录</span>
+ Debug Mode: <span class="token boolean">false</span>		<span class="token comment">#server 端是否开启 debug</span>
+ Registry: https://index.docker.io/v1/		<span class="token comment">#仓库路径</span>
+ Labels:
+ Experimental: <span class="token boolean">false</span>	<span class="token comment">#是否测试版</span>
+ Insecure Registries:
+  <span class="token number">127.0</span>.0.0/8		<span class="token comment">#非安全的镜像仓库</span>
+ Registry Mirrors:
+  https://3417nt4m.mirror.aliyuncs.com/		<span class="token comment">#镜像仓库</span>
+ Live Restore Enabled: <span class="token boolean">false</span>	<span class="token comment">#是否开启活动重启 (重启docker-daemon 不关闭容器 )</span>
+
+WARNING: No swap limit support	<span class="token comment">#系统警告信息 (没有开启 swap 资源限制 )</span></code></pre>
+
+<p>解决上述 SWAP 报警提示：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># vim /etc/default/grub</span>
+<span class="token punctuation">..</span>.
+<span class="token assign-left variable">GRUB_CMDLINE_LINUX</span><span class="token operator">=</span><span class="token string">"net.ifnames=0 biosdevname=0 swapaccount=1"</span>	<span class="token comment">#修改此行</span>
+<span class="token punctuation">..</span>.
+
+<span class="token function">sudo</span> <span class="token function">update-grub</span>
+<span class="token function">sudo</span> <span class="token function">reboot</span></code></pre>
+
+<h2 id="docker0-网卡"><a href="#docker0-网卡" class="headerlink" title="docker0 网卡"></a>docker0 网卡</h2><p>在 docker 安装启动之后，默认会生成一个名称为 docker0 的网卡，默认 IP 地址为 172.17.0.1 的网卡</p>
+<h2 id="docker-存储引擎"><a href="#docker-存储引擎" class="headerlink" title="docker 存储引擎"></a>docker 存储引擎</h2><p>docker 官方推荐首选存储引擎为 overlay2，需要磁盘分区支持 d-type 功能</p>
+<h2 id="docker-服务进程"><a href="#docker-服务进程" class="headerlink" title="docker 服务进程"></a>docker 服务进程</h2><p>docker 相关的四个进程：</p>
+<ul>
+<li>dockerd：服务端程序，被 client 直接访问，父进程为宿主机的 systemd 守护进程</li>
+<li>docker-proxy：每个进程 docker-proxy 实现对应一个需要网络通信的容器，管理宿主机和容器的之间端口映射，其父进程为 dockerd，如果容器不需要网络则无需启动</li>
+<li>containerd：被 dockerd 进程调用以实现与 runc 交互</li>
+<li>containerd-shim：真正运行容器的载体，每个容器对应一个 containerd-shim 进程，其父进程为 containerd</li>
+</ul>
+<h3 id="containerd-shim-命令"><a href="#containerd-shim-命令" class="headerlink" title="containerd-shim 命令"></a>containerd-shim 命令</h3><h3 id="容器的创建与管理过程"><a href="#容器的创建与管理过程" class="headerlink" title="容器的创建与管理过程"></a>容器的创建与管理过程</h3><p><img data-src="//img.to2b.cn/blog/ljk/1605701276549.png"></p>
+<ol>
+<li>dockerd 通过 grpc 和 containerd 模块通信，由 libcontainerd 负责，通信的 socket：&#x2F;run&#x2F;containerd&#x2F;containerd.sock</li>
+<li>containerd 在 dockerd 启动时被启动，然后 containerd 启动 grpc 请求监听，containerd 处理请求，根据请求作出相应动作</li>
+<li>run&#x2F;start&#x2F;exec 容器，containerd 拉起一个 container-shim，并进行相应的操作</li>
+<li>container-shim 被拉起后，start&#x2F;exec&#x2F;create 拉起 runc 进程，通过 exit、control 文件和 containerd 通信，通过父子进程关系和 sigchld 监控容器中进程状态</li>
+<li>在整个容器生命周期中，container 通过 epoll 监控容器文件、事件</li>
+</ol>
+<h3 id="gRPC"><a href="#gRPC" class="headerlink" title="gRPC"></a>gRPC</h3><p><img data-src="//img.to2b.cn/blog/lujinkai/1669884233046.png"></p>
+<p>gPRC 是谷歌开发的一款高性能、开源和通用的 RPC 框架，支持众多语言客户端</p>
+<h2 id="docker-服务管理"><a href="#docker-服务管理" class="headerlink" title="docker 服务管理"></a>docker 服务管理</h2><p>docker 服务基于 C&#x2F;S 架构，可以实现基于本地和远程方式进行管理</p>
+<p>范例：docker 服务添加标签</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">vim</span> /lib/systemd/system/docker.service
+<span class="token comment"># 修改如下行</span>
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/bin/dockerd <span class="token parameter variable">-H</span> fd:// <span class="token parameter variable">--containerd</span><span class="token operator">=</span>/run/containerd/containerd.sock <span class="token parameter variable">--label</span><span class="token operator">=</span><span class="token string">"name=docker1"</span>
+<span class="token punctuation">..</span>.
+
+
+$ <span class="token function">docker</span> info
+<span class="token punctuation">..</span>.
+Labels:
+<span class="token assign-left variable">name</span><span class="token operator">=</span>docker1	<span class="token comment">#此处显示添加的标签</span>
+<span class="token punctuation">..</span>.</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/1.Docker%E4%BB%8B%E7%BB%8D/" rel="prev" title="docker介绍">
+                  <i class="fa fa-chevron-left"></i> docker介绍
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/1.2.docker%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86/" rel="next" title="docker镜像管理">
+                  docker镜像管理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

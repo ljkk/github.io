@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="locatefind 去硬盘搜索，locate 是去数据库搜索，系统预建的文件索引数据库：&#x2F;var&#x2F;lib&#x2F;mlocate&#x2F;mlocate.db执行updatedb更新数据库，这个命令构建索引的过程需要遍历整个根文件系统，很消耗 io 资源，所以在服务器比较繁忙的时候不要执行 locate [OPTION]... [PATTERN]...  -i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件查找locate和find">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/tar%E5%92%8Cfind/%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BElocate%E5%92%8Cfind/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="locatefind 去硬盘搜索，locate 是去数据库搜索，系统预建的文件索引数据库：&#x2F;var&#x2F;lib&#x2F;mlocate&#x2F;mlocate.db执行updatedb更新数据库，这个命令构建索引的过程需要遍历整个根文件系统，很消耗 io 资源，所以在服务器比较繁忙的时候不要执行 locate [OPTION]... [PATTERN]...  -i">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-09T14:28:37.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.506Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="locate">
+<meta property="article:tag" content="find">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/tar%E5%92%8Cfind/%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BElocate%E5%92%8Cfind/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/tar%E5%92%8Cfind/%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BElocate%E5%92%8Cfind/","path":"运维/基础/tar和find/文件查找locate和find/","title":"文件查找locate和find"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>文件查找locate和find | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#locate"><span class="nav-number">1.</span> <span class="nav-text">locate</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#find"><span class="nav-number">2.</span> <span class="nav-text">find</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OPTION"><span class="nav-number">2.1.</span> <span class="nav-text">OPTION</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expression"><span class="nav-number">2.2.</span> <span class="nav-text">expression</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Positional-options-%E4%BD%8D%E7%BD%AE%E9%80%89%E9%A1%B9"><span class="nav-number">2.2.1.</span> <span class="nav-text">Positional options 位置选项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Global-options-%E5%85%A8%E5%B1%80%E9%80%89%E9%A1%B9"><span class="nav-number">2.2.2.</span> <span class="nav-text">Global options 全局选项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tests-%E6%B5%8B%E8%AF%95"><span class="nav-number">2.2.3.</span> <span class="nav-text">Tests 测试</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E6%88%B3"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">时间戳</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%90%8D%E5%92%8C-inode"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">文件名和 inode</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B1%9E%E4%B8%BB%E3%80%81%E5%B1%9E%E7%BB%84"><span class="nav-number">2.2.3.3.</span> <span class="nav-text">属主、属组</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.3.4.</span> <span class="nav-text">文件类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A9%BA%E6%96%87%E4%BB%B6%E6%88%96%E7%9B%AE%E5%BD%95"><span class="nav-number">2.2.3.5.</span> <span class="nav-text">空文件或目录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F"><span class="nav-number">2.2.3.6.</span> <span class="nav-text">文件大小</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9D%83%E9%99%90"><span class="nav-number">2.2.3.7.</span> <span class="nav-text">权限</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">2.2.3.8.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ACTIONS-%E5%8A%A8%E4%BD%9C"><span class="nav-number">2.2.4.</span> <span class="nav-text">ACTIONS 动作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OPERATORS-%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.5.</span> <span class="nav-text">OPERATORS 操作</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%BF%E6%8D%A2%E5%8F%82%E6%95%B0-xargs"><span class="nav-number">3.</span> <span class="nav-text">替换参数 xargs</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/tar%E5%92%8Cfind/%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BElocate%E5%92%8Cfind/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="文件查找locate和find | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          文件查找locate和find
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 22:28:37" itemprop="dateCreated datePublished" datetime="2020-12-09T22:28:37+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/tar%E5%92%8Cfind/" itemprop="url" rel="index"><span itemprop="name">tar和find</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="locate"><a href="#locate" class="headerlink" title="locate"></a>locate</h2><p>find 去硬盘搜索，locate 是去数据库搜索，系统预建的文件索引数据库：&#x2F;var&#x2F;lib&#x2F;mlocate&#x2F;mlocate.db<br>执行<code>updatedb</code>更新数据库，这个命令构建索引的过程需要遍历整个根文件系统，很消耗 io 资源，所以在服务器比较繁忙的时候不要执行</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">locate</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>PATTERN<span class="token punctuation">]</span><span class="token punctuation">..</span>.
+
+<span class="token parameter variable">-i</span>      <span class="token comment"># 不区分大小写的搜索</span>
+<span class="token parameter variable">-n</span> N    <span class="token comment"># 只列举前N个匹配项目</span>
+<span class="token parameter variable">-r</span>      <span class="token comment"># 使用基本正则表达式</span></code></pre>
+
+<p>支持模糊搜索：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~/data/test$ <span class="token function">locate</span> <span class="token variable"><span class="token variable">`</span><span class="token builtin class-name">pwd</span><span class="token variable">`</span></span>/*sh
+/home/lujinkai/data/test/a.sh
+/home/lujinkai/data/test/b.sh
+/home/lujinkai/data/test/c_r.sh
+/home/lujinkai/data/test/test.sh
+/home/lujinkai/data/test/test2.sh</code></pre>
+
+<h2 id="find"><a href="#find" class="headerlink" title="find"></a>find</h2><p>locate 查询的不是实时数据，find 查询的是实时的，因为 find 是去遍历指定路径完成文件查找</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">find</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>path<span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">[</span>expression<span class="token punctuation">]</span></code></pre>
+
+<h3 id="OPTION"><a href="#OPTION" class="headerlink" title="OPTION"></a>OPTION</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-P</span>   <span class="token comment"># 找到符号链接的时候，所有的属性都来自符号链接，从来不follow symbolic links。这是默认选项</span>
+<span class="token parameter variable">-L</span>   <span class="token comment"># 找到符号链接的时候，所有的属性来自文件本身，总是follow symbolic links。而不是符号链接</span>
+<span class="token parameter variable">-H</span>   <span class="token comment"># 仅仅当作为命令行参数时，也就是这里的[path...]，才会follow symbolic links</span></code></pre>
+
+<h3 id="expression"><a href="#expression" class="headerlink" title="expression"></a>expression</h3><p>描述了如何匹配文件以及如何处理匹配的文件。一个 expression 是由以下多个选项组成：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">- Tests
+- Actions
+- Global options
+- Positional options
+- Operators</code></pre>
+
+<p>如果整个 expression 没有包含任何选项，默认 <code>-print</code></p>
+<p><code>-delete</code> 也类似一个选项，因为它隐含 <code>-depth</code> 选项</p>
+<h4 id="Positional-options-位置选项"><a href="#Positional-options-位置选项" class="headerlink" title="Positional options 位置选项"></a>Positional options 位置选项</h4><p>位置选项总是返回 true。位置选项会影响所有指定的 Tests，哪怕 Tests 写在前面（除了-daystart，-daystart 只影响写在其后面的 Tests），为了易读性，最好把位置选项放在 expression 的开头部分</p>
+<ul>
+<li><p>-daystart<br>指定每天的开始是 0 点而不是 24 小时之前，例如：当前时间是 8 月 13 日 8 点，要求搜索 2 天内修改过的文件，默认搜索文件的起点是 8 月 11 日 8 点，如果使用-daystart 选项，则搜索文件的起点是 8 月 11 日 0 点</p>
+<p>影响的 Tests：-amin,-atime,-cmin,-ctime,-mmin、-mtime</p>
+</li>
+<li><p>-follow<br>这个选项已经被弃用，使用-L 代替</p>
+</li>
+<li><p>-regextype type<br>不常用，先略过。。。</p>
+<p>影响的 Tests：-regex、-iregex</p>
+</li>
+<li><p>-warn，-nowarn<br>打开或关闭警告信息，具体看 man 帮助</p>
+</li>
+</ul>
+<h4 id="Global-options-全局选项"><a href="#Global-options-全局选项" class="headerlink" title="Global options 全局选项"></a>Global options 全局选项</h4><p>Global options 也总是返回 true，对所有的</p>
+<ul>
+<li><p>-d<br>已弃用，等同于-depth 的，与 FreeBSD、NetBSD、MacOSX 和 OpenBSD 兼容.</p>
+</li>
+<li><p>-depth<br>搜索到目录时，先处理目录中的文件，再处理目录本身。对于-delete 这个 action，它隐含-depth 选项</p>
+</li>
+<li><p>-ignore_readdir_race<br>在 find 统计文件的时候，如果有其他操作把这文件删了，会报错，加上这个选项就不报错了</p>
+</li>
+<li><p>-noignore_readdir_race<br>关闭-ignore_readdir_race.</p>
+</li>
+<li><p>-maxdepth levels<br>最大搜索目录深度,指定目录下的文件为第 1 级</p>
+</li>
+<li><p>-mindepth levels<br>最小搜索目录深度</p>
+</li>
+<li><p>-mount<br>不搜索其他文件系统，-xdev 的替代名称，用于与 find 的其他版本兼容</p>
+</li>
+<li><p>-xdev<br>不搜索其他文件系统</p>
+</li>
+<li><p>-noleaf<br>禁止在非 UNUX 文件系统，MS-DOS 系统，CD-ROM 文件系统中进行最优化查找，具体什么意思没太看懂</p>
+</li>
+<li><p>-help，–help<br>打印帮助信息，并且退出</p>
+</li>
+<li><p>-version<br>打印 find 版本号然后退出</p>
+</li>
+</ul>
+<h4 id="Tests-测试"><a href="#Tests-测试" class="headerlink" title="Tests 测试"></a>Tests 测试</h4><p>关于选项的参数是数字的，n 表示等于 n，+n 表示大于 n，-n 表示小于 n，例如：<code>-uid 0</code>表示要求 uid 等于 0，<code>-uid +0</code>要求 uid 大于 0</p>
+<h5 id="时间戳"><a href="#时间戳" class="headerlink" title="时间戳"></a>时间戳</h5><p>n：n 个时间单位之内<br>+n：n 个时间单位之前<br>atime：access time，访问时间，文件中的数据库最后被访问的时间<br>mtime：modify time，修改时间，文件内容被修改的最后时间<br>ctime：change time，变化时间，文件的原数据，发生改变的时间</p>
+<ul>
+<li><p>-amin n<br>a：atime、min：minutes<br>n：搜索 atime 在 n 分钟内有改变的文件<br>+n：搜索 atime 在 n 分钟之前有改变的文件</p>
+</li>
+<li><p>-mmin n<br>m：mtime</p>
+</li>
+<li><p>-cmin n<br>c：ctime</p>
+</li>
+<li><p>-atime n、-ctime n、-mtime n<br>和 amin、mmin、cmin 的区别在于时间单位为天，也就是 24 小时，从现在往前数 24×n 小时</p>
+</li>
+<li><p>-used n<br>查找 atime 在 ctime 后 n 天的文件</p>
+</li>
+<li><p>-anewer file<br>搜索 atime 比给定 file 的 mtime 还要晚的文件。换言之，在 file 的内容被修改后，又访问了哪些文件？</p>
+</li>
+<li><p>-cnewer file<br>搜索 ctime 比给定 file 的 mtime 还要晚的文件。</p>
+</li>
+<li><p>-new file<br>搜索 mtime 比给定文件的 mtime 还要晚的文件。</p>
+</li>
+</ul>
+<p>-newerXY reference<br>X 和 Y 是占位符，主要是查找 X 时间戳比 reference 的 Y 时间戳更新的文件。<br>reference 可以是时间字符串（参考 date -d 格式，推荐使用 yyyy-MM-dd hh:mm:ss），也可以是<br>X 可以是 a、B、c、m，Y 可以是 a、B、c、m、t。<br>a：atime；<br>B：birth time 文件的出生日期，不是所有系统都支持这个参数；<br>c：ctime；<br>t：代表 reference 本身，此时 reference 必须是时间，不能是文件，显然只有 Y 可以设为 t，X 设为 t 是没有意义的</p>
+<p>范例：获取 mtime 为昨天的文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~/data/test$ <span class="token function">find</span> <span class="token builtin class-name">.</span> <span class="token parameter variable">-newermt</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> <span class="token parameter variable">-d</span> <span class="token string">'-1 day'</span> +%F<span class="token variable">)</span></span> <span class="token operator">!</span> <span class="token parameter variable">-newermt</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +%F<span class="token variable">)</span></span>
+./issue
+./re.txt
+lujinkai@Z510:~/data/test$ <span class="token function">find</span> <span class="token builtin class-name">.</span> <span class="token parameter variable">-newermt</span> <span class="token string">'2020-08-12 00:00:00'</span> <span class="token operator">!</span> <span class="token parameter variable">-newermt</span> <span class="token string">'2020-08-13 00:00:00'</span>
+./issue
+./re.txt</code></pre>
+
+<h5 id="文件名和-inode"><a href="#文件名和-inode" class="headerlink" title="文件名和 inode"></a>文件名和 inode</h5><ul>
+<li><p>-name pattern<br>文件的 basename 与 pattern 匹配，支持使用通配符，注意，这里的 pattern 的 *、?、[] 是可以匹配.开头的文件，也就是隐藏文件（在 bash 中，是无法匹配的）</p>
+</li>
+<li><p>-iname pattern<br>不区分大小写的 name</p>
+</li>
+<li><p>-lname pattern<br>找找符合指定匹配模式的符号链接文件，该选项与-L 冲突</p>
+</li>
+<li><p>-ilname pattern<br>不区分大小写的 lname</p>
+</li>
+<li><p>-inum n<br>按照 inode 号查找</p>
+</li>
+<li><p>-samefile name<br>找出指定文件同 inode 号的文件，即其硬链接</p>
+</li>
+<li><p>-links n<br>File has n hard links.</p>
+</li>
+<li><p>-regex pattern<br>-name 只能匹配 basename，-regex 可以匹配整个文件路径，匹配规则是正则表达式</p>
+</li>
+<li><p>-iregex pattern<br>相比 regex，iregex 对匹配的内容不区分大小写</p>
+</li>
+<li><p>-path pattern<br>和-regex pattern 相比，-path pattern 的匹配规则是通配符</p>
+</li>
+<li><p>-ipath pattern<br>不区分大小写的 path</p>
+</li>
+<li><p>-wholename pattern<br>不推荐使用，可以使用 -path 代替</p>
+</li>
+<li><p>-iwholename pattern<br>不区分大小写的 wholename</p>
+</li>
+</ul>
+<h5 id="属主、属组"><a href="#属主、属组" class="headerlink" title="属主、属组"></a>属主、属组</h5><ul>
+<li>-user uname<br>uname 可以是用户名，也可以是 uid</li>
+<li>-group gname<br>gname 可以是组名，也可以是 gid</li>
+<li>-uid n<br>文件的属主 id 是 n</li>
+<li>-gid n<br>文件的属组 id 是 n</li>
+<li>-nouser<br>查找没有属主的文件</li>
+<li>-nogroup<br>查找没有属组的文件</li>
+</ul>
+<h5 id="文件类型"><a href="#文件类型" class="headerlink" title="文件类型"></a>文件类型</h5><ul>
+<li>-type c<br>c 可以是以下类型：<br>b（block）、c（character）、d（directory）、p（FIFO）、f（regular file）、l（symbolic link）、s（socket）、D（门 (Solaris 特有)）<br>当搜索多个文件类型时，可以用逗号分割</li>
+</ul>
+<h5 id="空文件或目录"><a href="#空文件或目录" class="headerlink" title="空文件或目录"></a>空文件或目录</h5><ul>
+<li>-empty<br>查找空文件和空目录</li>
+</ul>
+<h5 id="文件大小"><a href="#文件大小" class="headerlink" title="文件大小"></a>文件大小</h5><ul>
+<li>-size n[cwbkMG]<br>c：1 字节、w：2 字节、b：512 字节（默认）、k：1k、M：1M、G:1G<br>n 的前缀+和-表示大于和小于，对比目标文件时，对文件的 size 进行四舍五入，精度就是指定的 cwbkMG，例如：<code>-size -1M</code>并不等同于<code>-size -1048576c</code>。前者只匹配空文件，后者匹配 0 到 1048575 字节的文件。</li>
+</ul>
+<h5 id="权限"><a href="#权限" class="headerlink" title="权限"></a>权限</h5><ul>
+<li><p>-perm mode<br>精确匹配文件权限，必须提供全部的权限，不提供的默认此权限为 0，mode 推荐使用八进制模式，如果使用符号模式，可能会比较复杂，例如：<code>-perm g=w</code>只能匹配到模式为 0020 的文件</p>
+</li>
+<li><p>-perm &#x2F;mode<br>可以提供 1 个或多个权限，只要满足其中一个权限，就能匹配，例如：<code>-perm /u=rwx</code>,u 满足 rwx 中一项即可；<code>-perm /222</code>,ugo 中只要有一个具有写权限即可</p>
+</li>
+<li><p>-perm -mode<br>可以提供 1 个或多个权限，无论提供多少权限，必须全部满足，才能匹配，例如：<code>-perm /u=rwx</code>,u 必须全部满足 rwx；<code>-perm /222</code>,ugo 都要具有写权限</p>
+</li>
+<li><p>-perm +mode<br>已淘汰，使用 -perm &#x2F;mode 代替</p>
+</li>
+<li><p>-writable<br>匹配当前用户可写的文件</p>
+</li>
+<li><p>-readable<br>匹配当前用户可读的文件。-perm 测试文件的 ugo 的权限，而-writable 和-readable 测试当前用户对文件的权限</p>
+</li>
+</ul>
+<h5 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h5><ul>
+<li><p>-executable<br>查找可以被执行的文件（sh、bin 文件），和可以被搜索的目录</p>
+</li>
+<li><p>-true<br>总是返回 true</p>
+</li>
+<li><p>-false<br>总是返回 false</p>
+</li>
+<li><p>-fstype type<br>指定文件系统的类型，本机的文件系统类型在&#x2F;etc&#x2F;fstab 中可以查看</p>
+</li>
+<li><p>-xtype c<br>和“-type”相同，除非文件是符号链接。对于符号链接，-xtype 检查-type 不检查的文件的类型。<br>具体什么意思，还不太清楚</p>
+</li>
+<li><p>-context pattern<br>只限 SELinux，因为 SELinux 我们都会关掉，所以这个选项没什么用</p>
+</li>
+</ul>
+<h4 id="ACTIONS-动作"><a href="#ACTIONS-动作" class="headerlink" title="ACTIONS 动作"></a>ACTIONS 动作</h4><ul>
+<li><p>-print<br>默认的处理动作，输出内容到终端</p>
+</li>
+<li><p>-delete<br>删除文件，删除成功返回 true，删除失败报错</p>
+</li>
+<li><p>-ls<br>对处理后的内容执行类似<code>ls -l</code>的操作</p>
+</li>
+<li><p>-ok command {} ;<br>对查找到的每个文件执行 command,对于每个文件执行命令之前,都会交互式要求用户确认，{}用于引用查找到的文件名称自身</p>
+</li>
+<li><p>-exec command {} ;<br>对查找到的每个文件执行由 COMMAND 指定的命令，{}用于引用查找到的文件名称自身</p>
+</li>
+<li><p>-fls file<br>查找到的所有文件的长格式信息保存至指定文件中</p>
+</li>
+<li><p>-prune<br>如果该文件是一个目录，则不要下降到它，该选项和-depth 冲突，如果设置了-depth 选项，该选项失效</p>
+</li>
+<li><p>-quit</p>
+</li>
+</ul>
+<h4 id="OPERATORS-操作"><a href="#OPERATORS-操作" class="headerlink" title="OPERATORS 操作"></a>OPERATORS 操作</h4><ul>
+<li><p>( expr )<br>强制优先</p>
+</li>
+<li><p>!expr<br>取反</p>
+</li>
+<li><p>expr1 expr2<br>隐含的“与“操作</p>
+</li>
+<li><p>expr1 -a expr2<br>和“expr1 expr2“一样</p>
+</li>
+<li><p>expr1 -o expr2<br>“或“操作</p>
+</li>
+<li><p>expr1 , expr2</p>
+</li>
+</ul>
+<h2 id="替换参数-xargs"><a href="#替换参数-xargs" class="headerlink" title="替换参数 xargs"></a>替换参数 xargs</h2><p>xargs 读取标准输入的内容，使用空格或回车（-n）将数据分割，可以直接输出，也可以作为参数传递给后面的命令</p>
+<p>find 常常搭配 xargs 一起使用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">find</span> <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token builtin class-name">command</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#显示10个数字</span>
+<span class="token function">seq</span> <span class="token number">10</span> <span class="token operator">|</span> <span class="token function">xargs</span>
+<span class="token comment">#删除当前目录下的大量文件</span>
+<span class="token function">ls</span> <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token function">rm</span>
+<span class="token comment">#</span>
+<span class="token function">find</span> <span class="token parameter variable">-name</span> <span class="token string">"*.sh"</span> <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token function">ls</span> <span class="token parameter variable">-Sl</span>
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token comment">#echo &#123;1..10&#125; |xargs</span>
+<span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span> <span class="token number">6</span> <span class="token number">7</span> <span class="token number">8</span> <span class="token number">9</span> <span class="token number">10</span>
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token comment">#echo &#123;1..10&#125; |xargs -n1</span>
+<span class="token number">1</span>
+<span class="token number">2</span>
+<span class="token number">3</span>
+<span class="token number">4</span>
+<span class="token number">5</span>
+<span class="token number">6</span>
+<span class="token number">7</span>
+<span class="token number">8</span>
+<span class="token number">9</span>
+<span class="token number">10</span>
+<span class="token punctuation">[</span>root@centos8 data<span class="token punctuation">]</span><span class="token comment">#echo &#123;1..10&#125; |xargs -n2</span>
+<span class="token number">1</span> <span class="token number">2</span>
+<span class="token number">3</span> <span class="token number">4</span>
+<span class="token number">5</span> <span class="token number">6</span>
+<span class="token number">7</span> <span class="token number">8</span>
+<span class="token number">9</span> <span class="token number">10</span>
+<span class="token comment">#批量创建和删除用户</span>
+<span class="token builtin class-name">echo</span> user<span class="token punctuation">&#123;</span><span class="token number">1</span><span class="token punctuation">..</span><span class="token number">10</span><span class="token punctuation">&#125;</span> <span class="token operator">|</span><span class="token function">xargs</span> <span class="token parameter variable">-n1</span> <span class="token function">useradd</span>
+<span class="token builtin class-name">echo</span> user<span class="token punctuation">&#123;</span><span class="token number">1</span><span class="token punctuation">..</span><span class="token number">100</span><span class="token punctuation">&#125;</span> <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token parameter variable">-n1</span> <span class="token function">userdel</span> <span class="token parameter variable">-r</span>
+<span class="token comment">#这个命令是错误的</span>
+<span class="token function">find</span> /sbin/ <span class="token parameter variable">-perm</span> /700 <span class="token operator">|</span> <span class="token function">ls</span> <span class="token parameter variable">-l</span>
+<span class="token comment">#查找有特殊权限的文件,并排序</span>
+<span class="token function">find</span> /bin/ <span class="token parameter variable">-perm</span> /7000 <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token function">ls</span> <span class="token parameter variable">-Sl</span>
+<span class="token comment">#此命令和上面有何区别?</span>
+<span class="token function">find</span> /bin/ <span class="token parameter variable">-perm</span> <span class="token parameter variable">-7000</span> <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token function">ls</span> <span class="token parameter variable">-Sl</span>
+<span class="token comment">#以字符nul分隔*</span>
+<span class="token function">find</span> <span class="token parameter variable">-type</span> f <span class="token parameter variable">-name</span> “*.txt” <span class="token parameter variable">-print0</span> <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token parameter variable">-0</span> <span class="token function">rm</span>
+<span class="token comment">#并发执行多个进程</span>
+<span class="token function">seq</span> <span class="token number">100</span> <span class="token operator">|</span><span class="token function">xargs</span> <span class="token parameter variable">-i</span> <span class="token parameter variable">-P10</span> <span class="token function">wget</span> <span class="token parameter variable">-P</span> /data
+http://10.0.0.8/<span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>.html
+<span class="token comment">#并行下载视频</span>
+<span class="token function">seq</span> <span class="token number">389</span> <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token parameter variable">-i</span> <span class="token parameter variable">-P3</span> you-get https://www.bilibili.com/video/av36489007?p<span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span></code></pre>
+
+<p>练习</p>
+<ol>
+<li>查找&#x2F;var 目录下属主为 root,且属组为 mail 的所有文件</li>
+<li>查找&#x2F;var 目录下不属于 root、lp、gdm 的所有文件</li>
+<li>查找&#x2F;var 目录下最近一周内其内容修改过,同时属主不为 root,也不是 postfix 的文件</li>
+<li>查找当前系统上没有属主或属组,且最近一个周内曾被访问过的文件</li>
+<li>查找&#x2F;etc 目录下大于 1M 且类型为普通文件的所有文件</li>
+<li>查找&#x2F;etc 目录下所有用户都没有写权限的文件</li>
+<li>查找&#x2F;etc 目录下至少有一类用户没有执行权限的文件</li>
+<li>查找&#x2F;etc&#x2F;init.d 目录下,所有用户都有执行权限,且其它用户有写权限的文件</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/locate/" rel="tag"><i class="fa fa-tag"></i> locate</a>
+              <a href="/tags/find/" rel="tag"><i class="fa fa-tag"></i> find</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/tar%E5%92%8Cfind/%E6%89%93%E5%8C%85%E5%8E%8B%E7%BC%A9/" rel="prev" title="打包压缩">
+                  <i class="fa fa-chevron-left"></i> 打包压缩
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E5%9F%BA%E7%A1%80/%E8%BD%AF%E4%BB%B6/%E8%BD%AF%E4%BB%B6%E7%AE%A1%E7%90%86/" rel="next" title="软件管理">
+                  软件管理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="集群和分布式集群（cluster）：为了解决某个特定问题将多台服务器组合起来形成的单个系统 cluster 分为三种类型：负载均衡（LB）、高可用（HA）、高性能（HPC，例如天河一号） 集群和分布式： 集群是一个业务系统部署在多台服务器上，分布式是拆分业务系统，然后分别部署在不同服务器 分布式是指通过网络连接的多个组件，通过交换信息协作而形成的系统。而集群，是指同一种组件的多个实例，形成的逻辑上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LVS">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/LVS/LVS/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="集群和分布式集群（cluster）：为了解决某个特定问题将多台服务器组合起来形成的单个系统 cluster 分为三种类型：负载均衡（LB）、高可用（HA）、高性能（HPC，例如天河一号） 集群和分布式： 集群是一个业务系统部署在多台服务器上，分布式是拆分业务系统，然后分别部署在不同服务器 分布式是指通过网络连接的多个组件，通过交换信息协作而形成的系统。而集群，是指同一种组件的多个实例，形成的逻辑上">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605433606569.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605495268542.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1605497471540.png">
+<meta property="article:published_time" content="2020-12-09T15:41:03.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="LVS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1605433606569.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/LVS/LVS/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/LVS/LVS/","path":"运维/LVS/LVS/","title":"LVS"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LVS | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">集群和分布式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1-LB"><span class="nav-number">1.1.</span> <span class="nav-text">cluster 负载均衡 LB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4-HA"><span class="nav-number">1.2.</span> <span class="nav-text">cluster 高可用集群 HA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LVS-%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">LVS 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LVS-%E9%9B%86%E7%BE%A4"><span class="nav-number">3.</span> <span class="nav-text">LVS 集群</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS-%E9%9B%86%E7%BE%A4%E4%BD%93%E7%B3%BB%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">3.1.</span> <span class="nav-text">LVS 集群体系架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">3.2.</span> <span class="nav-text">术语</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPVS-%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">IPVS 工作模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nat"><span class="nav-number">4.1.</span> <span class="nav-text">nat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fullnat"><span class="nav-number">4.2.</span> <span class="nav-text">fullnat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dr-%E9%87%8D%E7%82%B9"><span class="nav-number">4.3.</span> <span class="nav-text">dr (重点)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tun"><span class="nav-number">4.4.</span> <span class="nav-text">tun</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E5%92%8C%E6%AF%94%E8%BE%83"><span class="nav-number">4.5.</span> <span class="nav-text">总结和比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPVS-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">IPVS 负载均衡调度算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E7%AE%97%E6%B3%95"><span class="nav-number">5.1.</span> <span class="nav-text">静态算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%AE%97%E6%B3%95"><span class="nav-number">5.2.</span> <span class="nav-text">动态算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ipvsadm"><span class="nav-number">6.</span> <span class="nav-text">ipvsadm</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E9%9B%86%E7%BE%A4%E6%9C%8D%E5%8A%A1"><span class="nav-number">6.1.</span> <span class="nav-text">管理集群服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E9%9B%86%E7%BE%A4%E4%B8%8A%E7%9A%84-RS"><span class="nav-number">6.2.</span> <span class="nav-text">管理集群上的 RS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ipvs-%E8%A7%84%E5%88%99"><span class="nav-number">6.3.</span> <span class="nav-text">ipvs 规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ipvs-%E8%BF%9E%E6%8E%A5"><span class="nav-number">6.4.</span> <span class="nav-text">ipvs 连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98%E8%A7%84%E5%88%99"><span class="nav-number">6.5.</span> <span class="nav-text">保存规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%BD%BD"><span class="nav-number">6.6.</span> <span class="nav-text">重载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B2%E7%81%AB%E5%A2%99%E6%A0%87%E8%AE%B0"><span class="nav-number">6.7.</span> <span class="nav-text">防火墙标记</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E6%A0%87%E8%AE%B0"><span class="nav-number">6.8.</span> <span class="nav-text">持久标记</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LVS-%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">LVS 实战案例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS-DR-%E6%A8%A1%E5%BC%8F%E5%8D%95%E7%BD%91%E6%AE%B5%E6%A1%88%E4%BE%8B"><span class="nav-number">7.1.</span> <span class="nav-text">LVS-DR 模式单网段案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS-DR-%E6%A8%A1%E5%BC%8F%E5%A4%9A%E7%BD%91%E6%AE%B5%E6%A1%88%E4%BE%8B"><span class="nav-number">7.2.</span> <span class="nav-text">LVS-DR 模式多网段案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LVS-%E9%AB%98%E5%8F%AF%E7%94%A8%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.</span> <span class="nav-text">LVS 高可用实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DS-%E4%B8%8D%E5%8F%AF%E7%94%A8%E6%97%B6"><span class="nav-number">8.1.</span> <span class="nav-text">DS 不可用时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RS-%E4%B8%8D%E5%8F%AF%E7%94%A8%E6%97%B6"><span class="nav-number">8.2.</span> <span class="nav-text">RS 不可用时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ldirectord"><span class="nav-number">8.3.</span> <span class="nav-text">ldirectord</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/LVS/LVS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LVS | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LVS
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:41:03" itemprop="dateCreated datePublished" datetime="2020-12-09T23:41:03+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/LVS/" itemprop="url" rel="index"><span itemprop="name">LVS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="集群和分布式"><a href="#集群和分布式" class="headerlink" title="集群和分布式"></a>集群和分布式</h2><p>集群（cluster）：为了解决某个特定问题将多台服务器组合起来形成的单个系统</p>
+<p>cluster 分为三种类型：负载均衡（LB）、高可用（HA）、高性能（HPC，例如天河一号）</p>
+<p>集群和分布式：</p>
+<p>集群是一个业务系统部署在多台服务器上，分布式是拆分业务系统，然后分别部署在不同服务器</p>
+<p>分布式是指通过网络连接的多个组件，通过交换信息协作而形成的系统。而集群，是指同一种组件的多个实例，形成的逻辑上的整体</p>
+<h3 id="cluster-负载均衡-LB"><a href="#cluster-负载均衡-LB" class="headerlink" title="cluster 负载均衡 LB"></a>cluster 负载均衡 LB</h3><p>按实现方式：</p>
+<ul>
+<li>硬件：F5，非常昂贵，一个 F5 就 18W，配置一套主从高可用就是 36W</li>
+<li>软件：LVS、Nginx、haproxy</li>
+</ul>
+<p>基于工作的协议层划分：</p>
+<ul>
+<li>传输层：LVS、Nginx、haproxy</li>
+<li>应用层：针对特定协议，常称为 proxy server<ul>
+<li>http：nginx、httpd、haproxy…</li>
+<li>fastcgi：nginx、httpd…</li>
+<li>mysql：mysql-proxy、mycat…</li>
+</ul>
+</li>
+</ul>
+<h3 id="cluster-高可用集群-HA"><a href="#cluster-高可用集群-HA" class="headerlink" title="cluster 高可用集群 HA"></a>cluster 高可用集群 HA</h3><p>keepalived</p>
+<h2 id="LVS-简介"><a href="#LVS-简介" class="headerlink" title="LVS 简介"></a>LVS 简介</h2><p>Linux Virtual Server，官网: <a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org/">http://www.linuxvirtualserver.org/</a></p>
+<p>四层负载均衡，转发效率极高，具有处理百万计并发连接请求的能力。</p>
+<p>阿里的四层 <a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/1803">SLB</a> ( Server Load Balance )是基于 LVS + keepalived 实现</p>
+<p><strong>LVS &#x3D; IPVS（内核空间） + ipvsadm（用户空间）</strong></p>
+<ul>
+<li><strong>IPVS：</strong>集成在内核，工作在 netfilter 框架上，具体来讲就是工作在 INPUT 链上，将发往 INPUT 的流量进行 “处理”</li>
+<li><strong>ipvsadm：</strong>管理 ipvs 规则的用户空间软件</li>
+</ul>
+<p>负载均衡的应用场景为高访问量的业务,提高应用程序的可用性和可靠性</p>
+<ol>
+<li>应用于高访问量的业务</li>
+<li>扩展应用程序：随时添加和移除 ECS 实例来扩展应用系统的服务能力</li>
+<li>消除单点故障</li>
+<li>同城容灾 (多可用区容灾)</li>
+<li>跨地域容灾</li>
+</ol>
+<h2 id="LVS-集群"><a href="#LVS-集群" class="headerlink" title="LVS 集群"></a>LVS 集群</h2><h3 id="LVS-集群体系架构图"><a href="#LVS-集群体系架构图" class="headerlink" title="LVS 集群体系架构图"></a>LVS 集群体系架构图</h3><p><img data-src="//img.to2b.cn/blog/ljk/1605433606569.png"></p>
+<h3 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h3><ul>
+<li>CIP：Client IP</li>
+<li>VS：Virtual Server；Director Server(DS)、Dispatcher(调度器)、Load Balancer</li>
+<li>RS：Real Server；upstream server(nginx)、backend server(haproxy)</li>
+<li>DIP：Director IP，VS 内网 IP</li>
+<li>VIP：Virtual server IP，VS 和 RS 的外网 IP</li>
+<li>RIP：Real server IP，RS 的 IP</li>
+</ul>
+<p>访问流程：CIP &lt;–&gt; VIP&#x3D;&#x3D;DIP &lt;–&gt; RIP</p>
+<h2 id="IPVS-工作模式"><a href="#IPVS-工作模式" class="headerlink" title="IPVS 工作模式"></a>IPVS 工作模式</h2><ul>
+<li>nat：修改请求报文的目标 IP</li>
+<li>fullnat：修改请求报文的源和目标 IP，默认不支持</li>
+<li>dr：操纵封装新的 mac 地址</li>
+<li>tun：在原请求 IP 报文之外新加一个 IP 首部</li>
+</ul>
+<h3 id="nat"><a href="#nat" class="headerlink" title="nat"></a>nat</h3><p>本质是多目标 IP 的 DNAT，通过将请求报文中的目标地址和目标端口修改为某挑出的 RS 的 RIP 和 PORT 实现转发</p>
+<p>缺点：请求报文和响应报文都必须经由 VS 转发，VS 容易成为系统瓶颈</p>
+<h3 id="fullnat"><a href="#fullnat" class="headerlink" title="fullnat"></a>fullnat</h3><p>lvs-nat 模式下，DIP 和 RIP 应该在同一个 IP 网段，RS 的网关要指向 DIP</p>
+<p>而 lvs-fullnat 模式下，DIP 和 RIP 通常不在一个网段，只要能通信就行，当然 RS 的网关也不指向 DIP</p>
+<p><strong>注意：此类型 kernel 默认不支持</strong></p>
+<h3 id="dr-重点"><a href="#dr-重点" class="headerlink" title="dr (重点)"></a>dr (重点)</h3><p>Direct Routing 直接路由，LVS 默认模式，应用也最广泛，重点掌握。</p>
+<p>通过为请求报文重新封装一个 MAC 首部进行转发，源 MAC 是 DIP 的 MAC，目标 MAC 是一个挑选出的 RS 的 RIP 的 MAC 地址；源 IP&#x2F;PORT 以及目标 IP&#x2F;PORT 均保持不变</p>
+<p><strong>lvs-dr 模式的特点：</strong></p>
+<ul>
+<li><p>Director 和各 RS 都配置同一个公网 IP（VIP），通常配置在 lo 上</p>
+</li>
+<li><p>RS 和 Director 要在同一个物理网络（同一个机房）</p>
+</li>
+<li><p>请求报文要经由 Director，但响应报文不经由 Director，而由 RS 直接发往 Client</p>
+</li>
+<li><p>所以为了保证目标为 VIP 的请求发往 VS 而不是 RS，需要在 RS 上修改 arp_ignore 和 rp_announce 参数，从而隐藏 RS</p>
+</li>
+<li><p>RIP 和 DIP 在同一 IP 网段，RS 网关不能指向 DIP（避免响应报文经过 VS）</p>
+</li>
+<li><p>不支持端口映射</p>
+</li>
+<li><p>无需开启 ip_forward</p>
+</li>
+</ul>
+<h3 id="tun"><a href="#tun" class="headerlink" title="tun"></a>tun</h3><blockquote>
+<p>一般来说，TUN 模式常会用来负载调度缓存服务器组，这些缓存服务器一般放置在不同的网络环境，可以就近折返给客户端。在请求对象不在 Cache 服务器本地命中的情况下，Cache 服务器要向源服务器发送请求，将结果取回，最后将结果返回给用户。</p>
+<p>LAN 环境一般多采用 DR 模式，WAN 环境虽然可以用 TUN 模式，但是一般在 WAN 环境下，请求转发更多的被 haproxy、nginx、DNS 等实现。因此，TUN 模式实际应用的很少，跨机房的应用一般专线光纤连接或 DNS 调度</p>
+</blockquote>
+<h3 id="总结和比较"><a href="#总结和比较" class="headerlink" title="总结和比较"></a>总结和比较</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>NAT</th>
+<th>TUN</th>
+<th>DR</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Real Server</td>
+<td>any</td>
+<td>Tunneling</td>
+<td>Non-arp device</td>
+</tr>
+<tr>
+<td>Real server network</td>
+<td>private</td>
+<td>LAN&#x2F;WAN</td>
+<td>LAN</td>
+</tr>
+<tr>
+<td>Real server number</td>
+<td>low (10~20)</td>
+<td>High (100)</td>
+<td>High (100)</td>
+</tr>
+<tr>
+<td>Real server gateway</td>
+<td>load balancer</td>
+<td>own router</td>
+<td>own router</td>
+</tr>
+<tr>
+<td>优点</td>
+<td>端口转换</td>
+<td>WAN</td>
+<td>性能最好</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>性能瓶颈</td>
+<td>支持隧道</td>
+<td>不支持跨网段</td>
+</tr>
+</tbody></table>
+<h2 id="IPVS-负载均衡调度算法"><a href="#IPVS-负载均衡调度算法" class="headerlink" title="IPVS 负载均衡调度算法"></a>IPVS 负载均衡调度算法</h2><p>根据其调度时是否考虑各 RS 当前的负载状态，分为两种：静态方法和动态方法</p>
+<h3 id="静态算法"><a href="#静态算法" class="headerlink" title="静态算法"></a>静态算法</h3><p>仅根据算法本身进行调度</p>
+<table>
+<thead>
+<tr>
+<th><font style="display:inline-block;min-width: 150px">静态算法</font></th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RR</td>
+<td>roundrobin 轮询，常用</td>
+</tr>
+<tr>
+<td>WRR</td>
+<td>weighted rr 加权轮询，常用</td>
+</tr>
+<tr>
+<td>SH</td>
+<td>源 IP hash，将来自于同一个 IP 地址的请求始终发往第一次挑中的 RS，从而实现会话绑定</td>
+</tr>
+<tr>
+<td>DH</td>
+<td>目标 IP hash，第一次轮询调度至 RS，后续将发往同一个目标地址的请求始终转发至第一次挑中的 RS，典型使用场景是正向代理缓存场景中的负载均衡，如：web 缓存</td>
+</tr>
+</tbody></table>
+<h3 id="动态算法"><a href="#动态算法" class="headerlink" title="动态算法"></a>动态算法</h3><p>主要根据每 RS 当前的负载状态及调度算法进行调度 Overhead&#x3D;value，较小的 RS 将被调度</p>
+<table>
+<thead>
+<tr>
+<th>动态算法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LC</td>
+<td>least connections 适用于长连接应用</td>
+</tr>
+<tr>
+<td>WLC</td>
+<td>Weighted LC 默认调度方法,较常用</td>
+</tr>
+<tr>
+<td>SED</td>
+<td>Shortest Expection Delay 初始连接高权重优先，只检查活动连接，而不考虑非活动连接</td>
+</tr>
+<tr>
+<td>NQ</td>
+<td>Never Queue 第一轮均匀分配，后续 SED</td>
+</tr>
+<tr>
+<td>LBLC</td>
+<td>Locality-Based LC，动态的 DH 算法，使用场景：根据负载状态实现正向代理,实现 Web Cache 等</td>
+</tr>
+<tr>
+<td>LBLCR</td>
+<td>LBLC with Replication 带复制功能的 LBLC，解决 LBLC 负载不均衡问题，从负载重的复制到负载轻的 RS，实现 Web Cache 等</td>
+</tr>
+<tr>
+<td>FO</td>
+<td>内核 4.15 之后新增</td>
+</tr>
+<tr>
+<td>OVF</td>
+<td>内核 4.15 之后新增</td>
+</tr>
+</tbody></table>
+<h2 id="ipvsadm"><a href="#ipvsadm" class="headerlink" title="ipvsadm"></a>ipvsadm</h2><p>ipvsadm 的核心功能：管理集群服务 和 集群服务的 RS</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> ipvsadm
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$rpm</span> <span class="token parameter variable">-ql</span> ipvsadm
+/etc/sysconfig/ipvsadm-config					<span class="token comment"># 配置文件</span>
+/usr/lib/systemd/system/ipvsadm.service			<span class="token comment">#</span>
+/usr/sbin/ipvsadm								<span class="token comment"># 主程序</span>
+/usr/sbin/ipvsadm-restore						<span class="token comment"># 规则重载工具</span>
+/usr/sbin/ipvsadm-save							<span class="token comment"># 规则保存工具</span>
+<span class="token punctuation">..</span>.</code></pre>
+
+<h3 id="管理集群服务"><a href="#管理集群服务" class="headerlink" title="管理集群服务"></a>管理集群服务</h3><pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -A<span class="token operator">|</span>E -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token punctuation">[</span>-s scheduler<span class="token punctuation">]</span> <span class="token punctuation">[</span>-p <span class="token punctuation">[</span>timeout<span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>-M netmask<span class="token punctuation">]</span> <span class="token punctuation">[</span>--pe persistence_engine<span class="token punctuation">]</span> <span class="token punctuation">[</span>-b sched-flags<span class="token punctuation">]</span>
+
+<span class="token parameter variable">-A</span>		<span class="token comment"># add</span>
+<span class="token parameter variable">-E</span>		<span class="token comment"># edit</span>
+
+service-address		<span class="token comment"># vip:port 如：10.0.0.100:80</span>
+    <span class="token parameter variable">-t</span>		<span class="token comment"># tcp协议</span>
+    <span class="token parameter variable">-u</span>		<span class="token comment"># udp协议</span>
+    <span class="token parameter variable">-f</span>		<span class="token comment"># firewall mark，标记，一个数字</span>
+
+<span class="token parameter variable">-s</span>		<span class="token comment"># 指定集群的调度算法，默认为wlc</span>
+
+<span class="token comment"># 范例</span>
+ipvsadm <span class="token parameter variable">-A</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-s</span> wrr</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm <span class="token parameter variable">-D</span> -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address 	<span class="token comment"># 删除</span>
+ipvsadm –C 							<span class="token comment"># 清空定义的所有内容</span>
+ipvsadm –R 							<span class="token comment"># 重载,相当于ipvsadm-restore</span>
+ipvsadm <span class="token parameter variable">-S</span> <span class="token punctuation">[</span>-n<span class="token punctuation">]</span> 					<span class="token comment"># 保存,相当于ipvsadm-save</span></code></pre>
+
+<h3 id="管理集群上的-RS"><a href="#管理集群上的-RS" class="headerlink" title="管理集群上的 RS"></a>管理集群上的 RS</h3><pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -a<span class="token operator">|</span>e -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token parameter variable">-r</span> server-address <span class="token punctuation">[</span>-g<span class="token operator">|</span>i<span class="token operator">|</span>m<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w weight<span class="token punctuation">]</span>
+
+<span class="token parameter variable">-a</span>		<span class="token comment"># add</span>
+<span class="token parameter variable">-e</span>		<span class="token comment"># edit</span>
+<span class="token parameter variable">-r</span>		<span class="token comment"># rip[:port] 如省略port，不作端口映射</span>
+    <span class="token parameter variable">-g</span>		<span class="token comment"># gateway，dr类型，默认</span>
+    <span class="token parameter variable">-i</span>		<span class="token comment"># ipip，tun类型</span>
+    <span class="token parameter variable">-m</span>		<span class="token comment"># masquerade，nat类型</span>
+<span class="token parameter variable">-w</span>		<span class="token comment"># 权重</span>
+
+<span class="token comment"># 范例</span>
+ipvsadm <span class="token parameter variable">-a</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.8:8080 <span class="token parameter variable">-m</span> <span class="token parameter variable">-w</span> <span class="token number">3</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm <span class="token parameter variable">-d</span> -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token parameter variable">-r</span> server-address		<span class="token comment"># 删除</span>
+ipvsadm <span class="token parameter variable">-Z</span> <span class="token punctuation">[</span>-t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address<span class="token punctuation">]</span>						<span class="token comment"># 清空计数器</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -L<span class="token operator">|</span>l <span class="token punctuation">[</span>options<span class="token punctuation">]</span>	<span class="token comment"># 查看</span>
+
+options：
+-n：			以数字形式输出地址和端口号
+--exact：	扩展信息,精确值
+-c：			当前IPVS连接输出
+--stats：	统计信息
+--rate：		输出速率信息</code></pre>
+
+<h3 id="ipvs-规则"><a href="#ipvs-规则" class="headerlink" title="ipvs 规则"></a>ipvs 规则</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/proc/net/ip_vs</code></pre>
+
+<h3 id="ipvs-连接"><a href="#ipvs-连接" class="headerlink" title="ipvs 连接"></a>ipvs 连接</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/proc/net/ip_vs_conn</code></pre>
+
+<h3 id="保存规则"><a href="#保存规则" class="headerlink" title="保存规则"></a>保存规则</h3><p>ipvs 调度规则建议保存至 &#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm.rules</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm-save <span class="token operator">></span> /etc/sysconfig/ipvsadm.rules
+ipvsadm <span class="token parameter variable">-S</span> <span class="token operator">></span> /etc/sysconfig/ipvsadm.rules	<span class="token comment"># ipvsadm -S 和 ipvsadm-save等价</span>
+systemctl stop ipvsadm.service			<span class="token comment"># 会自动保存规则至/etc/sysconfig/ipvsadm.rules</span></code></pre>
+
+<h3 id="重载"><a href="#重载" class="headerlink" title="重载"></a>重载</h3><pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm-restore <span class="token operator">&lt;</span> /etc/sysconfig/ipvsadm.rules
+systemctl start ipvsadm.service			<span class="token comment"># #会自动加载/etc/sysconfig/ipvsadm.rules中规则</span></code></pre>
+
+<h3 id="防火墙标记"><a href="#防火墙标记" class="headerlink" title="防火墙标记"></a>防火墙标记</h3><p>FWM：FireWall Mark</p>
+<p>借助防火墙标记来分类报文，而后基于标记定义集群服务，可将多个不同的应用使用同一个集群服务进行调度</p>
+<p>实现方法：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 在VS主机打标记</span>
+iptables <span class="token parameter variable">-t</span> mangle <span class="token parameter variable">-A</span> PREROUTING <span class="token parameter variable">-d</span> <span class="token variable">$vip</span> <span class="token parameter variable">-p</span> <span class="token variable">$proto</span> <span class="token parameter variable">-m</span> multiport <span class="token parameter variable">--dports</span> <span class="token variable">$port1</span>,<span class="token variable">$port2</span>,<span class="token punctuation">..</span>. <span class="token parameter variable">-j</span> MARK --set-mark NUMBER
+
+<span class="token comment"># 2. 在VS主机基于标记定义集群服务</span>
+ipvsadm <span class="token parameter variable">-A</span> <span class="token parameter variable">-f</span> NUMBER <span class="token punctuation">[</span>options<span class="token punctuation">]</span></code></pre>
+
+<p>范例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$iptables</span> <span class="token parameter variable">-t</span> mangle <span class="token parameter variable">-A</span> PREROUTING <span class="token parameter variable">-d</span> <span class="token number">172.16</span>.0.100 <span class="token parameter variable">-p</span> tcp <span class="token parameter variable">-m</span> multiport <span class="token parameter variable">--dports</span> <span class="token number">80,443</span> <span class="token parameter variable">-j</span> MARK --set-mark <span class="token number">10</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-C</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-A</span> <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-s</span> rr
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.72 <span class="token parameter variable">-g</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.73 <span class="token parameter variable">-g</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-Ln</span>
+IP Virtual Server version <span class="token number">1.2</span>.1 <span class="token punctuation">(</span>size<span class="token operator">=</span><span class="token number">4096</span><span class="token punctuation">)</span>
+Prot LocalAddress:Port Scheduler Flags
+  -<span class="token operator">></span> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+FWM  <span class="token number">10</span> rr
+  -<span class="token operator">></span> <span class="token number">10.0</span>.0.72:0                  Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
+  -<span class="token operator">></span> <span class="token number">10.0</span>.0.73:0                  Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
+<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$cat</span> /proc/net/ip_vs
+IP Virtual Server version <span class="token number">1.2</span>.1 <span class="token punctuation">(</span>size<span class="token operator">=</span><span class="token number">4096</span><span class="token punctuation">)</span>
+Prot LocalAddress:Port Scheduler Flags
+  -<span class="token operator">></span> RemoteAddress:Port Forward Weight ActiveConn InActConn
+FWM  0000000A rr
+  -<span class="token operator">></span> 0A000049:0000      Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
+  -<span class="token operator">></span> 0A000048:0000      Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span></code></pre>
+
+<h3 id="持久标记"><a href="#持久标记" class="headerlink" title="持久标记"></a>持久标记</h3><p>session 绑定：对共享同一组 RS 的多个集群服务，需要统一进行绑定，IPVS 调度算法无法实现</p>
+<p>持久连接模板：无论使用任何调度算法，在一段时间内（默认 360s），能够实现将来自同一地址的请求始终发往同一个 RS</p>
+<p>实现方法：ipvsadm 指定 -p 选项即可</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -A<span class="token operator">|</span>E -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token punctuation">[</span>-s scheduler<span class="token punctuation">]</span> <span class="token parameter variable">-p</span> <span class="token punctuation">[</span>timeout<span class="token punctuation">]</span> <span class="token punctuation">[</span>-M netmask<span class="token punctuation">]</span> <span class="token punctuation">[</span>--pe persistence_engine<span class="token punctuation">]</span> <span class="token punctuation">[</span>-b sched-flags<span class="token punctuation">]</span>
+
+<span class="token comment"># 范例：</span>
+ipvsadm -A<span class="token operator">|</span>E <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-p</span>
+ipvsadm -A<span class="token operator">|</span>E <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-p</span> <span class="token number">3600</span></code></pre>
+
+<h2 id="LVS-实战案例"><a href="#LVS-实战案例" class="headerlink" title="LVS 实战案例"></a>LVS 实战案例</h2><p>重点掌握 LVS-DR 模式即可，其他模式如果用到再复习</p>
+<h3 id="LVS-DR-模式单网段案例"><a href="#LVS-DR-模式单网段案例" class="headerlink" title="LVS-DR 模式单网段案例"></a>LVS-DR 模式单网段案例</h3><p>DR 模式中各主机上均需配置 VIP，解决地址冲突的方式有三种，最常用的是修改 RS 的内核参数：</p>
+<ul>
+<li><p>arp_ignore：用于处理接收到的 arp 请求，</p>
+<ul>
+<li><p>设置为 1：请求的目的 IP 地址为接收网卡上的 IP，才响应。</p>
+<p>举例来讲：服务器上配置两个网卡 A 和 B，A 接收到 arp 请求，只要请求的目的 IP 不是 A 的 IP 就不响应。</p>
+</li>
+</ul>
+</li>
+<li><p>arp_announce：用于处理发送的 arp 请求</p>
+<ul>
+<li>设置为 2：请求的源 IP 为发送网卡的 IP</li>
+</ul>
+</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605495268542.png"></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">环境：五台主机
+
+一台客户机：eht0：仅主机 <span class="token number">192.168</span>.10.6/24 GW：192.168.10.200
+
+一台路由器：
+eht0：NAT <span class="token number">10.0</span>.0.200/24
+eht1：仅主机 <span class="token number">192.168</span>.10.200/24
+启用ip_forward
+
+<span class="token comment"># dr模式下，vs只负责转发请求，不往外网发送请求，所以网关可以随便设置一个ip，但是不能不配置，因为如果不配置，vs会认为自己和外网没有通信的可能，就不会转发请求了</span>
+一台VS：eht0：NAT <span class="token number">10.0</span>.0.8/24 GW：10.0.0.200		lo：10.0.0.100/32
+
+两台RS：
+RS1：eth0：NAT <span class="token number">10.0</span>.0.7/24 GW:10.0.0.200		lo：10.0.0.100/32
+RS2：eth0：NAT <span class="token number">10.0</span>.0.17/24 GW:10.0.0.200		lo：10.0.0.100/32</code></pre>
+
+<ul>
+<li><p>RS 要可以出网，所以配置了网关</p>
+</li>
+<li><p>VIP 是 10.0.0.100，给 VS 和 RS 的 lo 网卡都配置上</p>
+</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 客户机配置过程略。。。</span>
+<span class="token comment"># 路由器配置过程略。。。</span>
+<span class="token comment"># RS配置：将arp_ignore设置为1、arp_announce设置为2；lo的ip配置为VIP</span>
+<span class="token builtin class-name">echo</span> <span class="token number">1</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/all/arp_ignore
+<span class="token builtin class-name">echo</span> <span class="token number">1</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/lo/arp_ignore
+<span class="token builtin class-name">echo</span> <span class="token number">2</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/all/arp_announce
+<span class="token builtin class-name">echo</span> <span class="token number">2</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/lo/arp_announce
+<span class="token function">ip</span> a <span class="token function">add</span> <span class="token number">10.0</span>.0.100/32 dev lo label lo:1
+<span class="token comment"># VS配置：lo的ip配置为VIP，配置ipvs规则</span>
+ipvsadm <span class="token parameter variable">-A</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-s</span> rr
+ipvsadm <span class="token parameter variable">-a</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.7:80 <span class="token parameter variable">-g</span>
+ipvsadm <span class="token parameter variable">-a</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.17:80 <span class="token parameter variable">-g</span>
+
+<span class="token comment"># 测试访问：客户机多次执行 curl 10.0.0.100</span></code></pre>
+
+<h3 id="LVS-DR-模式多网段案例"><a href="#LVS-DR-模式多网段案例" class="headerlink" title="LVS-DR 模式多网段案例"></a>LVS-DR 模式多网段案例</h3><p>前面的单网段案例中，lo 和 eth0 在同一个网段，如果把 lo 和 eth0 的 ip 设置在不同的网段就是多网段，这种情况是物理上单网段，逻辑上多网段</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1605497471540.png"></p>
+<p>实现过程略。。。</p>
+<h2 id="LVS-高可用实现"><a href="#LVS-高可用实现" class="headerlink" title="LVS 高可用实现"></a>LVS 高可用实现</h2><h3 id="DS-不可用时"><a href="#DS-不可用时" class="headerlink" title="DS 不可用时"></a>DS 不可用时</h3><ul>
+<li>keepalived</li>
+<li>heartbeat&#x2F;corosync</li>
+</ul>
+<h3 id="RS-不可用时"><a href="#RS-不可用时" class="headerlink" title="RS 不可用时"></a>RS 不可用时</h3><p>某 RS 不可用时，Director 依然会调度请求至此 RS</p>
+<p>解决方案： 由 Director 对各 RS 健康状态进行检查，失败时禁用，成功时启用</p>
+<p>常用解决方案：</p>
+<ul>
+<li>keepalived</li>
+<li>heartbeat&#x2F;corosync</li>
+<li>ldirectord</li>
+</ul>
+<p>检测方式：</p>
+<ul>
+<li>网络层检测：icmp</li>
+<li>传输层检测：端口探测</li>
+<li>应用层检测：请求某关键资源</li>
+</ul>
+<h3 id="ldirectord"><a href="#ldirectord" class="headerlink" title="ldirectord"></a>ldirectord</h3><p>…</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/LVS/" rel="tag"><i class="fa fa-tag"></i> LVS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB/pureftpd/" rel="prev" title="pureftpd">
+                  <i class="fa fa-chevron-left"></i> pureftpd
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8CKVM/" rel="next" title="虚拟化和KVM">
+                  虚拟化和KVM <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

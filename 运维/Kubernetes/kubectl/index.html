@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="kubectl 是 kube-apiserver 的命令行客户端，就像 redis-cli 是 redis 的命令行客户端 安装 kubectlhttps:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;tasks&#x2F;tools&#x2F;install-kubectl&#x2F; https:&#x2F;&#x2F;developer.aliyun.com&#x2F;mirror&#x2F;kubernetes?spm&#x3D;a2c6h.13651102.0.0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubectl">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/kubectl/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="kubectl 是 kube-apiserver 的命令行客户端，就像 redis-cli 是 redis 的命令行客户端 安装 kubectlhttps:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;tasks&#x2F;tools&#x2F;install-kubectl&#x2F; https:&#x2F;&#x2F;developer.aliyun.com&#x2F;mirror&#x2F;kubernetes?spm&#x3D;a2c6h.13651102.0.0">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-16T01:55:26.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/kubectl/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/kubectl/","path":"运维/Kubernetes/kubectl/","title":"kubectl"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>kubectl | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-kubectl"><span class="nav-number">1.</span> <span class="nav-text">安装 kubectl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kubectl-%E8%AF%A6%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">kubectl 详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4"><span class="nav-number">2.1.</span> <span class="nav-text">基本命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#get"><span class="nav-number">2.1.1.</span> <span class="nav-text">get</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#create"><span class="nav-number">2.1.2.</span> <span class="nav-text">create</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#expose"><span class="nav-number">2.1.3.</span> <span class="nav-text">expose</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#set-%E2%98%85%E2%98%85%E2%98%85"><span class="nav-number">2.1.4.</span> <span class="nav-text">set ★★★</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#edit"><span class="nav-number">2.1.5.</span> <span class="nav-text">edit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#run"><span class="nav-number">2.1.6.</span> <span class="nav-text">run</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#explain"><span class="nav-number">2.1.7.</span> <span class="nav-text">explain</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#delete"><span class="nav-number">2.1.8.</span> <span class="nav-text">delete</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E5%91%BD%E4%BB%A4"><span class="nav-number">2.2.</span> <span class="nav-text">部署命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#rollout-%E2%98%85%E2%98%85%E2%98%85"><span class="nav-number">2.2.1.</span> <span class="nav-text">rollout ★★★</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scale"><span class="nav-number">2.2.2.</span> <span class="nav-text">scale</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#autoscale"><span class="nav-number">2.2.3.</span> <span class="nav-text">autoscale</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4"><span class="nav-number">2.3.</span> <span class="nav-text">集群管理命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#cordon"><span class="nav-number">2.3.1.</span> <span class="nav-text">cordon</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#uncordon"><span class="nav-number">2.3.2.</span> <span class="nav-text">uncordon</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86%E5%92%8C%E8%B0%83%E8%AF%95%E5%91%BD%E4%BB%A4"><span class="nav-number">2.4.</span> <span class="nav-text">故障处理和调试命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#describe-%E2%98%85%E2%98%85%E2%98%85"><span class="nav-number">2.4.1.</span> <span class="nav-text">describe ★★★</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#logs"><span class="nav-number">2.4.2.</span> <span class="nav-text">logs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exec"><span class="nav-number">2.4.3.</span> <span class="nav-text">exec</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E5%91%BD%E4%BB%A4"><span class="nav-number">2.5.</span> <span class="nav-text">高级命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#diff"><span class="nav-number">2.5.1.</span> <span class="nav-text">diff</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#apply-%E2%98%85%E2%98%85%E2%98%85"><span class="nav-number">2.5.2.</span> <span class="nav-text">apply ★★★</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#patch"><span class="nav-number">2.5.3.</span> <span class="nav-text">patch</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#replace"><span class="nav-number">2.5.4.</span> <span class="nav-text">replace</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#wait"><span class="nav-number">2.5.5.</span> <span class="nav-text">wait</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kustomize"><span class="nav-number">2.5.6.</span> <span class="nav-text">kustomize</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%91%BD%E4%BB%A4"><span class="nav-number">2.6.</span> <span class="nav-text">设置命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%91%BD%E4%BB%A4"><span class="nav-number">2.7.</span> <span class="nav-text">其他命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E9%80%89%E9%A1%B9"><span class="nav-number">2.8.</span> <span class="nav-text">输出选项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Formatting-output"><span class="nav-number">2.8.1.</span> <span class="nav-text">Formatting output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Sorting-list-objects"><span class="nav-number">2.8.2.</span> <span class="nav-text">Sorting list objects</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C"><span class="nav-number">2.9.</span> <span class="nav-text">示例：常用操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%92%8C%E4%BD%BF%E7%94%A8%E6%8F%92%E4%BB%B6"><span class="nav-number">2.10.</span> <span class="nav-text">示例：创建和使用插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90"><span class="nav-number">3.</span> <span class="nav-text">资源</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/kubectl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="kubectl | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kubectl
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-16 09:55:26" itemprop="dateCreated datePublished" datetime="2021-01-16T09:55:26+08:00">2021-01-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>kubectl 是 kube-apiserver 的命令行客户端，就像 redis-cli 是 redis 的命令行客户端</p>
+<h2 id="安装-kubectl"><a href="#安装-kubectl" class="headerlink" title="安装 kubectl"></a>安装 kubectl</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/tasks/tools/install-kubectl/">https://kubernetes.io/zh/docs/tasks/tools/install-kubectl/</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/mirror/kubernetes?spm=a2c6h.13651102.0.0.3e221b11Qo8aZk">https://developer.aliyun.com/mirror/kubernetes?spm=a2c6h.13651102.0.0.3e221b11Qo8aZk</a></p>
+<h2 id="kubectl-详解"><a href="#kubectl-详解" class="headerlink" title="kubectl 详解"></a>kubectl 详解</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/kubectl/overview/">https://kubernetes.io/zh/docs/reference/kubectl/overview/</a></p>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/kubectl/overview/">https://kubernetes.io/docs/reference/kubectl/overview/</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token punctuation">[</span>command<span class="token punctuation">]</span> <span class="token punctuation">[</span>TYPE<span class="token punctuation">]</span> <span class="token punctuation">[</span>NAME<span class="token punctuation">]</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span></code></pre>
+
+<p><strong>command</strong>：指定要对一个或多个资源执行的操作，例如 <code>create</code>、<code>get</code>、<code>describe</code>、<code>delete</code><br><strong>TYPE</strong>：指定资源类型。不区分大小写， 可以指定单数、复数或缩写形式。例如，以下命令输出相同的结果：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl get pod pod1
+kubectl get pods pod1
+kubectl get po pod1</code></pre>
+
+<p><strong>NAME</strong>：指定资源的名称。名称区分大小写。 如果省略名称，则显示所有资源的详细信息</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 类型相同的资源 TYPE1 name1 name2 name3...</span>
+kubectl get pod example-pod1 example-pod2
+<span class="token comment"># 多个资源类型 TYPE1/name1 TYPE1/name2 TYPE2/name3 ...</span>
+kubectl get pod/example-pod1 replicationcontroller/example-rc1
+<span class="token comment"># 用一个或多个文件指定资源 -f file1 -f file2 -f file3...</span>
+kubectl get <span class="token parameter variable">-f</span> ./pod.yaml</code></pre>
+
+<p><strong>flags</strong>：指定可选的参数。例如，可以使用 -s 或 -server 指定 Kubernetes API 服务器的地址和端口</p>
+<blockquote>
+<p>从命令行指定的参数优先级最高</p>
+</blockquote>
+<h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">create        <span class="token comment"># 创建资源</span>
+expose        <span class="token comment"># 将资源暴露为新的 Service</span>
+run           <span class="token comment"># 在集群上运行一个特定的镜像</span>
+<span class="token builtin class-name">set</span>           <span class="token comment"># 使用命令行修改资源</span>
+edit          <span class="token comment"># 使用编辑器修改资源，交互式</span>
+explain       <span class="token comment"># 资源的详细信息</span>
+get           <span class="token comment"># 显示一个或多个资源</span>
+delete        <span class="token comment"># 删除资源</span></code></pre>
+
+<h4 id="get"><a href="#get" class="headerlink" title="get"></a>get</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl get <span class="token punctuation">[</span><span class="token punctuation">(</span>-o<span class="token operator">|</span>--output<span class="token operator">=</span><span class="token punctuation">)</span>json<span class="token operator">|</span>yaml<span class="token operator">|</span>wide<span class="token operator">|</span>custom-columns<span class="token operator">=</span><span class="token punctuation">..</span>.<span class="token operator">|</span>custom-columns-file<span class="token operator">=</span><span class="token punctuation">..</span>.<span class="token operator">|</span>go-template<span class="token operator">=</span><span class="token punctuation">..</span>.<span class="token operator">|</span>go-template-file<span class="token operator">=</span><span class="token punctuation">..</span>.<span class="token operator">|</span><span class="token assign-left variable">jsonpath</span><span class="token operator">=</span><span class="token punctuation">..</span>.<span class="token operator">|</span>jsonpath-file<span class="token operator">=</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">(</span>TYPE<span class="token punctuation">[</span>.VERSION <span class="token punctuation">[</span>.GROUP<span class="token punctuation">]</span> <span class="token punctuation">[</span>NAME <span class="token operator">|</span> <span class="token parameter variable">-l</span> label<span class="token punctuation">]</span> <span class="token operator">|</span> TYPE<span class="token punctuation">[</span>.VERSION<span class="token punctuation">]</span><span class="token punctuation">[</span>.GROUP<span class="token punctuation">]</span>/NAME <span class="token punctuation">..</span>.<span class="token punctuation">)</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例</span>
+kubectl get pods
+kubectl get pods <span class="token parameter variable">-A</span> 相当于 kubectl  get pods --all-namespaces
+kubectl get pods <span class="token parameter variable">-o</span> wide
+kubectl get replicationcontroller web
+kubectl get deployments.v1.apps <span class="token parameter variable">-o</span> json
+kubectl get <span class="token parameter variable">-o</span> json pod web-pod-13je7
+kubectl get <span class="token parameter variable">-f</span> pod.yaml <span class="token parameter variable">-o</span> json
+kubectl get <span class="token parameter variable">-k</span> dir/
+kubectl get <span class="token parameter variable">-o</span> template pod/web-pod-13je7 <span class="token parameter variable">--template</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span>.status.phase<span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span>
+kubectl get rc,services
+kubectl get rc/web service/frontend pods/web-pod-13je7</code></pre>
+
+<h4 id="create"><a href="#create" class="headerlink" title="create"></a>create</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl create <span class="token parameter variable">-f</span> FILENAME <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl create <span class="token parameter variable">-f</span> ./pod.json
+<span class="token function">cat</span> pod.json <span class="token operator">|</span> kubectl create <span class="token parameter variable">-f</span> -
+kubectl create <span class="token parameter variable">-f</span> docker-registry.yaml <span class="token parameter variable">--edit</span> <span class="token parameter variable">-o</span> json</code></pre>
+
+<h4 id="expose"><a href="#expose" class="headerlink" title="expose"></a>expose</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl expose <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> TYPE NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>--port<span class="token operator">=</span>port<span class="token punctuation">]</span> <span class="token punctuation">[</span>--protocol<span class="token operator">=</span>TCP<span class="token operator">|</span>UDP<span class="token operator">|</span>SCTP<span class="token punctuation">]</span> <span class="token punctuation">[</span>--target-port<span class="token operator">=</span>number-or-name<span class="token punctuation">]</span> <span class="token punctuation">[</span>--name<span class="token operator">=</span>name<span class="token punctuation">]</span> <span class="token punctuation">[</span>--external-ip<span class="token operator">=</span>external-ip-of-service<span class="token punctuation">]</span> <span class="token punctuation">[</span>--type<span class="token operator">=</span>type<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl expose rc nginx <span class="token parameter variable">--port</span><span class="token operator">=</span><span class="token number">80</span> --target-port<span class="token operator">=</span><span class="token number">8000</span>
+kubectl expose <span class="token parameter variable">-f</span> nginx-controller.yaml <span class="token parameter variable">--port</span><span class="token operator">=</span><span class="token number">80</span> --target-port<span class="token operator">=</span><span class="token number">8000</span>
+kubectl expose pod valid-pod <span class="token parameter variable">--port</span><span class="token operator">=</span><span class="token number">444</span> <span class="token parameter variable">--name</span><span class="token operator">=</span>frontend
+kubectl expose <span class="token function">service</span> nginx <span class="token parameter variable">--port</span><span class="token operator">=</span><span class="token number">443</span> --target-port<span class="token operator">=</span><span class="token number">8443</span> <span class="token parameter variable">--name</span><span class="token operator">=</span>nginx-https
+kubectl expose rc streamer <span class="token parameter variable">--port</span><span class="token operator">=</span><span class="token number">4100</span> <span class="token parameter variable">--protocol</span><span class="token operator">=</span>UDP <span class="token parameter variable">--name</span><span class="token operator">=</span>video-stream
+kubectl expose rs nginx <span class="token parameter variable">--port</span><span class="token operator">=</span><span class="token number">80</span> --target-port<span class="token operator">=</span><span class="token number">8000</span>
+kubectl expose deployment nginx <span class="token parameter variable">--port</span><span class="token operator">=</span><span class="token number">80</span> --target-port<span class="token operator">=</span><span class="token number">8000</span></code></pre>
+
+<h4 id="set-★★★"><a href="#set-★★★" class="headerlink" title="set ★★★"></a>set ★★★</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">set</span> SUBCOMMAND <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+SUBCOMMAND:
+  <span class="token function">env</span>		<span class="token comment"># 更新环境变量，对应deployment的`spec.template.spec.containers.env`</span>
+  image     <span class="token comment"># 更新镜像</span>
+  resources      Update resource requests/limits on objects with pod templates
+  selector       Set the selector on a resource
+  serviceaccount Update ServiceAccount of a resource</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">set</span> image <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> TYPE NAME<span class="token punctuation">)</span> <span class="token assign-left variable">CONTAINER_NAME_1</span><span class="token operator">=</span>CONTAINER_IMAGE_1 <span class="token punctuation">..</span>. <span class="token assign-left variable">CONTAINER_NAME_N</span><span class="token operator">=</span>CONTAINER_IMAGE_N <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例</span>
+kubectl <span class="token builtin class-name">set</span> image deployment/nginx <span class="token assign-left variable">busybox</span><span class="token operator">=</span>busybox <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1
+kubectl <span class="token builtin class-name">set</span> image deployments,rc <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 <span class="token parameter variable">--all</span>
+kubectl <span class="token builtin class-name">set</span> image daemonset abc *<span class="token operator">=</span>nginx:1.9.1
+kubectl <span class="token builtin class-name">set</span> image <span class="token parameter variable">-f</span> path/to/file.yaml <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 <span class="token parameter variable">--local</span> <span class="token parameter variable">-o</span> yaml</code></pre>
+
+<h4 id="edit"><a href="#edit" class="headerlink" title="edit"></a>edit</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl edit <span class="token punctuation">(</span>RESOURCE/NAME <span class="token operator">|</span> <span class="token parameter variable">-f</span> FILENAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl edit svc/docker-registry
+<span class="token assign-left variable">KUBE_EDITOR</span><span class="token operator">=</span><span class="token string">"nano"</span> kubectl edit svc/docker-registry
+kubectl edit job.v1.batch/myjob <span class="token parameter variable">-o</span> json
+kubectl edit deployment/mydeployment <span class="token parameter variable">-o</span> yaml --save-config</code></pre>
+
+<h4 id="run"><a href="#run" class="headerlink" title="run"></a>run</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl run NAME <span class="token parameter variable">--image</span><span class="token operator">=</span><span class="token operator">&lt;</span>image<span class="token operator">></span> <span class="token punctuation">[</span>--env<span class="token operator">=</span><span class="token string">"key=value"</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>--port<span class="token operator">=</span>port<span class="token punctuation">]</span> <span class="token punctuation">[</span>--dry-run<span class="token operator">=</span>server<span class="token operator">|</span>client<span class="token punctuation">]</span> <span class="token punctuation">[</span>--overrides<span class="token operator">=</span>inline-json<span class="token punctuation">]</span> <span class="token punctuation">[</span>--command<span class="token punctuation">]</span> -- <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl run nginx <span class="token parameter variable">--image</span><span class="token operator">=</span>nginx		<span class="token comment"># 使用默认命令启动</span>
+kubectl run nginx <span class="token parameter variable">--image</span><span class="token operator">=</span>nginx -- <span class="token operator">&lt;</span>arg<span class="token operator"><span class="token file-descriptor important">1</span>></span> <span class="token operator">&lt;</span>arg<span class="token operator"><span class="token file-descriptor important">2</span>></span> <span class="token punctuation">..</span>. <span class="token operator">&lt;</span>argN<span class="token operator">></span> <span class="token comment">#默认命令，自定义参数</span>
+kubectl run nginx <span class="token parameter variable">--image</span><span class="token operator">=</span>nginx <span class="token parameter variable">--command</span> -- <span class="token operator">&lt;</span>cmd<span class="token operator">></span> <span class="token operator">&lt;</span>arg<span class="token operator"><span class="token file-descriptor important">1</span>></span> <span class="token punctuation">..</span>. <span class="token operator">&lt;</span>argN<span class="token operator">></span> <span class="token comment">#非默认命令</span>
+kubectl run test1 <span class="token parameter variable">--image</span><span class="token operator">=</span>harbor.ljk.local/baseimages/alpine:3.12.4 -- <span class="token function">sleep</span> <span class="token number">3600</span></code></pre>
+
+<h4 id="explain"><a href="#explain" class="headerlink" title="explain"></a>explain</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl explain RESOURCE <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+kubectl explain <span class="token operator">&lt;</span>type<span class="token operator">></span>.<span class="token operator">&lt;</span>fieldName<span class="token operator">></span><span class="token punctuation">[</span>.<span class="token operator">&lt;</span>fieldName<span class="token operator">></span><span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span></code></pre>
+
+<p>使用 <code>kubectl explain</code> 查看配置清单怎么写，例如：使用 <code>kubectl explain deployment</code> 查看创建 deployment 资源的配置清单怎么写，使用 <code>kubectl explain namespace</code> 查看创建 namespace 资源的配置清单怎么写，等等</p>
+<h4 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl delete <span class="token punctuation">(</span><span class="token punctuation">[</span>-f FILENAME<span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token punctuation">[</span>-k DIRECTORY<span class="token punctuation">]</span> <span class="token operator">|</span> TYPE <span class="token punctuation">[</span><span class="token punctuation">(</span>NAME <span class="token operator">|</span> <span class="token parameter variable">-l</span> label <span class="token operator">|</span> --all<span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl delete <span class="token parameter variable">-f</span> ./pod.json
+kubectl delete <span class="token parameter variable">-k</span> <span class="token function">dir</span>
+<span class="token function">cat</span> pod.json <span class="token operator">|</span> kubectl delete <span class="token parameter variable">-f</span> -
+kubectl delete pod,service baz foo
+kubectl delete pods,services <span class="token parameter variable">-l</span> <span class="token assign-left variable">name</span><span class="token operator">=</span>myLabel
+kubectl delete pod foo <span class="token parameter variable">--now</span>
+kubectl delete pod foo <span class="token parameter variable">--force</span>
+kubectl delete pods <span class="token parameter variable">--all</span></code></pre>
+
+<h3 id="部署命令"><a href="#部署命令" class="headerlink" title="部署命令"></a>部署命令</h3><p>参考：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment">回滚 Deployment</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">rollout       管理资源的升级和回滚
+scale         弹性伸缩Pod数量
+autoscale     自动设置运行的pod数量（水平自动伸缩）</code></pre>
+
+<h4 id="rollout-★★★"><a href="#rollout-★★★" class="headerlink" title="rollout ★★★"></a>rollout ★★★</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout SUBCOMMAND <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+SUBCOMMAND:
+  <span class="token function">history</span>     查看指定资源的操作记录
+  pause       暂停升级
+  restart     Restart a resource
+  resume      继续升级
+  status      Show the status of the rollout
+  undo        升级回滚</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout <span class="token function">history</span> <span class="token punctuation">(</span>TYPE NAME <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl rollout <span class="token function">history</span> deployment/abc
+deployments <span class="token string">"nginx-deployment"</span>
+EVISION    CHANGE-CAUSE
+<span class="token number">1</span>           kubectl apply <span class="token parameter variable">--filename</span><span class="token operator">=</span>nginx-deployment.yaml <span class="token parameter variable">--record</span><span class="token operator">=</span>true
+<span class="token number">2</span>           kubectl <span class="token builtin class-name">set</span> image deployment/abc <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.9.1 <span class="token parameter variable">--record</span><span class="token operator">=</span>true
+<span class="token number">3</span>           kubectl <span class="token builtin class-name">set</span> image deployment/abc <span class="token assign-left variable">nginx</span><span class="token operator">=</span>nginx:1.91 <span class="token parameter variable">--record</span><span class="token operator">=</span>true
+
+kubectl rollout <span class="token function">history</span> daemonset/abc <span class="token parameter variable">--revision</span><span class="token operator">=</span><span class="token number">3</span>		<span class="token comment"># 指定版本</span>
+
+kubectl rollout <span class="token function">history</span> deployment.v1.apps/nginx-deployment
+kubectl rollout <span class="token function">history</span> deployment.v1.apps/nginx-deployment <span class="token parameter variable">--revision</span><span class="token operator">=</span><span class="token number">2</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl rollout undo <span class="token punctuation">(</span>TYPE NAME <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl rollout undo deployment/abc		<span class="token comment"># 回滚到上个版本</span>
+kubectl rollout undo daemonset/abc --to-revision<span class="token operator">=</span><span class="token number">3</span>	<span class="token comment"># 回滚到指定版本</span>
+kubectl rollout undo --dry-run<span class="token operator">=</span>server deployment/abc</code></pre>
+
+<h4 id="scale"><a href="#scale" class="headerlink" title="scale"></a>scale</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl scale <span class="token punctuation">[</span>--resource-version<span class="token operator">=</span>version<span class="token punctuation">]</span> <span class="token punctuation">[</span>--current-replicas<span class="token operator">=</span>count<span class="token punctuation">]</span> <span class="token parameter variable">--replicas</span><span class="token operator">=</span>COUNT <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> <span class="token operator">&lt;</span>TYPE<span class="token operator">></span> <span class="token operator">&lt;</span>NAME<span class="token operator">></span><span class="token punctuation">)</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl scale <span class="token parameter variable">--replicas</span><span class="token operator">=</span><span class="token number">3</span> rs/foo
+kubectl scale <span class="token parameter variable">--replicas</span><span class="token operator">=</span><span class="token number">3</span> <span class="token parameter variable">-f</span> foo.yaml
+kubectl scale --current-replicas<span class="token operator">=</span><span class="token number">2</span> <span class="token parameter variable">--replicas</span><span class="token operator">=</span><span class="token number">3</span> deployment/mysql
+kubectl scale <span class="token parameter variable">--replicas</span><span class="token operator">=</span><span class="token number">5</span> rc/foo rc/bar rc/baz
+kubectl scale <span class="token parameter variable">--replicas</span><span class="token operator">=</span><span class="token number">3</span> statefulset/web</code></pre>
+
+<h4 id="autoscale"><a href="#autoscale" class="headerlink" title="autoscale"></a>autoscale</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl autoscale <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> TYPE NAME <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>--min<span class="token operator">=</span>MINPODS<span class="token punctuation">]</span> <span class="token parameter variable">--max</span><span class="token operator">=</span>MAXPODS <span class="token punctuation">[</span>--cpu-percent<span class="token operator">=</span>CPU<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl autoscale deployment foo <span class="token parameter variable">--min</span><span class="token operator">=</span><span class="token number">2</span> <span class="token parameter variable">--max</span><span class="token operator">=</span><span class="token number">10</span>
+kubectl autoscale rc foo <span class="token parameter variable">--max</span><span class="token operator">=</span><span class="token number">5</span> --cpu-percent<span class="token operator">=</span><span class="token number">80</span></code></pre>
+
+<h3 id="集群管理命令"><a href="#集群管理命令" class="headerlink" title="集群管理命令"></a>集群管理命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">certificate   Modify certificate resources.
+cluster-info  集群信息
+<span class="token function">top</span>           集群资源 <span class="token punctuation">(</span>CPU/Memory/Storage<span class="token punctuation">)</span> 使用情况
+cordon        警戒线，标记node不被调度，即不参加pod调度
+uncordon      取消警戒标记为cordon的node，即参加pod调度
+drain         驱逐node上的pod，用于node下线等场景
+taint         给node标记污点</code></pre>
+
+<h4 id="cordon"><a href="#cordon" class="headerlink" title="cordon"></a>cordon</h4><h4 id="uncordon"><a href="#uncordon" class="headerlink" title="uncordon"></a>uncordon</h4><h3 id="故障处理和调试命令"><a href="#故障处理和调试命令" class="headerlink" title="故障处理和调试命令"></a>故障处理和调试命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">describe      显示资源或资源组的详细信息
+logs          打印pod中容器的日志（标准输出的日志）
+attach        Attach to a running container
+<span class="token builtin class-name">exec</span>          和docker的exec实现一样的功能，只是更加智能，不用考虑容器在哪个节点上
+port-forward  Forward one or <span class="token function">more</span> <span class="token builtin class-name">local</span> ports to a pod
+proxy         Run a proxy to the Kubernetes API server
+<span class="token function">cp</span>            Copy files and directories to and from containers.
+auth          Inspect authorization
+debug         Create debugging sessions <span class="token keyword">for</span> troubleshooting workloads and nodes</code></pre>
+
+<h4 id="describe-★★★"><a href="#describe-★★★" class="headerlink" title="describe ★★★"></a>describe ★★★</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl describe <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> TYPE <span class="token punctuation">[</span>NAME_PREFIX <span class="token operator">|</span> <span class="token parameter variable">-l</span> label<span class="token punctuation">]</span> <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl describe nodes kubernetes-node-emt8.c.myproject.internal
+kubectl describe pods/nginx
+kubectl describe <span class="token parameter variable">-f</span> pod.json
+kubectl describe pods
+kubectl describe po <span class="token parameter variable">-l</span> <span class="token assign-left variable">name</span><span class="token operator">=</span>myLabel
+kubectl describe pods frontend</code></pre>
+
+<p>经常用此命令查看 pod 的日志</p>
+<p>pod 没有启动的原因排错：</p>
+<ol>
+<li>kubectl get</li>
+<li>kubectl describe</li>
+<li>kubectl logs</li>
+<li>到 pod 所在的宿主机去看宿主机的系统日志</li>
+</ol>
+<h4 id="logs"><a href="#logs" class="headerlink" title="logs"></a>logs</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl logs <span class="token punctuation">[</span>-f<span class="token punctuation">]</span> <span class="token punctuation">[</span>-p<span class="token punctuation">]</span> <span class="token punctuation">(</span>POD <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>-c CONTAINER<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl logs nginx
+kubectl logs nginx --all-containers<span class="token operator">=</span>true
+kubectl logs <span class="token parameter variable">-lapp</span><span class="token operator">=</span>nginx --all-containers<span class="token operator">=</span>true
+kubectl logs <span class="token parameter variable">-p</span> <span class="token parameter variable">-c</span> ruby web-1
+kubectl logs <span class="token parameter variable">-f</span> <span class="token parameter variable">-c</span> ruby web-1
+kubectl logs <span class="token parameter variable">-f</span> <span class="token parameter variable">-lapp</span><span class="token operator">=</span>nginx --all-containers<span class="token operator">=</span>true
+kubectl logs <span class="token parameter variable">--tail</span><span class="token operator">=</span><span class="token number">20</span> nginx
+kubectl logs <span class="token parameter variable">--since</span><span class="token operator">=</span>1h nginx
+kubectl logs --insecure-skip-tls-verify-backend nginx
+kubectl logs job/hello
+kubectl logs deployment/nginx <span class="token parameter variable">-c</span> nginx-1</code></pre>
+
+<h4 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">exec</span> <span class="token punctuation">(</span>POD <span class="token operator">|</span> TYPE/NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>-c CONTAINER<span class="token punctuation">]</span> <span class="token punctuation">[</span>flags<span class="token punctuation">]</span> -- COMMAND <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl <span class="token builtin class-name">exec</span> mypod -- <span class="token function">date</span>
+kubectl <span class="token builtin class-name">exec</span> mypod <span class="token parameter variable">-c</span> ruby-container -- <span class="token function">date</span>
+kubectl <span class="token builtin class-name">exec</span> mypod <span class="token parameter variable">-c</span> ruby-container <span class="token parameter variable">-i</span> <span class="token parameter variable">-t</span> -- <span class="token function">bash</span> <span class="token parameter variable">-il</span>
+kubectl <span class="token builtin class-name">exec</span> mypod <span class="token parameter variable">-i</span> <span class="token parameter variable">-t</span> -- <span class="token function">ls</span> <span class="token parameter variable">-t</span> /usr
+kubectl <span class="token builtin class-name">exec</span> deploy/mydeployment -- <span class="token function">date</span>
+kubectl <span class="token builtin class-name">exec</span> svc/myservice -- <span class="token function">date</span></code></pre>
+
+<p>注意：进入容器只是查看信息，不要修改配置，如果需要修改配置，只能重新打镜像</p>
+<h3 id="高级命令"><a href="#高级命令" class="headerlink" title="高级命令"></a>高级命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">diff</span>          Diff live version against would-be applied version
+apply         Apply a configuration to a resource by filename or stdin
+patch         Update field<span class="token punctuation">(</span>s<span class="token punctuation">)</span> of a resource
+replace       Replace a resource by filename or stdin
+<span class="token function">wait</span>          Experimental: Wait <span class="token keyword">for</span> a specific condition on one or many resources.
+kustomize     Build a kustomization target from a directory or a remote url.</code></pre>
+
+<h4 id="diff"><a href="#diff" class="headerlink" title="diff"></a>diff</h4><h4 id="apply-★★★"><a href="#apply-★★★" class="headerlink" title="apply ★★★"></a>apply ★★★</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl apply <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> <span class="token parameter variable">-k</span> DIRECTORY<span class="token punctuation">)</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl apply <span class="token parameter variable">-f</span> ./pod.json
+kubectl apply <span class="token parameter variable">-k</span> dir/
+<span class="token function">cat</span> pod.json <span class="token operator">|</span> kubectl apply <span class="token parameter variable">-f</span> -
+kubectl apply <span class="token parameter variable">--prune</span> <span class="token parameter variable">-f</span> manifest.yaml <span class="token parameter variable">-l</span> <span class="token assign-left variable">app</span><span class="token operator">=</span>nginx
+kubectl apply <span class="token parameter variable">--prune</span> <span class="token parameter variable">-f</span> manifest.yaml <span class="token parameter variable">--all</span> --prune-whitelist<span class="token operator">=</span>core/v1/ConfigMap</code></pre>
+
+<h4 id="patch"><a href="#patch" class="headerlink" title="patch"></a>patch</h4><p>修改、更新资源字段，支持 JSON 和 YAML 格式</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl patch <span class="token punctuation">(</span>-f FILENAME <span class="token operator">|</span> TYPE NAME<span class="token punctuation">)</span> <span class="token punctuation">[</span>-p PATCH<span class="token operator">|</span>--patch-file FILE<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+-p：更新json资源文件
+
+<span class="token comment"># 示例：</span>
+kubectl patch <span class="token function">node</span> k8s-node-1 <span class="token parameter variable">-p</span> <span class="token string">'&#123;"spec":&#123;"unschedulable":true&#125;&#125;'</span>
+kubectl patch <span class="token function">node</span> k8s-node-1 <span class="token parameter variable">-p</span> <span class="token string">$'spec:<span class="token entity" title="\n">\n</span> unschedulable: true'</span>
+kubectl patch <span class="token parameter variable">-f</span> node.json <span class="token parameter variable">-p</span> <span class="token string">'&#123;"spec":&#123;"unschedulable":true&#125;&#125;'</span>
+kubectl patch pod valid-pod <span class="token parameter variable">-p</span> <span class="token string">'&#123;"spec":&#123;"containers":[&#123;"name":"kubernetes-serve-hostname","image":"new image"&#125;]&#125;&#125;'</span>
+kubectl patch pod valid-pod <span class="token parameter variable">--type</span><span class="token operator">=</span><span class="token string">'json'</span> <span class="token parameter variable">-p</span><span class="token operator">=</span><span class="token string">'[&#123;"op": "replace", "path": "/spec/containers/0/image", "value":"newimage"&#125;]'</span></code></pre>
+
+<h4 id="replace"><a href="#replace" class="headerlink" title="replace"></a>replace</h4><p>使用配置文件或 stdin 来替换当前资源</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">kubectl replace <span class="token parameter variable">-f</span> FILENAME <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+<span class="token comment"># 示例：</span>
+kubectl replace <span class="token parameter variable">-f</span> ./pod.json
+<span class="token function">cat</span> pod.json <span class="token operator">|</span> kubectl replace <span class="token parameter variable">-f</span> -
+kubectl get pod mypod <span class="token parameter variable">-o</span> yaml <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/\(image: myimage\):.*$/\1:v4/'</span> <span class="token operator">|</span> kubectl replace <span class="token parameter variable">-f</span> -
+kubectl replace <span class="token parameter variable">--force</span> <span class="token parameter variable">-f</span> ./pod.json</code></pre>
+
+<p><strong><code>create</code> 、<code>apply</code>、<code>replace</code> 的区别：</strong></p>
+<ul>
+<li><code>create</code>：指定一个动作，新建资源</li>
+<li><code>replace</code>：指定一个动作，替换资源</li>
+<li><code>apply</code>：指定目标状态，不关心实现的过程</li>
+</ul>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建资源</span>
+kubectl create <span class="token parameter variable">-f</span> nginx.yaml
+<span class="token comment"># 修改nginx.yaml，然后用修改后替换当前的</span>
+kubectl replace <span class="token parameter variable">-f</span> nginx.yaml</code></pre>
+
+<p>相当于：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建资源，相当于 `kubectl create`</span>
+kubectl apply <span class="token parameter variable">-f</span> nginx.yaml
+<span class="token comment"># 修改nginx.yaml，然后更新资源，相当于 `kubectl path`</span>
+kubectl apply <span class="token parameter variable">-f</span> nginx.yaml</code></pre>
+
+<h4 id="wait"><a href="#wait" class="headerlink" title="wait"></a>wait</h4><h4 id="kustomize"><a href="#kustomize" class="headerlink" title="kustomize"></a>kustomize</h4><h3 id="设置命令"><a href="#设置命令" class="headerlink" title="设置命令"></a>设置命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">label         Update the labels on a resource
+annotate      Update the annotations on a resource
+completion    Output shell completion code <span class="token keyword">for</span> the specified shell <span class="token punctuation">(</span>bash or <span class="token function">zsh</span><span class="token punctuation">)</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master ~<span class="token punctuation">]</span><span class="token variable">$kubectl</span> completion <span class="token function">bash</span> <span class="token operator">></span> /etc/profile.d/kubectl_completion.sh</code></pre>
+
+<h3 id="其他命令"><a href="#其他命令" class="headerlink" title="其他命令"></a>其他命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">api-resources 打印服务器上支持的API资源
+api-versions  以 <span class="token string">"group/version"</span> 的形式打印API versions
+config        Modify kubeconfig files
+plugin        Provides utilities <span class="token keyword">for</span> interacting with plugins.
+version       Print the client and server version information
+alpha
+convert
+options</code></pre>
+
+<h3 id="输出选项"><a href="#输出选项" class="headerlink" title="输出选项"></a>输出选项</h3><h4 id="Formatting-output"><a href="#Formatting-output" class="headerlink" title="Formatting output"></a>Formatting output</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token punctuation">[</span>command<span class="token punctuation">]</span> <span class="token punctuation">[</span>TYPE<span class="token punctuation">]</span> <span class="token punctuation">[</span>NAME<span class="token punctuation">]</span> <span class="token parameter variable">-o</span> <span class="token operator">&lt;</span>output_format<span class="token operator">></span>
+
+<span class="token parameter variable">-o</span> wide：适合查看
+<span class="token parameter variable">-o</span> json：适合监控</code></pre>
+
+<h4 id="Sorting-list-objects"><a href="#Sorting-list-objects" class="headerlink" title="Sorting list objects"></a>Sorting list objects</h4><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token punctuation">[</span>command<span class="token punctuation">]</span> <span class="token punctuation">[</span>TYPE<span class="token punctuation">]</span> <span class="token punctuation">[</span>NAME<span class="token punctuation">]</span> --sort-by<span class="token operator">=</span><span class="token operator">&lt;</span>jsonpath_exp<span class="token operator">></span></code></pre>
+
+<h3 id="示例：常用操作"><a href="#示例：常用操作" class="headerlink" title="示例：常用操作"></a>示例：常用操作</h3><h3 id="示例：创建和使用插件"><a href="#示例：创建和使用插件" class="headerlink" title="示例：创建和使用插件"></a>示例：创建和使用插件</h3><h2 id="资源"><a href="#资源" class="headerlink" title="资源"></a>资源</h2><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl api-resources</code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/Kubeadm/" rel="prev" title="kubeadm">
+                  <i class="fa fa-chevron-left"></i> kubeadm
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/kubeasz/" rel="next" title="kubeasz">
+                  kubeasz <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

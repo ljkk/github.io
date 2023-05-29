@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="PHP 中的 Exception, Error, Throwable PHP 中将代码自身异常(一般是环境或者语法非法所致)称作错误 Error，将运行中出现的逻辑错误称为异常 Exception 错误是没法通过代码处理的，而异常则可以通过 try&#x2F;catch 来处理 PHP7 中出现了 Throwable 接口，该接口由 Error 和 Exception 实现，用户不能直接实现 Throwab">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP7中的异常与错误处理">
+<meta property="og:url" content="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/PHP7%E4%B8%AD%E7%9A%84%E5%BC%82%E5%B8%B8%E4%B8%8E%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="PHP 中的 Exception, Error, Throwable PHP 中将代码自身异常(一般是环境或者语法非法所致)称作错误 Error，将运行中出现的逻辑错误称为异常 Exception 错误是没法通过代码处理的，而异常则可以通过 try&#x2F;catch 来处理 PHP7 中出现了 Throwable 接口，该接口由 Error 和 Exception 实现，用户不能直接实现 Throwab">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-08T14:52:17.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.474Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="PHP">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/PHP7%E4%B8%AD%E7%9A%84%E5%BC%82%E5%B8%B8%E4%B8%8E%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/PHP7%E4%B8%AD%E7%9A%84%E5%BC%82%E5%B8%B8%E4%B8%8E%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86/","path":"PHP/基础/PHP7中的异常与错误处理/","title":"PHP7中的异常与错误处理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PHP7中的异常与错误处理 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP-%E4%B8%AD%E7%9A%84-Exception-Error-Throwable"><span class="nav-number">1.</span> <span class="nav-text">PHP 中的 Exception, Error, Throwable</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PHP7-%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6"><span class="nav-number">1.1.</span> <span class="nav-text">PHP7 异常处理机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Throwable"><span class="nav-number">1.2.</span> <span class="nav-text">Throwable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Error"><span class="nav-number">1.3.</span> <span class="nav-text">Error</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TypeError"><span class="nav-number">1.4.</span> <span class="nav-text">TypeError</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ParseError"><span class="nav-number">1.5.</span> <span class="nav-text">ParseError</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ArithmeticError"><span class="nav-number">1.6.</span> <span class="nav-text">ArithmeticError</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DevisionByZeroError"><span class="nav-number">1.7.</span> <span class="nav-text">DevisionByZeroError</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AssertionError"><span class="nav-number">1.8.</span> <span class="nav-text">AssertionError</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E4%BD%A0%E7%9A%84%E4%BB%A3%E7%A0%81%E4%B8%AD%E4%BD%BF%E7%94%A8-Error"><span class="nav-number">1.9.</span> <span class="nav-text">在你的代码中使用 Error</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E4%BB%A3%E7%A0%81%E6%94%AF%E6%8C%81-PHP5-x-%E5%92%8C-PHP7-%E7%9A%84%E5%BC%82%E5%B8%B8"><span class="nav-number">1.10.</span> <span class="nav-text">编写代码支持 PHP5.x 和 PHP7 的异常</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/PHP/%E5%9F%BA%E7%A1%80/PHP7%E4%B8%AD%E7%9A%84%E5%BC%82%E5%B8%B8%E4%B8%8E%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PHP7中的异常与错误处理 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP7中的异常与错误处理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-08 22:52:17" itemprop="dateCreated datePublished" datetime="2021-09-08T22:52:17+08:00">2021-09-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/" itemprop="url" rel="index"><span itemprop="name">PHP</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/PHP/%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">基础</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="PHP-中的-Exception-Error-Throwable"><a href="#PHP-中的-Exception-Error-Throwable" class="headerlink" title="PHP 中的 Exception, Error, Throwable"></a>PHP 中的 Exception, Error, Throwable</h2><ul>
+<li>PHP 中将代码自身异常(一般是环境或者语法非法所致)称作错误 <code>Error</code>，将运行中出现的逻辑错误称为异常 <code>Exception</code></li>
+<li>错误是没法通过代码处理的，而异常则可以通过 <code>try/catch</code> 来处理</li>
+<li>PHP7 中出现了 <code>Throwable</code> 接口，该接口由 <code>Error</code> 和 <code>Exception</code> 实现，用户不能直接实现 <code>Throwable</code> 接口，而只能通过继承 <code>Exception</code> 来实现接口</li>
+</ul>
+<h3 id="PHP7-异常处理机制"><a href="#PHP7-异常处理机制" class="headerlink" title="PHP7 异常处理机制"></a>PHP7 异常处理机制</h3><p>过去的 PHP，处理致命错误几乎是不可能的。致命错误不会调用由 <code>set_error_handler()</code> 设置的处理方式，而是简单的停止脚本的执行。</p>
+<p>在 PHP7 中，当致命错误和可捕获的错误(<code>E_ERROR</code> 和 <code>E_RECOVERABLE_ERROR</code>)发生时会抛出异常，而不是直接停止脚本的运行。对于某些情况，比如内存溢出，致命错误则仍然像之前一样直接停止脚本执行。在 PHP7 中，一个未捕获的异常也会是一个致命错误。这意味着在 PHP5.x 中致命错误抛出的异常未捕获，在 PHP7 中也是致命错误。</p>
+<blockquote>
+<p>注意：其他级别的错误如 <code>warning</code> 和 <code>notice</code>，和之前一样不会抛出异常，只有 <code>fatal</code> 和 <code>recoverable</code> 级别的错误会抛出异常。</p>
+</blockquote>
+<p>从 <code>fatal</code> 和 <code>recoverable</code> 级别错误抛出的异常并非继承自 <code>Exception</code> 类。这种分离是为了防止现有 PHP5.x 的用于停止脚本运行的代码也捕获到错误抛出的异常。<code>fatal</code> 和 <code>recoverable</code> 级别的错误抛出的异常是一个全新分离出来的类 <code>Error</code> 类的实例。跟其他异常一样，<code>Error</code> 类异常也能被捕获和处理，同样允许在 <code>finally</code> 之类的块结构中运行。</p>
+<h3 id="Throwable"><a href="#Throwable" class="headerlink" title="Throwable"></a>Throwable</h3><p>为了统一两个异常分支，<code>Exception</code> 和 <code>Error</code> 都实现了一个全新的接口：<code>Throwable</code></p>
+<p>PHP7 中新的异常结构如下：</p>
+<pre class="language-none"><code class="language-none">interface Throwable
+    |- Exception implements Throwable
+        |- ...
+    |- Error implements Throwable
+        |- TypeError extends Error
+        |- ParseError extends Error
+        |- ArithmeticError extends Error
+            |- DivisionByZeroError extends ArithmeticError
+        |- AssertionError extends Error</code></pre>
+
+<p>如果在 PHP7 的代码中定义了 <code>Throwable</code> 类，它将会是如下这样：</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">interface</span> <span class="token class-name-definition class-name">Throwable</span><span class="token punctuation">&#123;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">string</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">getCode</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">int</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">getFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">string</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">getLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">int</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">getTrace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">array</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">getTraceAsString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">string</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">getPrevious</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token class-name return-type">Throwable</span><span class="token punctuation">;</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">__toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>这个接口看起来很熟悉。<code>Throwable</code> 规定的方法跟 <code>Exception</code> 几乎是一样的。唯一不同的是 <code>Throwable::getPrevious()</code> 返回的是 <code>Throwable</code> 的实例而不是 <code>Exception</code> 的。<code>Exception</code> 和 <code>Error</code> 的构造函数跟之前 <code>Exception</code> 一样，可以接受任何 <code>Throwable</code> 的实例。</p>
+<p><code>Throwable</code> 可以用于 <code>try/catch</code>块中捕获 <code>Exception</code> 和 <code>Error</code> 对象(或是任何未来可能的异常类型)。记住捕获更多特定类型的异常并且对之做相应的处理是更好的实践。然而在某种情况下我们想捕获任何类型的异常(比如日志或框架中错误处理)。在 PHP7 中，要捕获所有的应该使用 <code>Throwable</code> 而不是 <code>Exception</code>。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token number">1</span> <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+<span class="token number">2</span> <span class="token comment">// Code that may throw an Exception or Error.</span>
+<span class="token number">3</span> <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> <span class="token variable">$t</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token number">4</span> <span class="token comment">// Handle exception</span>
+<span class="token number">5</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<p>用户定义的类不能实现 <code>Throwable</code> 接口。做出这个决定一定程度上是为了预测性和一致性——只有 <code>Exception</code> 和 <code>Error</code> 的对象可以被抛出。此外，异常需要携带对象在追溯堆栈中创建位置的信息，而用户定义的对象不会自动的有参数来存储这些信息。</p>
+<p><code>Throwable</code> 可以被继承从而创建特定的包接口或者添加额外的方法。一个继承自 <code>Throwable</code> 的接口只能被 <code>Exception</code> 或 <code>Error</code> 的子类来实现。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token number">1</span> <span class="token keyword">interface</span> <span class="token class-name-definition class-name">MyPackageThrowable</span> <span class="token keyword">extends</span> <span class="token class-name">Throwable</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+<span class="token number">2</span>
+<span class="token number">3</span> <span class="token keyword">class</span> <span class="token class-name-definition class-name">MyPackageException</span> <span class="token keyword">extends</span> <span class="token class-name">Exception</span> <span class="token keyword">implements</span> <span class="token class-name">MyPackageThrowable</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+<span class="token number">4</span>
+<span class="token number">5</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">MyPackageException</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<h3 id="Error"><a href="#Error" class="headerlink" title="Error"></a>Error</h3><p>事实上，PHP5.x 中所有的错误都是 <code>fatal</code> 或 <code>recoverable</code> 级别的错误，在 PHP7 中都能抛出一个 <code>Error</code>实例。跟其他任何异常一样，<code>Error</code> 对象可以使用 <code>try/catch</code> 块来捕获。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token variable">$var</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+<span class="token variable">$var</span><span class="token operator">-></span><span class="token function">method</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Throws an Error object in PHP 7.</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Error</span> <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token comment">// Handle error</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>通常情况下，之前的致命错误都会抛出一个基本的 <code>Error</code> 类实例，但某些错误会抛出一个更具体的 <code>Error</code> 子类：<code>TypeError</code>、<code>ParseError</code> 以及 <code>AssertionError</code>。</p>
+<h3 id="TypeError"><a href="#TypeError" class="headerlink" title="TypeError"></a>TypeError</h3><p>当函数参数或返回值不符合声明的类型时，<code>TypeError</code> 的实例会被抛出。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">function</span> <span class="token function-definition function">add</span><span class="token punctuation">(</span><span class="token keyword type-hint">int</span> <span class="token variable">$left</span><span class="token punctuation">,</span> <span class="token keyword type-hint">int</span> <span class="token variable">$right</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
+<span class="token keyword">return</span> <span class="token variable">$left</span> <span class="token operator">+</span> <span class="token variable">$right</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+<span class="token variable">$value</span> <span class="token operator">=</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'left'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'right'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">TypeError</span> <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">echo</span> <span class="token variable">$e</span><span class="token operator">-></span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"\n"</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">//Argument 1 passed to add() must be of the type integer, string given</span></code></pre>
+
+<h3 id="ParseError"><a href="#ParseError" class="headerlink" title="ParseError"></a>ParseError</h3><p>当 <code>include/require</code> 文件或 <code>eval()</code> 代码存在语法错误时，<code>ParseError</code> 会被抛出。</p>
+<pre class="language-none"><code class="language-none">1 try &#123;
+2 require &#39;file-with-parse-error.php&#39;;
+3 &#125; catch (ParseError $e) &#123;
+4 echo $e-&gt;getMessage(), &quot;\n&quot;;
+5 &#125;</code></pre>
+
+<h3 id="ArithmeticError"><a href="#ArithmeticError" class="headerlink" title="ArithmeticError"></a>ArithmeticError</h3><p><code>ArithmeticError</code> 在两种情况下会被抛出。一是位移操作负数位。二是调用<code>intdiv()</code> 时分子是 <code>PHP_INT_MIN</code> 且分母是 -1 (这个使用除法运算符的表达式：<code>PHP_INT_MIN / -1</code>，结果是浮点型)。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token number">1</span> <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+<span class="token number">2</span> <span class="token variable">$value</span> <span class="token operator">=</span> <span class="token number">1</span> <span class="token operator">&lt;&lt;</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token number">3</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">ArithmeticError</span> <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token number">4</span> <span class="token keyword">echo</span> <span class="token variable">$e</span><span class="token operator">-></span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//Bit shift by negative number</span>
+<span class="token number">5</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="DevisionByZeroError"><a href="#DevisionByZeroError" class="headerlink" title="DevisionByZeroError"></a>DevisionByZeroError</h3><p>当 <code>intdiv()</code> 的分母是 0 或者取模操作 (%) 中分母是 0 时，<code>DivisionByZeroError</code> 会被抛出。注意在除法运算符 (&#x2F;) 中使用 0 作除数（也即 xxx&#x2F;0 这样写）时只会触发一个 warning，这时候若分子非零结果是 INF，若分子是 0 结果是 NaN。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token number">1</span> <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+<span class="token number">2</span> <span class="token variable">$value</span> <span class="token operator">=</span> <span class="token number">1</span> <span class="token operator">%</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token number">3</span> <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">DivisionByZeroError</span> <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token number">4</span> <span class="token keyword">echo</span> <span class="token variable">$e</span><span class="token operator">-></span><span class="token function">getMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//Modulo by zero</span>
+<span class="token number">5</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="AssertionError"><a href="#AssertionError" class="headerlink" title="AssertionError"></a>AssertionError</h3><p>当 <code>assert()</code> 的条件不满足时，<code>AssertionError</code> 会被抛出。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'zend.assertions'</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token number">1</span> <span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'assert.exception'</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token number">2</span>
+<span class="token number">3</span> <span class="token variable">$test</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token number">4</span>
+<span class="token number">5</span> <span class="token function">assert</span><span class="token punctuation">(</span><span class="token variable">$test</span> <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token number">6</span>
+<span class="token number">7</span> <span class="token comment">//Fatal error: Uncaught AssertionError: assert($test === 0)</span></code></pre>
+
+<p>只有断言启用并且是设置 ini 配置的 <code>zend.assertions = 1</code> 和 <code>assert.exception = 1</code> 时，<code>assert()</code>才会执行并抛 <code>AssertionError</code>。</p>
+<h3 id="在你的代码中使用-Error"><a href="#在你的代码中使用-Error" class="headerlink" title="在你的代码中使用 Error"></a>在你的代码中使用 Error</h3><p>用户可以通过继承 <code>Error</code> 来创建符合自己层级要求的 <code>Error</code> 类。这就形成了一个问题：什么情况下应该抛出 <code>Exception</code>，什么情况下应该抛出 <code>Error</code>。</p>
+<p><code>Error</code> 应该用来表示需要程序员关注的代码问题。从 PHP 引擎抛出的 <code>Error</code> 对象属于这些分类，通常都是代码级别的错误，比如传递了错误类型的参数给一个函数或者解析一个文件发生错误。<code>Exception</code> 则应该用于在运行时能安全的处理，并且另一个动作能继续执行的情况。</p>
+<p>由于 <code>Error</code> 对象不应该在运行时被处理，因此捕获 <code>Error</code> 对象也应该是不频繁的。一般来说，<code>Error</code> 对象仅被捕获用于日志记录、执行必要的清理以及展示错误信息给用户。</p>
+<h3 id="编写代码支持-PHP5-x-和-PHP7-的异常"><a href="#编写代码支持-PHP5-x-和-PHP7-的异常" class="headerlink" title="编写代码支持 PHP5.x 和 PHP7 的异常"></a>编写代码支持 PHP5.x 和 PHP7 的异常</h3><p>为了在同样的代码中捕获任何 PHP5.x 和 PHP7 的异常，可以使用多个 <code>catch</code>，先捕获 <code>Throwable</code>，然后是 <code>Exception</code>。当 PHP5.x 不再需要支持时，捕获 <code>Exception</code> 的 <code>catch</code> 块可以移除。</p>
+<pre class="language-php" data-language="php"><code class="language-php"><span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+<span class="token comment">// Code that may throw an Exception or Error.</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Throwable</span> <span class="token variable">$t</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token comment">// Executed only in PHP 7, will not match in PHP 5.x</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">Exception</span> <span class="token variable">$e</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+<span class="token comment">// Executed only in PHP 5.x, will not be reached in PHP 7</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>不幸的是，处理异常的函数中的类型声明不容易确定。当 <code>Exception</code> 用于函数参数类型声明时，如果函数调用时候能用 <code>Error</code> 的实例，这个类型声明就要去掉。当 PHP5.x 不需要被支持时，类型声明则可以还原为 <code>Throwable</code>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/PHP/" rel="tag"><i class="fa fa-tag"></i> PHP</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/React/Hook/" rel="prev" title="Hook">
+                  <i class="fa fa-chevron-left"></i> Hook
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%89%8D%E7%AB%AF/JavaScript/videojs/videojs%E6%96%87%E6%A1%A3/" rel="next" title="videojs文档">
+                  videojs文档 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="参考资料:  https:&#x2F;&#x2F;blog.csdn.net&#x2F;liu3292011&#x2F;article&#x2F;details&#x2F;77993402  https:&#x2F;&#x2F;www.codetd.com&#x2F;article&#x2F;2998816   CMAKE_BUILD_TYPEcmake 的构建模式 CMAKE_BUILD_TYPE&#x3D;Debug | Release | RelWithDebInfo | MinSizeRel  C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cmake安装mysql参数">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/cmake%E5%AE%89%E8%A3%85mysql%E5%8F%82%E6%95%B0%E5%A4%A7%E5%85%A8/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="参考资料:  https:&#x2F;&#x2F;blog.csdn.net&#x2F;liu3292011&#x2F;article&#x2F;details&#x2F;77993402  https:&#x2F;&#x2F;www.codetd.com&#x2F;article&#x2F;2998816   CMAKE_BUILD_TYPEcmake 的构建模式 CMAKE_BUILD_TYPE&#x3D;Debug | Release | RelWithDebInfo | MinSizeRel  C">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-07T13:27:39.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/cmake%E5%AE%89%E8%A3%85mysql%E5%8F%82%E6%95%B0%E5%A4%A7%E5%85%A8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/cmake%E5%AE%89%E8%A3%85mysql%E5%8F%82%E6%95%B0%E5%A4%A7%E5%85%A8/","path":"运维/MySQL/cmake安装mysql参数大全/","title":"cmake安装mysql参数"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>cmake安装mysql参数 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CMAKE-BUILD-TYPE"><span class="nav-number">1.</span> <span class="nav-text">CMAKE_BUILD_TYPE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMAKE-INSTALL-PREFIX"><span class="nav-number">2.</span> <span class="nav-text">CMAKE_INSTALL_PREFIX</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#COMMUNITY-BUILD"><span class="nav-number">3.</span> <span class="nav-text">COMMUNITY_BUILD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DOWNLOAD-BOOST"><span class="nav-number">4.</span> <span class="nav-text">DOWNLOAD_BOOST</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DWITH-BOOST"><span class="nav-number">5.</span> <span class="nav-text">DWITH_BOOST</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DOWNLOAD-BOOST-TIMEOUT"><span class="nav-number">6.</span> <span class="nav-text">DOWNLOAD_BOOST_TIMEOUT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENABLED-PROFILING"><span class="nav-number">7.</span> <span class="nav-text">ENABLED_PROFILING</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENABLE-GCOV"><span class="nav-number">8.</span> <span class="nav-text">ENABLE_GCOV</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENABLE-GPROF"><span class="nav-number">9.</span> <span class="nav-text">ENABLE_GPROF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENABLE-MEMCACHED-SASL"><span class="nav-number">10.</span> <span class="nav-text">ENABLE_MEMCACHED_SASL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENABLE-MEMCACHED-SASL-PWDB"><span class="nav-number">11.</span> <span class="nav-text">ENABLE_MEMCACHED_SASL_PWDB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FEATURE-SET"><span class="nav-number">12.</span> <span class="nav-text">FEATURE_SET</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#INSTALL-LAYOUT"><span class="nav-number">13.</span> <span class="nav-text">INSTALL_LAYOUT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MYSQL-DATADIR"><span class="nav-number">14.</span> <span class="nav-text">MYSQL_DATADIR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MYSQL-KEYRINGDIR"><span class="nav-number">15.</span> <span class="nav-text">MYSQL_KEYRINGDIR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OPTIMIZER-TRACE"><span class="nav-number">16.</span> <span class="nav-text">OPTIMIZER_TRACE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#REPRODUCIBLE-BUILD"><span class="nav-number">17.</span> <span class="nav-text">REPRODUCIBLE_BUILD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TMPDIR"><span class="nav-number">18.</span> <span class="nav-text">TMPDIR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-xxx-STORAGE-ENGINE"><span class="nav-number">19.</span> <span class="nav-text">WITH_xxx_STORAGE_ENGINE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-ASAN"><span class="nav-number">20.</span> <span class="nav-text">WITH_ASAN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-ASAN-SCOPE"><span class="nav-number">21.</span> <span class="nav-text">WITH_ASAN_SCOPE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-CLIENT-PROTOCOL-TRACING"><span class="nav-number">22.</span> <span class="nav-text">WITH_CLIENT_PROTOCOL_TRACING</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-DEBUG-BOOL"><span class="nav-number">23.</span> <span class="nav-text">WITH_DEBUG:BOOL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-DEFAULT-COMPILER-OPTIONS"><span class="nav-number">24.</span> <span class="nav-text">WITH_DEFAULT_COMPILER_OPTIONS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-DEFAULT-FEATURE-SET"><span class="nav-number">25.</span> <span class="nav-text">WITH_DEFAULT_FEATURE_SET</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-EDITLINE"><span class="nav-number">26.</span> <span class="nav-text">WITH_EDITLINE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-EMBEDDED-SERVER"><span class="nav-number">27.</span> <span class="nav-text">WITH_EMBEDDED_SERVER</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-EXTRA-CHARSETS"><span class="nav-number">28.</span> <span class="nav-text">WITH_EXTRA_CHARSETS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-INNODB-MEMCACHED"><span class="nav-number">29.</span> <span class="nav-text">WITH_INNODB_MEMCACHED</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-LZ4-STRING"><span class="nav-number">30.</span> <span class="nav-text">WITH_LZ4:STRING</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-MSAN"><span class="nav-number">31.</span> <span class="nav-text">WITH_MSAN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-RAPID"><span class="nav-number">32.</span> <span class="nav-text">WITH_RAPID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-SASL"><span class="nav-number">33.</span> <span class="nav-text">WITH_SASL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-SSL"><span class="nav-number">34.</span> <span class="nav-text">WITH_SSL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-TEST-TRACE-PLUGIN"><span class="nav-number">35.</span> <span class="nav-text">WITH_TEST_TRACE_PLUGIN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-UBSAN"><span class="nav-number">36.</span> <span class="nav-text">WITH_UBSAN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-UNIT-TESTS"><span class="nav-number">37.</span> <span class="nav-text">WITH_UNIT_TESTS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-VALGRIND"><span class="nav-number">38.</span> <span class="nav-text">WITH_VALGRIND</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WITH-ZLIB"><span class="nav-number">39.</span> <span class="nav-text">WITH_ZLIB</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/cmake%E5%AE%89%E8%A3%85mysql%E5%8F%82%E6%95%B0%E5%A4%A7%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="cmake安装mysql参数 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          cmake安装mysql参数
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-07 21:27:39" itemprop="dateCreated datePublished" datetime="2020-12-07T21:27:39+08:00">2020-12-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>参考资料:</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/liu3292011/article/details/77993402">https://blog.csdn.net/liu3292011/article/details/77993402</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.codetd.com/article/2998816">https://www.codetd.com/article/2998816</a></p>
+</li>
+</ul>
+<h2 id="CMAKE-BUILD-TYPE"><a href="#CMAKE-BUILD-TYPE" class="headerlink" title="CMAKE_BUILD_TYPE"></a>CMAKE_BUILD_TYPE</h2><p>cmake 的构建模式</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">CMAKE_BUILD_TYPE</span><span class="token punctuation">=</span><span class="token value attr-value">Debug | Release | RelWithDebInfo | MinSizeRel</span></code></pre>
+
+<h2 id="CMAKE-INSTALL-PREFIX"><a href="#CMAKE-INSTALL-PREFIX" class="headerlink" title="CMAKE_INSTALL_PREFIX"></a>CMAKE_INSTALL_PREFIX</h2><p>mysql 的安装目录</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">CMAKE_INSTALL_PREFIX</span> <span class="token punctuation">=</span> <span class="token value attr-value">/usr/local/mysql</span></code></pre>
+
+<h2 id="COMMUNITY-BUILD"><a href="#COMMUNITY-BUILD" class="headerlink" title="COMMUNITY_BUILD"></a>COMMUNITY_BUILD</h2><p>是否为社区版本</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">COMMUNITY_BUILD</span> <span class="token punctuation">=</span> <span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="DOWNLOAD-BOOST"><a href="#DOWNLOAD-BOOST" class="headerlink" title="DOWNLOAD_BOOST"></a>DOWNLOAD_BOOST</h2><p>是否从下载开源 boost</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">DOWNLOAD_BOOST</span> <span class="token punctuation">=</span> <span class="token value attr-value">1</span></code></pre>
+
+<h2 id="DWITH-BOOST"><a href="#DWITH-BOOST" class="headerlink" title="DWITH_BOOST"></a>DWITH_BOOST</h2><p>This CMake script will look for boost in <directory>.</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">DWITH_BOOST</span> <span class="token punctuation">=</span> <span class="token value attr-value">&lt;directory></span></code></pre>
+
+<h2 id="DOWNLOAD-BOOST-TIMEOUT"><a href="#DOWNLOAD-BOOST-TIMEOUT" class="headerlink" title="DOWNLOAD_BOOST_TIMEOUT"></a>DOWNLOAD_BOOST_TIMEOUT</h2><p>下载 boost 的超时时间, 单位 秒</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">DOWNLOAD_BOOST_TIMEOUT</span> <span class="token punctuation">=</span> <span class="token value attr-value">600</span></code></pre>
+
+<h2 id="ENABLED-PROFILING"><a href="#ENABLED-PROFILING" class="headerlink" title="ENABLED_PROFILING"></a>ENABLED_PROFILING</h2><p>是否启用查询分析代码 参考</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">ENABLED_PROFILING</span> <span class="token punctuation">=</span> <span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="ENABLE-GCOV"><a href="#ENABLE-GCOV" class="headerlink" title="ENABLE_GCOV"></a>ENABLE_GCOV</h2><p>是否包括 gcov 支持, 不太懂这是什么, 默认关闭.</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">ENABLE_GCOV</span> <span class="token punctuation">=</span> <span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="ENABLE-GPROF"><a href="#ENABLE-GPROF" class="headerlink" title="ENABLE_GPROF"></a>ENABLE_GPROF</h2><p>启用 gprof, (仅优化 Linux 版本), 不太懂, 默认关闭</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">ENABLE_GPROF</span> <span class="token punctuation">=</span> <span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="ENABLE-MEMCACHED-SASL"><a href="#ENABLE-MEMCACHED-SASL" class="headerlink" title="ENABLE_MEMCACHED_SASL"></a>ENABLE_MEMCACHED_SASL</h2><p>不太懂, 默认关闭</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">ENABLE_MEMCACHED_SASL</span> <span class="token punctuation">=</span> <span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="ENABLE-MEMCACHED-SASL-PWDB"><a href="#ENABLE-MEMCACHED-SASL-PWDB" class="headerlink" title="ENABLE_MEMCACHED_SASL_PWDB"></a>ENABLE_MEMCACHED_SASL_PWDB</h2><p>不太懂, 看起来和上面一起是配套的, 也默认关闭</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">ENABLE_MEMCACHED_SASL_PWDB:BOOL</span><span class="token punctuation">=</span><span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="FEATURE-SET"><a href="#FEATURE-SET" class="headerlink" title="FEATURE_SET"></a>FEATURE_SET</h2><p>这也不太懂, 默认就好了, 它的注释说这个选项好像已经被弃用了</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">FEATURE_SET</span><span class="token punctuation">=</span><span class="token value attr-value">community</span></code></pre>
+
+<h2 id="INSTALL-LAYOUT"><a href="#INSTALL-LAYOUT" class="headerlink" title="INSTALL_LAYOUT"></a>INSTALL_LAYOUT</h2><p>选择预定义的安装布局, STANDALONE</p>
+<ul>
+<li><code>STANDALONE</code>：与用于<code>.tar.gz</code>和<code>.zip</code> 包的布局相同 。这是默认值。</li>
+<li><code>RPM</code>：布局类似于 RPM 包</li>
+<li><code>SVR4</code>：Solaris 包布局</li>
+<li><code>DEB</code>：DEB 封装布局（实验）</li>
+</ul>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">INSTALL_LAYOUT</span> <span class="token punctuation">=</span> <span class="token value attr-value">STANDALONE</span></code></pre>
+
+<h2 id="MYSQL-DATADIR"><a href="#MYSQL-DATADIR" class="headerlink" title="MYSQL_DATADIR"></a>MYSQL_DATADIR</h2><p>默认的 mysql 数据目录</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">MYSQL_DATADIR</span> <span class="token punctuation">=</span> <span class="token value attr-value">/usr/local/mysql/data</span></code></pre>
+
+<h2 id="MYSQL-KEYRINGDIR"><a href="#MYSQL-KEYRINGDIR" class="headerlink" title="MYSQL_KEYRINGDIR"></a>MYSQL_KEYRINGDIR</h2><p>默认的 mysql 手册目录</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">MYSQL_KEYRINGDIR</span><span class="token punctuation">=</span><span class="token value attr-value">/usr/local/mysql/keyring</span></code></pre>
+
+<h2 id="OPTIMIZER-TRACE"><a href="#OPTIMIZER-TRACE" class="headerlink" title="OPTIMIZER_TRACE"></a>OPTIMIZER_TRACE</h2><p>optimizer_trace 是 mysql5.6 之后加入的新功能, explain 是各种执行计划选择的结果, 如果想看整个执行计划以及对于多种索引方案之间是如何选择的, 就使用 optimizer_trace 这个功能</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">OPTIMIZER_TRACE</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="REPRODUCIBLE-BUILD"><a href="#REPRODUCIBLE-BUILD" class="headerlink" title="REPRODUCIBLE_BUILD"></a>REPRODUCIBLE_BUILD</h2><p>不太懂, 默认关闭</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">REPRODUCIBLE_BUILD</span> <span class="token punctuation">=</span> <span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="TMPDIR"><a href="#TMPDIR" class="headerlink" title="TMPDIR"></a>TMPDIR</h2><p>临时文件的目录，P_tmpdir 的值可以在 &#x2F;usr&#x2F;include&#x2F;stdio.h 中查看，默认 &#x2F;tmp</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">TMPDIR</span> <span class="token punctuation">=</span> <span class="token value attr-value">P_tmpdir</span></code></pre>
+
+<h2 id="WITH-xxx-STORAGE-ENGINE"><a href="#WITH-xxx-STORAGE-ENGINE" class="headerlink" title="WITH_xxx_STORAGE_ENGINE"></a>WITH_xxx_STORAGE_ENGINE</h2><pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_ARCHIVE_STORAGE_ENGINE</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">WITH_BLACKHOLE_STORAGE_ENGINE</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">WITH_FEDERATED_STORAGE_ENGINE</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">WITH_INNOBASE_STORAGE_ENGINE</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">WITH_PARTITION_STORAGE_ENGINE</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span></code></pre>
+
+<p>分别开启 ARCHIVE 、BLACKHOLE 、FEDERATED、INNOBASE、PARTITION 引擎，默认都是开启的</p>
+<h2 id="WITH-ASAN"><a href="#WITH-ASAN" class="headerlink" title="WITH_ASAN"></a>WITH_ASAN</h2><p>是否启用 AddressSanitizer , 不太懂, 默认是关闭的</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_ASAN</span> <span class="token punctuation">=</span> <span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="WITH-ASAN-SCOPE"><a href="#WITH-ASAN-SCOPE" class="headerlink" title="WITH_ASAN_SCOPE"></a>WITH_ASAN_SCOPE</h2><p>不太懂, 看起来像是和上面一个选项是配套的, 默认关闭</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_ASAN_SCOPE</span> <span class="token punctuation">=</span> <span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="WITH-CLIENT-PROTOCOL-TRACING"><a href="#WITH-CLIENT-PROTOCOL-TRACING" class="headerlink" title="WITH_CLIENT_PROTOCOL_TRACING"></a>WITH_CLIENT_PROTOCOL_TRACING</h2><p>是否将客户端协议跟踪框架构建到客户端库中。默认情况下，此选项被启用</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_CLIENT_PROTOCOL_TRACING</span> <span class="token punctuation">=</span> <span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="WITH-DEBUG-BOOL"><a href="#WITH-DEBUG-BOOL" class="headerlink" title="WITH_DEBUG:BOOL"></a>WITH_DEBUG:BOOL</h2><p>是否包括调试支持，默认关闭</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">WITH_DEBUG</span><span class="token operator">=</span>OFF</code></pre>
+
+<h2 id="WITH-DEFAULT-COMPILER-OPTIONS"><a href="#WITH-DEFAULT-COMPILER-OPTIONS" class="headerlink" title="WITH_DEFAULT_COMPILER_OPTIONS"></a>WITH_DEFAULT_COMPILER_OPTIONS</h2><p>是否使用默认的编译器来编译, 也就是 cmake</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_DEFAULT_COMPILER_OPTIONS</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="WITH-DEFAULT-FEATURE-SET"><a href="#WITH-DEFAULT-FEATURE-SET" class="headerlink" title="WITH_DEFAULT_FEATURE_SET"></a>WITH_DEFAULT_FEATURE_SET</h2><p>是否使用 cmake 的特性集</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_DEFAULT_FEATURE_SET</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="WITH-EDITLINE"><a href="#WITH-EDITLINE" class="headerlink" title="WITH_EDITLINE"></a>WITH_EDITLINE</h2><p>要使用 哪个<code>libedit</code>&#x2F; <code>editline</code>库。允许的值为 <code>bundled</code>（默认值）和 <code>system</code>。<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/source-configuration-options.html#option_cmake_with_editline"><code>WITH_EDITLINE</code></a>被添加到 MySQL 5.7.2 中。它取而代之<code>WITH_LIBEDIT</code>，已被删除</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_EDITLINE</span> <span class="token punctuation">=</span> <span class="token value attr-value">bundled</span></code></pre>
+
+<h2 id="WITH-EMBEDDED-SERVER"><a href="#WITH-EMBEDDED-SERVER" class="headerlink" title="WITH_EMBEDDED_SERVER"></a>WITH_EMBEDDED_SERVER</h2><p>是否构建<code>libmysqld</code>嵌入式服务器库。 注意: 从<code>libmysqld</code>MySQL 5.7.17 起，嵌入式服务器库已被弃用，MySQL 8.0 中将被删除</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_EMBEDDED_SERVER</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="WITH-EXTRA-CHARSETS"><a href="#WITH-EXTRA-CHARSETS" class="headerlink" title="WITH_EXTRA_CHARSETS"></a>WITH_EXTRA_CHARSETS</h2><p>哪些额外的字符集包括： all, complex, none</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_EXTRA_CHARSETS</span><span class="token punctuation">=</span><span class="token value attr-value">all</span></code></pre>
+
+<h2 id="WITH-INNODB-MEMCACHED"><a href="#WITH-INNODB-MEMCACHED" class="headerlink" title="WITH_INNODB_MEMCACHED"></a>WITH_INNODB_MEMCACHED</h2><p>是否生成 memcached 共享库（<code>libmemcached.so</code>和 <code>innodb_engine.so</code>）</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_INNODB_MEMCACHED</span><span class="token punctuation">=</span><span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="WITH-LZ4-STRING"><a href="#WITH-LZ4-STRING" class="headerlink" title="WITH_LZ4:STRING"></a>WITH_LZ4:STRING</h2><ul>
+<li>bundled：使用 LZ4 与发行版捆绑在一起的库。这是默认值</li>
+<li>system：使用系统 LZ4 库。如果 WITH_LZ4 设置为此值，则不构建 lz4_decompress 实用程序。在这种情况下， 可以使用系统 lz4 命令</li>
+</ul>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_LZ4</span> <span class="token punctuation">=</span> <span class="token value attr-value">bundled</span></code></pre>
+
+<h2 id="WITH-MSAN"><a href="#WITH-MSAN" class="headerlink" title="WITH_MSAN"></a>WITH_MSAN</h2><p>是否启用 MemorySanitizer，支持它的编译器。默认是关闭。对于此选项，如果启用该功能，则所有连接到 MySQL 的库也必须已经通过启用该选项进行编译。此选项已添加到 MySQL 5.7.4 中</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_MSAN</span><span class="token punctuation">=</span><span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="WITH-RAPID"><a href="#WITH-RAPID" class="headerlink" title="WITH_RAPID"></a>WITH_RAPID</h2><p>是否构建快速开发周期插件</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_RAPID</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="WITH-SASL"><a href="#WITH-SASL" class="headerlink" title="WITH_SASL"></a>WITH_SASL</h2><p>不太懂</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_SASL</span> <span class="token punctuation">=</span> <span class="token value attr-value">system</span></code></pre>
+
+<h2 id="WITH-SSL"><a href="#WITH-SSL" class="headerlink" title="WITH_SSL"></a>WITH_SSL</h2><p>要包含的 SSL 支持类型或要使用的 OpenSSL 安装的路径名。</p>
+<ul>
+<li><code>ssl_type</code> 可以是以下值之一：<ul>
+<li><code>yes</code>：使用系统 SSL 库（如果存在），否则与发行版捆绑在一起的库</li>
+<li><code>bundled</code>：使用与发行版捆绑在一起的 SSL 库。这是默认值</li>
+<li><code>system</code>：使用系统 SSL 库</li>
+</ul>
+</li>
+<li><code>path_name</code>是要使用的 OpenSSL 安装的路径名。使用这个可能比使用这个<code>ssl_type</code>值 更好 <code>system</code>，因为它可以防止 CMake 检测并使用系统上安装的较旧或不正确的 OpenSSL 版本。（另一个允许的方式做同样的事情是设置 <code>CMAKE_PREFIX_PATH</code>选项 <code>path_name</code>。）</li>
+</ul>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_SSL</span> <span class="token punctuation">=</span> <span class="token value attr-value">ssl_type | path_name</span></code></pre>
+
+<h2 id="WITH-TEST-TRACE-PLUGIN"><a href="#WITH-TEST-TRACE-PLUGIN" class="headerlink" title="WITH_TEST_TRACE_PLUGIN"></a>WITH_TEST_TRACE_PLUGIN</h2><p>是否构建测试协议跟踪客户端插件. 默认情况下，此选项被禁用。启用此选项不起作用，除非该<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/source-configuration-options.html#option_cmake_with_client_protocol_tracing"><code>WITH_CLIENT_PROTOCOL_TRACING</code></a> 选项被启用。如果 MySQL 配置启用了这两个选项，<code>libmysqlclient</code>客户端库将内置测试协议跟踪插件构建，所有标准的 MySQL 客户端都会加载该插件。但是，即使启用测试插件，默认情况下也不起作用。使用环境变量来控制插件; 请参见<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/writing-protocol-trace-plugins.html#test-protocol-trace-plugin">第 28.2.4.11.1 节“使用测试协议跟踪插件”</a>。</p>
+<blockquote>
+<p>不要启用 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/source-configuration-options.html#option_cmake_with_test_trace_plugin"><code>WITH_TEST_TRACE_PLUGIN</code></a>，如果你想使用自己的协议跟踪的插件，因为只有一个这样的插件可以在同一时间被加载并出现错误尝试加载第二个选项。如果您已经使用启用了测试协议跟踪插件的 MySQL 来构建 MySQL，以了解它是如何工作的，那么在使用自己的插件之前，您必须重新构建 MySQL。</p>
+</blockquote>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_TEST_TRACE_PLUGIN</span> <span class="token punctuation">=</span> <span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="WITH-UBSAN"><a href="#WITH-UBSAN" class="headerlink" title="WITH_UBSAN"></a>WITH_UBSAN</h2><p>是否为支持它的编译器启用 Undefined Behavior Sanitizer。默认是关闭。此选项已添加到 MySQL 5.7.6</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_UBSAN</span><span class="token punctuation">=</span><span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="WITH-UNIT-TESTS"><a href="#WITH-UNIT-TESTS" class="headerlink" title="WITH_UNIT_TESTS"></a>WITH_UNIT_TESTS</h2><p>如果启用，则使用单元测试编译 MySQL。默认值为 ON，除非服务器未被编译</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_UNIT_TESTS</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span></code></pre>
+
+<h2 id="WITH-VALGRIND"><a href="#WITH-VALGRIND" class="headerlink" title="WITH_VALGRIND"></a>WITH_VALGRIND</h2><p>是否在 Valgrind 头文件中编译，这将 Valgrind API 暴露给 MySQL 代码。默认是 <code>OFF</code></p>
+<p>要生成一个 Valgrind 感知的调试构建， <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/source-configuration-options.html#option_cmake_with_valgrind"><code>-DWITH_VALGRIND=1</code></a>通常与之结合<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/source-configuration-options.html#option_cmake_with_debug"><code>-DWITH_DEBUG=1</code></a>。请参阅 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/internals/en/debug-configurations.html">构建调试配置</a></p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_VALGRIND</span><span class="token punctuation">=</span><span class="token value attr-value">OFF</span></code></pre>
+
+<h2 id="WITH-ZLIB"><a href="#WITH-ZLIB" class="headerlink" title="WITH_ZLIB"></a>WITH_ZLIB</h2><p>某些功能要求服务器使用压缩库支持（如功能<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/encryption-functions.html#function_compress"><code>COMPRESS()</code></a>和 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/encryption-functions.html#function_uncompress"><code>UNCOMPRESS()</code></a>功能）以及客户端&#x2F;服务器协议的压缩来构建 。这 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/source-configuration-options.html#option_cmake_with_zlib"><code>WITH_ZLIB</code></a>表明<code>zlib</code>支持的来源：</p>
+<ul>
+<li><code>bundled</code>：使用<code>zlib</code>与发行版捆绑在一起的 库。这是默认值。</li>
+<li><code>system</code>：使用系统 <code>zlib</code>库。</li>
+</ul>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">WITH_ZLIB</span><span class="token punctuation">=</span><span class="token value attr-value">bundled</span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"><i class="fa fa-tag"></i> MySQL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/restful%E9%A3%8E%E6%A0%BC%E8%AE%BE%E8%AE%A1%E6%8E%A5%E5%8F%A3/" rel="prev" title="restful 风格设计接口">
+                  <i class="fa fa-chevron-left"></i> restful 风格设计接口
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%B7%A5%E5%85%B7/ubuntu/%E5%8F%8C%E7%B3%BB%E7%BB%9F%E4%BF%AE%E6%94%B9%E5%BC%95%E5%AF%BC%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F/" rel="next" title="双系统修改引导启动顺序">
+                  双系统修改引导启动顺序 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

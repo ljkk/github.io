@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Pod 的生命周期：https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;pod-lifecycle&#x2F; Pod 状态  第一阶段 Pending		# 正在创建Pod但是Pod中的容器还没有全部被创建完成，处于此状态的Pod应该检查Pod依赖的存储是否有权限挂载、镜像是否可以下载、调度是否正常等 Failed		# Pod中有容器启动失败而导致">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pod的状态和探针">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/Pod%E7%9A%84%E7%8A%B6%E6%80%81%E5%92%8C%E6%8E%A2%E9%92%88/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="Pod 的生命周期：https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;pod-lifecycle&#x2F; Pod 状态  第一阶段 Pending		# 正在创建Pod但是Pod中的容器还没有全部被创建完成，处于此状态的Pod应该检查Pod依赖的存储是否有权限挂载、镜像是否可以下载、调度是否正常等 Failed		# Pod中有容器启动失败而导致">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1616054219990.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1616054631438.png">
+<meta property="article:published_time" content="2021-03-18T07:56:00.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.498Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1616054219990.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/Pod%E7%9A%84%E7%8A%B6%E6%80%81%E5%92%8C%E6%8E%A2%E9%92%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/Pod%E7%9A%84%E7%8A%B6%E6%80%81%E5%92%8C%E6%8E%A2%E9%92%88/","path":"运维/Kubernetes/Pod的状态和探针/","title":"Pod的状态和探针"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Pod的状态和探针 | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-%E7%8A%B6%E6%80%81"><span class="nav-number">1.</span> <span class="nav-text">Pod 状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">Pod 调度过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-%E6%8E%A2%E9%92%88"><span class="nav-number">3.</span> <span class="nav-text">Pod 探针</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A2%E9%92%88%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">探针类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A2%E9%92%88%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">探针配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-%E6%8E%A2%E9%92%88%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.3.</span> <span class="nav-text">HTTP 探针示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-%E6%8E%A2%E9%92%88%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.4.</span> <span class="nav-text">TCP 探针示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ExecAction-%E6%8E%A2%E9%92%88"><span class="nav-number">3.5.</span> <span class="nav-text">ExecAction 探针</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pod-%E9%87%8D%E5%90%AF%E7%AD%96%E7%95%A5"><span class="nav-number">4.</span> <span class="nav-text">Pod 重启策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E7%AD%96%E7%95%A5"><span class="nav-number">5.</span> <span class="nav-text">镜像拉取策略</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Kubernetes/Pod%E7%9A%84%E7%8A%B6%E6%80%81%E5%92%8C%E6%8E%A2%E9%92%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Pod的状态和探针 | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Pod的状态和探针
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-18 15:56:00" itemprop="dateCreated datePublished" datetime="2021-03-18T15:56:00+08:00">2021-03-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Kubernetes/" itemprop="url" rel="index"><span itemprop="name">Kubernetes</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Pod 的生命周期：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/">https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/</a></p>
+<h2 id="Pod-状态"><a href="#Pod-状态" class="headerlink" title="Pod 状态"></a>Pod 状态</h2><p><img data-src="//img.to2b.cn/blog/ljk/1616054219990.png"></p>
+<ol>
+<li><p>第一阶段</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Pending		<span class="token comment"># 正在创建Pod但是Pod中的容器还没有全部被创建完成，处于此状态的Pod应该检查Pod依赖的存储是否有权限挂载、镜像是否可以下载、调度是否正常等</span>
+Failed		<span class="token comment"># Pod中有容器启动失败而导致pod工作异常</span>
+Unknown		<span class="token comment"># 由于某种原因无法获得pod的当前状态，通常是由于与pod所在的node节点通信错误</span>
+Succeeded	<span class="token comment"># Pod中的所有容器都被成功终止即pod里所有的containers均已terminated</span></code></pre>
+</li>
+<li><p>第二阶段</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Unschedulable		<span class="token comment"># Pod不能被调度，kube-scheduler没有匹配到合适的node节点</span>
+PodScheduled		<span class="token comment"># pod正处于调度中，在kube-scheduler刚开始调度的时候，还没有将pod分配到指定的node，在筛选出合适的节点后就会更新etcd数据，将pod分配到指定的node</span>
+Initialized			<span class="token comment"># 所有pod中的初始化容器已经完成了</span>
+ImagePullBackOff	<span class="token comment"># Pod所在的node节点下载镜像失败</span>
+Running				<span class="token comment"># Pod内部的容器已经被创建并且启动</span>
+Ready				<span class="token comment"># 表示pod中的容器已经可以提供访问服务</span></code></pre>
+</li>
+<li><p>第三阶段</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Succeeded
+Failed</code></pre></li>
+</ol>
+<p><img data-src="//img.to2b.cn/blog/ljk/1616054631438.png"></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">Error                      <span class="token comment">#pod 启动过程中发生错误</span>
+NodeLost                   <span class="token comment">#Pod 所在节点失联</span>
+Unkown                     <span class="token comment">#Pod 所在节点失联或其它未知异常</span>
+Waiting                    <span class="token comment">#Pod 等待启动</span>
+Pending                    <span class="token comment">#Pod 等待被调度</span>
+Terminating:               <span class="token comment">#Pod 正在被销毁</span>
+CrashLoopBackOff           <span class="token comment">#pod，但是kubelet正在将它重启</span>
+InvalidImageName           <span class="token comment">#node节点无法解析镜像名称导致的镜像无法下载</span>
+ImageInspectError          <span class="token comment">#无法校验镜像，镜像不完整导致</span>
+ErrImageNeverPull          <span class="token comment">#策略禁止拉取镜像，镜像中心权限是私有等</span>
+ImagePullBackOff           <span class="token comment">#镜像拉取失败，但是正在重新拉取</span>
+RegistryUnavailable        <span class="token comment">#镜像服务器不可用，网络原因或harbor宕机</span>
+ErrImagePull               <span class="token comment">#镜像拉取出错，超时或下载被强制终止</span>
+CreateContainerConfigError <span class="token comment">#不能创建kubelet使用的容器配置</span>
+CreateContainerError       <span class="token comment">#创建容器失败</span>
+PreStartContainer          <span class="token comment">#执行preStart hook报错，Pod hook(钩子)是由 Kubernetes 管理的 kubelet 发起的，当容器中的进程启动前或者容器中的进程终止之前运行，比如容器创建完成后里面的服务启动之前可以检查一下依赖的其它服务是否启动，或者容器退出之前可以把容器中的服务先通过命令停止。</span>
+PostStartHookError         <span class="token comment">#执行 postStart hook 报错</span>
+RunContainerError          <span class="token comment">#pod运行失败，容器中没有初始化PID为1的守护进程等</span>
+ContainersNotInitialized   <span class="token comment">#pod没有初始化完毕</span>
+ContainersNotReady         <span class="token comment">#pod没有准备完毕</span>
+ContainerCreating          <span class="token comment">#pod正在创建中</span>
+PodInitializing            <span class="token comment">#pod正在初始化中</span>
+DockerDaemonNotReady       <span class="token comment">#node节点decker服务没有启动</span>
+NetworkPluginNotReady      <span class="token comment">#网络插件还没有完全启动</span></code></pre>
+
+<h2 id="Pod-调度过程"><a href="#Pod-调度过程" class="headerlink" title="Pod 调度过程"></a>Pod 调度过程</h2><p>参考：<a href="./%E5%9F%BA%E7%A1%80/#kube-scheduler">kube-scheduler</a></p>
+<h2 id="Pod-探针"><a href="#Pod-探针" class="headerlink" title="Pod 探针"></a>Pod 探针</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/#container-probes">https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/#container-probes</a></p>
+<p>探针是 kubelet 对容器执行的定期诊断，以保证 Pod 的状态始终处于运行状态，要执行诊断，kubelet 调用由容器实现的 Handler（处理程序），有三种类型的处理程序：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ExecAction      <span class="token comment">#在容器内执行指定命令，如果命令退出时返回码为0则认为诊断成功</span>
+TCPSocketAction <span class="token comment">#对指定端口上的容器的IP地址进行TCP检查，如果端口打开，则诊断被认为是成功的</span>
+HTTPGetAction   <span class="token comment">#对指定的端口和路径上的容器的IP地址执行HTTPGet请求，如果响应的状态码大于等于200且小于 400，则诊断被认为是成功的</span></code></pre>
+
+<p>每次探测都将获得以下三种结果之一：</p>
+<pre class="language-none"><code class="language-none">成功：容器通过了诊断
+失败：容器未通过诊断
+未知：诊断失败，因此不会采取任何行动</code></pre>
+
+<h3 id="探针类型"><a href="#探针类型" class="headerlink" title="探针类型"></a>探针类型</h3><pre class="language-bash" data-language="bash"><code class="language-bash">livenessProbe	<span class="token comment"># 存活探针，检测容器容器是否正在运行，如果存活探测失败，则kubelet会杀死容器，并且容器将受到其重启策略的影响，如果容器不提供存活探针，则默认状态为 Success，livenessProbe用于控制是否重启pod</span>
+
+readinessProbe	<span class="token comment"># 就绪探针，如果就绪探测失败，端点控制器将从与Pod匹配的所有Service的端点中删除该Pod的IP地址，初始延迟之前的就绪状态默认为Failure(失败)，如果容器不提供就绪探针，则默认状态为 Success，readinessProbe用于控制pod是否添加至service</span></code></pre>
+
+<p>livenessProbe 和 readinessProbe 的对比：</p>
+<pre class="language-none"><code class="language-none">1. 配置参数一样
+2. livenessProbe用于控制是否重启pod，readinessProbe用于控制pod是否添加至service
+3. livenessProbe连续探测失败会重启、重建pod，readinessProbe不会执行重启或者重建Pod操作
+4. livenessProbe连续检测指定次数失败后会将容器置于(Crash Loop BackOff)且不可用，readinessProbe不会
+5. readinessProbe 连续探测失败会从service的endpointd中删除该Pod，livenessProbe不具备此功能，但是会将容器挂起livenessProbe
+
+建议：两个探针都配置</code></pre>
+
+<h3 id="探针配置"><a href="#探针配置" class="headerlink" title="探针配置"></a>探针配置</h3><p>探针有很多配置字段，可以使用这些字段精确的控制存活和就绪检测的行为：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">initialDelaySeconds: <span class="token number">120</span> <span class="token comment"># 初始化延迟时间，告诉kubelet在执行第一次探测前应该等待多少秒，默认是0秒，最小值是0</span>
+periodSeconds: <span class="token number">60</span>        <span class="token comment"># 探测周期间隔时间，指定了kubelet应该每多少秒秒执行一次存活探测，默认是10秒。最小值是1</span>
+timeoutSeconds: <span class="token number">5</span>        <span class="token comment"># 单次探测超时时间，探测的超时后等待多少秒，默认值是1秒，最小值是1</span>
+successThreshold: <span class="token number">1</span>      <span class="token comment"># 从失败转为成功的重试次数，探测器在失败后，被视为成功的最小连续成功数，默认值是1，存活探测的这个值必须是1，最小值是 1</span>
+failureThreshold: <span class="token number">3</span>      <span class="token comment"># 从成功转为失败的重试次数，当Pod启动了并且探测到失败，Kubernetes的重试次数，存活探测情况下的放弃就意味着重新启动容器，就绪探测情况下的放弃Pod 会被打上未就绪的标签，默认值是3，最小值是1</span></code></pre>
+
+<p>HTTP 探测器可以在 httpGet 上配置额外的字段：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">host:                     <span class="token comment">#连接使用的主机名，默认是Pod的 IP，也可以在HTTP头中设置 "Host" 来代替</span>
+scheme: http              <span class="token comment">#用于设置连接主机的方式（HTTP 还是 HTTPS），默认是 HTTP</span>
+path: /monitor/index.html <span class="token comment">#访问 HTTP 服务的路径</span>
+httpHeaders:              <span class="token comment">#请求中自定义的 HTTP 头,HTTP 头字段允许重复</span>
+port: <span class="token number">80</span>                  <span class="token comment">#访问容器的端口号或者端口名，如果数字必须在 1 ～ 65535 之间</span></code></pre>
+
+<h3 id="HTTP-探针示例"><a href="#HTTP-探针示例" class="headerlink" title="HTTP 探针示例"></a>HTTP 探针示例</h3><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment">#apiVersion: extensions/v1beta1</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span> <span class="token comment">#rs or deployment</span>
+      <span class="token key atrule">app</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+    <span class="token comment">#matchExpressions:</span>
+    <span class="token comment"># - &#123;key: app, operator: In, values: [ng-deploy-80,ng-rs-81]&#125;</span>
+    <span class="token key atrule">template</span><span class="token punctuation">:</span>
+      <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+        <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+          <span class="token key atrule">app</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+      <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+        <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+          <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+            <span class="token key atrule">image</span><span class="token punctuation">:</span> nginx<span class="token punctuation">:</span>1.17.5
+            <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+              <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
+            <span class="token comment">#readinessProbe:</span>
+            <span class="token key atrule">livenessProbe</span><span class="token punctuation">:</span>
+              <span class="token key atrule">httpGet</span><span class="token punctuation">:</span>
+                <span class="token comment">#path: /monitor/monitor.html</span>
+                <span class="token key atrule">path</span><span class="token punctuation">:</span> /index.html <span class="token comment"># 探测的url</span>
+                <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span>
+              <span class="token key atrule">initialDelaySeconds</span><span class="token punctuation">:</span> <span class="token number">5</span> <span class="token comment"># 等五秒才开始第一次检测</span>
+              <span class="token key atrule">periodSeconds</span><span class="token punctuation">:</span> <span class="token number">3</span> <span class="token comment"># 探测周期</span>
+              <span class="token key atrule">timeoutSeconds</span><span class="token punctuation">:</span> <span class="token number">5</span> <span class="token comment"># 单次探测超时时间</span>
+              <span class="token key atrule">successThreshold</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token comment"># 处于失败中，探测成功一次就算成功</span>
+              <span class="token key atrule">failureThreshold</span><span class="token punctuation">:</span> <span class="token number">3</span> <span class="token comment"># 出于成功中，探测失败三次才算失败</span>
+<span class="token punctuation">---</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+<span class="token key atrule">ports</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http
+    <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">81</span>
+    <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
+    <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">40012</span>
+    <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+<span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort
+<span class="token key atrule">selector</span><span class="token punctuation">:</span>
+  <span class="token key atrule">app</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span></code></pre>
+
+<h3 id="TCP-探针示例"><a href="#TCP-探针示例" class="headerlink" title="TCP 探针示例"></a>TCP 探针示例</h3><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment">#apiVersion: extensions/v1beta1</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>deployment
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+  <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span> <span class="token comment">#rs or deployment</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+  <span class="token comment">#matchExpressions:</span>
+  <span class="token comment"># - &#123;key: app, operator: In, values: [ng-deploy-80,ng-rs-81]&#125;</span>
+  <span class="token key atrule">template</span><span class="token punctuation">:</span>
+    <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+      <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+        <span class="token key atrule">app</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+          <span class="token key atrule">image</span><span class="token punctuation">:</span> nginx<span class="token punctuation">:</span>1.17.5
+          <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+            <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
+          <span class="token key atrule">livenessProbe</span><span class="token punctuation">:</span> <span class="token comment">#或readinessProbe:</span>
+            <span class="token key atrule">tcpSocket</span><span class="token punctuation">:</span>
+              <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span>
+            <span class="token key atrule">initialDelaySeconds</span><span class="token punctuation">:</span> <span class="token number">5</span>
+            <span class="token key atrule">periodSeconds</span><span class="token punctuation">:</span> <span class="token number">3</span>
+            <span class="token key atrule">timeoutSeconds</span><span class="token punctuation">:</span> <span class="token number">5</span>
+            <span class="token key atrule">successThreshold</span><span class="token punctuation">:</span> <span class="token number">1</span>
+            <span class="token key atrule">failureThreshold</span><span class="token punctuation">:</span> <span class="token number">3</span>
+<span class="token punctuation">---</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span>
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">81</span>
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
+      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">40012</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> ng<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">80</span></code></pre>
+
+<h3 id="ExecAction-探针"><a href="#ExecAction-探针" class="headerlink" title="ExecAction 探针"></a>ExecAction 探针</h3><p>基于指定的命令对 Pod 进行特定的状态检查</p>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment">#apiVersion: extensions/v1beta1</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>deployment
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+  <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span> <span class="token comment">#rs or deployment</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">6379</span>
+  <span class="token comment">#matchExpressions:</span>
+  <span class="token comment"># - &#123;key: app, operator: In, values: [redis-deploy-6379,ng-rs-81]&#125;</span>
+  <span class="token key atrule">template</span><span class="token punctuation">:</span>
+    <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+      <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+        <span class="token key atrule">app</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">6379</span>
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">6379</span>
+      <span class="token key atrule">image</span><span class="token punctuation">:</span> redis
+      <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">6379</span>
+      <span class="token comment">#readinessProbe:</span>
+      <span class="token key atrule">livenessProbe</span><span class="token punctuation">:</span>
+        <span class="token key atrule">exec</span><span class="token punctuation">:</span>
+          <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token comment"># 基于指定的命令对Pod进行特定的状态检查</span>
+            <span class="token comment">#- /apps/redis/bin/redis-cli</span>
+            <span class="token punctuation">-</span> /usr/local/bin/redis<span class="token punctuation">-</span>cli
+            <span class="token punctuation">-</span> quit
+        <span class="token key atrule">initialDelaySeconds</span><span class="token punctuation">:</span> <span class="token number">5</span>
+        <span class="token key atrule">periodSeconds</span><span class="token punctuation">:</span> <span class="token number">3</span>
+        <span class="token key atrule">timeoutSeconds</span><span class="token punctuation">:</span> <span class="token number">5</span>
+        <span class="token key atrule">successThreshold</span><span class="token punctuation">:</span> <span class="token number">1</span>
+        <span class="token key atrule">failureThreshold</span><span class="token punctuation">:</span> <span class="token number">3</span>
+<span class="token punctuation">---</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">6379</span>
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort
+  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> http
+      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">6379</span>
+      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">6379</span>
+      <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">40016</span>
+      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>deploy<span class="token punctuation">-</span><span class="token number">6379</span></code></pre>
+
+<h2 id="Pod-重启策略"><a href="#Pod-重启策略" class="headerlink" title="Pod 重启策略"></a>Pod 重启策略</h2><p>k8s 在 Pod 出现异常的时候会自动将 Pod 重启，以恢复 Pod 中的服务</p>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml">restartPolicy：
+	Always	<span class="token comment"># 当容器异常时，k8s自动重启该容器，ReplicationController/Replicaset/Deployment</span>
+	OnFailure	<span class="token comment"># 当容器失败时(容器停止运行且退出码不为0)，k8s自动重启该容器</span>
+	Never	<span class="token comment"># 不论容器运行状态如何都不会重启该容器,Job或CronJob</span></code></pre>
+
+<h2 id="镜像拉取策略"><a href="#镜像拉取策略" class="headerlink" title="镜像拉取策略"></a>镜像拉取策略</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/configuration/overview/">配置最佳实践 | Kubernetes</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">imagePullPolicy:
+	IfNotPresent	<span class="token comment"># node节点没有此镜像就去指定的镜像仓库拉取，node有就使用node本地镜像</span>
+	Always		<span class="token comment"># 每次重建pod都会重新拉取镜像</span>
+	Never		<span class="token comment"># 从不到镜像中心拉取镜像，只使用本地镜像</span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/HPA%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9pod%E6%95%B0%E9%87%8F/" rel="prev" title="HPA自动伸缩pod数量">
+                  <i class="fa fa-chevron-left"></i> HPA自动伸缩pod数量
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Kubernetes/%E4%B8%9A%E5%8A%A1%E9%95%9C%E5%83%8F%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E5%8F%8A%E5%9B%9E%E6%BB%9A/" rel="next" title="业务镜像版本升级及回滚">
+                  业务镜像版本升级及回滚 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

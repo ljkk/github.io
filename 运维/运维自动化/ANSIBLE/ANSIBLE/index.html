@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ansible 介绍和架构ansible 特性 基于 python 实现 模块化：支持自定义模块，可以使用任何语言编写模块 安全：基于 OpenSSH 部署简单：被控端不需要配置环境 幂等性：一个任何执行一遍和执行 n 遍效果一样，不因重复执行带来意外情况，此特性非绝对 支持 playbook 编排任务，YAML 格式，编排任务，支持丰富的数据结构 较强大的多层解决方案 role  ansible">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ANSIBLE">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/ANSIBLE/ANSIBLE/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="ansible 介绍和架构ansible 特性 基于 python 实现 模块化：支持自定义模块，可以使用任何语言编写模块 安全：基于 OpenSSH 部署简单：被控端不需要配置环境 幂等性：一个任何执行一遍和执行 n 遍效果一样，不因重复执行带来意外情况，此特性非绝对 支持 playbook 编排任务，YAML 格式，编排任务，支持丰富的数据结构 较强大的多层解决方案 role  ansible">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1603019949400.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1603026608236.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1611764134262.png">
+<meta property="article:published_time" content="2020-12-09T15:30:58.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.514Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="ansible">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1603019949400.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/ANSIBLE/ANSIBLE/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/ANSIBLE/ANSIBLE/","path":"运维/运维自动化/ANSIBLE/ANSIBLE/","title":"ANSIBLE"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ANSIBLE | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ansible-%E4%BB%8B%E7%BB%8D%E5%92%8C%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">ansible 介绍和架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ansible-%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">ansible 特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ansible-%E6%9E%B6%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">ansible 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ansible-%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%9D%A5%E6%BA%90"><span class="nav-number">1.3.</span> <span class="nav-text">ansible 命令执行来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">1.4.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ansible-%E5%AE%89%E8%A3%85%E5%92%8C%E5%85%A5%E9%97%A8"><span class="nav-number">2.</span> <span class="nav-text">ansible 安装和入门</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ansible-%E7%9B%B8%E5%85%B3%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">ansible 相关文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ansible-%E4%B8%BB%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.1.</span> <span class="nav-text">ansible 主配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#inventory-%E4%B8%BB%E6%9C%BA%E6%B8%85%E5%8D%95"><span class="nav-number">2.1.2.</span> <span class="nav-text">inventory 主机清单</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ansible-%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7"><span class="nav-number">2.2.</span> <span class="nav-text">ansible 相关工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ansible"><span class="nav-number">2.2.1.</span> <span class="nav-text">ansible</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ansible-%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">ansible 命令执行顺序</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ansible-%E6%89%A7%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">ansible 执行状态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ansible-%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.2.1.3.</span> <span class="nav-text">ansible 使用示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ansible-doc"><span class="nav-number">2.2.2.</span> <span class="nav-text">ansible-doc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ansible-playbook"><span class="nav-number">2.2.3.</span> <span class="nav-text">ansible-playbook</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ansible-vault"><span class="nav-number">2.2.4.</span> <span class="nav-text">ansible-vault</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ansible-console"><span class="nav-number">2.2.5.</span> <span class="nav-text">ansible-console</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ansible-galaxy"><span class="nav-number">2.2.6.</span> <span class="nav-text">ansible-galaxy</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ansible-%E5%B8%B8%E7%94%A8%E6%A8%A1%E5%9D%97"><span class="nav-number">2.3.</span> <span class="nav-text">ansible 常用模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#command"><span class="nav-number">2.3.1.</span> <span class="nav-text">command</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#shell"><span class="nav-number">2.3.2.</span> <span class="nav-text">shell</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#script"><span class="nav-number">2.3.3.</span> <span class="nav-text">script</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#copy"><span class="nav-number">2.3.4.</span> <span class="nav-text">copy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fetch"><span class="nav-number">2.3.5.</span> <span class="nav-text">fetch</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#file"><span class="nav-number">2.3.6.</span> <span class="nav-text">file</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#unarchive"><span class="nav-number">2.3.7.</span> <span class="nav-text">unarchive</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#archive"><span class="nav-number">2.3.8.</span> <span class="nav-text">archive</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#hostname"><span class="nav-number">2.3.9.</span> <span class="nav-text">hostname</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cron"><span class="nav-number">2.3.10.</span> <span class="nav-text">cron</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#yum%E3%80%81apt"><span class="nav-number">2.3.11.</span> <span class="nav-text">yum、apt</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#yum"><span class="nav-number">2.3.11.1.</span> <span class="nav-text">yum</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#apt"><span class="nav-number">2.3.11.2.</span> <span class="nav-text">apt</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#serivce"><span class="nav-number">2.3.12.</span> <span class="nav-text">serivce</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#user"><span class="nav-number">2.3.13.</span> <span class="nav-text">user</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#group"><span class="nav-number">2.3.14.</span> <span class="nav-text">group</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lineinfile"><span class="nav-number">2.3.15.</span> <span class="nav-text">lineinfile</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#replace"><span class="nav-number">2.3.16.</span> <span class="nav-text">replace</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#setup"><span class="nav-number">2.3.17.</span> <span class="nav-text">setup</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#playbook"><span class="nav-number">3.</span> <span class="nav-text">playbook</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#playbook-%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">playbook 核心组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hosts-%E7%BB%84%E4%BB%B6"><span class="nav-number">3.1.1.</span> <span class="nav-text">hosts 组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#remote-user%E3%80%81sudo%E3%80%81sudo-user-%E7%BB%84%E4%BB%B6"><span class="nav-number">3.1.2.</span> <span class="nav-text">remote_user、sudo、sudo_user 组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tasks-%E5%92%8C-action"><span class="nav-number">3.1.3.</span> <span class="nav-text">tasks 和 action</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#handlers-%E5%92%8C-notify"><span class="nav-number">3.1.4.</span> <span class="nav-text">handlers 和 notify</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tags-%E7%BB%84%E4%BB%B6"><span class="nav-number">3.1.5.</span> <span class="nav-text">tags 组件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Playbook-%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%8F%98%E9%87%8F"><span class="nav-number">3.2.</span> <span class="nav-text">Playbook 中使用变量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E7%BD%AE%E5%8F%98%E9%87%8F-hostvars"><span class="nav-number">3.2.1.</span> <span class="nav-text">内置变量 hostvars</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%8F%98%E9%87%8F"><span class="nav-number">3.2.2.</span> <span class="nav-text">常用变量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#playbook-%E4%B8%AD%E4%BD%BF%E7%94%A8-when"><span class="nav-number">3.3.</span> <span class="nav-text">playbook 中使用 when</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#playbook-%E4%BD%BF%E7%94%A8%E8%BF%AD%E4%BB%A3-with-items-loop"><span class="nav-number">3.4.</span> <span class="nav-text">playbook 使用迭代 with_items(loop)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E8%8A%82%E7%82%B9%E8%BF%87%E5%A4%9A%E5%AF%BC%E8%87%B4%E7%9A%84%E8%B6%85%E6%97%B6%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">3.5.</span> <span class="nav-text">管理节点过多导致的超时问题解决方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#roles"><span class="nav-number">4.</span> <span class="nav-text">roles</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/ANSIBLE/ANSIBLE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ANSIBLE | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ANSIBLE
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-09 23:30:58" itemprop="dateCreated datePublished" datetime="2020-12-09T23:30:58+08:00">2020-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">运维自动化</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96/ANSIBLE/" itemprop="url" rel="index"><span itemprop="name">ANSIBLE</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="ansible-介绍和架构"><a href="#ansible-介绍和架构" class="headerlink" title="ansible 介绍和架构"></a>ansible 介绍和架构</h2><h3 id="ansible-特性"><a href="#ansible-特性" class="headerlink" title="ansible 特性"></a>ansible 特性</h3><ul>
+<li>基于 python 实现</li>
+<li>模块化：支持自定义模块，可以使用任何语言编写模块</li>
+<li>安全：基于 OpenSSH</li>
+<li>部署简单：被控端不需要配置环境</li>
+<li>幂等性：一个任何执行一遍和执行 n 遍效果一样，不因重复执行带来意外情况，此特性非绝对</li>
+<li>支持 playbook 编排任务，YAML 格式，编排任务，支持丰富的数据结构</li>
+<li>较强大的多层解决方案 role</li>
+</ul>
+<h3 id="ansible-架构"><a href="#ansible-架构" class="headerlink" title="ansible 架构"></a>ansible 架构</h3><p><img data-src="//img.to2b.cn/blog/ljk/1603019949400.png"></p>
+<ul>
+<li>INVENTORY：Ansible 管理主机的清单&#x2F;etc&#x2F;anaible&#x2F;hosts</li>
+<li>MODULES：Ansible 执行命令的功能模块，多数为内置核心模块，也可自定义</li>
+<li>PLUGINS：模块功能的补充，如连接类型插件、循环插件、变量插件、过滤插件等，该功能不常用</li>
+<li>API：供第三方程序调用的应用程序编程接口</li>
+</ul>
+<h3 id="ansible-命令执行来源"><a href="#ansible-命令执行来源" class="headerlink" title="ansible 命令执行来源"></a>ansible 命令执行来源</h3><ul>
+<li>USER：普通用户，即 SYSTEM ADMINISTRATOR</li>
+<li>PLAYBOOKS：任务剧本（任务集），编排定义 Ansible 任务集的配置文件，由 Ansible 顺序依次执行，通常是 JSON 格式的 YML 文件</li>
+<li>CMDB（配置管理数据库） API 调用</li>
+<li>PUBLIC&#x2F;PRIVATE CLOUD API 调用</li>
+<li>USER-&gt; Ansible Playbook -&gt; Ansibile</li>
+</ul>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>执行 ansible 的主机一般称为管理端, 主控端，中控，master 或堡垒机</li>
+<li>主控端 Python 版本需要 2.6 或以上</li>
+<li>如果被控端 Python 版本小于 2.4，则需要安装 python-simplejson</li>
+<li>被控端如开启 SELinux 需要安装 libselinux-python</li>
+<li>windows 不能做为主控端</li>
+</ul>
+<h2 id="ansible-安装和入门"><a href="#ansible-安装和入门" class="headerlink" title="ansible 安装和入门"></a>ansible 安装和入门</h2><p>pip 安装后没有配置文件，需要手动创建，有以下四种方式：</p>
+<ol>
+<li>ANSIBLE_CONFIG (environment variable if set)</li>
+<li>ansible.cfg (in the current directory)</li>
+<li>~&#x2F;.ansible.cfg (in the home directory)</li>
+<li>&#x2F;etc&#x2F;ansible&#x2F;ansible.cfg</li>
+</ol>
+<h3 id="ansible-相关文件"><a href="#ansible-相关文件" class="headerlink" title="ansible 相关文件"></a>ansible 相关文件</h3><ul>
+<li>&#x2F;etc&#x2F;ansible&#x2F;ansible.cfg 主配置文件，配置 ansible 工作特性</li>
+<li>&#x2F;etc&#x2F;ansible&#x2F;hosts 主机清单</li>
+<li>&#x2F;etc&#x2F;ansible&#x2F;roles&#x2F; 存放角色的目录</li>
+</ul>
+<h4 id="ansible-主配置文件"><a href="#ansible-主配置文件" class="headerlink" title="ansible 主配置文件"></a>ansible 主配置文件</h4><p>默认为：&#x2F;etc&#x2F;ansible&#x2F;ansible.cfg</p>
+<p>参考文档：<a target="_blank" rel="noopener" href="http://www.ansible.com.cn/docs/intro_configuration.html">http://www.ansible.com.cn/docs/intro_configuration.html</a></p>
+<h4 id="inventory-主机清单"><a href="#inventory-主机清单" class="headerlink" title="inventory 主机清单"></a>inventory 主机清单</h4><p>默认为：&#x2F;etc&#x2F;ansible&#x2F;hosts</p>
+<p>参考文档：<a target="_blank" rel="noopener" href="http://www.ansible.com.cn/docs/intro_inventory.html?highlight=hosts">http://www.ansible.com.cn/docs/intro_inventory.html?highlight=hosts</a></p>
+<p>示例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini">ntp.magedu.com
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">webservers</span><span class="token punctuation">]</span></span>
+www1.magedu.com:2222
+www2.magedu.com
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">dbservers</span><span class="token punctuation">]</span></span>
+db1.magedu.com
+db2.magedu.com
+db3.magedu.com
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">websrvs</span><span class="token punctuation">]</span></span>
+www[1:100].example.com
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">dbsrvs</span><span class="token punctuation">]</span></span>
+db-[a:f].example.com
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">appsrvs</span><span class="token punctuation">]</span></span>
+<span class="token comment"># 表示 10.0.0.1 - 10.0.0.100</span>
+10.0.0.[1:100]
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">ex-lb</span><span class="token punctuation">]</span></span>
+<span class="token comment"># 定义主机变量，这些变量定义后可在 playbooks 中使用</span>
+<span class="token key attr-name">10.0.2.1 LB_ROLE</span><span class="token punctuation">=</span><span class="token value attr-value">backup EX_APISERVER_VIP=10.0.2.188 EX_APISERVER_PORT=8443</span>
+<span class="token key attr-name">10.0.2.2 LB_ROLE</span><span class="token punctuation">=</span><span class="token value attr-value">master EX_APISERVER_VIP=10.0.2.188 EX_APISERVER_PORT=8443</span></code></pre>
+
+<p>给主机组设置变量，示例：</p>
+<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">all:vars</span><span class="token punctuation">]</span></span>						# 为所有主机组设置变量
+<span class="token key attr-name">CONTAINER_RUNTIME</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">docker</span>"</span>
+<span class="token key attr-name">CLUSTER_NETWORK</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">calico</span>"</span>
+<span class="token key attr-name">PROXY_MODE</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">ipvs</span>"</span>
+<span class="token key attr-name">SERVICE_CIDR</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">192.168.0.0/16</span>"</span>
+<span class="token key attr-name">CLUSTER_CIDR</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">10.10.0.0/16</span>"</span>
+<span class="token key attr-name">NODE_PORT_RANGE</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">30000-60000</span>"</span>
+<span class="token key attr-name">CLUSTER_DNS_DOMAIN</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">ljk.local.</span>"</span>
+<span class="token key attr-name">bin_dir</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">/usr/local/bin</span>"</span>
+<span class="token key attr-name">ca_dir</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">/etc/kubernetes/ssl</span>"</span>
+<span class="token key attr-name">base_dir</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">/etc/ansible</span>"</span></code></pre>
+
+<p>注意：ansible 会隐式创建一个 localhost 主机，只是 localhost 不能匹配 all</p>
+<h3 id="ansible-相关工具"><a href="#ansible-相关工具" class="headerlink" title="ansible 相关工具"></a>ansible 相关工具</h3><ul>
+<li>ansible：主程序，临时命令执行工具</li>
+<li>ansible-doc：查看配置文档，模块功能查看工具,相当于 man</li>
+<li>ansible-playbook：定制自动化任务，编排剧本工具,相当于脚本</li>
+<li>ansible-pull：远程执行命令的工具</li>
+<li>ansible-vault：文件加密工具</li>
+<li>ansible-console：基于 Console 界面与用户交互的执行工具</li>
+<li>ansible-galaxy：下载&#x2F;上传优秀代码或 Roles 模块的官网平台</li>
+</ul>
+<h4 id="ansible"><a href="#ansible" class="headerlink" title="ansible"></a>ansible</h4><p>通过 ssh 协议，实现对远程主机的配置管理、应用部署、任务执行等功能</p>
+<p>注意：使用 ansible 之前，需要配置各个被控端基于 key 的密钥认证</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible <span class="token operator">&lt;</span>host-pattern<span class="token operator">></span> <span class="token punctuation">[</span>option<span class="token punctuation">]</span><span class="token punctuation">..</span>.</code></pre>
+
+<ul>
+<li><p><a target="_blank" rel="noopener" href="http://www.ansible.com.cn/docs/intro_patterns.html">host-pattern</a>：匹配被控主机</p>
+<ul>
+<li>all：inventory 中的所有主机</li>
+<li>支持通配符</li>
+<li><a target="_blank" rel="noopener" href="http://www.ansible.com.cn/docs/intro_patterns.html">支持正则表达式</a>：需要以 ‘~’ 开头</li>
+<li>使用:表示或关系</li>
+<li>使用:&amp;表示与关系</li>
+<li>使用:!表示非关系</li>
+</ul>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># all</span>
+ansible all –m <span class="token function">ping</span>
+<span class="token comment"># 统配符</span>
+ansible <span class="token string">"*"</span> <span class="token parameter variable">-m</span> <span class="token function">ping</span>
+ansible <span class="token number">192.168</span>.1.* <span class="token parameter variable">-m</span> <span class="token function">ping</span>
+ansible <span class="token string">"srvs"</span> <span class="token parameter variable">-m</span> <span class="token function">ping</span>
+ansible <span class="token string">"10.0.0.6 10.0.0.7"</span> <span class="token parameter variable">-m</span> <span class="token function">ping</span>
+<span class="token comment"># 或</span>
+ansible <span class="token string">"websrvs:appsrvs"</span> <span class="token parameter variable">-m</span> <span class="token function">ping</span>
+ansible <span class="token string">"192.168.1.10:192.168.1.20"</span> <span class="token parameter variable">-m</span> <span class="token function">ping</span>
+<span class="token comment"># 与</span>
+ansible <span class="token string">"websrvs:&amp;dbsrvs"</span> –m <span class="token function">ping</span>	<span class="token comment"># 在websrvs组并且在dbsrvs组中的主机</span>
+<span class="token comment"># 非 注意此处为单引号</span>
+ansible <span class="token string">'websrvs:!dbsrvs'</span> –m <span class="token function">ping</span>	<span class="token comment">#在websrvs组，但不在dbsrvs组中的主机</span>
+<span class="token comment"># 综合逻辑</span>
+ansible <span class="token string">'websrvs:dbsrvs:&amp;appsrvs:!ftpsrvs'</span> –m <span class="token function">ping</span>
+<span class="token comment"># 正则表达式</span>
+ansible <span class="token string">"~(web|db).*\.magedu\.com"</span> –m <span class="token function">ping</span></code></pre>
+</li>
+<li><p>常用 option</p>
+<ul>
+<li>–version：显示版本等信息</li>
+<li>-m module：指定模块，默认为 command</li>
+<li>-a|–args MODULE_ARGS：指定模块的参数</li>
+<li>–list-hosts：显示主机列表，可简写 –lists</li>
+<li>-C|–check：检查，并不执行</li>
+<li>-T|–timeout&#x3D;TIMEOUT：执行命令的超时时间，默认 10s</li>
+<li>-k|–ask-pass：提示输入 ssh 连接密码，默认 Key 验证</li>
+<li>-u| –user REMOTE_USER：指定远程执行的用户</li>
+<li>-b|–become：代替旧版的 sudo 切换</li>
+<li>–become-user&#x3D;USERNAME：指定 sudo 的 runas 用户，默认为 root</li>
+<li>-K|–ask-become-pass：提示输入 sudo 时的口令</li>
+</ul>
+</li>
+</ul>
+<h5 id="ansible-命令执行顺序"><a href="#ansible-命令执行顺序" class="headerlink" title="ansible 命令执行顺序"></a>ansible 命令执行顺序</h5><ol>
+<li>加载配置文件，默认&#x2F;etc&#x2F;ansible&#x2F;ansible.cfg</li>
+<li>加载对应的模块文件，如：command</li>
+<li>将模块或命令生成临时 py 文件，并将该文件传输至远程服务器远程服务器：$HOME&#x2F;.ansible&#x2F;tmp&#x2F;ansible-tmp-数字&#x2F;XXX.PY</li>
+<li>给文件+x 权限</li>
+<li>执行并返回结果</li>
+<li>删除临时 py 文件，退出</li>
+</ol>
+<h5 id="ansible-执行状态"><a href="#ansible-执行状态" class="headerlink" title="ansible 执行状态"></a>ansible 执行状态</h5><p>在 ansible.cfg 的[colors]配置项中设置：</p>
+<ul>
+<li>绿色：执行成功且没有对目标主机做更改</li>
+<li>黄色：执行成功且对目标主机做了更改</li>
+<li>红色：执行失败</li>
+</ul>
+<h5 id="ansible-使用示例"><a href="#ansible-使用示例" class="headerlink" title="ansible 使用示例"></a>ansible 使用示例</h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">(</span>venv<span class="token punctuation">)</span> <span class="token punctuation">[</span>root@c71 bin<span class="token punctuation">]</span><span class="token variable">$ansible</span> all <span class="token parameter variable">-m</span> <span class="token builtin class-name">command</span> <span class="token parameter variable">-a</span> <span class="token string">'ls ~'</span>
+<span class="token number">10.0</span>.0.72 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+anaconda-ks.cfg
+init.sh
+original-ks.cfg
+<span class="token number">10.0</span>.0.82 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+anaconda-ks.cfg
+init.sh
+original-ks.cfg
+<span class="token number">10.0</span>.0.81 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+anaconda-ks.cfg
+init.sh
+original-ks.cfg
+<span class="token punctuation">(</span>venv<span class="token punctuation">)</span> <span class="token punctuation">[</span>root@c71 bin<span class="token punctuation">]</span><span class="token variable">$ansible</span> all <span class="token parameter variable">-m</span> <span class="token function">ping</span>
+<span class="token number">10.0</span>.0.72 <span class="token operator">|</span> SUCCESS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"ansible_facts"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"discovered_interpreter_python"</span><span class="token builtin class-name">:</span> <span class="token string">"/usr/bin/python"</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"changed"</span><span class="token builtin class-name">:</span> false,
+    <span class="token string">"ping"</span><span class="token builtin class-name">:</span> <span class="token string">"pong"</span>
+<span class="token punctuation">&#125;</span>
+<span class="token number">10.0</span>.0.81 <span class="token operator">|</span> SUCCESS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"ansible_facts"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"discovered_interpreter_python"</span><span class="token builtin class-name">:</span> <span class="token string">"/usr/libexec/platform-python"</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"changed"</span><span class="token builtin class-name">:</span> false,
+    <span class="token string">"ping"</span><span class="token builtin class-name">:</span> <span class="token string">"pong"</span>
+<span class="token punctuation">&#125;</span>
+<span class="token number">10.0</span>.0.82 <span class="token operator">|</span> SUCCESS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"ansible_facts"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"discovered_interpreter_python"</span><span class="token builtin class-name">:</span> <span class="token string">"/usr/libexec/platform-python"</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"changed"</span><span class="token builtin class-name">:</span> false,
+    <span class="token string">"ping"</span><span class="token builtin class-name">:</span> <span class="token string">"pong"</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h4 id="ansible-doc"><a href="#ansible-doc" class="headerlink" title="ansible-doc"></a>ansible-doc</h4><p>显示模块帮助，相当于 man</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible-doc <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>module<span class="token punctuation">..</span>.<span class="token punctuation">]</span></code></pre>
+
+<p>options：</p>
+<ul>
+<li>-l|–list：列出可用模块</li>
+<li>-s|–snippet：显示指定模块的 playbook 片段</li>
+</ul>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#列出所有模块</span>
+ansible-doc <span class="token parameter variable">-l</span>
+<span class="token comment">#查看指定模块帮助用法</span>
+ansible-doc <span class="token function">ping</span>
+<span class="token comment">#查看指定模块帮助用法</span>
+ansible-doc <span class="token parameter variable">-s</span> <span class="token function">ping</span></code></pre>
+
+<h4 id="ansible-playbook"><a href="#ansible-playbook" class="headerlink" title="ansible-playbook"></a>ansible-playbook</h4><p>执行编写好的 playbook 任务</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible-playbook <span class="token operator">&lt;</span>filename.yml<span class="token operator">></span> <span class="token punctuation">..</span>. <span class="token punctuation">[</span>options<span class="token punctuation">]</span></code></pre>
+
+<ul>
+<li>–syntax-check：语法检查</li>
+<li>-C|–check：只检测可能会发生的改变，但不真正执行操作</li>
+<li>–list-hosts：列出运行任务的主机</li>
+<li>–list-tags：列出 tag</li>
+<li>–list-tasks：列出 task</li>
+<li>–limit 主机列表：只针对主机列表中的特定主机执行</li>
+<li>-v -vv -vvv：显示过程</li>
+</ul>
+<h4 id="ansible-vault"><a href="#ansible-vault" class="headerlink" title="ansible-vault"></a>ansible-vault</h4><p>加密解密 yml 文件</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible-vault <span class="token punctuation">&#123;</span>create,decrypt,edit,view,encrypt,encrypt_string,rekey<span class="token punctuation">&#125;</span> <span class="token punctuation">..</span>.</code></pre>
+
+<ul>
+<li>encrypt：加密</li>
+<li>decrypt：解密</li>
+<li>view：查看</li>
+<li>edit：编辑加密文件</li>
+<li>rekey：修改口令</li>
+<li>create：创建新文件</li>
+</ul>
+<h4 id="ansible-console"><a href="#ansible-console" class="headerlink" title="ansible-console"></a>ansible-console</h4><p>交互执行命令，支持 tab，ansible 2.0+新增</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">执行用户@当前操作的主机组 <span class="token punctuation">(</span>当前组的主机数量<span class="token punctuation">)</span><span class="token punctuation">[</span>f:并发数<span class="token punctuation">]</span>$</code></pre>
+
+<p>常用子命令：</p>
+<ul>
+<li>设置并发数： forks n 例如： <code>forks 10</code></li>
+<li>切换组： cd 主机组 例如： <code>cd web</code></li>
+<li>列出当前组主机列表： <code>list</code></li>
+<li>列出所有的内置命令： <code>?</code>或<code>help</code></li>
+</ul>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">(</span>venv<span class="token punctuation">)</span> <span class="token punctuation">[</span>root@c71 bin<span class="token punctuation">]</span><span class="token variable">$ansible</span>-console
+Welcome to the ansible console.
+Type <span class="token builtin class-name">help</span> or ? to list commands.
+
+root@all <span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">[</span>f:5<span class="token punctuation">]</span>$ <span class="token function">ping</span>
+<span class="token number">10.0</span>.0.72 <span class="token operator">|</span> SUCCESS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"ansible_facts"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"discovered_interpreter_python"</span><span class="token builtin class-name">:</span> <span class="token string">"/usr/bin/python"</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"changed"</span><span class="token builtin class-name">:</span> false,
+    <span class="token string">"ping"</span><span class="token builtin class-name">:</span> <span class="token string">"pong"</span>
+<span class="token punctuation">&#125;</span>
+<span class="token number">10.0</span>.0.82 <span class="token operator">|</span> SUCCESS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"ansible_facts"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"discovered_interpreter_python"</span><span class="token builtin class-name">:</span> <span class="token string">"/usr/libexec/platform-python"</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"changed"</span><span class="token builtin class-name">:</span> false,
+    <span class="token string">"ping"</span><span class="token builtin class-name">:</span> <span class="token string">"pong"</span>
+<span class="token punctuation">&#125;</span>
+<span class="token number">10.0</span>.0.81 <span class="token operator">|</span> SUCCESS <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"ansible_facts"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"discovered_interpreter_python"</span><span class="token builtin class-name">:</span> <span class="token string">"/usr/libexec/platform-python"</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"changed"</span><span class="token builtin class-name">:</span> false,
+    <span class="token string">"ping"</span><span class="token builtin class-name">:</span> <span class="token string">"pong"</span>
+<span class="token punctuation">&#125;</span>
+root@all <span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">[</span>f:5<span class="token punctuation">]</span>$ list
+<span class="token number">10.0</span>.0.72
+<span class="token number">10.0</span>.0.81
+<span class="token number">10.0</span>.0.82
+root@all <span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">[</span>f:5<span class="token punctuation">]</span>$ <span class="token function">ls</span> ~
+<span class="token number">10.0</span>.0.72 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+anaconda-ks.cfg
+init.sh
+original-ks.cfg
+<span class="token number">10.0</span>.0.82 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+anaconda-ks.cfg
+init.sh
+original-ks.cfg
+<span class="token number">10.0</span>.0.81 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+anaconda-ks.cfg
+init.sh
+original-ks.cfg
+root@all <span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">[</span>f:5<span class="token punctuation">]</span>$ <span class="token builtin class-name">exit</span>
+
+<span class="token punctuation">(</span>venv<span class="token punctuation">)</span> <span class="token punctuation">[</span>root@c71 bin<span class="token punctuation">]</span>$</code></pre>
+
+<h4 id="ansible-galaxy"><a href="#ansible-galaxy" class="headerlink" title="ansible-galaxy"></a>ansible-galaxy</h4><p>连接 <a target="_blank" rel="noopener" href="https://galaxy.ansible.com/">https://galaxy.ansible.com</a> 下载相应的 roles</p>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#列出所有已安装的galaxy</span>
+ansible-galaxy list
+<span class="token comment">#安装galaxy</span>
+ansible-galaxy <span class="token function">install</span> geerlingguy.mysql
+ansible-galaxy <span class="token function">install</span> geerlingguy.redis
+<span class="token comment">#删除galaxy</span>
+ansible-galaxy remove geerlingguy.redis</code></pre>
+
+<h3 id="ansible-常用模块"><a href="#ansible-常用模块" class="headerlink" title="ansible 常用模块"></a>ansible 常用模块</h3><p>本文以 ansible 2.10.5 为准</p>
+<p>虽然模块众多，但最常用的模块也就 2，30 个而已，针对特定业务只用 10 几个模块</p>
+<p>常用模块帮助文档参考：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 官网</span>
+https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html
+https://docs.ansible.com/ansible/latest/modules/modules_by_category.html
+<span class="token comment"># 中文翻译</span>
+http://www.ansible.com.cn/docs/modules.html</code></pre>
+
+<p>使用 ansible-doc 可以查看每个模块的具体用法：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 以 command 模块为例</span>
+ansible-doc <span class="token parameter variable">-s</span> <span class="token builtin class-name">command</span>			<span class="token comment"># 查看模块的可用选项</span>
+ansible-doc <span class="token builtin class-name">command</span>				<span class="token comment"># 查看模块的详细帮助信息</span>
+
+<span class="token comment"># ansible-doc module 的内容是包含 ansible-doc -s module 的</span>
+
+<span class="token comment"># 打印模块的选项</span>
+<span class="token variable">$ansible</span>-doc <span class="token parameter variable">-s</span> shell <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> +3 <span class="token operator">|</span> <span class="token function">egrep</span> <span class="token string">'^[[:space:]]&#123;6&#125;[^[:space:]]+:'</span> <span class="token operator">|</span> <span class="token function">cut</span> <span class="token parameter variable">-d</span> <span class="token string">':'</span> <span class="token parameter variable">-f</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">' '</span>
+chdir
+cmd
+creates
+executable
+free_form
+removes
+stdin
+stdin_add_newline
+warn</code></pre>
+
+<h4 id="command"><a href="#command" class="headerlink" title="command"></a>command</h4><p>默认模块，可忽略 -m 选项<br>注意：此命令不支持 $VARNAME &lt; &gt; | ; &amp; 等，用 shell 模块实现</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 以下两条命令是一样的，-m 可以省略，-a 不能省略</span>
+<span class="token variable">$ansible</span> all <span class="token parameter variable">-a</span> <span class="token string">'hostname'</span>
+<span class="token variable">$ansible</span> all <span class="token parameter variable">-m</span> <span class="token builtin class-name">command</span> <span class="token parameter variable">-a</span> <span class="token string">'hostname'</span>
+
+<span class="token variable">$ansible</span> all <span class="token parameter variable">-a</span> <span class="token string">'chdir=/etc pwd'</span>
+<span class="token number">10.0</span>.2.2 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+/etc
+<span class="token number">10.0</span>.2.3 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+/etc
+<span class="token number">10.0</span>.2.1 <span class="token operator">|</span> CHANGED <span class="token operator">|</span> <span class="token assign-left variable">rc</span><span class="token operator">=</span><span class="token number">0</span> <span class="token operator">>></span>
+/etc</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 选项：ansible-doc -s command</span>
+free_form  <span class="token comment"># 必须参数，指定需要远程执行的命令，free_form并不是一个"实际存在"的参数名，比如，当我们想要在远程主机上执行ls命令时，我们并不需要写成"free_form=ls" ，这样写反而是错误的，因为并没有任何参数的名字是free_form，当我们想要在远程主机中执行ls命令时，直接写成ls即可，这就是free_form参数的含义</span>
+chdir  <span class="token comment"># 指定一个目录，在执行对应的命令之前，会先进入到chdir参数指定的目录中</span>
+creates  <span class="token comment"># 当指定的文件存在时，就不执行对应命令</span>
+removes  <span class="token comment"># 与creates参数的作用正好相反，它的作用是当指定的文件不存在时，就不执行对应命令</span>
+stdin  <span class="token comment">#</span></code></pre>
+
+<h4 id="shell"><a href="#shell" class="headerlink" title="shell"></a>shell</h4><p>和 command 相似，但是功能更丰富，支持各种符号，比如 *、$、&gt;</p>
+<p>注意：类似 <code>cat /tmp/test.md | awk -F&#39;|&#39; &#39;&#123;print $1,$2&#125;&#39; &amp;&gt; /tmp/example.txt</code> 这<br>些复杂命令，即使使用 shell 也可能会失败，解决办法：写到脚本时，copy 到远程，执行，再把需要的<br>结果拉回执行命令的机器</p>
+<p>建议将 shell 模块替换 command，设为默认模块</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$vim</span> /etc/ansible/ansible.cfg
+module_name <span class="token operator">=</span> shell</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$ansible</span>-doc <span class="token parameter variable">-s</span> shell <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> +3 <span class="token operator">|</span> <span class="token function">egrep</span> <span class="token string">'^[[:space:]]&#123;6&#125;[^[:space:]]+:'</span> <span class="token operator">|</span> <span class="token function">cut</span> <span class="token parameter variable">-d</span> <span class="token string">':'</span> <span class="token parameter variable">-f</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">' '</span>
+chdir
+cmd
+creates
+executable  <span class="token comment"># 指定执行程序，默认是 /bin/bash</span>
+free_form
+removes
+stdin
+stdin_add_newline
+warn</code></pre>
+
+<h4 id="script"><a href="#script" class="headerlink" title="script"></a>script</h4><p>在远程主机上运行 ansible 服务器上的脚本（无需执行权限）</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$ansible</span>-doc <span class="token parameter variable">-s</span> script <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> +3 <span class="token operator">|</span> <span class="token function">egrep</span> <span class="token string">'^[[:space:]]&#123;6&#125;[^[:space:]]+:'</span> <span class="token operator">|</span> <span class="token function">cut</span> <span class="token parameter variable">-d</span> <span class="token string">':'</span> <span class="token parameter variable">-f</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">' '</span>
+chdir
+cmd
+creates
+decrypt
+executable
+free_form
+removes</code></pre>
+
+<h4 id="copy"><a href="#copy" class="headerlink" title="copy"></a>copy</h4><p>从 ansible 服务器主控端复制文件到远程主机</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">src  <span class="token comment"># 需要copy的文件或目录</span>
+dest  <span class="token comment"># 文件将被拷贝到远程主机的哪个目录中，dest为必须参数</span>
+content  <span class="token comment"># 当不指定src时，可以使用content直接指定文件内容，src与content两个参数必有其一，否则会报错</span>
+force  <span class="token comment"># 当远程主机的目标路径中已经存在同名文件，并且与ansible主机中的文件内容不同时，是否强制覆盖，可选值有yes和no，默认值为yes，表示覆盖，如果设置为no，则不会执行覆盖拷贝操作，远程主机中的文件保持不变</span>
+backup  <span class="token comment">#  当远程主机的目标路径中已经存在同名文件，并且与ansible主机中的文件内容不同时，是否对远程主机的文件进行备份，可选值有yes和no，当设置为yes时，会先备份远程主机中的文件，然后再将ansible主机中的文件拷贝到远程主机</span>
+owner  <span class="token comment"># 指定文件拷贝到远程主机后的属主，但是远程主机上必须有对应的用户，否则会报错</span>
+group  <span class="token comment"># 指定文件拷贝到远程主机后的属组，但是远程主机上必须有对应的组，否则会报错</span>
+mode  <span class="token comment"># 指定文件拷贝到远程主机后的权限，如果你想将权限设置为"rw-r--r--"，则可以使用mode=0644表示，如果你想要在user对应的权限位上添加执行权限，则可以使用mode=u+x表示</span>
+attributes
+checksum
+decrypt
+directory_mode
+follow
+local_follow
+remote_src
+selevel
+serole
+setype
+seuser
+unsafe_writes
+validate</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible test70 <span class="token parameter variable">-m</span> copy <span class="token parameter variable">-a</span> <span class="token string">"src=/testdir/copytest dest=/opt/"</span>
+ansible test70 <span class="token parameter variable">-m</span> copy <span class="token parameter variable">-a</span> <span class="token string">'content="aaa\nbbb\n" dest=/opt/test'</span>
+ansible test70 <span class="token parameter variable">-m</span> copy <span class="token parameter variable">-a</span> <span class="token string">"src=/testdir/copytest dest=/opt/ force=no"</span>
+ansible test70 <span class="token parameter variable">-m</span> copy <span class="token parameter variable">-a</span> <span class="token string">"src=/testdir/copytest dest=/opt/ backup=yes"</span>
+ansible test70 <span class="token parameter variable">-m</span> copy <span class="token parameter variable">-a</span> <span class="token string">"src=/testdir/copytest dest=/opt/ owner=zsy"</span>
+ansible test70 <span class="token parameter variable">-m</span> copy <span class="token parameter variable">-a</span> <span class="token string">"src=/testdir/copytest dest=/opt/ group=zsy"</span>
+ansible test70 <span class="token parameter variable">-m</span> copy <span class="token parameter variable">-a</span> <span class="token string">"src=/testdir/copytest dest=/opt/ mode=0640"</span></code></pre>
+
+<h4 id="fetch"><a href="#fetch" class="headerlink" title="fetch"></a>fetch</h4><p>从远程主机提取文件至 ansible 的主控端，和 copy 相反，目前不支持目录</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$ansible</span>-doc <span class="token parameter variable">-s</span> fetch <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> +3 <span class="token operator">|</span> <span class="token function">egrep</span> <span class="token string">'^[[:space:]]&#123;6&#125;[^[:space:]]+:'</span> <span class="token operator">|</span> <span class="token function">cut</span> <span class="token parameter variable">-d</span> <span class="token string">':'</span> <span class="token parameter variable">-f</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">' '</span>
+dest  <span class="token comment"># 保存文件的目录</span>
+fail_on_missing  <span class="token comment"># bool，当源文件不存在的时候，标识为失败</span>
+flat  <span class="token comment"># bool，文件覆盖</span>
+src  <span class="token comment"># 从远程主机上获取的文件，必须是文件，不能为目录</span>
+validate_checksum  <span class="token comment"># bool，文件fetch之后进行md5检查</span></code></pre>
+
+<h4 id="file"><a href="#file" class="headerlink" title="file"></a>file</h4><p>file 模块可以帮助我们完成一些对文件的基本操作，比如，创建文件或目录、删除文件或目录、修改文件权限等</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">path  <span class="token comment"># 指定要操作的文件或目录，在之前版本的ansible中，使用dest或者name</span>
+state  <span class="token comment"># 此参数非常灵活，此参数对应的值需要根据情况设定，比如，当我们需要在远程主机中创建一个目录的时候，我们需要使用path参数指定对应的目录路径，假设，我想要在远程主机上创建/testdir/a/b目录，那么我则需要设置path=/testdir/a/b，但是，我们无法从"/testdir/a/b"这个路径看出b是一个文件还是一个目录，ansible也同样无法单单从一个字符串就知道你要创建文件还是目录，所以，我们需要通过state参数进行说明，当我们想要创建的/testdir/a/b是一个目录时，需要将state的值设置为directory，"directory"为目录之意，当它与path结合，ansible就能知道我们要操作的目标是一个目录，同理，当我们想要操作的/testdir/a/b是一个文件时，则需要将state的值设置为touch，当我们想要创建软链接文件时，需将state设置为link，想要创建硬链接文件时，需要将state设置为hard，当我们想要删除一个文件时（删除时不用区分目标是文件、目录、还是链接），则需要将state的值设置为absent，"absent"为缺席之意，当我们想让操作的目标"缺席"时，就表示我们想要删除目标</span>
+src  <span class="token comment"># 当state设置为link或者hard时，表示我们想要创建一个软链或者硬链，所以，我们必须指明软链或硬链链接的哪个文件，通过src参数即可指定链接源</span>
+force  <span class="token comment"># 当state=link的时候，可配合此参数强制创建链接文件，当force=yes时，表示强制创建链接文件，不过强制创建链接文件分为两种情况，情况一：当你要创建的链接文件指向的源文件并不存在时，使用此参数，可以先强制创建出链接文件。情况二：当你要创建链接文件的目录中已经存在与链接文件同名的文件时，将force设置为yes，回将同名文件覆盖为链接文件，相当于删除同名文件，创建链接文件。情况三：当你要创建链接文件的目录中已经存在与链接文件同名的文件，并且链接文件指向的源文件也不存在，这时会强制替换同名文件为链接文件</span>
+owner  <span class="token comment"># 用于指定被操作文件的属主，属主对应的用户必须在远程主机中存在，否则会报错</span>
+group  <span class="token comment"># 用于指定被操作文件的属组，属组对应的组必须在远程主机中存在，否则会报错</span>
+mode  <span class="token comment"># 用于指定被操作文件的权限，比如，如果想要将文件权限设置为"rw-r-x---"，则可以使用mode=650进行设置，或者使用mode=0650，效果也是相同的，如果你想要设置特殊权限，比如为二进制文件设置suid，则可以使用mode=4700，很方便吧</span>
+recurse  <span class="token comment"># 当要操作的文件为目录，将recurse设置为yes，可以递归的修改目录中文件的属性</span>
+access_time
+access_time_format
+attributes
+follow
+modification_time
+modification_time_format
+selevel
+serole
+setype
+seuser
+unsafe_writes</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#创建空文件</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">'path=/data/test.txt state=touch'</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">'path=/data/test.txt state=absent'</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/root/test.sh owner=wang mode=755"</span>
+<span class="token comment">#创建目录</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/data/mysql state=directory owner=mysql group=mysql"</span>
+<span class="token comment">#创建软链接</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">'src=/data/testfile path|dest|name=/data/testfile-link state=link'</span>
+<span class="token comment">#创建目录</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">'path=/data/testdir state=directory'</span>
+<span class="token comment">#递归修改目录属性</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/data/mysql state=directory owner=mysql group=mysql recurse=yes"</span>
+
+<span class="token comment"># 在test70主机上创建一个名为testfile的文件，如果testfile文件已经存在，则会更新文件的时间戳，与touch命令的作用相同</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/testfile state=touch"</span>
+<span class="token comment"># 在test70主机上创建一个名为testdir的目录，如果testdir目录已经存在，则不进行任何操作</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/testdir state=directory"</span>
+<span class="token comment"># 在test70上为testfile文件创建软链接文件，软链接名为linkfile，执行下面命令的时候，testfile已经存在</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/linkfile state=link src=/testdir/testfile"</span>
+<span class="token comment"># 在test70上为testfile文件创建硬链接文件，硬链接名为hardfile，执行下面命令的时候，testfile已经存在</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/hardfile state=hard src=/testdir/testfile"</span>
+<span class="token comment"># 在创建链接文件时，如果源文件不存在，或者链接文件与其他文件同名时，强制覆盖同名文件或者创建链接文件，参考上述force参数的解释</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/linkfile state=link src=sourcefile force=yes"</span>
+<span class="token comment"># 删除远程机器上的指定文件或目录</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/testdir state=absent"</span>
+<span class="token comment"># 在创建文件或目录的时候指定属主，或者修改远程主机上的文件或目录的属主</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abc state=touch owner=zsy"</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abc owner=zsy"</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abc state=directory owner=zsy"</span>
+<span class="token comment"># 在创建文件或目录的时候指定属组，或者修改远程主机上的文件或目录的属组</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abb state=touch group=zsy"</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abb group=zsy"</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abb state=directory group=zsy"</span>
+<span class="token comment"># 在创建文件或目录的时候指定权限，或者修改远程主机上的文件或目录的权限</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abb state=touch mode=0644"</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abb mode=0644"</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/binfile mode=4700"</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abb state=directory mode=0644"</span>
+<span class="token comment"># 当操作远程主机中的目录时，同时递归的将目录中的文件的属主属组都设置为zsy</span>
+ansible test70 <span class="token parameter variable">-m</span> <span class="token function">file</span> <span class="token parameter variable">-a</span> <span class="token string">"path=/testdir/abd state=directory owner=zsy group=zsy recurse=yes"</span></code></pre>
+
+<h4 id="unarchive"><a href="#unarchive" class="headerlink" title="unarchive"></a>unarchive</h4><p>解包解压缩</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">copy  <span class="token comment"># 默认为yes，当copy=yes，拷贝的文件是从ansible主机复制到远程主机上，如果设置为copy=no，会在远程主机上寻找src源文件</span>
+remote_src  <span class="token comment"># 和copy功能一样且互斥，yes表示在远程主机，不在ansible主机，no表示文件在ansible主机上</span>
+src  <span class="token comment"># 源路径，可以是ansible主机上的路径，也可以是远程主机(被管理端或者第三方主机)上的路径，如果是远程主机上的路径，则需要设置copy=no</span>
+dest  <span class="token comment"># 远程主机上的目标路径</span>
+mode  <span class="token comment"># 设置解压缩后的文件权限</span>
+attributes
+creates
+decrypt
+exclude
+extra_opts
+group
+keep_newer
+list_files
+owner
+selevel
+serole
+setype
+seuser
+unsafe_writes
+validate_certs</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible all <span class="token parameter variable">-m</span> unarchive <span class="token parameter variable">-a</span> <span class="token string">'src=/data/foo.tgz dest=/var/lib/foo owner=wang group=bin'</span>
+ansible all <span class="token parameter variable">-m</span> unarchive <span class="token parameter variable">-a</span> <span class="token string">'src=/tmp/foo.zip dest=/data copy=no mode=0777'</span>
+ansible all <span class="token parameter variable">-m</span> unarchive <span class="token parameter variable">-a</span> <span class="token string">'src=https://example.com/example.zip dest=/data copy=no'</span>
+ansible websrvs <span class="token parameter variable">-m</span> unarchive <span class="token parameter variable">-a</span> <span class="token string">'src=https://releases.ansible.com/ansible/ansible-2.1.6.0-0.1.rc1.tar.gz dest=/data/ owner=mysql remote_src=yes'</span></code></pre>
+
+<h4 id="archive"><a href="#archive" class="headerlink" title="archive"></a>archive</h4><p>打包压缩保存在被管理节点</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$ansible</span>-doc <span class="token parameter variable">-s</span> archive <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> +3 <span class="token operator">|</span> <span class="token function">egrep</span> <span class="token string">'^[[:space:]]&#123;6&#125;[^[:space:]]+:'</span> <span class="token operator">|</span> <span class="token function">cut</span> <span class="token parameter variable">-d</span> <span class="token string">':'</span> <span class="token parameter variable">-f</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token parameter variable">-d</span> <span class="token string">' '</span>
+attributes
+dest
+exclude_path
+force_archive
+<span class="token function">format</span>
+group
+mode
+owner
+path
+remove
+selevel
+serole
+setype
+seuser
+unsafe_writes</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible websrvs <span class="token parameter variable">-m</span> archive <span class="token parameter variable">-a</span> <span class="token string">'path=/var/log/ dest=/data/log.tar.bz2 format=bz2 owner=wang mode=0600'</span></code></pre>
+
+<h4 id="hostname"><a href="#hostname" class="headerlink" title="hostname"></a>hostname</h4><p>管理主机名</p>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible <span class="token number">10.0</span>.0.18 <span class="token parameter variable">-m</span> <span class="token function">hostname</span> <span class="token parameter variable">-a</span> <span class="token string">'name=node18.magedu.com'</span></code></pre>
+
+<h4 id="cron"><a href="#cron" class="headerlink" title="cron"></a>cron</h4><p>计划任务，支持时间：minute，hour，day，month，weekday</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 示例1 每天的1点5分输出 test 字符</span>
+<span class="token number">5</span> <span class="token number">1</span> * * * <span class="token builtin class-name">echo</span> <span class="token builtin class-name">test</span>
+<span class="token comment"># 示例2 每3天执行一次计划任务，于当天的1点1分执行，具体任务为输出 test 字符</span>
+<span class="token number">1</span> <span class="token number">1</span> */3 * * <span class="token builtin class-name">echo</span> <span class="token builtin class-name">test</span>
+<span class="token comment"># 示例3 每次系统启动后需要执行一次计划任务，具体任务为输出 test 字符</span>
+@reboot <span class="token builtin class-name">echo</span> <span class="token builtin class-name">test</span>
+<span class="token comment"># 示例4 每小时执行一次计划任务，具体任务为输出 test 字符</span>
+@hourly <span class="token builtin class-name">echo</span> <span class="token builtin class-name">test</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash">backup  <span class="token comment"># yes|no，当修改或者删除对应的计划任务时，是否先对计划任务进行备份，如果设置为yes，cron 模块会在远程主机的 /tmp 目录下创建备份文件</span>
+cron_file
+disabled  <span class="token comment"># 当计划任务有名称时，我们可以根据名称使对应的任务”失效”（注释掉对应的任务）。注意，使用此参数时，除了需要指定任务的名称，还需要同时指定任务的job 以及任务的时间设定，而且任务的时间设定必须和对应任务完全相同，否则在注释任务的同时，任务的时间设定会被修改</span>
+<span class="token function">env</span>
+minute  <span class="token comment"># 设置计划任务中分钟设定位的值，当不使用此参数时，分钟设定位的值默认为”*”</span>
+hour  <span class="token comment"># 设置计划任务中小时设定位的值，当不使用此参数时，小时设定位的值默认为”*”</span>
+day  <span class="token comment"># 设置计划任务中日设定位的值，当不使用此参数时，日设定位的值默认为”*”</span>
+month  <span class="token comment"># 设置计划任务中月设定位的值，当不使用此参数时，月设定位的值默认为”*”</span>
+weekday  <span class="token comment"># 设置计划任务中周几设定位的值，当不使用此参数时，周几设定位的值默认为”*”</span>
+insertafter
+insertbefore
+job  <span class="token comment"># 此参数用于指定计划的任务中需要实际执行的命令或者脚本，比如上例中的 “echo test” 命令</span>
+name  <span class="token comment"># 此参数用于设置计划任务的名称，计划任务的名称会在注释中显示，当不指定计划任务的名称时，ansible 会默认为计划任务加入注释，注释的内容为 #Ansible: None，假设指定计划任务的名称为 test，那么注释的内容为#Ansible: test，在一台机器中，计划任务的名称应该具有唯一性，方便我们以后根据名称修改或删除计划任务</span>
+<span class="token function">reboot</span>
+special_time  <span class="token comment"># 在上述示例3与示例4中，计划任务的时间设定格式为 @reboot 或者@hourly。@reboot 表示重启时执行，@hourly 表示每小时执行一次，相当于设置成”0 0 * * *” ，这种@开头的时间设定格式则需要使用 special_time 参数进行设置，special_time 参数的可用值有 reboot(重启后)、yearly(每年)、annually(每年，与yearly相同)、monthly(每月)、weekly(每周)、daily(每天)、hourly(每时)</span>
+<span class="token comment"># 注意：当上述时间单位设定参数都未指定时，计划任务的时间设定默认会被设定为”* * * * *”，这样表示每秒都会执行一次计划任务，所以，在使用cron模块时，我们应该确定对应的时间参数设置正确</span>
+state  <span class="token comment"># 当计划任务有名称时，我们可以根据名称修改或删除对应的任务，当删除计划任务时，需要将 state 的值设置为 absent</span>
+user  <span class="token comment"># 此参数用于设置当前计划任务属于哪个用户，当不使用此参数时，默认为管理员用户</span></code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#备份数据库脚本</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#cat /root/mysql_backup.sh</span>
+<span class="token comment">#!/bin/bash</span>
+mysqldump <span class="token parameter variable">-A</span> <span class="token parameter variable">-F</span> --single-transaction --master-data<span class="token operator">=</span><span class="token number">2</span> <span class="token parameter variable">-q</span> <span class="token parameter variable">-uroot</span> <span class="token operator">|</span><span class="token function">gzip</span> <span class="token operator">></span> /data/mysql_<span class="token variable"><span class="token variable">`</span><span class="token function">date</span> +%F_%T<span class="token variable">`</span></span>.sql.gz
+<span class="token comment">#创建任务</span>
+ansible <span class="token number">10.0</span>.0.8 <span class="token parameter variable">-m</span> <span class="token function">cron</span> <span class="token parameter variable">-a</span> <span class="token string">'hour=2 minute=30 weekday=1-5 name="backup mysql" job=/root/mysql_backup.sh'</span>
+ansible websrvs <span class="token parameter variable">-m</span> <span class="token function">cron</span> <span class="token parameter variable">-a</span> <span class="token string">"minute=*/5 job='/usr/sbin/ntpdate ntp.aliyun.com &amp;>/dev/null' name=Synctime"</span>
+<span class="token comment">#禁用计划任务</span>
+ansible websrvs <span class="token parameter variable">-m</span> <span class="token function">cron</span> <span class="token parameter variable">-a</span> <span class="token string">"minute=*/5 job='/usr/sbin/ntpdate 172.20.0.1 &amp;>/dev/null' name=Synctime disabled=yes"</span>
+<span class="token comment">#启用计划任务</span>
+ansible websrvs <span class="token parameter variable">-m</span> <span class="token function">cron</span> <span class="token parameter variable">-a</span> <span class="token string">"minute=*/5 job='/usr/sbin/ntpdate 172.20.0.1 &amp;>/dev/null' name=Synctime disabled=no"</span>
+<span class="token comment">#删除任务</span>
+ansible websrvs <span class="token parameter variable">-m</span> <span class="token function">cron</span> <span class="token parameter variable">-a</span> <span class="token string">"name='backup mysql' state=absent"</span>
+ansible websrvs <span class="token parameter variable">-m</span> <span class="token function">cron</span> <span class="token parameter variable">-a</span> <span class="token string">'state=absent name=Synctime'</span></code></pre>
+
+<h4 id="yum、apt"><a href="#yum、apt" class="headerlink" title="yum、apt"></a>yum、apt</h4><p>yum：管理软件包，只支持 RHEL，CentOS，fedora<br>apt：模块管理 Debian 相关版本的软件包</p>
+<h5 id="yum"><a href="#yum" class="headerlink" title="yum"></a>yum</h5><pre class="language-bash" data-language="bash"><code class="language-bash">allow_downgrade
+autoremove
+bugfix
+conf_file
+disable_excludes
+disable_gpg_check
+disable_plugin
+disablerepo
+download_dir
+download_only
+enable_plugin
+enablerepo
+exclude
+install_repoquery
+install_weak_deps
+installroot
+list
+lock_timeout
+name
+releasever
+security
+skip_broken
+state  <span class="token comment"># present|installed|latest|absent|removed，installed 和 present等效，表示安装；absent 和 removed 等效，表示卸载；latest 表示安装最新版本</span>
+update_cache
+update_only
+use_backend
+validate_certs</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible websrvs <span class="token parameter variable">-m</span> yum <span class="token parameter variable">-a</span> <span class="token string">'name=httpd state=present'</span> <span class="token comment">#安装，state可以省略</span>
+ansible websrvs <span class="token parameter variable">-m</span> yum <span class="token parameter variable">-a</span> <span class="token string">'name=httpd state=absent'</span> <span class="token comment">#删除</span>
+ansible websrvs <span class="token parameter variable">-m</span> yum <span class="token parameter variable">-a</span> <span class="token string">'name=sl,cowsay'</span>	<span class="token comment"># 安装</span></code></pre>
+
+<h5 id="apt"><a href="#apt" class="headerlink" title="apt"></a>apt</h5><pre class="language-bash" data-language="bash"><code class="language-bash">allow_unauthenticated
+autoclean
+autoremove
+cache_valid_time
+deb
+default_release
+dpkg_options
+force
+force_apt_get
+install_recommends
+name
+only_upgrade
+policy_rc_d
+purge
+state
+update_cache
+update_cache_retries
+update_cache_retry_max_delay
+upgrade</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible <span class="token number">10.0</span>.0.100 <span class="token parameter variable">-m</span> <span class="token function">apt</span> <span class="token parameter variable">-a</span> <span class="token string">'name=bb,sl,cowsay,cmatrix,oneko,hollywood,boxes,libaa-bin,x11-apps'</span>
+ansible websrvs <span class="token parameter variable">-m</span> <span class="token function">apt</span> <span class="token parameter variable">-a</span> <span class="token string">'name=rsync,psmisc state=absent'</span></code></pre>
+
+<h4 id="serivce"><a href="#serivce" class="headerlink" title="serivce"></a>serivce</h4><p>管理服务</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">arguments
+enabled
+name
+pattern
+runlevel
+<span class="token function">sleep</span>
+state
+use</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible all <span class="token parameter variable">-m</span> <span class="token function">service</span> <span class="token parameter variable">-a</span> <span class="token string">'name=httpd state=started enabled=yes'</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">service</span> <span class="token parameter variable">-a</span> <span class="token string">'name=httpd state=stopped'</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">service</span> <span class="token parameter variable">-a</span> <span class="token string">'name=httpd state=reloaded'</span>
+ansible all <span class="token parameter variable">-m</span> shell <span class="token parameter variable">-a</span> <span class="token string">"sed -i 's/^Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf"</span>
+ansible all <span class="token parameter variable">-m</span> <span class="token function">service</span> <span class="token parameter variable">-a</span> <span class="token string">'name=httpd state=restarted'</span></code></pre>
+
+<h4 id="user"><a href="#user" class="headerlink" title="user"></a>user</h4><p>管理用户</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">append
+authorization
+comment
+create_home
+expires
+force
+generate_ssh_key
+group
+<span class="token function">groups</span>
+hidden
+home
+<span class="token builtin class-name">local</span>
+login_class
+move_home
+name
+non_unique
+password
+password_lock
+profile
+remove
+role
+seuser
+shell
+skeleton
+ssh_key_bits
+ssh_key_comment
+ssh_key_file
+ssh_key_passphrase
+ssh_key_type
+state
+system
+uid
+update_password</code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#创建用户</span>
+ansible all <span class="token parameter variable">-m</span> user <span class="token parameter variable">-a</span> <span class="token string">'name=user1 comment="test user" uid=2048 home=/app/user1 group=root'</span>
+ansible all <span class="token parameter variable">-m</span> user <span class="token parameter variable">-a</span> <span class="token string">'name=nginx comment=nginx uid=88 group=nginx groups="root,daemon" shell=/sbin/nologin system=yes create_home=no home=/data/nginx non_unique=yes'</span>
+
+<span class="token comment">#remove=yes表示删除用户及家目录等数据,默认remove=no</span>
+ansible all <span class="token parameter variable">-m</span> user <span class="token parameter variable">-a</span> <span class="token string">'name=nginx state=absent remove=yes'</span></code></pre>
+
+<h4 id="group"><a href="#group" class="headerlink" title="group"></a>group</h4><p>管理组</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">gid
+<span class="token builtin class-name">local</span>
+name
+non_unique
+state
+system</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#创建组</span>
+ansible websrvs <span class="token parameter variable">-m</span> group <span class="token parameter variable">-a</span> <span class="token string">'name=nginx gid=88 system=yes'</span>
+<span class="token comment">#删除组</span>
+ansible websrvs <span class="token parameter variable">-m</span> group <span class="token parameter variable">-a</span> <span class="token string">'name=nginx state=absent'</span></code></pre>
+
+<h4 id="lineinfile"><a href="#lineinfile" class="headerlink" title="lineinfile"></a>lineinfile</h4><p>参考：<a target="_blank" rel="noopener" href="http://www.zsythink.net/archives/2542">http://www.zsythink.net/archives/2542</a></p>
+<p>我们可以借助 lineinfile 模块，确保”某一行文本”存在于指定的文件中，或者确保从文件中删除指定的”文本”（即确保指定的文本不存在于文件中），还可以根据正则表达式，替换”某一行文本”</p>
+<p>ansible 在使用 sed 进行替换时，经常会遇到需要转义的问题，而且 ansible 在遇到特殊符号进行替换时，存在问题，无法正常进行替换 。所以 ansible 提供了两个模块：lineinfile 模块和 replace 模块，可以方便的进行替换</p>
+<p>一般在 ansible 当中去修改某个文件的单行进行替换的时候需要使用 lineinfile 模块</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">attributes
+backrefs  <span class="token comment"># backrefs=yes 表示开启后向引用，并且当正则没有匹配到任何的行时，则不会对文件进行任何操作</span>
+backup  <span class="token comment"># 是否在修改文件之前对文件进行备份</span>
+create  <span class="token comment"># 当要操作的文件并不存在时，是否创建对应的文件</span>
+firstmatch
+group
+insertafter  <span class="token comment"># 将文本插入到“指定的行”之后</span>
+insertbefore  <span class="token comment"># 将文本插入到“指定的行”之前</span>
+line  <span class="token comment"># 使用此参数指定文本内容</span>
+mode
+others
+owner
+path  <span class="token comment"># 必须参数，指定要操作的文件</span>
+regexp  <span class="token comment"># 使用正则表达式匹配对应的行，当替换文本时，如果有多行文本都能被匹配，则只有最后面被匹配到的那行文本才会被替换，当删除文本时，如果有多行文本都能被匹配，这么这些行都会被删除</span>
+selevel
+serole
+setype
+seuser
+state  <span class="token comment"># 默认值为present，absent表示删除</span>
+unsafe_writes
+validate</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查找内容为‘xxx’的行是否存在于文件/data/test/test.sh，如果不存在，则追加此行到此文件</span>
+ansible localhost <span class="token parameter variable">-m</span> lineinfile <span class="token parameter variable">-a</span> <span class="token string">'path=/data/test/test.sh line=xxx'</span>
+
+<span class="token comment"># 正则匹配，然后替换，如果匹配到多行，但是只能替换最后一行</span>
+ansible websrvs <span class="token parameter variable">-m</span> lineinfile <span class="token parameter variable">-a</span> <span class="token string">"path=/etc/httpd/conf/httpd.conf regexp='^Listen' line='Listen 80'"</span>
+ansible all <span class="token parameter variable">-m</span> lineinfile <span class="token parameter variable">-a</span> <span class="token string">"path=/etc/selinux/config regexp='^SELINUX=' line='SELINUX=disabled'"</span>
+
+<span class="token comment"># 正则匹配，然后删除，如果匹配到多行，就全部删除</span>
+ansible all <span class="token parameter variable">-m</span> lineinfile <span class="token parameter variable">-a</span> <span class="token string">'path=/etc/fstab state=absent regexp="^#"'</span></code></pre>
+
+<h4 id="replace"><a href="#replace" class="headerlink" title="replace"></a>replace</h4><p>lineinfile 模块的主要功能是操作 in file 的 line，只能替换单行文本，多行匹配进行替换需要使用 replace 模块</p>
+<p>该模块有点类似于 sed 命令，主要也是基于正则进行匹配和替换，建议使用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">after
+attributes
+backup
+before
+encoding
+group
+mode
+others
+owner
+path
+regexp
+replace
+selevel
+serole
+setype
+seuser
+unsafe_writes
+validate</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">ansible all <span class="token parameter variable">-m</span> replace <span class="token parameter variable">-a</span> <span class="token string">"path=/etc/fstab regexp='^(UUID.*)' replace='#<span class="token entity" title="\1">\1</span>'"</span>
+ansible all <span class="token parameter variable">-m</span> replace <span class="token parameter variable">-a</span> <span class="token string">"path=/etc/fstab regexp='^#(UUID.*)' replace='<span class="token entity" title="\1">\1</span>'"</span></code></pre>
+
+<h4 id="setup"><a href="#setup" class="headerlink" title="setup"></a>setup</h4><p>setup 模块来收集主机的系统信息，这些 facts 信息可以直接以变量的形式使用，但是如果主机较多，会影响执行速度，可以使用 gather_facts: no 来禁止 ansible 收集 facts 信息</p>
+<h2 id="playbook"><a href="#playbook" class="headerlink" title="playbook"></a>playbook</h2><p><img data-src="//img.to2b.cn/blog/ljk/1603026608236.png"></p>
+<ul>
+<li>playbook 剧本是由一个或多个”play”组成的列表</li>
+<li>play 的主要功能在于将预定义的一组主机，装扮成事先通过 ansible 中的 task 定义好的角色。Task 实际是调用 ansible 的一个 module，将多个 play 组织在一个 playbook 中，即可以让它们联合起来，按事先编排的机制执行预定义的动作</li>
+<li>Playbook 文件是采用 YAML 语言编写的</li>
+</ul>
+<h3 id="playbook-核心组件"><a href="#playbook-核心组件" class="headerlink" title="playbook 核心组件"></a><a target="_blank" rel="noopener" href="http://www.ansible.com.cn/docs/playbooks_intro.html">playbook 核心组件</a></h3><ul>
+<li>hosts：执行的远程主机<strong>列表</strong></li>
+<li>tasks：任务集</li>
+<li>variables：内置变量或自定义变量在 playbook 中调用</li>
+<li>templates：模板，可替换模板文件中的变量并实现一些简单逻辑的文件</li>
+<li>handlers 和 notify：两者结合使用，特定条件出发操作</li>
+<li>tags：标签，指定某条任务执行，用于选择运行 playbook 中的部分代码。ansible 具有幂等性，因此会自动跳过没有变化的部分，即便如此，有些代码为测试其确实没有发生变化的时间依然会非常长。此时，如果确信其没有变化，就可以通过 tags 跳过此些代码片断</li>
+</ul>
+<h4 id="hosts-组件"><a href="#hosts-组件" class="headerlink" title="hosts 组件"></a>hosts 组件</h4><p>playbook 中的每一个 play 的目的都是为了让特定主机以某个指定的用户身份执行任务。hosts 用于指定要执行指定任务的主机，须事先定义在 inventory 主机清单中</p>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">- hosts: websrvs:appsrvs</code></pre>
+
+<h4 id="remote-user、sudo、sudo-user-组件"><a href="#remote-user、sudo、sudo-user-组件" class="headerlink" title="remote_user、sudo、sudo_user 组件"></a>remote_user、sudo、sudo_user 组件</h4><ul>
+<li>remote_usr：指定远程主机执行任务的用户</li>
+<li>sudo：支持使用 sudo，默认切换到 root</li>
+<li>sudo_user：指定使用 sudo 时切换的用户</li>
+</ul>
+<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token punctuation">-</span> <span class="token key atrule">hosts</span><span class="token punctuation">:</span> websrvs
+  <span class="token key atrule">remote_user</span><span class="token punctuation">:</span> root
+<span class="token key atrule">tasks</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> test connection
+    <span class="token key atrule">ping</span><span class="token punctuation">:</span>
+    <span class="token key atrule">remote_user</span><span class="token punctuation">:</span> magedu
+    <span class="token key atrule">sudo</span><span class="token punctuation">:</span> yes
+    sudo_user<span class="token punctuation">:</span>lujinkai</code></pre>
+
+<h4 id="tasks-和-action"><a href="#tasks-和-action" class="headerlink" title="tasks 和 action"></a>tasks 和 action</h4><p>tasks 是 task 列表，每个 task 的类型是字典</p>
+<p>play 的主体部分是 tasks，所有 task<strong>依次</strong>在所有远程主机上执行，注意是同步执行而非异步执行；</p>
+<p>task 的目的是使用指定的参数执行模块，</p>
+<p>未完待续…</p>
+<h4 id="handlers-和-notify"><a href="#handlers-和-notify" class="headerlink" title="handlers 和 notify"></a>handlers 和 notify</h4><h4 id="tags-组件"><a href="#tags-组件" class="headerlink" title="tags 组件"></a>tags 组件</h4><h3 id="Playbook-中使用变量"><a href="#Playbook-中使用变量" class="headerlink" title="Playbook 中使用变量"></a>Playbook 中使用变量</h3><p>两类变量：</p>
+<ol>
+<li><p>ansible 内置变量 和 自定义变量，这些变量不仅可以在 playbook 中使用，在 ansible 中任何地方都可以使用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用debug模块可以格式化输出变量</span>
+<span class="token variable">$ansible</span> localhost <span class="token parameter variable">-m</span> debug <span class="token parameter variable">-a</span> <span class="token string">"msg=&#123;&#123;hostvars&#125;&#125;"</span></code></pre>
+</li>
+<li><p>facts 信息，来自 setup 模块收集（允许自定义），可以禁止收集，这些变量只能在 playbook 中使用</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$ansible</span> localhost <span class="token parameter variable">-m</span> setup</code></pre></li>
+</ol>
+<h4 id="内置变量-hostvars"><a href="#内置变量-hostvars" class="headerlink" title="内置变量 hostvars"></a>内置变量 hostvars</h4><p>在 playbook 中，自己主机的变量，无论是 ansible 内置、自定义还是 facts，都可以直接调用，其他主机的变量，可以通过 hostvars 间接调用，例如：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 具体事例，待补充...</span></code></pre>
+
+<h4 id="常用变量"><a href="#常用变量" class="headerlink" title="常用变量"></a>常用变量</h4><ul>
+<li>groups：来自 ansible 内置，主机列表</li>
+<li>group_names：来自 ansible 内置，当前主机在主机列表中的所属组</li>
+</ul>
+<h3 id="playbook-中使用-when"><a href="#playbook-中使用-when" class="headerlink" title="playbook 中使用 when"></a>playbook 中使用 when</h3><h3 id="playbook-使用迭代-with-items-loop"><a href="#playbook-使用迭代-with-items-loop" class="headerlink" title="playbook 使用迭代 with_items(loop)"></a>playbook 使用迭代 with_items(loop)</h3><p>当有需要重复性执行的任务时，可以使用迭代机制</p>
+<p>对迭代项的引用，固定内置变量名为”item”</p>
+<p>要在 task 中使用 with_items 给定要迭代的元素列表</p>
+<p>注意: ansible2.5 版本后，可以用 loop 代替 with_items</p>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">- name: 下载 kube-master 二进制
+  copy: <span class="token assign-left variable">src</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span> base_dir <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span>/bin/<span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span> item <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span> <span class="token assign-left variable">dest</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span> bin_dir <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span>/<span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span> item <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span> <span class="token assign-left variable">mode</span><span class="token operator">=</span>0755
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+  - kubectl
+  tags: upgrade_k8s</code></pre>
+
+<p><strong>迭代嵌套子变量</strong>：在迭代中，还可以嵌套子变量，关联多个变量在一起使用</p>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">- name: <span class="token function">add</span> some <span class="token function">users</span>
+user: <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span> item.name <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span> <span class="token assign-left variable">group</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token punctuation">&#123;</span> item.group <span class="token punctuation">&#125;</span><span class="token punctuation">&#125;</span> <span class="token assign-left variable">state</span><span class="token operator">=</span>present
+with_items:
+- <span class="token punctuation">&#123;</span> name: <span class="token string">'nginx'</span>, group: <span class="token string">'nginx'</span> <span class="token punctuation">&#125;</span>
+- <span class="token punctuation">&#123;</span> name: <span class="token string">'mysql'</span>, group: <span class="token string">'mysql'</span> <span class="token punctuation">&#125;</span>
+- <span class="token punctuation">&#123;</span> name: <span class="token string">'apache'</span>, group: <span class="token string">'apache'</span> <span class="token punctuation">&#125;</span></code></pre>
+
+<h3 id="管理节点过多导致的超时问题解决方法"><a href="#管理节点过多导致的超时问题解决方法" class="headerlink" title="管理节点过多导致的超时问题解决方法"></a>管理节点过多导致的超时问题解决方法</h3><h2 id="roles"><a href="#roles" class="headerlink" title="roles"></a>roles</h2><p>roles 目录结构如下所示：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1611764134262.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ansible/" rel="tag"><i class="fa fa-tag"></i> ansible</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/MySQL/my.conf/" rel="prev" title="my.conf">
+                  <i class="fa fa-chevron-left"></i> my.conf
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Redis/Redis/" rel="next" title="Redis">
+                  Redis <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

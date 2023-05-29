@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="什么是 ELKhttps:&#x2F;&#x2F;www.elastic.co&#x2F;cn&#x2F;what-is&#x2F;elk-stack ELK 全称 ELK Stack，它的更新换代产品叫 Elastic Stack ELK &#x3D; Elasticsearch + Logstash + Kibana  Elasticsearch：搜索和分析引擎 Logstash：服务器端数据处理管道，能够同时从多个来源采集数据，转换数据，然">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/ELK/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="什么是 ELKhttps:&#x2F;&#x2F;www.elastic.co&#x2F;cn&#x2F;what-is&#x2F;elk-stack ELK 全称 ELK Stack，它的更新换代产品叫 Elastic Stack ELK &#x3D; Elasticsearch + Logstash + Kibana  Elasticsearch：搜索和分析引擎 Logstash：服务器端数据处理管道，能够同时从多个来源采集数据，转换数据，然">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614731653192.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614734003034.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614868627749.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614790916767.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614790940334.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615007863772.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614827175253.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1615015973480.png">
+<meta property="og:image" content="http://img.to2b.cn/blog/ljk/1614862854522.png">
+<meta property="article:published_time" content="2021-03-03T00:30:51.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.490Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="ELK">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://img.to2b.cn/blog/ljk/1614731653192.png">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/ELK/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/ELK/","path":"运维/ELK/ELK/","title":"ELK"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ELK | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-ELK"><span class="nav-number">1.</span> <span class="nav-text">什么是 ELK</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Elasticsearch"><span class="nav-number">1.1.</span> <span class="nav-text">什么是 Elasticsearch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Logstash"><span class="nav-number">1.2.</span> <span class="nav-text">什么是 Logstash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-kibana"><span class="nav-number">1.3.</span> <span class="nav-text">什么是 kibana</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8-ELK"><span class="nav-number">1.4.</span> <span class="nav-text">为什么使用 ELK</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#elasticsearch"><span class="nav-number">2.</span> <span class="nav-text">elasticsearch</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">2.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#apt-%E5%AE%89%E8%A3%85"><span class="nav-number">2.2.</span> <span class="nav-text">apt 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91"><span class="nav-number">2.3.</span> <span class="nav-text">源码编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-elasticsearch-%E6%8F%92%E4%BB%B6"><span class="nav-number">2.4.</span> <span class="nav-text">安装 elasticsearch 插件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#head-%E6%8F%92%E4%BB%B6"><span class="nav-number">2.4.1.</span> <span class="nav-text">head 插件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kopf-%E6%8F%92%E4%BB%B6"><span class="nav-number">2.4.2.</span> <span class="nav-text">kopf 插件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cerebro-%E6%8F%92%E4%BB%B6"><span class="nav-number">2.4.3.</span> <span class="nav-text">cerebro 插件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%91%E6%8E%A7-elasticsearch-%E9%9B%86%E7%BE%A4%E7%8A%B6%E6%80%81"><span class="nav-number">2.5.</span> <span class="nav-text">监控 elasticsearch 集群状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#zabbix-%E6%B7%BB%E5%8A%A0%E7%9B%91%E6%8E%A7"><span class="nav-number">2.5.1.</span> <span class="nav-text">zabbix 添加监控</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#logstash"><span class="nav-number">3.</span> <span class="nav-text">logstash</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4"><span class="nav-number">3.2.</span> <span class="nav-text">命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6"><span class="nav-number">3.3.</span> <span class="nav-text">插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#input-%E6%8F%92%E4%BB%B6"><span class="nav-number">3.4.</span> <span class="nav-text">input 插件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stdin"><span class="nav-number">3.4.1.</span> <span class="nav-text">stdin</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#file"><span class="nav-number">3.4.2.</span> <span class="nav-text">file</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp"><span class="nav-number">3.4.3.</span> <span class="nav-text">tcp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kafka"><span class="nav-number">3.4.4.</span> <span class="nav-text">kafka</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#output-%E6%8F%92%E4%BB%B6"><span class="nav-number">3.5.</span> <span class="nav-text">output 插件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#output"><span class="nav-number">3.5.1.</span> <span class="nav-text">output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#elasticsearch-1"><span class="nav-number">3.5.2.</span> <span class="nav-text">elasticsearch</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis"><span class="nav-number">3.5.3.</span> <span class="nav-text">redis</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kafka-1"><span class="nav-number">3.5.4.</span> <span class="nav-text">kafka</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#codec-%E6%8F%92%E4%BB%B6"><span class="nav-number">3.6.</span> <span class="nav-text">codec 插件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#multiline"><span class="nav-number">3.6.1.</span> <span class="nav-text">multiline</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">3.7.</span> <span class="nav-text">配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.7.1.</span> <span class="nav-text">多配置文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">3.8.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA"><span class="nav-number">3.8.1.</span> <span class="nav-text">标准输入输出</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E5%88%B0%E6%96%87%E4%BB%B6"><span class="nav-number">3.8.2.</span> <span class="nav-text">输出到文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E5%88%B0-elasticsearch"><span class="nav-number">3.8.3.</span> <span class="nav-text">输出到 elasticsearch</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kibana"><span class="nav-number">4.</span> <span class="nav-text">kibana</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-1"><span class="nav-number">4.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E7%8A%B6%E6%80%81"><span class="nav-number">4.2.</span> <span class="nav-text">查看状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kibana-%E7%94%BB%E5%9B%BE%E5%8A%9F%E8%83%BD%E8%AF%A6%E8%A7%A3"><span class="nav-number">4.3.</span> <span class="nav-text">kibana 画图功能详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA%E4%BB%AA%E8%A1%A8%E7%9B%98"><span class="nav-number">4.4.</span> <span class="nav-text">添加一个仪表盘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Beats"><span class="nav-number">5.</span> <span class="nav-text">Beats</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#filebeat"><span class="nav-number">5.1.</span> <span class="nav-text">filebeat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#metricbeat"><span class="nav-number">5.2.</span> <span class="nav-text">metricbeat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#heartbeat"><span class="nav-number">5.3.</span> <span class="nav-text">heartbeat</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/ELK/ELK/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ELK | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ELK
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-03 08:30:51" itemprop="dateCreated datePublished" datetime="2021-03-03T08:30:51+08:00">2021-03-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/ELK/" itemprop="url" rel="index"><span itemprop="name">ELK</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="什么是-ELK"><a href="#什么是-ELK" class="headerlink" title="什么是 ELK"></a>什么是 ELK</h2><p><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/what-is/elk-stack">https://www.elastic.co/cn/what-is/elk-stack</a></p>
+<p>ELK 全称 ELK Stack，它的更新换代产品叫 Elastic Stack</p>
+<p>ELK &#x3D; Elasticsearch + Logstash + Kibana</p>
+<ul>
+<li>Elasticsearch：搜索和分析引擎</li>
+<li>Logstash：服务器端数据处理管道，能够同时从多个来源采集数据，转换数据，然后将数据发送到诸如 Elasticsearch 等“存储库”中</li>
+<li>Kibana：让用户在 Elasticsearch 中使用图形和图表对数据进行可视化</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614731653192.png"></p>
+<h3 id="什么是-Elasticsearch"><a href="#什么是-Elasticsearch" class="headerlink" title="什么是 Elasticsearch"></a>什么是 Elasticsearch</h3><p><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/what-is/elasticsearch">https://www.elastic.co/cn/what-is/elasticsearch</a></p>
+<h3 id="什么是-Logstash"><a href="#什么是-Logstash" class="headerlink" title="什么是 Logstash"></a>什么是 Logstash</h3><p>Logstash 是 Elastic Stack 的核心产品之一，可用来对数据进行聚合和处理，并将数据发送到 Elasticsearch。Logstash 是一个开源的服务器端数据处理管道，允许您在将数据索引到 Elasticsearch 之前同时从多个来源采集数据，并对数据进行充实和转换。</p>
+<h3 id="什么是-kibana"><a href="#什么是-kibana" class="headerlink" title="什么是 kibana"></a>什么是 kibana</h3><p><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/what-is/kibana">https://www.elastic.co/cn/what-is/kibana</a></p>
+<h3 id="为什么使用-ELK"><a href="#为什么使用-ELK" class="headerlink" title="为什么使用 ELK"></a>为什么使用 ELK</h3><p>ELK 组件在海量日志系统的运维中，可用于解决以下主要问题：</p>
+<ul>
+<li>分布式日志数据统一收集，实现集中式查询和管理</li>
+<li>故障排查</li>
+<li>安全信息和事件管理</li>
+<li>报表功能</li>
+</ul>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614734003034.png"></p>
+<h2 id="elasticsearch"><a href="#elasticsearch" class="headerlink" title="elasticsearch"></a>elasticsearch</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>参考博客：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/qdhxhz/p/11448451.html">https://www.cnblogs.com/qdhxhz/p/11448451.html</a></p>
+<p>重点理解 index 和 document 这两个概念：index（索引）类似 kafka 的 topic，oss 的 bucket，要尽量控制 index 的数量；index 中的单条数据称为 document（文档），相当于 mysql 表中的行</p>
+<p>之前的版本中，索引和文档中间还有个 type（类型）的概念，每个索引下可以建立多个 type，document 存储时需要指定 index 和 type，因为一个 index 中的 type 并不隔离，document 不能重名，所以 type 并没有多少意义。从 7.0 版本开始，一个 index 只能建一个名为_doc 的 type，8.0.0 以后将完全取消</p>
+<p>下面是一个 document 的源数据：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614868627749.png"></p>
+<ul>
+<li><code>_index</code>：文档所属索引名称</li>
+<li><code>_type</code>：文档所属类型名</li>
+<li><code>_id</code>：doc 主键，写入时指定，如果不指定，则系统自动生成一个唯一的 UUID 值</li>
+<li><code>_version</code>：doc 版本信息，保证 doc 的变更能以正确的顺序执行，避免乱序造成的数据丢失</li>
+<li><code>_seq_no</code>：严格递增的顺序号，shard 级别严格递增，保证后写入的 doc 的<code>_seq_no</code>大于先写入的 doc 的_seq_no</li>
+<li><code>_primary_term</code>：和<code>_seq_no</code>一样是一个整数，每当 primary shard 发生重新分配时，比如重启，primary 选举等，_primary_term 会递增 1</li>
+<li><code>found</code>：查询的 ID 正确那么 ture, 如果 Id 不正确，就查不到数据，found 字段就是 false</li>
+<li><code>_source</code>：文档的原始 JSON 数据</li>
+</ul>
+<h3 id="apt-安装"><a href="#apt-安装" class="headerlink" title="apt 安装"></a>apt 安装</h3><p><strong>elasticsearch 集群中 master 与 slave 的区别：</strong></p>
+<p>master：统计各节点状态信息、集群状态信息统计、索引的创建和删除、索引分配的管理、关闭节点等<br>slave：从 master 同步数据、等待机会成为 master</p>
+<ol>
+<li><p>apt 安装</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$dpkg</span> <span class="token parameter variable">-i</span> elasticsearch-7.11.1-amd64.deb</code></pre>
+
+<p>主要目录：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">/usr/share/elasticsearch	<span class="token comment"># 主目录</span>
+/etc/elasticsearch			<span class="token comment"># 配置文件目录</span>
+<span class="token punctuation">..</span>.</code></pre>
+</li>
+<li><p>修改 hosts</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/hosts
+<span class="token punctuation">..</span>.
+<span class="token number">10.0</span>.1.121 elk1-ljk.local
+<span class="token number">10.0</span>.1.122 elk2-ljk.local
+<span class="token number">10.0</span>.1.123 elk3-ljk.local</code></pre>
+</li>
+<li><p>修改配置文件 elasticsearch.yml</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk /<span class="token punctuation">]</span><span class="token variable">$grep</span> <span class="token string">'^[a-Z]'</span> /etc/elasticsearch/elasticsearch.yml
+cluster.name: es-cluster            <span class="token comment"># ELK的集群名称，名称相同即属于是同一个集群</span>
+node.name: node-2                   <span class="token comment"># 当前节点在集群内的节点名称</span>
+path.data: /data/elasticsearch/data <span class="token comment"># ES数据保存目录</span>
+path.logs: /data/elasticsearch/logs <span class="token comment"># ES日志保存目</span>
+bootstrap.memory_lock: <span class="token boolean">true</span>         <span class="token comment"># 服务启动的时候锁定足够的内存，防止数据写入swap</span>
+network.host: <span class="token number">10.0</span>.1.122            <span class="token comment"># 监听本机ip</span>
+http.port: <span class="token number">9200</span>                     <span class="token comment"># 监听端口</span>
+<span class="token comment"># 集群中node节点发现列表，最好使用hostname，这里为了方便，使用ip</span>
+discovery.seed_hosts: <span class="token punctuation">[</span><span class="token string">"elk1-ljk.local"</span>, <span class="token string">"elk2-ljk.local"</span>, <span class="token string">"elk3-ljk.local"</span><span class="token punctuation">]</span>
+<span class="token comment"># 集群初始化那些节点可以被选举为master</span>
+cluster.initial_master_nodes: <span class="token punctuation">[</span><span class="token string">"node-1"</span>, <span class="token string">"node-2"</span>, <span class="token string">"node-3"</span><span class="token punctuation">]</span>
+gateway.recover_after_nodes: <span class="token number">2</span> <span class="token comment"># 一个集群中的 N 个节点启动后,才允许进行数据恢复处理，默认是 1</span>
+<span class="token comment"># 设置是否可以通过正则或者_all 删除或者关闭索引库，默认 true 表示必须需要显式指定索引库名称，生产环境建议设置为 true，删除索引库的时候必须指定，否则可能会误删索引库中的索引库</span>
+action.destructive_requires_name: <span class="token boolean">true</span></code></pre>
+</li>
+<li><p>修改内存限制</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$vim</span> /usr/lib/systemd/system/elasticsearch.service
+<span class="token punctuation">..</span>.
+<span class="token assign-left variable">LimitMEMLOCK</span><span class="token operator">=</span>infinity	<span class="token comment"># 无限制使用内存</span></code></pre>
+
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$vim</span> /usr/local/elasticsearch/config/jvm.options
+<span class="token parameter variable">-Xms2g</span>	<span class="token comment"># 最小内存限制</span>
+<span class="token parameter variable">-Xmx2g</span>	<span class="token comment"># 最大内存限制</span></code></pre>
+</li>
+<li><p>创建数据目录并修改属主</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$mkdir</span> <span class="token parameter variable">-p</span> /data/elasticsearch
+<span class="token punctuation">[</span>root@elk3-ljk src<span class="token punctuation">]</span><span class="token variable">$chown</span> <span class="token parameter variable">-R</span> elasticsearch:elasticsearch /data/elasticsearch</code></pre>
+</li>
+<li><p>启动</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk1-ljk src<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start elasticsearch.service 	<span class="token comment"># 稍等几分钟</span>
+
+<span class="token punctuation">[</span>root@elk1-ljk ~<span class="token punctuation">]</span><span class="token variable">$curl</span> http://10.0.1.121:9200/_cat/nodes
+<span class="token number">10.0</span>.1.123 <span class="token number">13</span> <span class="token number">96</span> <span class="token number">0</span> <span class="token number">0.14</span> <span class="token number">0.32</span> <span class="token number">0.22</span> cdhilmrstw - node-3
+<span class="token number">10.0</span>.1.122 <span class="token number">28</span> <span class="token number">97</span> <span class="token number">0</span> <span class="token number">0.01</span> <span class="token number">0.02</span> <span class="token number">0.02</span> cdhilmrstw * node-2		<span class="token comment"># master</span>
+<span class="token number">10.0</span>.1.121 <span class="token number">26</span> <span class="token number">96</span> <span class="token number">2</span> <span class="token number">0.13</span> <span class="token number">0.07</span> <span class="token number">0.03</span> cdhilmrstw - node-1</code></pre></li>
+</ol>
+<h3 id="源码编译"><a href="#源码编译" class="headerlink" title="源码编译"></a>源码编译</h3><p>启动总是失败，各种报错，解决不了…</p>
+<h3 id="安装-elasticsearch-插件"><a href="#安装-elasticsearch-插件" class="headerlink" title="安装 elasticsearch 插件"></a>安装 elasticsearch 插件</h3><p>插件是为了完成不同的功能，官方提供了一些插件但大部分是收费的，另外也有一些开发爱好者提供的插件，可以实现对 elasticsearch 集群的状态监控与管理配置等功能</p>
+<h4 id="head-插件"><a href="#head-插件" class="headerlink" title="head 插件"></a>head 插件</h4><p>在 elasticsearch 5.x 版本以后不再支持直接安装 head 插件，而是需要通过启动一个服务方式</p>
+<p>github 地址：<a target="_blank" rel="noopener" href="https://github.com/mobz/elasticsearch-head">https://github.com/mobz/elasticsearch-head</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># git太慢，这里用迅雷下载zip包，然后上传</span>
+<span class="token punctuation">[</span>root@elk1-ljk src<span class="token punctuation">]</span><span class="token variable">$unzip</span> master.zip
+<span class="token punctuation">[</span>root@elk1-ljk src<span class="token punctuation">]</span><span class="token variable">$cd</span> elasticsearch-head-master/
+<span class="token punctuation">[</span>root@elk1-ljk elasticsearch-head-master<span class="token punctuation">]</span><span class="token variable">$npm</span> <span class="token function">install</span> grunt <span class="token parameter variable">-save</span>
+<span class="token punctuation">[</span>root@elk1-ljk elasticsearch-head-master<span class="token punctuation">]</span><span class="token variable">$npm</span> <span class="token function">install</span>	<span class="token comment"># 这一步要等很久</span>
+<span class="token punctuation">[</span>root@elk1-ljk elasticsearch-head-master<span class="token punctuation">]</span><span class="token variable">$npm</span> run start	<span class="token comment"># 前台启动</span>
+
+<span class="token comment"># 开启跨域访问支持，每个节点都需要开启</span>
+<span class="token punctuation">[</span>root@elk3-ljk ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/elasticsearch/elasticsearch.yml
+<span class="token punctuation">..</span>.
+http.cors.enabled: <span class="token boolean">true</span>
+http.cors.allow-origin: <span class="token string">"*"</span>
+
+<span class="token punctuation">[</span>root@elk2-ljk games<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart elasticsearch.service 	<span class="token comment"># 重启elasticsearch</span></code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1614790916767.png"></p>
+<h4 id="kopf-插件"><a href="#kopf-插件" class="headerlink" title="kopf 插件"></a>kopf 插件</h4><p>过时的插件，只支持 elasticsearc 1.x 或 2.x 的版本</p>
+<h4 id="cerebro-插件"><a href="#cerebro-插件" class="headerlink" title="cerebro 插件"></a>cerebro 插件</h4><p>新开源的 elasticsearch 集群 web 管理程序，需要 java11 或者更高版本</p>
+<p>github 地址：<a target="_blank" rel="noopener" href="https://github.com/lmenezes/cerebro">https://github.com/lmenezes/cerebro</a></p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$unzip</span> cerebro-0.9.3.zip
+<span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$cd</span> cerebro-0.9.3/
+<span class="token punctuation">[</span>root@elk2-ljk cerebro-0.9.3<span class="token punctuation">]</span><span class="token variable">$vim</span> conf/application.conf
+<span class="token punctuation">..</span>.
+<span class="token comment"># host列表</span>
+hosts <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token function">host</span> <span class="token operator">=</span> <span class="token string">"http://10.0.1.122:9200"</span>
+    name <span class="token operator">=</span> <span class="token string">"es-cluster1"</span>  <span class="token comment"># host的名称，如果有多个elasticsearch集群，可以用这个name区分</span>
+  <span class="token comment">#  headers-whitelist = [ "x-proxy-user", "x-proxy-roles", "X-Forwarded-For" ]</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span>
+
+<span class="token punctuation">[</span>root@elk2-ljk cerebro-0.9.3<span class="token punctuation">]</span>$./bin/cerebro 	<span class="token comment"># 前台启动</span></code></pre>
+
+<p><img data-src="//img.to2b.cn/blog/ljk/1614790940334.png"></p>
+<h3 id="监控-elasticsearch-集群状态"><a href="#监控-elasticsearch-集群状态" class="headerlink" title="监控 elasticsearch 集群状态"></a>监控 elasticsearch 集群状态</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk3-ljk ~<span class="token punctuation">]</span><span class="token variable">$curl</span> http://10.0.1.122:9200/_cluster/health?pretty<span class="token operator">=</span>true
+<span class="token punctuation">&#123;</span>
+  <span class="token string">"cluster_name"</span> <span class="token builtin class-name">:</span> <span class="token string">"es-cluster"</span>,
+  <span class="token string">"status"</span> <span class="token builtin class-name">:</span> <span class="token string">"green"</span>,	<span class="token comment"># green：运行正常、yellow：副本分片丢失、red：主分片丢失</span>
+  <span class="token string">"timed_out"</span> <span class="token builtin class-name">:</span> false,
+  <span class="token string">"number_of_nodes"</span> <span class="token builtin class-name">:</span> <span class="token number">3</span>,
+  <span class="token string">"number_of_data_nodes"</span> <span class="token builtin class-name">:</span> <span class="token number">3</span>,
+  <span class="token string">"active_primary_shards"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"active_shards"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"relocating_shards"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"initializing_shards"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"unassigned_shards"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"delayed_unassigned_shards"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"number_of_pending_tasks"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"number_of_in_flight_fetch"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"task_max_waiting_in_queue_millis"</span> <span class="token builtin class-name">:</span> <span class="token number">0</span>,
+  <span class="token string">"active_shards_percent_as_number"</span> <span class="token builtin class-name">:</span> <span class="token number">100.0</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<p>如果是单节点，status 会显示 yellow，设置副本数为 0 即可解决：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk1-ljk ~<span class="token punctuation">]</span><span class="token variable">$curl</span> <span class="token parameter variable">-X</span> PUT <span class="token string">"10.0.1.121:9200/_settings"</span> <span class="token parameter variable">-H</span> <span class="token string">'Content-Type: application/json'</span> -d<span class="token string">' &#123;"number_of_replicas":0&#125;'</span>
+<span class="token punctuation">&#123;</span><span class="token string">"acknowledged"</span>:true<span class="token punctuation">&#125;</span></code></pre>
+
+<p>或者：</p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1615007863772.png"></p>
+<h4 id="zabbix-添加监控"><a href="#zabbix-添加监控" class="headerlink" title="zabbix 添加监控"></a>zabbix 添加监控</h4><h2 id="logstash"><a href="#logstash" class="headerlink" title="logstash"></a>logstash</h2><p>官方参考文档：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/index.html">https://www.elastic.co/guide/en/logstash/current/index.html</a></p>
+<p><font color=red> logstash 是一个具有 3 个阶段的处理<strong>管道</strong>：输入 –&gt; 过滤器 –&gt; 输出  </font></p>
+<p><font color=red>输入生成事件，过滤器修改数据（日志），输出将数据（日志）发送到其他地方</font></p>
+<p><img data-src="//img.to2b.cn/blog/ljk/1614827175253.png"></p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>logstash 依赖 java，可以自己配置 java 环境，如果不配置，logstash 会使用其自带的 openjdk</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk src<span class="token punctuation">]</span><span class="token variable">$dpkg</span> <span class="token parameter variable">-i</span> logstash-7.11.1-amd64.deb
+
+<span class="token comment"># 修改启动用户为root，不然因为权限问题，后面会出现各种莫名其妙的错误，有些根本找不到报错</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/systemd/system/logstash.service
+<span class="token punctuation">..</span>.
+<span class="token assign-left variable">User</span><span class="token operator">=</span>root
+<span class="token assign-left variable">Group</span><span class="token operator">=</span>root
+<span class="token punctuation">..</span>.</code></pre>
+
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk bin<span class="token punctuation">]</span>$./logstash <span class="token parameter variable">--help</span></code></pre>
+
+<ul>
+<li><p>-n：node name，就是节点的 hostname，例如：elk2-ljk.local</p>
+</li>
+<li><p>-f：从特定的文件或目录加载 logstash 配置。如果给定一个目录，该目录中的所有文件将按字典顺序合并，然后作为单个配置文件进行解析。您还可以指定通配符(globs)，任何匹配的文件将按照上面描述的顺序加载</p>
+</li>
+<li><p>-e：从命令行加载 logstash 配置，一般不用</p>
+</li>
+<li><p>-t：检查配置文件是否合法，配合-f 使用，-f 指定配置文件，-t 检查</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 示例：检查test.conf的合法性</span>
+$/usr/share/logstash/bin/logstash <span class="token parameter variable">-f</span> /etc/logstash/conf.d/test.conf <span class="token parameter variable">-t</span></code></pre>
+</li>
+<li><p>…</p>
+</li>
+</ul>
+<h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><p>logstash 的输入和输出都依赖插件</p>
+<p>不同的插件使用不同的配置，但是所有输入插件都支持以下配置选项：</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-file.html#plugins-inputs-file-add_field"><code>add_field</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#hash">hash</a></td>
+<td>Add a field to an event</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-file.html#plugins-inputs-file-codec"><code>codec</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#codec">codec</a></td>
+<td>用于输入数据的编解码器。输入编解码器是一种方便的方法，可以在数据进入输入之前对其进行解码，而不需要在 Logstash 管道中使用单独的过滤器</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-file.html#plugins-inputs-file-enable_metric"><code>enable_metric</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#boolean">boolean</a></td>
+<td>Disable or enable metric logging for this specific plugin instance by default we record all the metrics we can, but you can disable metrics collection for a specific plugin.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-file.html#plugins-inputs-file-id"><code>id</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#string">string</a></td>
+<td>唯一的 ID，如果没有指定，logstash 会自动生成一个，尤其是多个相同类型的插件时，强烈建议配置此项，例如有多个 file 输入，应当配置此项防止混淆</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-file.html#plugins-inputs-file-tags"><code>tags</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#array">array</a></td>
+<td>Add any number of arbitrary tags to your event.<br/>This can help with processing later.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-file.html#plugins-inputs-file-type"><code>type</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#string">string</a></td>
+<td>类型，例如收集 &#x2F;var&#x2F;log&#x2F;syslog 日志，type 可以设置为 “system”；收集网站日志，type 可以设置为 “web”。 <br/>此项用的较多，一般会根据判断 type 值来进行输出或过滤</td>
+</tr>
+</tbody></table>
+<p>所有输出插件都支持以下配置选项：</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-xmpp.html#plugins-outputs-xmpp-codec"><code>codec</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#codec">codec</a></td>
+<td>用于输出数据的编解码器。输出编解码器是一种方便的方法，可以在数据离开输出之前对数据进行编码，而不需要在 Logstash 管道中使用单独的过滤器</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-xmpp.html#plugins-outputs-xmpp-enable_metric"><code>enable_metric</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#boolean">boolean</a></td>
+<td>Disable or enable metric logging for this specific plugin instance. By default we record all the metrics we can, but you can disable metrics collection for a specific plugin.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-xmpp.html#plugins-outputs-xmpp-id"><code>id</code></a></td>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/7.11/configuration-file-structure.html#string"> string</a></td>
+<td>唯一的 ID，如果没有指定，logstash 会自动生成一个，尤其是多个相同类型的插件时，强烈建议配置此项，例如有多个 file 输出，应当配置此项防止混淆</td>
+</tr>
+</tbody></table>
+<p>可以看到 input 和 output 插件都支持 codec 配置项，input 的 codec 根据被采集的日志文件确定，如果日志是 json 格式，则 input 插件的 codec 应当设置为 json；而 output 的 codec 根据数据库确定，如果是 elasticsearch，codec 保持默认的 rubydebug 即可，如果是 kafka，codec 应该设置为 json</p>
+<h3 id="input-插件"><a href="#input-插件" class="headerlink" title="input 插件"></a>input 插件</h3><h4 id="stdin"><a href="#stdin" class="headerlink" title="stdin"></a>stdin</h4><p>标准输入</p>
+<h4 id="file"><a href="#file" class="headerlink" title="file"></a>file</h4><p>日志输出到文件</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>path</code></td>
+<td>日志路径</td>
+<td>必需</td>
+</tr>
+<tr>
+<td><code>start_position</code></td>
+<td>从文件的开头或者结尾开始采集数据</td>
+<td><code>[&quot;beginning&quot;, &quot;end&quot;]</code></td>
+</tr>
+<tr>
+<td><code>stat_interval</code></td>
+<td>日志收集的时间间隔</td>
+<td>每个 input 文件都生成一个 .sincedb_xxxxx 文件，这个文件中记录了上次收集日志位置，下次从记录的位置继续收集</td>
+</tr>
+</tbody></table>
+<h4 id="tcp"><a href="#tcp" class="headerlink" title="tcp"></a>tcp</h4><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>host</code></td>
+<td>当 mode 是<code>server</code>，<code>host</code>是监听的地址；<br>当 mode 是<code>client</code>，<code>host</code>是要连接的地址</td>
+<td>默认<code>0.0.0.0</code></td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td><code>server</code>：监听客户端连接；<br><code>client</code>：连接到服务器；</td>
+<td>[“server”, “client”]</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td>监听的端口或要连接的端口</td>
+<td>必需</td>
+</tr>
+</tbody></table>
+<h4 id="kafka"><a href="#kafka" class="headerlink" title="kafka"></a>kafka</h4><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bootstrap_servers</code></td>
+<td></td>
+<td>host1:port1,host2:port2</td>
+</tr>
+<tr>
+<td><code>topics</code></td>
+<td>要订阅的 topic 列表，默认为[“logstash”]</td>
+<td></td>
+</tr>
+<tr>
+<td><code>decorate_events</code></td>
+<td>是否添加一个 kafka 元数据，包含以下信息：<br>topic、consumer_group、partition、offset、key</td>
+<td>布尔值</td>
+</tr>
+<tr>
+<td><code>codec</code></td>
+<td>设置为 <code>json</code></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="output-插件"><a href="#output-插件" class="headerlink" title="output 插件"></a>output 插件</h3><h4 id="output"><a href="#output" class="headerlink" title="output"></a>output</h4><p>标准输出</p>
+<h4 id="elasticsearch-1"><a href="#elasticsearch-1" class="headerlink" title="elasticsearch"></a>elasticsearch</h4><h4 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h4><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html#plugins-outputs-redis-key"><code>key</code></a></td>
+<td>list（列表）名，或者 channel（频道）名，<br>至于是哪个取决于<code>data_type</code></td>
+<td></td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html#plugins-outputs-redis-data_type"><code>data_type</code></a></td>
+<td>如果<code>data_type</code>为<code>list</code>，将数据 push 到 list；<br>如果<code>data_type</code>为 channel，将数据发布到 channel；</td>
+<td>[“list”, “channel”]</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html#plugins-outputs-redis-host"><code>host</code></a></td>
+<td>redis 主机列表，可以是 hostname 或者 ip 地址</td>
+<td>数组</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html#plugins-outputs-redis-port"><code>port</code></a></td>
+<td>redis 服务端口，默认 6379</td>
+<td></td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html#plugins-outputs-redis-db"><code>db</code></a></td>
+<td>数据库编号，默认 0</td>
+<td></td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html#plugins-outputs-redis-password"><code>password</code></a></td>
+<td>身份认证，默认不认证</td>
+<td>不建议设置密码</td>
+</tr>
+</tbody></table>
+<p>写个脚本统计 redis 的 key 数量，使用 zabbix-agent 定时执行脚本，一旦 key 超过某个数量，就增加 logstash 数量，从而加快从 redis 中取数据的速度</p>
+<h4 id="kafka-1"><a href="#kafka-1" class="headerlink" title="kafka"></a>kafka</h4><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bootstrap_servers</code></td>
+<td></td>
+<td>host1:port1,host2:port2</td>
+</tr>
+<tr>
+<td><code>topic_id</code></td>
+<td>主题</td>
+<td></td>
+</tr>
+<tr>
+<td><code>codec</code></td>
+<td>设置为 <code>json</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>The producer will attempt to batch records together into fewer requests whenever multiple records are being sent to the same partition. This helps performance on both the client and the server. This configuration controls the default batch size in bytes.</td>
+<td>默认 16384</td>
+</tr>
+</tbody></table>
+<h3 id="codec-插件"><a href="#codec-插件" class="headerlink" title="codec 插件"></a>codec 插件</h3><h4 id="multiline"><a href="#multiline" class="headerlink" title="multiline"></a>multiline</h4><p>合并多行，比如 java 的一个报错，日志中会记录多行，为了方便查看，应该将一个报错的多行日志合并成一行</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pattern</td>
+<td>正则匹配</td>
+<td>必需</td>
+</tr>
+<tr>
+<td>negate</td>
+<td>匹配成功或失败，就开始多行合并</td>
+<td>布尔值</td>
+</tr>
+<tr>
+<td>what</td>
+<td>如果模式匹配，向前多行合并，还是向后多行合并</td>
+<td>必需，<code>[&quot;previous&quot;, &quot;next&quot;]</code></td>
+</tr>
+</tbody></table>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>配置：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/configuration.html">https://www.elastic.co/guide/en/logstash/current/configuration.html</a><br>配置文件结构：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/configuration-file-structure.html">https://www.elastic.co/guide/en/logstash/current/configuration-file-structure.html</a><br>配置文件语法：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/event-dependent-configuration.html">https://www.elastic.co/guide/en/logstash/current/event-dependent-configuration.html</a><br>使用环境变量：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/environment-variables.html">https://www.elastic.co/guide/en/logstash/current/environment-variables.html</a><br>配置文件示例：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/config-examples.html">https://www.elastic.co/guide/en/logstash/current/config-examples.html</a><br>数据发送到 es：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/connecting-to-cloud.html">https://www.elastic.co/guide/en/logstash/current/connecting-to-cloud.html</a></p>
+<pre class="language-conf" data-language="conf"><code class="language-conf">input &#123;
+  ...
+&#125;
+
+filter &#123;
+  ...
+&#125;
+
+output &#123;
+  ...
+&#125;</code></pre>
+
+<h4 id="多配置文件"><a href="#多配置文件" class="headerlink" title="多配置文件"></a>多配置文件</h4><p><a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html">https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html</a><br><a target="_blank" rel="noopener" href="https://elasticstack.blog.csdn.net/article/details/100995868">https://elasticstack.blog.csdn.net/article/details/100995868</a></p>
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 定义了两个管道</span>
+<span class="token punctuation">[</span>root@elk2-ljk logstash<span class="token punctuation">]</span><span class="token variable">$cat</span> pipelines.yml
+- pipeline.id: syslog
+  path.config: <span class="token string">"/etc/logstash/conf.d/syslog.conf"</span>
+- pipeline.id: tomcat
+  path.config: <span class="token string">"/etc/logstash/conf.d/tomcat.conf"</span>
+
+<span class="token comment"># syslog.conf 和 tomcat.conf，没有使用条件判断语句做输出判断</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$cat</span> syslog.conf
+input <span class="token punctuation">&#123;</span>
+    <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+        <span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"syslog"</span>
+        path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/var/log/syslog"</span>
+        start_position <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"end"</span>
+        stat_interval <span class="token operator">=</span><span class="token operator">></span> <span class="token number">3</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+output <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">[</span>type<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token string">"syslog"</span> <span class="token punctuation">&#123;</span>
+        elasticsearch <span class="token punctuation">&#123;</span>
+            hosts <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">"10.0.1.121:9200"</span><span class="token punctuation">]</span>
+            index <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"mytest-%&#123;type&#125;-%&#123;+xxxx.ww&#125;"</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$cat</span> tomcat.conf
+input <span class="token punctuation">&#123;</span>
+    <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+        <span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"tomcat-access-log"</span>
+        path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/usr/local/tomcat/logs/tomcat_access_log.*.log"</span>
+        start_position <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"end"</span>
+        stat_interval <span class="token operator">=</span><span class="token operator">></span> <span class="token number">3</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+output <span class="token punctuation">&#123;</span>
+    elasticsearch <span class="token punctuation">&#123;</span>
+        hosts <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">"10.0.1.121:9200"</span><span class="token punctuation">]</span>
+        index <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"mytest-%&#123;type&#125;-%&#123;+xxxx.ww&#125;"</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment"># 启动，注意一定要以为root用户启动</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart logstash.service</code></pre>
+
+<p>效果：<img data-src="//img.to2b.cn/blog/ljk/1615015973480.png"></p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><h4 id="标准输入输出"><a href="#标准输入输出" class="headerlink" title="标准输入输出"></a>标准输入输出</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$cat</span> /etc/logstash/conf.d/test.conf
+input <span class="token punctuation">&#123;</span>
+  stdin <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+output <span class="token punctuation">&#123;</span>
+  stdout <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span>$/usr/share/logstash/bin/logstash <span class="token parameter variable">-f</span> /etc/logstash/conf.d/test.conf
+<span class="token punctuation">..</span>.		<span class="token comment"># 启动得等一会</span>
+<span class="token punctuation">[</span>INFO <span class="token punctuation">]</span> <span class="token number">2021</span>-03-04 <span class="token number">18</span>:10:06.020 <span class="token punctuation">[</span>Api Webserver<span class="token punctuation">]</span> agent - Successfully started Logstash API endpoint <span class="token punctuation">&#123;</span>:port<span class="token operator">=</span><span class="token operator">></span><span class="token number">9600</span><span class="token punctuation">&#125;</span>
+hello word	<span class="token comment"># 标准输入</span>
+<span class="token punctuation">&#123;</span>
+    <span class="token string">"@timestamp"</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token number">2021</span>-03-04T10:10:15.528Z,	<span class="token comment"># 当前事件的发生时间</span>
+          <span class="token string">"host"</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"elk2-ljk.local"</span>,			<span class="token comment"># 标记事件发生的节点</span>
+      <span class="token string">"@version"</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"1"</span>,						<span class="token comment"># 事件版本号，一个事件就是一个 ruby 对象</span>
+       <span class="token string">"message"</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"hello word"</span>				<span class="token comment"># 息的具体内容</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h4 id="输出到文件"><a href="#输出到文件" class="headerlink" title="输出到文件"></a>输出到文件</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 修改被采集日志文件权限，至少让logstash用户可以读</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$chmod</span> o+r /var/log/syslog
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$chmod</span> o+r /var/log/auth.log
+
+<span class="token comment"># 2. 编写配置文件，采集多个日志文件，输出到不同的文件</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$vim</span> system-log.conf
+input <span class="token punctuation">&#123;</span>
+    <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+        <span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"syslog"</span>
+        path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/var/log/syslog"</span>
+        start_position <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"end"</span>
+        stat_interval <span class="token operator">=</span><span class="token operator">></span> <span class="token number">5</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+    	<span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"authlog"</span>
+        path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/var/log/auth.log"</span>
+        start_position <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"end"</span>
+        stat_interval <span class="token operator">=</span><span class="token operator">></span> <span class="token number">5</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+output <span class="token punctuation">&#123;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">[</span>type<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token string">"syslog"</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+            path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/tmp/%&#123;type&#125;.%&#123;+yyyy.MM.dd&#125;"</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">[</span>type<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token string">"authlog"</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+            path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/tmp/%&#123;type&#125;.%&#123;+yyyy.MM.dd&#125;"</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment"># 3. 检查配置文件是否合法</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span>$/usr/share/logstash/bin/logstash <span class="token parameter variable">-f</span> ./system-log.conf <span class="token parameter variable">-t</span>
+
+<span class="token comment"># 4. 重启logstash.service</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart logstash.service
+
+<span class="token comment"># 5. 观察输出文件</span>
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$tail</span> <span class="token parameter variable">-f</span> /tmp/syslog.2021.03.05
+<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>root@elk2-ljk conf.d<span class="token punctuation">]</span><span class="token variable">$tail</span> <span class="token parameter variable">-f</span> /tmp/authlog.2021.03.05
+<span class="token punctuation">..</span>.</code></pre>
+
+<p>时间格式参考：<a target="_blank" rel="noopener" href="http://joda-time.sourceforge.net/apidocs/org/joda/time/format/DateTimeFormat.html">http://joda-time.sourceforge.net/apidocs/org/joda/time/format/DateTimeFormat.html</a></p>
+<h4 id="输出到-elasticsearch"><a href="#输出到-elasticsearch" class="headerlink" title="输出到 elasticsearch"></a>输出到 elasticsearch</h4><p>elasticsearch 输出插件至少指定 <code>hosts</code> 和<code>index</code>，<code>hosts</code>可以指定 hosts 列表</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash">input <span class="token punctuation">&#123;</span>
+    <span class="token function">file</span> <span class="token punctuation">&#123;</span>
+        <span class="token builtin class-name">type</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"syslog"</span>
+        path <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"/var/log/syslog"</span>
+        start_position <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"end"</span>
+        stat_interval <span class="token operator">=</span><span class="token operator">></span> <span class="token number">3</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+
+output <span class="token punctuation">&#123;</span>
+  elasticsearch <span class="token punctuation">&#123;</span>
+        hosts <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span><span class="token string">"10.0.1.121:9200"</span><span class="token punctuation">]</span>
+        index <span class="token operator">=</span><span class="token operator">></span> <span class="token string">"mytest-%&#123;type&#125;-%&#123;+xxxx.ww&#125;"</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span></code></pre>
+
+<h2 id="kibana"><a href="#kibana" class="headerlink" title="kibana"></a>kibana</h2><p>开源的数据分析和可视化平台，可以 对 Elasticsearch 索引中的数据进行搜索、查看、交互操作，可以很方便的利用图表、表格及地图对数据进行多元化的分析和呈现</p>
+<h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk1-ljk src<span class="token punctuation">]</span><span class="token variable">$tar</span> zxf kibana-7.11.1-linux-x86_64.tar.gz
+<span class="token punctuation">[</span>root@elk1-ljk src<span class="token punctuation">]</span><span class="token variable">$mv</span> kibana-7.11.1-linux-x86_64 /usr/local/kibana
+<span class="token punctuation">[</span>root@elk1-ljk src<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/kibana
+<span class="token punctuation">[</span>root@elk1-ljk kibana<span class="token punctuation">]</span><span class="token variable">$grep</span> <span class="token string">'^[a-Z]'</span> config/kibana.yml 	<span class="token comment"># 修改以下配置项</span>
+server.port: <span class="token number">5601</span>
+server.host: <span class="token string">"10.0.1.121"</span>
+elasticsearch.hosts: <span class="token punctuation">[</span><span class="token string">"http://10.0.1.121:9200"</span><span class="token punctuation">]</span>
+i18n.locale: <span class="token string">"zh-CN"</span>
+
+<span class="token punctuation">[</span>root@elk1-ljk kibana<span class="token punctuation">]</span>$./bin/kibana --allow-root	<span class="token comment"># 启动</span>
+<span class="token comment"># nohup ./bin/kibana --allow-root >/dev/null 2>&amp;1 &amp;		# 后台启动</span></code></pre>
+
+<p>因为笔记本的性能问题，将 elasticsearch 集群缩减为 elasticsearch 单节点，这导致 kibana 无法连接到 elasticsearch，启动失败。解决办法：将 elasticsearch 的数据目录清空，然后重启</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@elk1-ljk data<span class="token punctuation">]</span><span class="token variable">$systemctl</span> stop elasticsearch.service 	<span class="token comment"># 停止elasticsearch</span>
+<span class="token punctuation">[</span>root@elk1-ljk data<span class="token punctuation">]</span><span class="token variable">$ls</span> /data/elasticsearch/
+data  logs
+<span class="token punctuation">[</span>root@elk1-ljk data<span class="token punctuation">]</span><span class="token variable">$rm</span> <span class="token parameter variable">-rf</span> /data/elasticsearch/*	<span class="token comment"># 清空数据目录</span>
+<span class="token punctuation">[</span>root@elk1-ljk data<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start elasticsearch.service	<span class="token comment"># 重新启动elasticsearch</span>
+<span class="token punctuation">[</span>root@elk1-ljk kibana<span class="token punctuation">]</span>$./bin/kibana --allow-root	<span class="token comment"># 再次启动kibana</span></code></pre>
+
+<h3 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614862854522.png"></p>
+<h3 id="kibana-画图功能详解"><a href="#kibana-画图功能详解" class="headerlink" title="kibana 画图功能详解"></a>kibana 画图功能详解</h3><h3 id="添加一个仪表盘"><a href="#添加一个仪表盘" class="headerlink" title="添加一个仪表盘"></a>添加一个仪表盘</h3><h2 id="Beats"><a href="#Beats" class="headerlink" title="Beats"></a>Beats</h2><p><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/beats/">https://www.elastic.co/cn/beats/</a></p>
+<p>logstash 基于 java，资源消耗很大，容器等场景，大多跑的都是轻量级的服务，没有必要安装 logstash，就可以用 beats 代替 logstash 做日志收集，beats 基于 go，性能更强，资源占用更低，但是功能也相对简单</p>
+<p>beats 是一个系列，具体包含以下类型的采集器：</p>
+<ul>
+<li><strong>filebeat</strong>：轻量型日志采集器，最常用</li>
+<li><strong>metricbeat</strong>：轻量型指标采集器，获取系统级的 CPU 使用率、内存、文件系统、磁盘 IO 和网络 IO 统计数据，还可针对系统上的每个进程获得与 top 命令类似的统计数据</li>
+<li><strong>heartbeat</strong>：面向运行状态监测的轻量型采集器，通过 ICMP、TCP 和 HTTP 进行 ping 检测主机、网站可用性</li>
+<li>packetbeat：轻量型网络数据采集器</li>
+<li>winlogbeat：轻量型 Windows 事件日志采集器</li>
+<li>auditbeat：轻量型审计日志采集器</li>
+<li>functionbeat：面向云端数据的无服务器采集器</li>
+</ul>
+<p>除了 filebeat，其他的 beat 可以用 zabbix 替代</p>
+<h3 id="filebeat"><a href="#filebeat" class="headerlink" title="filebeat"></a>filebeat</h3><p>官方文档：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/current/index.html">https://www.elastic.co/guide/en/beats/filebeat/current/index.html</a></p>
+<p>配置：只需要配置 input 和 output</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># ============================== Filebeat inputs ==================</span>
+filebeat.inputs:
+
+- type: log							<span class="token comment"># 日志type</span>
+  enabled: <span class="token boolean">false</span>					<span class="token comment"># 是否启动</span>
+  paths:							<span class="token comment"># 被采集日志，可以写多个</span>
+    - /var/log/*.log
+  exclude_lines: <span class="token punctuation">[</span><span class="token string">'^DBG'</span><span class="token punctuation">]</span>			<span class="token comment"># 不采集日志中的哪些行</span>
+  include_lines: <span class="token punctuation">[</span><span class="token string">'^ERR'</span>, <span class="token string">'^WARN'</span><span class="token punctuation">]</span>	<span class="token comment"># 只采集日志中的哪些行</span>
+  exclude_files: <span class="token punctuation">[</span><span class="token string">'.gz$'</span><span class="token punctuation">]</span>			<span class="token comment"># 从paths的匹配中排除哪些文件</span>
+  fields:							<span class="token comment"># 自定义字段，可以定义多个，后面用来做条件判断</span>
+    level: debug
+    review: <span class="token number">1</span>
+  multiline.pattern: ^<span class="token punctuation">\</span><span class="token punctuation">[</span>			<span class="token comment"># 合并多行，匹配规则</span>
+  multiline.negate: <span class="token boolean">false</span>			<span class="token comment"># 合并多行，配皮成功或失败执行合并</span>
+  multiline.match: after			<span class="token comment"># 合并多行，向前合并还是向后合并</span>
+
+<span class="token comment"># ============================== Filebeat modules ==============================</span>
+
+filebeat.config.modules:
+  path: <span class="token variable">$&#123;path.config&#125;</span>/modules.d/*.yml
+  reload.enabled: <span class="token boolean">false</span>
+  reload.period: 10s
+
+<span class="token comment"># ======================= Elasticsearch template setting =======================</span>
+
+setup.template.settings:
+  index.number_of_shards: <span class="token number">1</span>
+  index.codec: best_compression
+  _source.enabled: <span class="token boolean">false</span>
+
+<span class="token comment"># ================================== General ===================================</span>
+
+<span class="token comment">#name:</span>
+<span class="token comment">#tags: ["service-X", "web-tier"]</span>
+<span class="token comment">#fields:</span>
+<span class="token comment">#  env: staging</span>
+
+<span class="token comment"># ================================= Dashboards =================================</span>
+
+<span class="token comment">#setup.dashboards.enabled: false</span>
+<span class="token comment">#setup.dashboards.url:</span>
+
+<span class="token comment"># =================================== Kibana ===================================</span>
+
+setup.kibana:
+  <span class="token comment">#host: "localhost:5601"</span>
+  <span class="token comment">#space.id:</span>
+
+<span class="token comment"># =============================== Elastic Cloud ================================</span>
+
+<span class="token comment">#cloud.id:</span>
+<span class="token comment">#cloud.auth:</span>
+
+<span class="token comment"># ================================== Outputs ===================================</span>
+<span class="token comment"># 不同的output，有不同的配置，但是没有条件判断功能，无法根据不同的input使用不用的output</span>
+<span class="token comment"># ---------------------------- Elasticsearch Output ----------------------------</span>
+<span class="token comment">#output.elasticsearch:</span>
+  <span class="token comment">#hosts: ["localhost:9200"]</span>
+  <span class="token comment">#protocol: "https"</span>
+  <span class="token comment">#api_key: "id:api_key"</span>
+  <span class="token comment">#username: "elastic"</span>
+  <span class="token comment">#password: "changeme"</span>
+
+<span class="token comment"># ------------------------------ Logstash Output -------------------------------</span>
+<span class="token comment">#output.logstash:</span>
+  <span class="token comment">#hosts: ["localhost:5044"]</span>
+  <span class="token comment">#ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]</span>
+  <span class="token comment">#ssl.certificate: "/etc/pki/client/cert.pem"</span>
+  <span class="token comment">#ssl.key: "/etc/pki/client/cert.key"</span>
+
+<span class="token comment"># ================================= Processors =================================</span>
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~
+
+<span class="token comment"># ================================== Logging ===================================</span>
+
+<span class="token comment">#logging.level: debug</span>
+<span class="token comment">#logging.selectors: ["*"]</span>
+
+<span class="token comment"># ============================= X-Pack Monitoring ==============================</span>
+
+<span class="token comment">#monitoring.enabled: false</span>
+<span class="token comment">#monitoring.cluster_uuid:</span>
+<span class="token comment">#monitoring.elasticsearch:</span>
+
+<span class="token comment"># ============================== Instrumentation ===============================</span>
+
+<span class="token comment">#instrumentation:</span>
+    <span class="token comment">#enabled: false</span>
+    <span class="token comment">#environment: ""</span>
+    <span class="token comment">#hosts:</span>
+    <span class="token comment">#  - http://localhost:8200</span>
+    <span class="token comment">#api_key:</span>
+    <span class="token comment">#secret_token:</span>
+
+<span class="token comment"># ================================= Migration ==================================</span>
+
+<span class="token comment">#migration.6_to_7.enabled: true</span>
+</code></pre>
+
+<p>示例：</p>
+<pre class="language-bash" data-language="bash"><code class="language-bash"></code></pre>
+
+<h3 id="metricbeat"><a href="#metricbeat" class="headerlink" title="metricbeat"></a>metricbeat</h3><h3 id="heartbeat"><a href="#heartbeat" class="headerlink" title="heartbeat"></a>heartbeat</h3>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ELK/" rel="tag"><i class="fa fa-tag"></i> ELK</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/ELK/Elastic/" rel="prev" title="ELK">
+                  <i class="fa fa-chevron-left"></i> ELK
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/MySQL/MGR/" rel="next" title="MGR">
+                  MGR <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

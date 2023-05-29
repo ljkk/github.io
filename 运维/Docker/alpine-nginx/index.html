@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <link rel="mask-icon" href="//img.to2b.cn/blog/ljk/1607154764582.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//s1.to2b.cn/libs/fontawesome-free/5.15.4/css/all.min.css">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="# # 注意：此DOCKERFILE是通过&quot;update.sh&quot;生成的 # # 请不要直接编辑它。 # FROM alpine:3.16		# 基础镜像,后续的指令都是运行于此基准镜像所提供的运行环境  LABEL maintainer&#x3D;&quot;NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;	# 指定镜像元数据  ENV NGINX_VERSI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="alpine-nginx">
+<meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/alpine-nginx/index.html">
+<meta property="og:site_name" content="LJKのBlog">
+<meta property="og:description" content="# # 注意：此DOCKERFILE是通过&quot;update.sh&quot;生成的 # # 请不要直接编辑它。 # FROM alpine:3.16		# 基础镜像,后续的指令都是运行于此基准镜像所提供的运行环境  LABEL maintainer&#x3D;&quot;NGINX Docker Maintainers &lt;docker-maint@nginx.com&gt;&quot;	# 指定镜像元数据  ENV NGINX_VERSI">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-08T03:26:43.000Z">
+<meta property="article:modified_time" content="2023-05-29T08:58:05.486Z">
+<meta property="article:author" content="像方便面一样的男子">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/alpine-nginx/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/alpine-nginx/","path":"运维/Docker/alpine-nginx/","title":"alpine-nginx"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>alpine-nginx | LJKのBlog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">LJKのBlog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学无止境</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="像方便面一样的男子"
+      src="//img.to2b.cn/blog/ljk/1607154764582.png">
+  <p class="site-author-name" itemprop="name">像方便面一样的男子</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">340</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">73</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ljkk" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ljkk" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/alpine-nginx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="//img.to2b.cn/blog/ljk/1607154764582.png">
+      <meta itemprop="name" content="像方便面一样的男子">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="alpine-nginx | LJKのBlog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          alpine-nginx
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-08 11:26:43" itemprop="dateCreated datePublished" datetime="2021-01-08T11:26:43+08:00">2021-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-29 16:58:05" itemprop="dateModified" datetime="2023-05-29T16:58:05+08:00">2023-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%BF%90%E7%BB%B4/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#</span>
+<span class="token comment"># 注意：此DOCKERFILE是通过"update.sh"生成的</span>
+<span class="token comment">#</span>
+<span class="token comment"># 请不要直接编辑它。</span>
+<span class="token comment">#</span>
+FROM alpine:3.16		<span class="token comment"># 基础镜像,后续的指令都是运行于此基准镜像所提供的运行环境</span>
+
+LABEL <span class="token assign-left variable">maintainer</span><span class="token operator">=</span><span class="token string">"NGINX Docker Maintainers &lt;docker-maint@nginx.com>"</span>	<span class="token comment"># 指定镜像元数据</span>
+
+ENV NGINX_VERSION <span class="token number">1.22</span>.1	<span class="token comment"># 定义环境变量</span>
+ENV NJS_VERSION   <span class="token number">0.7</span>.7
+ENV PKG_RELEASE   <span class="token number">1</span>
+
+RUN <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span> <span class="token punctuation">\</span>
+<span class="token comment"># create nginx user/group first, to be consistent throughout docker variants</span>
+    <span class="token operator">&amp;&amp;</span> addgroup <span class="token parameter variable">-g</span> <span class="token number">101</span> <span class="token parameter variable">-S</span> nginx <span class="token punctuation">\</span>	<span class="token comment"># -g指定gid, -S创建系统组（这里是busybox,如果是shell,-r创建系统组）,组名为 nginx</span>
+    <span class="token comment"># -S创建系统用户,-D不分配密码,-H不创建用户家目录,-u指定用户id,-h指定用户家目录,-s指定用户的默认shell, 可从/etc/shells中选择, 如果是给服务用, 指定/sbin/nologin,-G指定用户所属的附加群组,-g指定用户所属的群组, 用户名nginx</span>
+    <span class="token operator">&amp;&amp;</span> adduser <span class="token parameter variable">-S</span> <span class="token parameter variable">-D</span> <span class="token parameter variable">-H</span> <span class="token parameter variable">-u</span> <span class="token number">101</span> <span class="token parameter variable">-h</span> /var/cache/nginx <span class="token parameter variable">-s</span> /sbin/nologin <span class="token parameter variable">-G</span> nginx <span class="token parameter variable">-g</span> nginx nginx <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">apkArch</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">cat</span> /etc/apk/arch<span class="token variable">)</span></span>"</span> <span class="token punctuation">\</span>		<span class="token comment"># x86_64</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">nginxPackages</span><span class="token operator">=</span><span class="token string">" \
+        nginx=<span class="token variable">$&#123;NGINX_VERSION&#125;</span>-r<span class="token variable">$&#123;PKG_RELEASE&#125;</span> \							# nginx=1.22.1-r1
+        nginx-module-xslt=<span class="token variable">$&#123;NGINX_VERSION&#125;</span>-r<span class="token variable">$&#123;PKG_RELEASE&#125;</span> \				# nginx-module-xslt=1.22.1-r1
+        nginx-module-geoip=<span class="token variable">$&#123;NGINX_VERSION&#125;</span>-r<span class="token variable">$&#123;PKG_RELEASE&#125;</span> \				# nginx-module-geoip=1.22.1-r1
+        nginx-module-image-filter=<span class="token variable">$&#123;NGINX_VERSION&#125;</span>-r<span class="token variable">$&#123;PKG_RELEASE&#125;</span> \		# nginx-module-image-filter=1.22.1-r1
+        nginx-module-njs=<span class="token variable">$&#123;NGINX_VERSION&#125;</span>.<span class="token variable">$&#123;NJS_VERSION&#125;</span>-r<span class="token variable">$&#123;PKG_RELEASE&#125;</span> \	# nginx-module-njs=1.22.1.0.7.7-r1
+    "</span> <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">'s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g'</span> /etc/apk/repositories <span class="token punctuation">\</span>
+<span class="token comment"># install prerequisites for public key and pkg-oss checks</span>
+    <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> --no-cache <span class="token parameter variable">--virtual</span> .checksum-deps <span class="token punctuation">\</span>
+        openssl <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token keyword">case</span> <span class="token string">"<span class="token variable">$apkArch</span>"</span> <span class="token keyword">in</span> <span class="token punctuation">\</span>
+        x86_64<span class="token operator">|</span>aarch64<span class="token punctuation">)</span> <span class="token punctuation">\</span>
+<span class="token comment"># arches officially built by upstream</span>
+            <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span> <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">KEY_SHA512</span><span class="token operator">=</span><span class="token string">"e7fa8303923d9b95db37a77ad46c68fd4755ff935d0a534d26eba83de193c76166c68bfe7f65471bf8881004ef4aa6df3e34689c305662750c0172fca5d8552a *stdin"</span> <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> <span class="token function">wget</span> <span class="token parameter variable">-O</span> /tmp/nginx_signing.rsa.pub https://nginx.org/keys/nginx_signing.rsa.pub <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span>openssl rsa <span class="token parameter variable">-pubin</span> <span class="token parameter variable">-in</span> /tmp/nginx_signing.rsa.pub <span class="token parameter variable">-text</span> <span class="token parameter variable">-noout</span> <span class="token operator">|</span> openssl sha512 <span class="token parameter variable">-r</span><span class="token variable">)</span></span>"</span> <span class="token operator">=</span> <span class="token string">"<span class="token variable">$KEY_SHA512</span>"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span> <span class="token punctuation">\</span>
+                <span class="token builtin class-name">echo</span> <span class="token string">"key verification succeeded!"</span><span class="token punctuation">;</span> <span class="token punctuation">\</span>
+                <span class="token function">mv</span> /tmp/nginx_signing.rsa.pub /etc/apk/keys/<span class="token punctuation">;</span> <span class="token punctuation">\</span>
+            <span class="token keyword">else</span> <span class="token punctuation">\</span>
+                <span class="token builtin class-name">echo</span> <span class="token string">"key verification failed!"</span><span class="token punctuation">;</span> <span class="token punctuation">\</span>
+                <span class="token builtin class-name">exit</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token punctuation">\</span>
+            <span class="token keyword">fi</span> <span class="token punctuation">\</span>
+            <span class="token comment"># -X 指定apk仓库：https://nginx.org/packages/alpine/v3.16/main</span>
+            <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> <span class="token parameter variable">-X</span> <span class="token string">"https://nginx.org/packages/alpine/v<span class="token variable"><span class="token variable">$(</span><span class="token function">egrep</span> <span class="token parameter variable">-o</span> <span class="token string">'^[0-9]+\.[0-9]+'</span> /etc/alpine-release<span class="token variable">)</span></span>/main"</span> --no-cache <span class="token variable">$nginxPackages</span> <span class="token punctuation">\</span>
+            <span class="token punctuation">;</span><span class="token punctuation">;</span> <span class="token punctuation">\</span>
+        *<span class="token punctuation">)</span> <span class="token punctuation">\</span>
+<span class="token comment"># we're on an architecture upstream doesn't officially build for</span>
+<span class="token comment"># let's build binaries from the published packaging sources</span>
+            <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span> <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">tempDir</span><span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span>mktemp <span class="token parameter variable">-d</span><span class="token variable">)</span></span>"</span> <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> <span class="token function">chown</span> nobody:nobody <span class="token variable">$tempDir</span> <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> --no-cache <span class="token parameter variable">--virtual</span> .build-deps <span class="token punctuation">\</span>
+                gcc <span class="token punctuation">\</span>
+                libc-dev <span class="token punctuation">\</span>
+                <span class="token function">make</span> <span class="token punctuation">\</span>
+                openssl-dev <span class="token punctuation">\</span>
+                pcre2-dev <span class="token punctuation">\</span>
+                zlib-dev <span class="token punctuation">\</span>
+                linux-headers <span class="token punctuation">\</span>
+                libxslt-dev <span class="token punctuation">\</span>
+                gd-dev <span class="token punctuation">\</span>
+                geoip-dev <span class="token punctuation">\</span>
+                perl-dev <span class="token punctuation">\</span>
+                libedit-dev <span class="token punctuation">\</span>
+                <span class="token function">bash</span> <span class="token punctuation">\</span>
+                alpine-sdk <span class="token punctuation">\</span>
+                findutils <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> <span class="token function">su</span> nobody <span class="token parameter variable">-s</span> /bin/sh <span class="token parameter variable">-c</span> <span class="token string">" \
+                export HOME=<span class="token variable">$&#123;tempDir&#125;</span> \
+                &amp;&amp; cd <span class="token variable">$&#123;tempDir&#125;</span> \
+                # https://hg.nginx.org/pkg-oss/archive/1.22.1-1.tar.gz 包含nginx.conf、nginx.logrotate等各种文件
+                &amp;&amp; curl -f -O https://hg.nginx.org/pkg-oss/archive/<span class="token variable">$&#123;NGINX_VERSION&#125;</span>-<span class="token variable">$&#123;PKG_RELEASE&#125;</span>.tar.gz \
+                &amp;&amp; PKGOSSCHECKSUM=<span class="token entity" title="\&quot;">\"</span>7266f418dcc9d89a2990f504d99ec58d10febbaf078c03630d42843955cee7e50b0f90fb317360384a32473839dc42d8b329b737015ec8dd0d028f90d4d5ed25 *<span class="token variable">$&#123;NGINX_VERSION&#125;</span>-<span class="token variable">$&#123;PKG_RELEASE&#125;</span>.tar.gz<span class="token entity" title="\&quot;">\"</span> \
+                &amp;&amp; if [ <span class="token entity" title="\&quot;">\"</span>\<span class="token variable"><span class="token variable">$(</span>openssl sha512 <span class="token parameter variable">-r</span> $<span class="token punctuation">&#123;</span>NGINX_VERSION<span class="token punctuation">&#125;</span>-$<span class="token punctuation">&#123;</span>PKG_RELEASE<span class="token punctuation">&#125;</span>.tar.gz<span class="token variable">)</span></span><span class="token entity" title="\&quot;">\"</span> = <span class="token entity" title="\&quot;">\"</span>\<span class="token variable">$PKGOSSCHECKSUM</span><span class="token entity" title="\&quot;">\"</span> ]; then \
+                    echo <span class="token entity" title="\&quot;">\"</span>pkg-oss tarball checksum verification succeeded!<span class="token entity" title="\&quot;">\"</span>; \
+                else \
+                    echo <span class="token entity" title="\&quot;">\"</span>pkg-oss tarball checksum verification failed!<span class="token entity" title="\&quot;">\"</span>; \
+                    exit 1; \
+                fi \
+                &amp;&amp; tar xzvf <span class="token variable">$&#123;NGINX_VERSION&#125;</span>-<span class="token variable">$&#123;PKG_RELEASE&#125;</span>.tar.gz \
+                &amp;&amp; cd pkg-oss-<span class="token variable">$&#123;NGINX_VERSION&#125;</span>-<span class="token variable">$&#123;PKG_RELEASE&#125;</span> \
+                &amp;&amp; cd alpine \
+                &amp;&amp; make all \
+                &amp;&amp; apk index -o <span class="token variable">$&#123;tempDir&#125;</span>/packages/alpine/<span class="token variable">$&#123;apkArch&#125;</span>/APKINDEX.tar.gz <span class="token variable">$&#123;tempDir&#125;</span>/packages/alpine/<span class="token variable">$&#123;apkArch&#125;</span>/*.apk \
+                &amp;&amp; abuild-sign -k <span class="token variable">$&#123;tempDir&#125;</span>/.abuild/abuild-key.rsa <span class="token variable">$&#123;tempDir&#125;</span>/packages/alpine/<span class="token variable">$&#123;apkArch&#125;</span>/APKINDEX.tar.gz \
+                "</span> <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> <span class="token function">cp</span> <span class="token variable">$&#123;tempDir&#125;</span>/.abuild/abuild-key.rsa.pub /etc/apk/keys/ <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> apk del .build-deps <span class="token punctuation">\</span>
+            <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> <span class="token parameter variable">-X</span> <span class="token variable">$&#123;tempDir&#125;</span>/packages/alpine/ --no-cache <span class="token variable">$nginxPackages</span> <span class="token punctuation">\</span>
+            <span class="token punctuation">;</span><span class="token punctuation">;</span> <span class="token punctuation">\</span>
+    <span class="token keyword">esac</span> <span class="token punctuation">\</span>
+<span class="token comment"># remove checksum deps</span>
+    <span class="token operator">&amp;&amp;</span> apk del .checksum-deps <span class="token punctuation">\</span>
+<span class="token comment"># if we have leftovers from building, let's purge them (including extra, unnecessary build deps)</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token parameter variable">-n</span> <span class="token string">"<span class="token variable">$tempDir</span>"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span> <span class="token function">rm</span> <span class="token parameter variable">-rf</span> <span class="token string">"<span class="token variable">$tempDir</span>"</span><span class="token punctuation">;</span> <span class="token keyword">fi</span> <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token parameter variable">-n</span> <span class="token string">"/etc/apk/keys/abuild-key.rsa.pub"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span> <span class="token function">rm</span> <span class="token parameter variable">-f</span> /etc/apk/keys/abuild-key.rsa.pub<span class="token punctuation">;</span> <span class="token keyword">fi</span> <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token parameter variable">-n</span> <span class="token string">"/etc/apk/keys/nginx_signing.rsa.pub"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span> <span class="token function">rm</span> <span class="token parameter variable">-f</span> /etc/apk/keys/nginx_signing.rsa.pub<span class="token punctuation">;</span> <span class="token keyword">fi</span> <span class="token punctuation">\</span>
+<span class="token comment"># Bring in gettext so we can get `envsubst`, then throw</span>
+<span class="token comment"># the rest away. To do this, we need to install `gettext`</span>
+<span class="token comment"># then move `envsubst` out of the way so `gettext` can</span>
+<span class="token comment"># be deleted completely, then move `envsubst` back.</span>
+    <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> --no-cache <span class="token parameter variable">--virtual</span> .gettext gettext <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token function">mv</span> /usr/bin/envsubst /tmp/ <span class="token punctuation">\</span>
+    <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">runDeps</span><span class="token operator">=</span><span class="token string">"$( \
+        scanelf --needed --nobanner /tmp/envsubst \
+            | awk '&#123; gsub(/,/, "<span class="token entity" title="\n">\n</span>so:", <span class="token variable">$2</span>); print "</span>so:<span class="token string">" <span class="token variable">$2</span> &#125;' \
+            | sort -u \
+            | xargs -r apk info --installed \
+            | sort -u \
+    )"</span> <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> --no-cache <span class="token variable">$runDeps</span> <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> apk del .gettext <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token function">mv</span> /tmp/envsubst /usr/local/bin/ <span class="token punctuation">\</span>
+<span class="token comment"># Bring in tzdata so users could set the timezones through the environment</span>
+<span class="token comment"># variables</span>
+    <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> --no-cache tzdata <span class="token punctuation">\</span>
+<span class="token comment"># Bring in curl and ca-certificates to make registering on DNS SD easier</span>
+    <span class="token operator">&amp;&amp;</span> apk <span class="token function">add</span> --no-cache <span class="token function">curl</span> ca-certificates <span class="token punctuation">\</span>
+<span class="token comment"># forward request and error logs to docker log collector</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token function">ln</span> <span class="token parameter variable">-sf</span> /dev/stdout /var/log/nginx/access.log <span class="token punctuation">\</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token function">ln</span> <span class="token parameter variable">-sf</span> /dev/stderr /var/log/nginx/error.log <span class="token punctuation">\</span>
+<span class="token comment"># create a docker-entrypoint.d directory</span>
+    <span class="token operator">&amp;&amp;</span> <span class="token function">mkdir</span> /docker-entrypoint.d
+
+COPY docker-entrypoint.sh /
+COPY <span class="token number">10</span>-listen-on-ipv6-by-default.sh /docker-entrypoint.d
+COPY <span class="token number">20</span>-envsubst-on-templates.sh /docker-entrypoint.d
+COPY <span class="token number">30</span>-tune-worker-processes.sh /docker-entrypoint.d
+ENTRYPOINT <span class="token punctuation">[</span><span class="token string">"/docker-entrypoint.sh"</span><span class="token punctuation">]</span>
+
+EXPOSE <span class="token number">80</span>
+
+STOPSIGNAL SIGQUIT
+
+CMD <span class="token punctuation">[</span><span class="token string">"nginx"</span>, <span class="token string">"-g"</span>, <span class="token string">"daemon off;"</span><span class="token punctuation">]</span></code></pre>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160536339.png" alt="像方便面一样的男子 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="//img.to2b.cn/blog/ljk/1607160019009.png" alt="像方便面一样的男子 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"><i class="fa fa-tag"></i> docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/JumpServer/JumpServer/" rel="prev" title="JumpServer">
+                  <i class="fa fa-chevron-left"></i> JumpServer
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E8%BF%90%E7%BB%B4/Docker/1.Docker%E4%BB%8B%E7%BB%8D/" rel="next" title="docker介绍">
+                  docker介绍 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">鲁ICP备18016600号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">像方便面一样的男子</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="//s1.to2b.cn/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="//s1.to2b.cn/libs/lozad.js/1.16.0/lozad.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="//s1.to2b.cn/libs/algoliasearch/4.11.0/algoliasearch-lite.umd.min.js"></script>
+<script src="//s1.to2b.cn/libs/instantsearch.js/4.36.0/instantsearch.production.min.js"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
