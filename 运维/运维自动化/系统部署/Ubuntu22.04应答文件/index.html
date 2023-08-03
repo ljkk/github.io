@@ -294,109 +294,60 @@
 <h2 id="设置DHPC-x2F-bootp和tftp服务"><a href="#设置DHPC-x2F-bootp和tftp服务" class="headerlink" title="设置DHPC&#x2F;bootp和tftp服务"></a>设置DHPC&#x2F;bootp和tftp服务</h2><p>有几种可用的 <strong>DHCP&#x2F;bootp</strong> 和 <strong>tftp</strong> 协议实现。本文档将简要介绍如何配置 <strong>dnsmasq</strong> 服务（相比配置 <strong>isc-dhcp-server</strong> 与 <strong>tftpd</strong> 简单的多）以执行这两个角色。</p>
 <ol>
 <li><p>创建存放为客户端提供 <strong>tftp</strong> 服务所需要的文件的目录 <em>&#x2F;srv&#x2F;tftp</em> ：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> /srv/tftp</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /srv/tftp</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>安装 <strong>dnsmasq</strong> 包，执行命令：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> <span class="token function">install</span> dnsmasq </code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install dnsmasq </span><br></pre></td></tr></table></figure>
 </li>
 <li><p>设置文件 <em>&#x2F;etc&#x2F;dnsmasq.conf.d&#x2F;pxe.conf</em> ，其内容：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#设置本服务器提供DHCP服务的网卡 </span>
-<span class="token assign-left variable">interface</span><span class="token operator">=</span>enp2s0,lo bind-interfaces 
-<span class="token comment">#提供DHCP服务的网卡,开始IP,结束IP </span>
-dhcp-range<span class="token operator">=</span>enp2s0,192.168.22.1,192.168.22.254 dhcp-boot<span class="token operator">=</span>pxelinux.0 
-<span class="token comment">#设置采用UEFI模式 dhcp-match=set:efi-x86_64,option:client-arch,7 dhcp-boot=tag:efi-x86_64,bootx64.efi </span>
-<span class="token comment">#启用tftp服务 enable-tftp </span>
-<span class="token comment">#设置tftp服务目录 tftp-root=/srv/tftp </span>
-<span class="token comment">#设定将要网络安装的MAC地址为08:00:20:0A:0C:01的主机名为Client1，IP为192.168.22.1 </span>
-dhcp-host<span class="token operator">=</span>08:00:20:0A:0C:01,Client1,192.168.22.1 
-<span class="token comment">#设定将要网络安装的MAC地址为08:00:20:0A:0C:02的主机名为Client2，IP为192.168.22.2 </span>
-dhcp-host<span class="token operator">=</span>08:00:20:0A:0C:02,Client2,192.168.22.2 </code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置本服务器提供DHCP服务的网卡 </span></span><br><span class="line">interface=enp2s0,lo bind-interfaces </span><br><span class="line"><span class="comment">#提供DHCP服务的网卡,开始IP,结束IP </span></span><br><span class="line">dhcp-range=enp2s0,192.168.22.1,192.168.22.254 dhcp-boot=pxelinux.0 </span><br><span class="line"><span class="comment">#设置采用UEFI模式 dhcp-match=set:efi-x86_64,option:client-arch,7 dhcp-boot=tag:efi-x86_64,bootx64.efi </span></span><br><span class="line"><span class="comment">#启用tftp服务 enable-tftp </span></span><br><span class="line"><span class="comment">#设置tftp服务目录 tftp-root=/srv/tftp </span></span><br><span class="line"><span class="comment">#设定将要网络安装的MAC地址为08:00:20:0A:0C:01的主机名为Client1，IP为192.168.22.1 </span></span><br><span class="line">dhcp-host=08:00:20:0A:0C:01,Client1,192.168.22.1 </span><br><span class="line"><span class="comment">#设定将要网络安装的MAC地址为08:00:20:0A:0C:02的主机名为Client2，IP为192.168.22.2 </span></span><br><span class="line">dhcp-host=08:00:20:0A:0C:02,Client2,192.168.22.2 </span><br></pre></td></tr></table></figure>
 
 <p>上面 <strong>enp2s0</strong> 为对客户端安装服务时使用的网卡名（与客户端启动网络安装服务的网卡在同一网络）。</p>
 </li>
 <li><p>重启 <strong>dnsmasq</strong> 服务，执行命令：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">systemctl restart dnsmasq</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart dnsmasq</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h2 id="提供引导加载程序和配置"><a href="#提供引导加载程序和配置" class="headerlink" title="提供引导加载程序和配置"></a>提供引导加载程序和配置</h2><h3 id="设置所需要的包"><a href="#设置所需要的包" class="headerlink" title="设置所需要的包"></a>设置所需要的包</h3><ol>
 <li><p>安装对应包</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> <span class="token function">install</span> cd-boot-images-amd64</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install cd-boot-images-amd64</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>生成软链接 <code>/srv/tftp/boot-amd64</code>指向 <code>/usr/share/cd-boot-images-amd64</code> ：</p>
 <blockquote>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ln</span> <span class="token parameter variable">-s</span> /usr/share/cd-boot-images-amd64 /srv/tftp/boot-amd64</code></pre></blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ln</span> -s /usr/share/cd-boot-images-amd64 /srv/tftp/boot-amd64</span><br></pre></td></tr></table></figure></blockquote>
 </li>
 </ol>
 <h3 id="安装WEB服务"><a href="#安装WEB服务" class="headerlink" title="安装WEB服务"></a>安装WEB服务</h3><p>安装时，需要通过 <strong>HTTP</strong> 协议下载所需文件，为此需要配置 <strong>WEB</strong> 服务。</p>
 <p>安装所需要包，并重新启动服务：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> <span class="token function">install</span> apache2 
-systemctl restart apache2</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apt install apache2 </span><br><span class="line">systemctl restart apache2</span><br></pre></td></tr></table></figure>
 
 <p>或者不用上述 <strong>apache</strong> 服务，如python3支持http模块，则可直接执行下述命令启动简易 <strong>WEB</strong> 服务：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">python3 <span class="token parameter variable">-m</span> http.server <span class="token number">80</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -m http.server 80</span><br></pre></td></tr></table></figure>
 
 <h3 id="模式独立设置"><a href="#模式独立设置" class="headerlink" title="模式独立设置"></a>模式独立设置</h3><ol>
 <li><p>针对该次使用 <strong>Ubuntu 22.04 server</strong> 版（代号： <strong>jammy</strong> ），建议有些配置文件放置在目录 <em>&#x2F;var&#x2F;www&#x2F;html&#x2F;jammy</em> 下，为此先生成该目录：</p>
 <p><code>mkdir /var/www/html/jammy </code></p>
 </li>
 <li><p>下载所需要的操作系统 <strong>Live ISO</strong> 镜像到目录 <em>&#x2F;var&#x2F;www&#x2F;html</em> ：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /var/www/html/jammy
-<span class="token function">wget</span> http://mirrors.ustc.edu.cn/ubuntu-releases/jammy/ubuntu-22.04.1-live-server-amd64.iso</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /var/www/html/jammy</span><br><span class="line">wget http://mirrors.ustc.edu.cn/ubuntu-releases/jammy/ubuntu-22.04.1-live-server-amd64.iso</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>挂载该ISO文件：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mount</span> <span class="token parameter variable">-o</span> loop /var/www/html/jammy/ubuntu-22.04.1-live-server-amd64.iso /mnt </code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -o loop /var/www/html/jammy/ubuntu-22.04.1-live-server-amd64.iso /mnt </span><br></pre></td></tr></table></figure>
 </li>
 <li><p>将内核和 <strong>initrd</strong> 从其中复制到 <strong>dnsmasq</strong> 中设置的 <strong>tftp</strong> 的位置：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">cp</span> /mnt/casper/<span class="token punctuation">&#123;</span>vmlinuz,initrd<span class="token punctuation">&#125;</span> /srv/tftp/</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /mnt/casper/&#123;vmlinuz,initrd&#125; /srv/tftp/</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h3 id="为-UEFI-引导设置文件"><a href="#为-UEFI-引导设置文件" class="headerlink" title="为 UEFI 引导设置文件"></a>为 <strong>UEFI</strong> 引导设置文件</h3><ol>
 <li><p>将签名的 shim 二进制文件复制到位：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> download shim-signed
-dpkg-deb --fsys-tarfile shim-signed*deb <span class="token operator">|</span> <span class="token function">tar</span> x ./usr/lib/shim/shimx64.efi.signed <span class="token parameter variable">-O</span> <span class="token operator">></span> /srv/tftp/bootx64.efi</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apt download shim-signed</span><br><span class="line">dpkg-deb --fsys-tarfile shim-signed*deb | tar x ./usr/lib/shim/shimx64.efi.signed -O &gt; /srv/tftp/bootx64.efi</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>将签名的 grub 二进制文件复制到位：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> download grub-efi-amd64-signed
-dpkg-deb --fsys-tarfile grub-efi-amd64-signed*deb <span class="token operator">|</span> <span class="token function">tar</span> x ./usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed <span class="token parameter variable">-O</span> <span class="token operator">></span> /srv/tftp/grubx64.efi</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apt download grub-efi-amd64-signed</span><br><span class="line">dpkg-deb --fsys-tarfile grub-efi-amd64-signed*deb | tar x ./usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed -O &gt; /srv/tftp/grubx64.efi</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>Grub 还需要在 tftp 上可用的字体：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> download grub-common
-dpkg-deb --fsys-tarfile grub-common*deb <span class="token operator">|</span> <span class="token function">tar</span> x ./usr/share/grub/unicode.pf2 <span class="token parameter variable">-O</span> <span class="token operator">></span> /srv/tftp/unicode.pf2</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">apt download grub-common</span><br><span class="line">dpkg-deb --fsys-tarfile grub-common*deb | tar x ./usr/share/grub/unicode.pf2 -O &gt; /srv/tftp/unicode.pf2</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>生成文件 <em><code>/srv/tftp/grub/grub.cfg</code></em> ，内容为：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">set</span> <span class="token assign-left variable">default</span><span class="token operator">=</span><span class="token string">"0"</span>
-<span class="token builtin class-name">set</span> <span class="token assign-left variable">timeout</span><span class="token operator">=</span><span class="token number">0</span>
-
-<span class="token keyword">if</span> loadfont unicode <span class="token punctuation">;</span> <span class="token keyword">then</span>
-  <span class="token builtin class-name">set</span> <span class="token assign-left variable">gfxmode</span><span class="token operator">=</span>auto
-  <span class="token builtin class-name">set</span> <span class="token assign-left variable">locale_dir</span><span class="token operator">=</span><span class="token variable">$prefix</span>/locale
-  <span class="token builtin class-name">set</span> <span class="token assign-left variable">lang</span><span class="token operator">=</span>en_US
-<span class="token keyword">fi</span>
-terminal_output gfxterm
-
-<span class="token builtin class-name">set</span> <span class="token assign-left variable">menu_color_normal</span><span class="token operator">=</span>white/black
-<span class="token builtin class-name">set</span> <span class="token assign-left variable">menu_color_highlight</span><span class="token operator">=</span>black/light-gray
-<span class="token keyword">if</span> background_color <span class="token number">44,0</span>,30<span class="token punctuation">;</span> <span class="token keyword">then</span>
-  <span class="token function">clear</span>
-<span class="token keyword">fi</span>
-
-<span class="token keyword">function</span> <span class="token function-name function">gfxmode</span> <span class="token punctuation">&#123;</span>
-        <span class="token builtin class-name">set</span> <span class="token assign-left variable">gfxpayload</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$&#123;1&#125;</span>"</span>
-        <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$&#123;1&#125;</span>"</span> <span class="token operator">=</span> <span class="token string">"keep"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
-                <span class="token builtin class-name">set</span> <span class="token assign-left variable">vt_handoff</span><span class="token operator">=</span>vt.handoff<span class="token operator">=</span><span class="token number">7</span>
-        <span class="token keyword">else</span>
-                <span class="token builtin class-name">set</span> <span class="token assign-left variable">vt_handoff</span><span class="token operator">=</span>
-        <span class="token keyword">fi</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token builtin class-name">set</span> <span class="token assign-left variable">linux_gfx_mode</span><span class="token operator">=</span>keep
-
-<span class="token builtin class-name">export</span> linux_gfx_mode
-
-menuentry <span class="token string">'Ubuntu 22.04.1'</span> <span class="token punctuation">&#123;</span>
-        gfxmode <span class="token variable">$linux_gfx_mode</span>
-        linux /vmlinuz <span class="token variable">$vt_handoff</span> <span class="token assign-left variable">ip</span><span class="token operator">=</span>dhcp <span class="token assign-left variable">url</span><span class="token operator">=</span>http://192.168.22.254/jammy/ubuntu-22.04.1-live-server-amd64.iso autoinstall <span class="token assign-left variable">ds</span><span class="token operator">=</span>nocloud-net<span class="token punctuation">\</span><span class="token punctuation">;</span><span class="token assign-left variable">s</span><span class="token operator">=</span>http://192.168.22.254/jammy/ ---
-        <span class="token comment">#注意上面最后面有三个-</span>
-        initrd /initrd
-<span class="token punctuation">&#125;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> default=<span class="string">&quot;0&quot;</span></span><br><span class="line"><span class="built_in">set</span> <span class="built_in">timeout</span>=0</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> loadfont unicode ; <span class="keyword">then</span></span><br><span class="line">  <span class="built_in">set</span> gfxmode=auto</span><br><span class="line">  <span class="built_in">set</span> locale_dir=<span class="variable">$prefix</span>/locale</span><br><span class="line">  <span class="built_in">set</span> lang=en_US</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">terminal_output gfxterm</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> menu_color_normal=white/black</span><br><span class="line"><span class="built_in">set</span> menu_color_highlight=black/light-gray</span><br><span class="line"><span class="keyword">if</span> background_color 44,0,30; <span class="keyword">then</span></span><br><span class="line">  clear</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> gfxmode &#123;</span><br><span class="line">        <span class="built_in">set</span> gfxpayload=<span class="string">&quot;<span class="variable">$&#123;1&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$&#123;1&#125;</span>&quot;</span> = <span class="string">&quot;keep&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">                <span class="built_in">set</span> vt_handoff=vt.handoff=7</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">                <span class="built_in">set</span> vt_handoff=</span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> linux_gfx_mode=keep</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> linux_gfx_mode</span><br><span class="line"></span><br><span class="line">menuentry <span class="string">&#x27;Ubuntu 22.04.1&#x27;</span> &#123;</span><br><span class="line">        gfxmode <span class="variable">$linux_gfx_mode</span></span><br><span class="line">        linux /vmlinuz <span class="variable">$vt_handoff</span> ip=dhcp url=http://192.168.22.254/jammy/ubuntu-22.04.1-live-server-amd64.iso autoinstall ds=nocloud-net\;s=http://192.168.22.254/jammy/ ---</span><br><span class="line">        <span class="comment">#注意上面最后面有三个-</span></span><br><span class="line">        initrd /initrd</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>备注：</p>
 <ul>
@@ -418,96 +369,26 @@ menuentry <span class="token string">'Ubuntu 22.04.1'</span> <span class="token 
 </ul>
 <h2 id="提供自动安装配置"><a href="#提供自动安装配置" class="headerlink" title="提供自动安装配置"></a>提供自动安装配置</h2><p>自动安装配置是通过 <strong>cloud-init</strong> 配置提供的，几乎无限灵活。在大多数情况下，最简单的方法是通过 <strong>nocloud</strong> 数据源提供用户数据。</p>
 <p>自动安装配置应在配置中的关键字 <strong>autoinstall</strong> 下提供，如：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#cloud-config</span>
-autoinstall:
-  version: <span class="token number">1</span>
-  <span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cloud-config</span></span><br><span class="line">autoinstall:</span><br><span class="line">  version: 1</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
 
 <h2 id="运行真正的自动安装"><a href="#运行真正的自动安装" class="headerlink" title="运行真正的自动安装"></a>运行真正的自动安装</h2><p>即使找到完全非交互式的自动安装配置，服务器安装程序也会在写入磁盘之前要求确认，除非内核命令行上存在自动安装关键字 <strong>autoinstall</strong> 。这是为了避免意外创建一个U盘，结果该U盘会在主机启动时重新格式化它插入的机器。许多自动安装将通过 <strong>netboot</strong> 完成，其中内核命令行由 <strong>netboot</strong> 配置控制 —— 只需记住将自动安装放在那里！</p>
 <h2 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h2><p>如只是想试试看，可以参看页面 <a target="_blank" rel="noopener" href="https://ubuntu.com/server/docs/install/autoinstall-quickstart">https://ubuntu.com/server/docs/install/autoinstall-quickstart</a> 。</p>
 <h2 id="创建自动安装配置"><a href="#创建自动安装配置" class="headerlink" title="创建自动安装配置"></a>创建自动安装配置</h2><p>当服务器安装好Ubuntu操作系统时，会在安装好后的服务器上创建一个可用于重复安装的自动安装文件 <em><code>/var/log/installer/autoinstall-user-data</code></em> ，这可用于做后续需要的文件 <em>user-data</em> 的模板。</p>
 <h2 id="转换现有-preseed-文件"><a href="#转换现有-preseed-文件" class="headerlink" title="转换现有 preseed 文件"></a>转换现有 <strong>preseed</strong> 文件</h2><p>如已经有了Debian系统的 <strong>preseed</strong> 文件，可利用自动安装生成器 <a target="_blank" rel="noopener" href="https://snapcraft.io/autoinstall-generator?_ga=2.223897308.698614161.1664162991-1711338095.1646124381">autoinstall-generator</a> <strong>snap</strong> 包（snap 是一种包管理器，可用于安装远程snap包）可以帮助将该预置数据转换为自动安装文件。</p>
 <p>安装 <strong>autoinstall-generator</strong> 包，执行：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">snap <span class="token function">install</span> autoinstall-generator</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">snap install autoinstall-generator</span><br></pre></td></tr></table></figure>
 
 <p>将 <strong>preseed</strong> 文件转换为自动安装格式的基本用法为：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">autoinstall-generator my-preseed.txt my-cloud-config.yaml <span class="token parameter variable">--cloud</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">autoinstall-generator my-preseed.txt my-cloud-config.yaml --cloud</span><br></pre></td></tr></table></figure>
 
 <p>有关详细信息，请 <a target="_blank" rel="noopener" href="https://discourse.ubuntu.com/t/autoinstall-generator-tool-to-help-with-creation-of-autoinstall-files-based-on-preseed/21334?_ga=2.35077545.964202620.1664022245-197937644.1660466546">参阅</a> 。</p>
 <h2 id="自动安装配置文件的结构"><a href="#自动安装配置文件的结构" class="headerlink" title="自动安装配置文件的结构"></a>自动安装配置文件的结构</h2><p>自动安装配置的完整说明参见：<a target="_blank" rel="noopener" href="https://ubuntu.com/server/docs/install/autoinstall-reference">https://ubuntu.com/server/docs/install/autoinstall-reference</a> 。</p>
 <p>从技术上讲，虽然配置未定义为文本格式，但 <strong>cloud-init</strong> 配置通常以 <strong>YAML</strong> 形式提供，这是本文档使用的语法。</p>
 <p>一个最小的配置是：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">1</span>
-<span class="token key atrule">identity</span><span class="token punctuation">:</span>
-    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> hostname
-    <span class="token key atrule">username</span><span class="token punctuation">:</span> username
-    <span class="token key atrule">password</span><span class="token punctuation">:</span> $crypted_pass</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">identity:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">hostname</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">username</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">$crypted_pass</span></span><br></pre></td></tr></table></figure>
 
 <p>含有更多特性的配置为：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">1</span>
-<span class="token key atrule">reporting</span><span class="token punctuation">:</span>
-    <span class="token key atrule">hook</span><span class="token punctuation">:</span>
-        <span class="token key atrule">type</span><span class="token punctuation">:</span> webhook
-        <span class="token key atrule">endpoint</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//example.com/endpoint/path
-<span class="token key atrule">early-commands</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> ping <span class="token punctuation">-</span>c1 198.162.1.1
-<span class="token key atrule">locale</span><span class="token punctuation">:</span> en_US
-<span class="token key atrule">keyboard</span><span class="token punctuation">:</span>
-    <span class="token key atrule">layout</span><span class="token punctuation">:</span> gb
-    <span class="token key atrule">variant</span><span class="token punctuation">:</span> dvorak
-<span class="token key atrule">network</span><span class="token punctuation">:</span>
-    <span class="token key atrule">network</span><span class="token punctuation">:</span>
-        <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">2</span>
-        <span class="token key atrule">ethernets</span><span class="token punctuation">:</span>
-            <span class="token key atrule">enp0s25</span><span class="token punctuation">:</span>
-               <span class="token key atrule">dhcp4</span><span class="token punctuation">:</span> yes
-            <span class="token key atrule">enp3s0</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-            <span class="token key atrule">enp4s0</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-        <span class="token key atrule">bonds</span><span class="token punctuation">:</span>
-            <span class="token key atrule">bond0</span><span class="token punctuation">:</span>
-                <span class="token key atrule">dhcp4</span><span class="token punctuation">:</span> yes
-                <span class="token key atrule">interfaces</span><span class="token punctuation">:</span>
-                    <span class="token punctuation">-</span> enp3s0
-                    <span class="token punctuation">-</span> enp4s0
-                <span class="token key atrule">parameters</span><span class="token punctuation">:</span>
-                    <span class="token key atrule">mode</span><span class="token punctuation">:</span> active<span class="token punctuation">-</span>backup
-                    <span class="token key atrule">primary</span><span class="token punctuation">:</span> enp3s0
-<span class="token key atrule">proxy</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//squid.internal<span class="token punctuation">:</span>3128/
-<span class="token key atrule">apt</span><span class="token punctuation">:</span>
-    <span class="token key atrule">primary</span><span class="token punctuation">:</span>
-        <span class="token punctuation">-</span> <span class="token key atrule">arches</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>default<span class="token punctuation">]</span>
-          <span class="token key atrule">uri</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//repo.internal/
-    <span class="token key atrule">sources</span><span class="token punctuation">:</span>
-        <span class="token key atrule">my-ppa.list</span><span class="token punctuation">:</span>
-            <span class="token key atrule">source</span><span class="token punctuation">:</span> <span class="token string">"deb http://ppa.launchpad.net/curtin-dev/test-archive/ubuntu $RELEASE main"</span>
-            <span class="token key atrule">keyid</span><span class="token punctuation">:</span> B59D 5F15 97A5 04B7 E230  6DCA 0620 BBCF 0368 3F77
-<span class="token key atrule">storage</span><span class="token punctuation">:</span>
-    <span class="token key atrule">layout</span><span class="token punctuation">:</span>
-        <span class="token key atrule">name</span><span class="token punctuation">:</span> lvm
-<span class="token key atrule">identity</span><span class="token punctuation">:</span>
-    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> hostname
-    <span class="token key atrule">username</span><span class="token punctuation">:</span> username
-    <span class="token key atrule">password</span><span class="token punctuation">:</span> $crypted_pass
-<span class="token key atrule">ssh</span><span class="token punctuation">:</span>
-    <span class="token key atrule">install-server</span><span class="token punctuation">:</span> yes
-    <span class="token key atrule">authorized-keys</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> $key
-    <span class="token key atrule">allow-pw</span><span class="token punctuation">:</span> no
-<span class="token key atrule">snaps</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> go
-      <span class="token key atrule">channel</span><span class="token punctuation">:</span> 1.14/stable
-      <span class="token key atrule">classic</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-<span class="token key atrule">debconf-selections</span><span class="token punctuation">:</span> <span class="token punctuation">|</span><span class="token scalar string">
-    bind9      bind9/run-resolvconf    boolean false</span>
-<span class="token key atrule">packages</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> libreoffice
-    <span class="token punctuation">-</span> dns<span class="token punctuation">-</span>server^
-<span class="token key atrule">user-data</span><span class="token punctuation">:</span>
-    <span class="token key atrule">disable_root</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-<span class="token key atrule">late-commands</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> sed <span class="token punctuation">-</span>ie 's/GRUB_TIMEOUT=.<span class="token important">*/GRUB_TIMEOUT=30/'</span> /target/etc/default/grub
-<span class="token key atrule">error-commands</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> tar c /var/log/installer <span class="token punctuation">|</span> nc 192.168.0.1 1000</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">reporting:</span></span><br><span class="line">    <span class="attr">hook:</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">webhook</span></span><br><span class="line">        <span class="attr">endpoint:</span> <span class="string">http://example.com/endpoint/path</span></span><br><span class="line"><span class="attr">early-commands:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">ping</span> <span class="string">-c1</span> <span class="number">198.162</span><span class="number">.1</span><span class="number">.1</span></span><br><span class="line"><span class="attr">locale:</span> <span class="string">en_US</span></span><br><span class="line"><span class="attr">keyboard:</span></span><br><span class="line">    <span class="attr">layout:</span> <span class="string">gb</span></span><br><span class="line">    <span class="attr">variant:</span> <span class="string">dvorak</span></span><br><span class="line"><span class="attr">network:</span></span><br><span class="line">    <span class="attr">network:</span></span><br><span class="line">        <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">        <span class="attr">ethernets:</span></span><br><span class="line">            <span class="attr">enp0s25:</span></span><br><span class="line">               <span class="attr">dhcp4:</span> <span class="literal">yes</span></span><br><span class="line">            <span class="attr">enp3s0:</span> &#123;&#125;</span><br><span class="line">            <span class="attr">enp4s0:</span> &#123;&#125;</span><br><span class="line">        <span class="attr">bonds:</span></span><br><span class="line">            <span class="attr">bond0:</span></span><br><span class="line">                <span class="attr">dhcp4:</span> <span class="literal">yes</span></span><br><span class="line">                <span class="attr">interfaces:</span></span><br><span class="line">                    <span class="bullet">-</span> <span class="string">enp3s0</span></span><br><span class="line">                    <span class="bullet">-</span> <span class="string">enp4s0</span></span><br><span class="line">                <span class="attr">parameters:</span></span><br><span class="line">                    <span class="attr">mode:</span> <span class="string">active-backup</span></span><br><span class="line">                    <span class="attr">primary:</span> <span class="string">enp3s0</span></span><br><span class="line"><span class="attr">proxy:</span> <span class="string">http://squid.internal:3128/</span></span><br><span class="line"><span class="attr">apt:</span></span><br><span class="line">    <span class="attr">primary:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">arches:</span> [<span class="string">default</span>]</span><br><span class="line">          <span class="attr">uri:</span> <span class="string">http://repo.internal/</span></span><br><span class="line">    <span class="attr">sources:</span></span><br><span class="line">        <span class="attr">my-ppa.list:</span></span><br><span class="line">            <span class="attr">source:</span> <span class="string">&quot;deb http://ppa.launchpad.net/curtin-dev/test-archive/ubuntu $RELEASE main&quot;</span></span><br><span class="line">            <span class="attr">keyid:</span> <span class="string">B59D</span> <span class="string">5F15</span> <span class="string">97A5</span> <span class="string">04B7</span> <span class="string">E230</span>  <span class="string">6DCA</span> <span class="number">0620 </span><span class="string">BBCF</span> <span class="number">0368 </span><span class="string">3F77</span></span><br><span class="line"><span class="attr">storage:</span></span><br><span class="line">    <span class="attr">layout:</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">lvm</span></span><br><span class="line"><span class="attr">identity:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">hostname</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">username</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">$crypted_pass</span></span><br><span class="line"><span class="attr">ssh:</span></span><br><span class="line">    <span class="attr">install-server:</span> <span class="literal">yes</span></span><br><span class="line">    <span class="attr">authorized-keys:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">$key</span></span><br><span class="line">    <span class="attr">allow-pw:</span> <span class="literal">no</span></span><br><span class="line"><span class="attr">snaps:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">go</span></span><br><span class="line">      <span class="attr">channel:</span> <span class="number">1.14</span><span class="string">/stable</span></span><br><span class="line">      <span class="attr">classic:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">debconf-selections:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    bind9      bind9/run-resolvconf    boolean false</span></span><br><span class="line"><span class="string"></span><span class="attr">packages:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">libreoffice</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">dns-server^</span></span><br><span class="line"><span class="attr">user-data:</span></span><br><span class="line">    <span class="attr">disable_root:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">late-commands:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">sed</span> <span class="string">-ie</span> <span class="string">&#x27;s/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=30/&#x27;</span> <span class="string">/target/etc/default/grub</span></span><br><span class="line"><span class="attr">error-commands:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">tar</span> <span class="string">c</span> <span class="string">/var/log/installer</span> <span class="string">|</span> <span class="string">nc</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span> <span class="number">1000</span></span><br></pre></td></tr></table></figure>
 
 <p>许多关键字和值一般直接对应于安装程序提出的问题（例如键盘选择），请参阅相关资料。</p>
 <h2 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h2><p>安装过程中的进度及出错信息，可以通过报告 <a target="_blank" rel="noopener" href="https://ubuntu.com/server/docs/install/autoinstall-reference#reporting">reporting</a> 关键字设定的系统获取。此外，当发生致命错误时，将执行错误命令 <a target="_blank" rel="noopener" href="https://ubuntu.com/server/docs/install/autoinstall-reference#error-commands">error-commands</a> 并将回溯打印到控制台，然后服务器等待人为交互式干预。</p>
@@ -520,142 +401,17 @@ autoinstall:
 </ul>
 <ol>
 <li><p>设置用户数据文件 <em><code>/var/www/html/jammy/user-data</code></em> （可以采用文件 <em><code>/var/log/installer/autoinstall-user-data</code></em> 为模板修改），其内容为：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment">#cloud-config</span>
-<span class="token key atrule">autoinstall</span><span class="token punctuation">:</span>
-  <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">1</span>
-  <span class="token key atrule">late-commands</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> mkdir /target/root/.ssh <span class="token important">&amp;&amp;</span> echo "ssh<span class="token punctuation">-</span>rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZUS2FXGm2yK09Tv0biWIwLszp0TPGzB2u1PD/QXCGPimLOmEP2xAFJbgwzeXlgfnj01LP7BD65lidSPd68WwaUsNHdlikfwf9iRdlSXxNg+PVueY2KPHRzgQ5omtAzJFUUnHKIOSH/Ozo9tmwrs4tZc4CNpx44InvgQY3yeKfhqvVn2O+WazirNlGsFRcpMcjLJjZ+U2OfMGM4l0soSDJKJTKoaHmV0XpIOA2iqfQmOgFDZExqmjc8Vj/1hTBvTzyhgMPlzkDz28UsuBT3U+RZiZJokPtXks5mnVkVYzQvOkln3r0+bmOX0Q4qDg2HhinSpGXAZGln1PKH3AFU7StMIg6e1Lb8AMNHNxWBR61uXIwJJw3dcP6Sy3N4Gq3WW+hkVsHJgZRD+dPQNRwMHIY1CIfBtB9TySKpwNwSAeXiBPFoYgAi0RlbrdHLpjDl9LxK/vyZ1gvGSumtU9IM01EZWfXfCKoMX68ljIaVsHHhHbqIXSS7AjaEsJO+ss8nQU= root@ubuntu22<span class="token punctuation">-</span>server.hanhai22.ustc.edu.cn" <span class="token punctuation">></span>/target/root/.ssh/authorized_keys
-  <span class="token key atrule">apt</span><span class="token punctuation">:</span>
-    <span class="token key atrule">disable_components</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-    <span class="token key atrule">geoip</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-    <span class="token key atrule">preserve_sources_list</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-    <span class="token key atrule">primary</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">arches</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> amd64
-      <span class="token punctuation">-</span> i386
-      <span class="token key atrule">uri</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//mirrors.ustc.edu.cn/ubuntu
-    <span class="token punctuation">-</span> <span class="token key atrule">arches</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> default
-      <span class="token key atrule">uri</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//ports.ubuntu.com/ubuntu<span class="token punctuation">-</span>ports
-  <span class="token key atrule">drivers</span><span class="token punctuation">:</span>
-    <span class="token key atrule">install</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-  <span class="token key atrule">identity</span><span class="token punctuation">:</span>
-    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> Client1.hanhai.scc.ustc.edu.cn
-    <span class="token key atrule">password</span><span class="token punctuation">:</span> $6$dIUrqz$MJN/0cc47EFl8OJBsbxm/o37ScqlZtXb8r63rGa0JLnbwpYQSLrCq7qgEcOAJc6RlkNbIicK6VlPPK402FD7wMQv.sHqNIl1
-    <span class="token key atrule">realname</span><span class="token punctuation">:</span> hmli
-    <span class="token key atrule">username</span><span class="token punctuation">:</span> hmli
-  <span class="token key atrule">kernel</span><span class="token punctuation">:</span>
-    <span class="token key atrule">package</span><span class="token punctuation">:</span> linux<span class="token punctuation">-</span>generic
-  <span class="token key atrule">keyboard</span><span class="token punctuation">:</span>
-    <span class="token key atrule">layout</span><span class="token punctuation">:</span> us
-    <span class="token key atrule">toggle</span><span class="token punctuation">:</span> <span class="token null important">null</span>
-    <span class="token key atrule">variant</span><span class="token punctuation">:</span> <span class="token string">''</span>
-  <span class="token key atrule">locale</span><span class="token punctuation">:</span> en_US.UTF<span class="token punctuation">-</span><span class="token number">8</span>
-  <span class="token key atrule">network</span><span class="token punctuation">:</span>
-    <span class="token key atrule">ethernets</span><span class="token punctuation">:</span>
-      <span class="token key atrule">enp1s0</span><span class="token punctuation">:</span>
-        <span class="token key atrule">addresses</span><span class="token punctuation">:</span>
-        <span class="token punctuation">-</span> 192.168.22.1/24
-        <span class="token key atrule">gateway4</span><span class="token punctuation">:</span> 192.168.22.254
-        <span class="token key atrule">nameservers</span><span class="token punctuation">:</span>
-          <span class="token key atrule">addresses</span><span class="token punctuation">:</span>
-          <span class="token punctuation">-</span> 202.38.64.7
-          <span class="token key atrule">search</span><span class="token punctuation">:</span>
-          <span class="token punctuation">-</span> ustc.edu.cn
-    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">2</span>
-  <span class="token key atrule">ssh</span><span class="token punctuation">:</span>
-    <span class="token key atrule">allow-pw</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-    <span class="token key atrule">authorized-keys</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-    <span class="token key atrule">install-server</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-  <span class="token key atrule">storage</span><span class="token punctuation">:</span>
-    <span class="token key atrule">config</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">ptable</span><span class="token punctuation">:</span> gpt
-<span class="token comment">#      serial: c9d3b07e01624ab69df6</span>
-      <span class="token key atrule">path</span><span class="token punctuation">:</span> /dev/vda
-      <span class="token key atrule">wipe</span><span class="token punctuation">:</span> superblock
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">name</span><span class="token punctuation">:</span> <span class="token string">''</span>
-      <span class="token key atrule">grub_device</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> disk
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> disk<span class="token punctuation">-</span>vda
-    <span class="token punctuation">-</span> <span class="token key atrule">device</span><span class="token punctuation">:</span> disk<span class="token punctuation">-</span>vda
-      <span class="token key atrule">size</span><span class="token punctuation">:</span> <span class="token number">999292928</span>
-      <span class="token key atrule">wipe</span><span class="token punctuation">:</span> superblock
-      <span class="token key atrule">flag</span><span class="token punctuation">:</span> boot
-      <span class="token key atrule">number</span><span class="token punctuation">:</span> <span class="token number">1</span>
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">grub_device</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> partition
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> partition<span class="token punctuation">-</span><span class="token number">0</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">fstype</span><span class="token punctuation">:</span> fat32
-      <span class="token key atrule">volume</span><span class="token punctuation">:</span> partition<span class="token punctuation">-</span><span class="token number">0</span>
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> format
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> format<span class="token punctuation">-</span><span class="token number">0</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">device</span><span class="token punctuation">:</span> disk<span class="token punctuation">-</span>vda
-      <span class="token key atrule">size</span><span class="token punctuation">:</span> <span class="token number">1902116864</span>
-      <span class="token key atrule">wipe</span><span class="token punctuation">:</span> superblock
-      <span class="token key atrule">flag</span><span class="token punctuation">:</span> <span class="token string">''</span>
-      <span class="token key atrule">number</span><span class="token punctuation">:</span> <span class="token number">2</span>
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">grub_device</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> partition
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> partition<span class="token punctuation">-</span><span class="token number">1</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">fstype</span><span class="token punctuation">:</span> ext4
-      <span class="token key atrule">volume</span><span class="token punctuation">:</span> partition<span class="token punctuation">-</span><span class="token number">1</span>
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> format
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> format<span class="token punctuation">-</span><span class="token number">1</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">device</span><span class="token punctuation">:</span> disk<span class="token punctuation">-</span>vda
-      <span class="token key atrule">size</span><span class="token punctuation">:</span> <span class="token number">18571329536</span>
-      <span class="token key atrule">wipe</span><span class="token punctuation">:</span> superblock
-      <span class="token key atrule">flag</span><span class="token punctuation">:</span> <span class="token string">''</span>
-      <span class="token key atrule">number</span><span class="token punctuation">:</span> <span class="token number">3</span>
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">grub_device</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> partition
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> partition<span class="token punctuation">-</span><span class="token number">2</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> ubuntu<span class="token punctuation">-</span>vg
-      <span class="token key atrule">devices</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> partition<span class="token punctuation">-</span><span class="token number">2</span>
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> lvm_volgroup
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> lvm_volgroup<span class="token punctuation">-</span><span class="token number">0</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> ubuntu<span class="token punctuation">-</span>lv
-      <span class="token key atrule">volgroup</span><span class="token punctuation">:</span> lvm_volgroup<span class="token punctuation">-</span><span class="token number">0</span>
-      <span class="token key atrule">size</span><span class="token punctuation">:</span> 10737418240B
-      <span class="token key atrule">wipe</span><span class="token punctuation">:</span> superblock
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> lvm_partition
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> lvm_partition<span class="token punctuation">-</span><span class="token number">0</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">fstype</span><span class="token punctuation">:</span> ext4
-      <span class="token key atrule">volume</span><span class="token punctuation">:</span> lvm_partition<span class="token punctuation">-</span><span class="token number">0</span>
-      <span class="token key atrule">preserve</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> format
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> format<span class="token punctuation">-</span><span class="token number">2</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">path</span><span class="token punctuation">:</span> /
-      <span class="token key atrule">device</span><span class="token punctuation">:</span> format<span class="token punctuation">-</span><span class="token number">2</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> mount
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> mount<span class="token punctuation">-</span><span class="token number">2</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">path</span><span class="token punctuation">:</span> /boot
-      <span class="token key atrule">device</span><span class="token punctuation">:</span> format<span class="token punctuation">-</span><span class="token number">1</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> mount
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> mount<span class="token punctuation">-</span><span class="token number">1</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">path</span><span class="token punctuation">:</span> /boot/efi
-      <span class="token key atrule">device</span><span class="token punctuation">:</span> format<span class="token punctuation">-</span><span class="token number">0</span>
-      <span class="token key atrule">type</span><span class="token punctuation">:</span> mount
-      <span class="token key atrule">id</span><span class="token punctuation">:</span> mount<span class="token punctuation">-</span><span class="token number">0</span>
-  <span class="token key atrule">updates</span><span class="token punctuation">:</span> security</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cloud-config</span></span><br><span class="line"><span class="attr">autoinstall:</span></span><br><span class="line">  <span class="attr">version:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">late-commands:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">mkdir</span> <span class="string">/target/root/.ssh</span> <span class="string">&amp;&amp;</span> <span class="string">echo</span> <span class="string">&quot;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZUS2FXGm2yK09Tv0biWIwLszp0TPGzB2u1PD/QXCGPimLOmEP2xAFJbgwzeXlgfnj01LP7BD65lidSPd68WwaUsNHdlikfwf9iRdlSXxNg+PVueY2KPHRzgQ5omtAzJFUUnHKIOSH/Ozo9tmwrs4tZc4CNpx44InvgQY3yeKfhqvVn2O+WazirNlGsFRcpMcjLJjZ+U2OfMGM4l0soSDJKJTKoaHmV0XpIOA2iqfQmOgFDZExqmjc8Vj/1hTBvTzyhgMPlzkDz28UsuBT3U+RZiZJokPtXks5mnVkVYzQvOkln3r0+bmOX0Q4qDg2HhinSpGXAZGln1PKH3AFU7StMIg6e1Lb8AMNHNxWBR61uXIwJJw3dcP6Sy3N4Gq3WW+hkVsHJgZRD+dPQNRwMHIY1CIfBtB9TySKpwNwSAeXiBPFoYgAi0RlbrdHLpjDl9LxK/vyZ1gvGSumtU9IM01EZWfXfCKoMX68ljIaVsHHhHbqIXSS7AjaEsJO+ss8nQU= root@ubuntu22-server.hanhai22.ustc.edu.cn&quot;</span> <span class="string">&gt;/target/root/.ssh/authorized_keys</span></span><br><span class="line">  <span class="attr">apt:</span></span><br><span class="line">    <span class="attr">disable_components:</span> []</span><br><span class="line">    <span class="attr">geoip:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">preserve_sources_list:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">primary:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">arches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">amd64</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">i386</span></span><br><span class="line">      <span class="attr">uri:</span> <span class="string">http://mirrors.ustc.edu.cn/ubuntu</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">arches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line">      <span class="attr">uri:</span> <span class="string">http://ports.ubuntu.com/ubuntu-ports</span></span><br><span class="line">  <span class="attr">drivers:</span></span><br><span class="line">    <span class="attr">install:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">identity:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">Client1.hanhai.scc.ustc.edu.cn</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">$6$dIUrqz$MJN/0cc47EFl8OJBsbxm/o37ScqlZtXb8r63rGa0JLnbwpYQSLrCq7qgEcOAJc6RlkNbIicK6VlPPK402FD7wMQv.sHqNIl1</span></span><br><span class="line">    <span class="attr">realname:</span> <span class="string">hmli</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">hmli</span></span><br><span class="line">  <span class="attr">kernel:</span></span><br><span class="line">    <span class="attr">package:</span> <span class="string">linux-generic</span></span><br><span class="line">  <span class="attr">keyboard:</span></span><br><span class="line">    <span class="attr">layout:</span> <span class="string">us</span></span><br><span class="line">    <span class="attr">toggle:</span> <span class="literal">null</span></span><br><span class="line">    <span class="attr">variant:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">  <span class="attr">locale:</span> <span class="string">en_US.UTF-8</span></span><br><span class="line">  <span class="attr">network:</span></span><br><span class="line">    <span class="attr">ethernets:</span></span><br><span class="line">      <span class="attr">enp1s0:</span></span><br><span class="line">        <span class="attr">addresses:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.22</span><span class="number">.1</span><span class="string">/24</span></span><br><span class="line">        <span class="attr">gateway4:</span> <span class="number">192.168</span><span class="number">.22</span><span class="number">.254</span></span><br><span class="line">        <span class="attr">nameservers:</span></span><br><span class="line">          <span class="attr">addresses:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="number">202.38</span><span class="number">.64</span><span class="number">.7</span></span><br><span class="line">          <span class="attr">search:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">ustc.edu.cn</span></span><br><span class="line">    <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">ssh:</span></span><br><span class="line">    <span class="attr">allow-pw:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">authorized-keys:</span> []</span><br><span class="line">    <span class="attr">install-server:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">storage:</span></span><br><span class="line">    <span class="attr">config:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">ptable:</span> <span class="string">gpt</span></span><br><span class="line"><span class="comment">#      serial: c9d3b07e01624ab69df6</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/dev/vda</span></span><br><span class="line">      <span class="attr">wipe:</span> <span class="string">superblock</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">      <span class="attr">grub_device:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">disk</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">disk-vda</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">device:</span> <span class="string">disk-vda</span></span><br><span class="line">      <span class="attr">size:</span> <span class="number">999292928</span></span><br><span class="line">      <span class="attr">wipe:</span> <span class="string">superblock</span></span><br><span class="line">      <span class="attr">flag:</span> <span class="string">boot</span></span><br><span class="line">      <span class="attr">number:</span> <span class="number">1</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">grub_device:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">partition</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">partition-0</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">fstype:</span> <span class="string">fat32</span></span><br><span class="line">      <span class="attr">volume:</span> <span class="string">partition-0</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">format</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">format-0</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">device:</span> <span class="string">disk-vda</span></span><br><span class="line">      <span class="attr">size:</span> <span class="number">1902116864</span></span><br><span class="line">      <span class="attr">wipe:</span> <span class="string">superblock</span></span><br><span class="line">      <span class="attr">flag:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">      <span class="attr">number:</span> <span class="number">2</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">grub_device:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">partition</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">partition-1</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">fstype:</span> <span class="string">ext4</span></span><br><span class="line">      <span class="attr">volume:</span> <span class="string">partition-1</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">format</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">format-1</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">device:</span> <span class="string">disk-vda</span></span><br><span class="line">      <span class="attr">size:</span> <span class="number">18571329536</span></span><br><span class="line">      <span class="attr">wipe:</span> <span class="string">superblock</span></span><br><span class="line">      <span class="attr">flag:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">      <span class="attr">number:</span> <span class="number">3</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">grub_device:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">partition</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">partition-2</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">ubuntu-vg</span></span><br><span class="line">      <span class="attr">devices:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">partition-2</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">lvm_volgroup</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">lvm_volgroup-0</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">ubuntu-lv</span></span><br><span class="line">      <span class="attr">volgroup:</span> <span class="string">lvm_volgroup-0</span></span><br><span class="line">      <span class="attr">size:</span> <span class="string">10737418240B</span></span><br><span class="line">      <span class="attr">wipe:</span> <span class="string">superblock</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">lvm_partition</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">lvm_partition-0</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">fstype:</span> <span class="string">ext4</span></span><br><span class="line">      <span class="attr">volume:</span> <span class="string">lvm_partition-0</span></span><br><span class="line">      <span class="attr">preserve:</span> <span class="literal">false</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">format</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">format-2</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/</span></span><br><span class="line">      <span class="attr">device:</span> <span class="string">format-2</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">mount</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">mount-2</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/boot</span></span><br><span class="line">      <span class="attr">device:</span> <span class="string">format-1</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">mount</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">mount-1</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/boot/efi</span></span><br><span class="line">      <span class="attr">device:</span> <span class="string">format-0</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">mount</span></span><br><span class="line">      <span class="attr">id:</span> <span class="string">mount-0</span></span><br><span class="line">  <span class="attr">updates:</span> <span class="string">security</span></span><br></pre></td></tr></table></figure>
 
 <p>备注：late-commands 等中的字符串在传递给执行安装的主机时，有些特殊字符串需要特殊处理。</p>
 </li>
 <li><p>生成所需要的文件 <em>meta-data</em> （空文件即可），执行命令：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">touch</span> /var/www/html/jammy/meta-data</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">touch</span> /var/www/html/jammy/meta-data</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>供应商数据文件 <em>vendor-data</em> 非必需，可不管。</p>
 </li>
 <li><p>确保目录 <em>&#x2F;var&#x2F;www&#x2F;html&#x2F;jammy&#x2F;</em> 下的文件对所有人可读：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">chmod</span> <span class="token parameter variable">-R</span> a+r /var/www/html/jammy/</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> -R a+r /var/www/html/jammy/</span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>上述各项含义参见： <a target="_blank" rel="noopener" href="https://hmli.ustc.edu.cn/doc/linux/ubuntu-autoinstall/ubuntu-autoinstall.html#reference">自动服务器安装配置文件参考</a> 。</p>
 <p>备注：做好上述工作后，同一子网内的客户机启动采用PXE引导时，即可自动安装配置所需要的系统。</p>
@@ -682,12 +438,7 @@ autoinstall:
 </li>
 <li><p>默认值：[]</p>
 <p>仍然显示在用户界面 <strong>UI</strong> 中的配置键列表，如：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">1</span>
-<span class="token key atrule">interactive-sections</span><span class="token punctuation">:</span>
- <span class="token punctuation">-</span> network
-<span class="token key atrule">identity</span><span class="token punctuation">:</span>
- <span class="token key atrule">username</span><span class="token punctuation">:</span> ubuntu
- <span class="token key atrule">password</span><span class="token punctuation">:</span> $crypted_pass</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">interactive-sections:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">network</span></span><br><span class="line"><span class="attr">identity:</span></span><br><span class="line"> <span class="attr">username:</span> <span class="string">ubuntu</span></span><br><span class="line"> <span class="attr">password:</span> <span class="string">$crypted_pass</span></span><br></pre></td></tr></table></figure>
 
 <p>交互式操作，将在网络屏幕上停止并允许用户更改默认值。如果为交互式部分提供了值，则将其用作默认值。</p>
 <p>可以使用特殊的块名称 “*” 来指示安装程序应该询问所有常见问题——在这种情况下，文件 <code>autoinstall.yaml </code>根本不是真正的“自动安装”文件，而只是一种用于更改用户界面中的默认值的文件。</p>
@@ -792,20 +543,10 @@ autoinstall:
 </ul>
 <p><a target="_blank" rel="noopener" href="https://netplan.io/reference?_ga=2.114730432.698614161.1664162991-1711338095.1646124381">netplan</a> 格式的网络配置。将在安装期间以及已安装的系统中应用。默认是解释安装媒介的配置，它在名称匹配 <strong>“eth*”</strong> 或 <strong>“en*”</strong> 的任何网卡上运行 <strong>DHCPv4</strong> 请求，并随后禁用任何未获取到IP地址的网卡。</p>
 <p>例如，要在特定网卡 <strong>enp0s31f6</strong> 上运行 <strong>dhcp6</strong> 请求：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">network</span><span class="token punctuation">:</span>
-  <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">2</span>
-  <span class="token key atrule">ethernets</span><span class="token punctuation">:</span>
-    <span class="token key atrule">enp0s31f6</span><span class="token punctuation">:</span>
-      <span class="token key atrule">dhcp6</span><span class="token punctuation">:</span> yes</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">network:</span></span><br><span class="line">  <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">ethernets:</span></span><br><span class="line">    <span class="attr">enp0s31f6:</span></span><br><span class="line">      <span class="attr">dhcp6:</span> <span class="literal">yes</span></span><br></pre></td></tr></table></figure>
 
 <p>请注意，由于一个错误，随 <strong>20.04 GA</strong> 发布的 <strong>subiquity</strong> 版本强制您使用额外的 <strong>“network:”</strong> 关键字编写此代码，如下所示：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">network</span><span class="token punctuation">:</span>
-<span class="token comment">#多了上一层network:</span>
-  <span class="token key atrule">network</span><span class="token punctuation">:</span>
-    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token number">2</span>
-    <span class="token key atrule">ethernets</span><span class="token punctuation">:</span>
-      <span class="token key atrule">enp0s31f6</span><span class="token punctuation">:</span>
-        <span class="token key atrule">dhcp6</span><span class="token punctuation">:</span> yes</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">network:</span></span><br><span class="line"><span class="comment">#多了上一层network:</span></span><br><span class="line">  <span class="attr">network:</span></span><br><span class="line">    <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">    <span class="attr">ethernets:</span></span><br><span class="line">      <span class="attr">enp0s31f6:</span></span><br><span class="line">        <span class="attr">dhcp6:</span> <span class="literal">yes</span></span><br></pre></td></tr></table></figure>
 
 <p>更高版本也支持此语法（以实现兼容性），但如果可以确定采用修复后的新版本，则应使用前者（无需使用额外的 <strong>“network:”</strong> 关键字）。</p>
 </li>
@@ -828,28 +569,15 @@ autoinstall:
 <p>APT配置，在安装期间和引导到目标系统后都使用。</p>
 <p>这使用与 <a target="_blank" rel="noopener" href="https://curtin.readthedocs.io/en/latest/topics/apt_source.html">https://curtin.readthedocs.io/en/latest/topics/apt_source.html</a> 中描述的 <strong>curtin</strong> (the curt installer) 安装格式相同的格式，但有一个扩展：关键字 <strong>geoip</strong> 控制是否完成地理IP(geoip)查找。</p>
 <p>默认值为：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apt</span><span class="token punctuation">:</span>
-    <span class="token key atrule">preserve_sources_list</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
-    <span class="token key atrule">primary</span><span class="token punctuation">:</span>
-        <span class="token punctuation">-</span> <span class="token key atrule">arches</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>i386<span class="token punctuation">,</span> amd64<span class="token punctuation">]</span>
-          <span class="token key atrule">uri</span><span class="token punctuation">:</span> <span class="token string">"http://archive.ubuntu.com/ubuntu"</span>
-        <span class="token punctuation">-</span> <span class="token key atrule">arches</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>default<span class="token punctuation">]</span>
-          <span class="token key atrule">uri</span><span class="token punctuation">:</span> <span class="token string">"http://ports.ubuntu.com/ubuntu-ports"</span>
-    <span class="token key atrule">geoip</span><span class="token punctuation">:</span> <span class="token boolean important">true</span></code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apt:</span></span><br><span class="line">    <span class="attr">preserve_sources_list:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">primary:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">arches:</span> [<span class="string">i386</span>, <span class="string">amd64</span>]</span><br><span class="line">          <span class="attr">uri:</span> <span class="string">&quot;http://archive.ubuntu.com/ubuntu&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">arches:</span> [<span class="string">default</span>]</span><br><span class="line">          <span class="attr">uri:</span> <span class="string">&quot;http://ports.ubuntu.com/ubuntu-ports&quot;</span></span><br><span class="line">    <span class="attr">geoip:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
 
 <p>如关键字 <strong>geoip</strong> 为 <strong>true</strong> 并且要使用的镜像源是默认值（ <strong><a target="_blank" rel="noopener" href="http://archive.ubuntu.com/ubuntu">http://archive.ubuntu.com/ubuntu</a></strong> 或 <strong><a target="_blank" rel="noopener" href="http://ports.ubuntu.com/ubuntu-ports">http://ports.ubuntu.com/ubuntu-ports</a></strong> 等），则向 <strong><a target="_blank" rel="noopener" href="https://geoip.ubuntu.com/lookup">https://geoip.ubuntu.com/lookup</a></strong> 发出请求，并且将使用的镜像URI更改为 <strong><a target="_blank" rel="noopener" href="http://cc.archive.ubuntu.com/ubuntu">http://CC.archive.ubuntu.com/ubuntu</a></strong> , 其中 <strong>CC</strong> 是查找返回的国家代码（或类似的端口，对于中国为 <strong>CN</strong> ），这将使用所在国家区域的源，提升网络更新速度。如果此部分不是交互式的，则请求会在10秒后超时。</p>
 <p>任何提供的配置都会与默认配置合并，而不是替换它。</p>
 <p>如果您只想设置镜像源，请使用如下配置：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apt</span><span class="token punctuation">:</span>
-    <span class="token key atrule">primary</span><span class="token punctuation">:</span>
-        <span class="token punctuation">-</span> <span class="token key atrule">arches</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>default<span class="token punctuation">]</span>
-          <span class="token key atrule">uri</span><span class="token punctuation">:</span> YOUR_MIRROR_GOES_HERE</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apt:</span></span><br><span class="line">    <span class="attr">primary:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">arches:</span> [<span class="string">default</span>]</span><br><span class="line">          <span class="attr">uri:</span> <span class="string">YOUR_MIRROR_GOES_HERE</span></span><br></pre></td></tr></table></figure>
 
 <p>增加一个 <strong>PPA</strong> 源：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apt</span><span class="token punctuation">:</span>
-    <span class="token key atrule">sources</span><span class="token punctuation">:</span>
-        <span class="token key atrule">curtin-ppa</span><span class="token punctuation">:</span>
-            <span class="token key atrule">source</span><span class="token punctuation">:</span> ppa<span class="token punctuation">:</span>curtin<span class="token punctuation">-</span>dev/test<span class="token punctuation">-</span>archive</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apt:</span></span><br><span class="line">    <span class="attr">sources:</span></span><br><span class="line">        <span class="attr">curtin-ppa:</span></span><br><span class="line">            <span class="attr">source:</span> <span class="string">ppa:curtin-dev/test-archive</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>storage</p>
 <ul>
@@ -862,24 +590,10 @@ autoinstall:
 <ul>
 <li><p>支持的布局</p>
 <p>目前支持的布局就两种，分别是逻辑卷模式 <strong>lvm</strong> 和直通模式 <strong>direct</strong> 。</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">storage</span><span class="token punctuation">:</span>
-  <span class="token key atrule">layout</span><span class="token punctuation">:</span>
-    <span class="token key atrule">name</span><span class="token punctuation">:</span> lvm
-<span class="token key atrule">storage</span><span class="token punctuation">:</span>
-  <span class="token key atrule">layout</span><span class="token punctuation">:</span>
-    <span class="token key atrule">name</span><span class="token punctuation">:</span> direct</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">layout:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">lvm</span></span><br><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">layout:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">direct</span></span><br></pre></td></tr></table></figure>
 
 <p>默认情况下，这些将安装到系统中容量最大的磁盘，但您可以提供匹配规范（“match: {}”，见下文）来指示要使用的磁盘：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">storage</span><span class="token punctuation">:</span>
-  <span class="token key atrule">layout</span><span class="token punctuation">:</span>
-    <span class="token key atrule">name</span><span class="token punctuation">:</span> lvm
-    <span class="token key atrule">match</span><span class="token punctuation">:</span>
-      <span class="token key atrule">serial</span><span class="token punctuation">:</span> CT*
-<span class="token key atrule">storage</span><span class="token punctuation">:</span>
-  <span class="token key atrule">layout</span><span class="token punctuation">:</span>
-    <span class="token key atrule">name</span><span class="token punctuation">:</span> disk
-    <span class="token key atrule">match</span><span class="token punctuation">:</span>
-      <span class="token key atrule">ssd</span><span class="token punctuation">:</span> yes</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">layout:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">lvm</span></span><br><span class="line">    <span class="attr">match:</span></span><br><span class="line">      <span class="attr">serial:</span> <span class="string">CT*</span></span><br><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">layout:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">disk</span></span><br><span class="line">    <span class="attr">match:</span></span><br><span class="line">      <span class="attr">ssd:</span> <span class="literal">yes</span></span><br></pre></td></tr></table></figure>
 
 <p>（可以用“match: {}”来匹配任意磁盘）</p>
 <p>默认采用 <strong>lvm</strong> 。</p>
@@ -888,15 +602,7 @@ autoinstall:
 <p>为了获得完全的灵活性，安装程序允许使用一种语法完成存储配置，该语法是 <strong>curtin</strong> 支持的语法的超集，在 <a target="_blank" rel="noopener" href="https://curtin.readthedocs.io/en/latest/topics/storage.html">https://curtin.readthedocs.io/en/latest/topics/storage.html</a> 中进行了描述。</p>
 <p>如果使用 <strong>layout</strong> 功能配置磁盘，则不会使用 <strong>config</strong> 部分。</p>
 <p>除了将操作列表放在关键字 <strong>config</strong> 下之外， <a target="_blank" rel="noopener" href="https://curtin.readthedocs.io/en/latest/topics/config.html#grub">grub</a> 和 <a target="_blank" rel="noopener" href="https://curtin.readthedocs.io/en/latest/topics/config.html#swap">swap</a> curtin配置项也可以放在此处。因此存储部分可能如下所示：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">storage</span><span class="token punctuation">:</span>
-    <span class="token key atrule">swap</span><span class="token punctuation">:</span>
-        <span class="token key atrule">size</span><span class="token punctuation">:</span> <span class="token number">0</span>
-    <span class="token key atrule">config</span><span class="token punctuation">:</span>
-        <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> disk
-          <span class="token key atrule">id</span><span class="token punctuation">:</span> disk0
-          <span class="token key atrule">serial</span><span class="token punctuation">:</span> ADATA_SX8200PNP_XXXXXXXXXXX
-        <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> partition
-          <span class="token punctuation">...</span></code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">storage:</span></span><br><span class="line">    <span class="attr">swap:</span></span><br><span class="line">        <span class="attr">size:</span> <span class="number">0</span></span><br><span class="line">    <span class="attr">config:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">disk</span></span><br><span class="line">          <span class="attr">id:</span> <span class="string">disk0</span></span><br><span class="line">          <span class="attr">serial:</span> <span class="string">ADATA_SX8200PNP_XXXXXXXXXXX</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">partition</span></span><br><span class="line">          <span class="string">...</span></span><br></pre></td></tr></table></figure>
 
 <p>Curtin语法的扩展围绕磁盘选择和分区&#x2F;逻辑卷大小调整。</p>
 </li>
@@ -905,21 +611,13 @@ autoinstall:
 <p>存储配置中的操作按照它们在自动安装文件中的顺序进行处理。任何磁盘操作都会被分配一个匹配的磁盘——如果有多个磁盘，则从一组未分配的磁盘中任意选择，如果没有未分配的匹配磁盘，则会导致安装失败。</p>
 <p>匹配规范支持以下关键字： - <strong>model: foo</strong> ：匹配 <strong>udev</strong> 中 <strong>ID_VENDOR&#x3D;foo</strong> 的磁盘，支持通配符 - <strong>path: foo</strong> ：匹配 <strong>udev</strong> 中 <strong>DEVPATH&#x3D;foo</strong> 的磁盘，支持通配符（通配符支持将此与直接在磁盘操作中指定 <strong>path: foo</strong> 区分开来） - <strong>serial: foo</strong> ：匹配 <strong>udev</strong> 中 <strong>ID_SERIAL&#x3D;foo</strong> 的磁盘，支持通配符（通配符支持将此与直接在磁盘操作中指定 <strong>serial: foo</strong> 区分开来） - <strong>ssd: yes|no</strong> ：匹配是或不是 <strong>SSD</strong> 的磁盘（相对于机械硬盘） - <strong>size: largest|smallest</strong> ：如果有多个匹配项，则取最大或最小的磁盘而不是任意一个（在 20.06.1 版本中添加了对最小 <strong>smallest</strong> 的支持）</p>
 <p>因此，例如，要匹配任意磁盘，只需：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> disk
-  <span class="token key atrule">id</span><span class="token punctuation">:</span> disk0</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">disk</span></span><br><span class="line">  <span class="attr">id:</span> <span class="string">disk0</span></span><br></pre></td></tr></table></figure>
 
 <p>匹配容量最大的SSD硬盘：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> disk
-  <span class="token key atrule">id</span><span class="token punctuation">:</span> big<span class="token punctuation">-</span>fast<span class="token punctuation">-</span>disk
-  <span class="token key atrule">match</span><span class="token punctuation">:</span>
-    <span class="token key atrule">ssd</span><span class="token punctuation">:</span> yes
-    <span class="token key atrule">size</span><span class="token punctuation">:</span> largest</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">disk</span></span><br><span class="line">  <span class="attr">id:</span> <span class="string">big-fast-disk</span></span><br><span class="line">  <span class="attr">match:</span></span><br><span class="line">    <span class="attr">ssd:</span> <span class="literal">yes</span></span><br><span class="line">    <span class="attr">size:</span> <span class="string">largest</span></span><br></pre></td></tr></table></figure>
 
 <p>匹配希捷Seagate硬盘：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> disk
-  <span class="token key atrule">id</span><span class="token punctuation">:</span> data<span class="token punctuation">-</span>disk
-  <span class="token key atrule">match</span><span class="token punctuation">:</span>
-    <span class="token key atrule">model</span><span class="token punctuation">:</span> Seagate</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">disk</span></span><br><span class="line">  <span class="attr">id:</span> <span class="string">data-disk</span></span><br><span class="line">  <span class="attr">match:</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">Seagate</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>分区&#x2F;逻辑卷扩展</p>
 <p>curtin中的分区或逻辑卷的大小指定为字节数。自动安装配置更加灵活：</p>
@@ -928,17 +626,7 @@ autoinstall:
 <li>您可以将大小指定为包含磁盘（或RAID）的百分比，例如“50%”</li>
 <li>对于为特定设备指定的最后一个分区，您可以将大小指定为“-1”以指示该分区应填充剩余空间。</li>
 </ul>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> partition
-  <span class="token key atrule">id</span><span class="token punctuation">:</span> boot<span class="token punctuation">-</span>partition
-  <span class="token key atrule">device</span><span class="token punctuation">:</span> root<span class="token punctuation">-</span>disk
-  <span class="token key atrule">size</span><span class="token punctuation">:</span> 10%
-<span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> partition
-  <span class="token key atrule">id</span><span class="token punctuation">:</span> root<span class="token punctuation">-</span>partition
-  <span class="token key atrule">size</span><span class="token punctuation">:</span> 20G
-<span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> partition
-  <span class="token key atrule">id</span><span class="token punctuation">:</span> data<span class="token punctuation">-</span>partition
-  <span class="token key atrule">device</span><span class="token punctuation">:</span> root<span class="token punctuation">-</span>disk
-  <span class="token key atrule">size</span><span class="token punctuation">:</span> <span class="token number">-1</span></code></pre></li>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">partition</span></span><br><span class="line">  <span class="attr">id:</span> <span class="string">boot-partition</span></span><br><span class="line">  <span class="attr">device:</span> <span class="string">root-disk</span></span><br><span class="line">  <span class="attr">size:</span> <span class="number">10</span><span class="string">%</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">partition</span></span><br><span class="line">  <span class="attr">id:</span> <span class="string">root-partition</span></span><br><span class="line">  <span class="attr">size:</span> <span class="string">20G</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">partition</span></span><br><span class="line">  <span class="attr">id:</span> <span class="string">data-partition</span></span><br><span class="line">  <span class="attr">device:</span> <span class="string">root-disk</span></span><br><span class="line">  <span class="attr">size:</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure></li>
 </ul>
 </li>
 <li><p>identity</p>
@@ -999,10 +687,7 @@ autoinstall:
 <li>是否可交互：可</li>
 </ul>
 <p>要安装的snap包列表。每个snap都表示为具有必需的关键字 <strong>name</strong> 和可选的关键字 <strong>chanel</strong> （默认为 <strong>stable</strong> ）和 <strong>classic</strong> （经典默认为 <strong>false</strong> ）的映射。如：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">snaps</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> etcd
-      <span class="token key atrule">channel</span><span class="token punctuation">:</span> edge
-      <span class="token key atrule">classic</span><span class="token punctuation">:</span> <span class="token boolean important">false</span></code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">snaps:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">etcd</span></span><br><span class="line">      <span class="attr">channel:</span> <span class="string">edge</span></span><br><span class="line">      <span class="attr">classic:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>debconf-selections</p>
 <ul>
@@ -1059,31 +744,16 @@ autoinstall:
 </ul>
 <p>例子：</p>
 <p>默认配置：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">reporting</span><span class="token punctuation">:</span>
- <span class="token key atrule">builtin</span><span class="token punctuation">:</span>
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> print</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">reporting:</span></span><br><span class="line"> <span class="attr">builtin:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">print</span></span><br></pre></td></tr></table></figure>
 
 <p>输出到 <strong>rsyslog</strong> ：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">reporting</span><span class="token punctuation">:</span>
- <span class="token key atrule">central</span><span class="token punctuation">:</span>
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> rsyslog
-  <span class="token key atrule">destination</span><span class="token punctuation">:</span> @192.168.0.1</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">reporting:</span></span><br><span class="line"> <span class="attr">central:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">rsyslog</span></span><br><span class="line">  <span class="attr">destination:</span> <span class="string">@192.168.0.1</span></span><br></pre></td></tr></table></figure>
 
 <p>抑制默认输出：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">reporting</span><span class="token punctuation">:</span>
- <span class="token key atrule">builtin</span><span class="token punctuation">:</span>
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> none</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">reporting:</span></span><br><span class="line"> <span class="attr">builtin:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">none</span></span><br></pre></td></tr></table></figure>
 
 <p>输出到 <strong>curtin</strong> 样式的 <strong>webhook</strong> ：</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">reporting</span><span class="token punctuation">:</span>
- <span class="token key atrule">hook</span><span class="token punctuation">:</span>
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> webhook
-  <span class="token key atrule">endpoint</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//example.com/endpoint/path
-  <span class="token key atrule">consumer_key</span><span class="token punctuation">:</span> <span class="token string">"ck_foo"</span>
-  <span class="token key atrule">consumer_secret</span><span class="token punctuation">:</span> <span class="token string">"cs_foo"</span>
-  <span class="token key atrule">token_key</span><span class="token punctuation">:</span> <span class="token string">"tk_foo"</span>
-  <span class="token key atrule">token_secret</span><span class="token punctuation">:</span> <span class="token string">"tk_secret"</span>
-  <span class="token key atrule">level</span><span class="token punctuation">:</span> INFO</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">reporting:</span></span><br><span class="line"> <span class="attr">hook:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">webhook</span></span><br><span class="line">  <span class="attr">endpoint:</span> <span class="string">http://example.com/endpoint/path</span></span><br><span class="line">  <span class="attr">consumer_key:</span> <span class="string">&quot;ck_foo&quot;</span></span><br><span class="line">  <span class="attr">consumer_secret:</span> <span class="string">&quot;cs_foo&quot;</span></span><br><span class="line">  <span class="attr">token_key:</span> <span class="string">&quot;tk_foo&quot;</span></span><br><span class="line">  <span class="attr">token_secret:</span> <span class="string">&quot;tk_secret&quot;</span></span><br><span class="line">  <span class="attr">level:</span> <span class="string">INFO</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>user-data</p>
 <ul>

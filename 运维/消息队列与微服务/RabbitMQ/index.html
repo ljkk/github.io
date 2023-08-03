@@ -273,99 +273,18 @@
 <h2 id="RabbitMQ-单机部署"><a href="#RabbitMQ-单机部署" class="headerlink" title="RabbitMQ 单机部署"></a>RabbitMQ 单机部署</h2><p>快速部署示例：<a target="_blank" rel="noopener" href="https://www.rabbitmq.com/install-debian.html#apt-bintray-quick-start">https://www.rabbitmq.com/install-debian.html#apt-bintray-quick-start</a></p>
 <ol>
 <li><p>主机名解析</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$hostname</span>
-mq1.ljk.cn
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$hostname</span> <span class="token parameter variable">-I</span>
-<span class="token number">10.0</span>.1.101
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/hosts
-<span class="token punctuation">..</span>.
-<span class="token number">10.0</span>.1.101 mq1.ljk.cn mq1</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$hostname</span></span><br><span class="line">mq1.ljk.cn</span><br><span class="line">[root@mq1 ~]<span class="variable">$hostname</span> -I</span><br><span class="line">10.0.1.101</span><br><span class="line">[root@mq1 ~]<span class="variable">$vim</span> /etc/hosts</span><br><span class="line">...</span><br><span class="line">10.0.1.101 mq1.ljk.cn mq1</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>时间原因，选择 apt 安装，直接执行以下脚本</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/sh</span>
-
-<span class="token comment">## If sudo is not available on the system,</span>
-<span class="token comment">## uncomment the line below to install it</span>
-<span class="token comment"># apt-get install -y sudo</span>
-
-<span class="token function">sudo</span> <span class="token function">apt-get</span> update <span class="token parameter variable">-y</span>
-
-<span class="token comment">## Install prerequisites</span>
-<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> <span class="token function">curl</span> gnupg <span class="token parameter variable">-y</span>
-
-<span class="token comment">## Install RabbitMQ signing key</span>
-<span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc <span class="token operator">|</span> <span class="token function">sudo</span> apt-key <span class="token function">add</span> -
-
-<span class="token comment">## Install apt HTTPS transport</span>
-<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> apt-transport-https
-
-<span class="token variable">$distribution</span><span class="token operator">=</span><span class="token string">'bionic'</span>		<span class="token comment"># ubuntu18.04</span>
-<span class="token function">sudo</span> <span class="token function">tee</span> /etc/apt/sources.list.d/bintray.rabbitmq.list <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-## 默认安装最新版本的 erlang 23.x，可以指定版本例如：erlang-22.x
-deb https://dl.bintray.com/rabbitmq-erlang/debian <span class="token variable">$distribution</span> erlang
-## Installs latest RabbitMQ release
-deb https://dl.bintray.com/rabbitmq/debian <span class="token variable">$distribution</span> main
-EOF</span>
-
-<span class="token comment">## Update package indices</span>
-<span class="token function">sudo</span> <span class="token function">apt-get</span> update <span class="token parameter variable">-y</span>
-
-<span class="token comment">## Install rabbitmq-server and its dependencies</span>
-<span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> rabbitmq-server <span class="token parameter variable">-y</span> --fix-missing</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## If sudo is not available on the system,</span></span><br><span class="line"><span class="comment">## uncomment the line below to install it</span></span><br><span class="line"><span class="comment"># apt-get install -y sudo</span></span><br><span class="line"></span><br><span class="line">sudo apt-get update -y</span><br><span class="line"></span><br><span class="line"><span class="comment">## Install prerequisites</span></span><br><span class="line">sudo apt-get install curl gnupg -y</span><br><span class="line"></span><br><span class="line"><span class="comment">## Install RabbitMQ signing key</span></span><br><span class="line">curl -fsSL https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc | sudo apt-key add -</span><br><span class="line"></span><br><span class="line"><span class="comment">## Install apt HTTPS transport</span></span><br><span class="line">sudo apt-get install apt-transport-https</span><br><span class="line"></span><br><span class="line"><span class="variable">$distribution</span>=<span class="string">&#x27;bionic&#x27;</span>		<span class="comment"># ubuntu18.04</span></span><br><span class="line">sudo <span class="built_in">tee</span> /etc/apt/sources.list.d/bintray.rabbitmq.list &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">## 默认安装最新版本的 erlang 23.x，可以指定版本例如：erlang-22.x</span></span><br><span class="line"><span class="string">deb https://dl.bintray.com/rabbitmq-erlang/debian $distribution erlang</span></span><br><span class="line"><span class="string">## Installs latest RabbitMQ release</span></span><br><span class="line"><span class="string">deb https://dl.bintray.com/rabbitmq/debian $distribution main</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## Update package indices</span></span><br><span class="line">sudo apt-get update -y</span><br><span class="line"></span><br><span class="line"><span class="comment">## Install rabbitmq-server and its dependencies</span></span><br><span class="line">sudo apt-get install rabbitmq-server -y --fix-missing</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>安装成功</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zabbix src<span class="token punctuation">]</span><span class="token variable">$systemctl</span> status rabbitmq-server.service
-● rabbitmq-server.service - RabbitMQ broker
-   Loaded: loaded <span class="token punctuation">(</span>/lib/systemd/system/rabbitmq-server.service<span class="token punctuation">;</span> enabled<span class="token punctuation">;</span> vendor preset: enabled<span class="token punctuation">)</span>
-   Active: active <span class="token punctuation">(</span>running<span class="token punctuation">)</span> since Sun <span class="token number">2021</span>-02-21 02:41:45 UTC<span class="token punctuation">;</span> 1h 26min ago
- Main PID: <span class="token number">5992</span> <span class="token punctuation">(</span>beam.smp<span class="token punctuation">)</span>
-   Status: <span class="token string">"Initialized"</span>
-    Tasks: <span class="token number">22</span> <span class="token punctuation">(</span>limit: <span class="token number">2289</span><span class="token punctuation">)</span>
-   CGroup: /system.slice/rabbitmq-server.service
-           ├─5992 /usr/lib/erlang/erts-11.1.8/bin/beam.smp <span class="token parameter variable">-W</span> w <span class="token parameter variable">-MBas</span> ageffcbf <span class="token parameter variable">-MHas</span> ageffcbf <span class="token parameter variable">-MBlmbcs</span> <span class="token number">512</span> <span class="token parameter variable">-MHlmbcs</span> <span class="token number">512</span> <span class="token parameter variable">-MMmcs</span> <span class="token number">30</span> <span class="token parameter variable">-P</span> <span class="token number">1048576</span> <span class="token parameter variable">-t</span> <span class="token number">5000000</span> <span class="token parameter variable">-stbt</span> db <span class="token parameter variable">-zd</span>
-           ├─6013 erl_child_setup <span class="token number">32768</span>
-           ├─6039 /usr/lib/erlang/erts-11.1.8/bin/epmd <span class="token parameter variable">-daemon</span>
-           ├─6058 inet_gethost <span class="token number">4</span>
-           └─6059 inet_gethost <span class="token number">4</span>
-<span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@zabbix src]<span class="variable">$systemctl</span> status rabbitmq-server.service</span><br><span class="line">● rabbitmq-server.service - RabbitMQ broker</span><br><span class="line">   Loaded: loaded (/lib/systemd/system/rabbitmq-server.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Sun 2021-02-21 02:41:45 UTC; 1h 26min ago</span><br><span class="line"> Main PID: 5992 (beam.smp)</span><br><span class="line">   Status: <span class="string">&quot;Initialized&quot;</span></span><br><span class="line">    Tasks: 22 (<span class="built_in">limit</span>: 2289)</span><br><span class="line">   CGroup: /system.slice/rabbitmq-server.service</span><br><span class="line">           ├─5992 /usr/lib/erlang/erts-11.1.8/bin/beam.smp -W w -MBas ageffcbf -MHas ageffcbf -MBlmbcs 512 -MHlmbcs 512 -MMmcs 30 -P 1048576 -t 5000000 -stbt db -zd</span><br><span class="line">           ├─6013 erl_child_setup 32768</span><br><span class="line">           ├─6039 /usr/lib/erlang/erts-11.1.8/bin/epmd -daemon</span><br><span class="line">           ├─6058 inet_gethost 4</span><br><span class="line">           └─6059 inet_gethost 4</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>插件管理<br><a target="_blank" rel="noopener" href="https://www.rabbitmq.com/management.html">https://www.rabbitmq.com/management.html</a><br>开启 web 管理界面</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zabbix src<span class="token punctuation">]</span><span class="token variable">$which</span> rabbitmq-plugins
-/usr/sbin/rabbitmq-plugins
-<span class="token punctuation">[</span>root@zabbix src<span class="token punctuation">]</span><span class="token variable">$rabbitmq</span>-plugins <span class="token builtin class-name">enable</span> rabbitmq_management
-Enabling plugins on <span class="token function">node</span> rabbit@mq1:
-rabbitmq_management
-The following plugins have been configured:
-  rabbitmq_management
-  rabbitmq_management_agent
-  rabbitmq_web_dispatch
-Applying plugin configuration to rabbit@mq1<span class="token punctuation">..</span>.
-The following plugins have been enabled:
-  rabbitmq_management
-  rabbitmq_management_agent
-  rabbitmq_web_dispatch
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@zabbix src]<span class="variable">$which</span> rabbitmq-plugins</span><br><span class="line">/usr/sbin/rabbitmq-plugins</span><br><span class="line">[root@zabbix src]<span class="variable">$rabbitmq</span>-plugins <span class="built_in">enable</span> rabbitmq_management</span><br><span class="line">Enabling plugins on node rabbit@mq1:</span><br><span class="line">rabbitmq_management</span><br><span class="line">The following plugins have been configured:</span><br><span class="line">  rabbitmq_management</span><br><span class="line">  rabbitmq_management_agent</span><br><span class="line">  rabbitmq_web_dispatch</span><br><span class="line">Applying plugin configuration to rabbit@mq1...</span><br><span class="line">The following plugins have been enabled:</span><br><span class="line">  rabbitmq_management</span><br><span class="line">  rabbitmq_management_agent</span><br><span class="line">  rabbitmq_web_dispatch</span><br><span class="line"></span><br><span class="line">started 3 plugins.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5672		消费者访问的 端口</span></span><br><span class="line"><span class="comment"># 15672		web 管理端口</span></span><br><span class="line"><span class="comment"># 25672		集群状态通信端口</span></span><br></pre></td></tr></table></figure>
 
-started <span class="token number">3</span> plugins.
-
-<span class="token comment"># 5672		消费者访问的 端口</span>
-<span class="token comment"># 15672		web 管理端口</span>
-<span class="token comment"># 25672		集群状态通信端口</span></code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_users
-Listing <span class="token function">users</span> <span class="token punctuation">..</span>.
-user    tags
-guest   <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span>		<span class="token comment"># guest是初始化的用户，账号密码都是guest，但是只能使用localhost访问</span>
-
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> add_user ljk <span class="token number">123456</span>	<span class="token comment"># 添加用户</span>
-Adding user <span class="token string">"ljk"</span> <span class="token punctuation">..</span>.
-Done. Don<span class="token string">'t forget to grant the user permissions to some virtual hosts! See '</span>rabbitmqctl <span class="token builtin class-name">help</span> set_permissions' to learn more.
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> set_user_tags ljk administrator	<span class="token comment"># 用户授权</span>
-Setting tags <span class="token keyword">for</span> user <span class="token string">"ljk"</span> to <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span> <span class="token punctuation">..</span>.
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_users
-Listing <span class="token function">users</span> <span class="token punctuation">..</span>.
-user    tags
-ljk     <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span>		<span class="token comment"># 授权成功</span>
-guest   <span class="token punctuation">[</span>administrator<span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> list_users</span><br><span class="line">Listing <span class="built_in">users</span> ...</span><br><span class="line">user    tags</span><br><span class="line">guest   [administrator]		<span class="comment"># guest是初始化的用户，账号密码都是guest，但是只能使用localhost访问</span></span><br><span class="line"></span><br><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> add_user ljk 123456	<span class="comment"># 添加用户</span></span><br><span class="line">Adding user <span class="string">&quot;ljk&quot;</span> ...</span><br><span class="line">Done. Don<span class="string">&#x27;t forget to grant the user permissions to some virtual hosts! See &#x27;</span>rabbitmqctl <span class="built_in">help</span> set_permissions<span class="string">&#x27; to learn more.</span></span><br><span class="line"><span class="string">[root@mq1 ~]$rabbitmqctl set_user_tags ljk administrator	# 用户授权</span></span><br><span class="line"><span class="string">Setting tags for user &quot;ljk&quot; to [administrator] ...</span></span><br><span class="line"><span class="string">[root@mq1 ~]$rabbitmqctl list_users</span></span><br><span class="line"><span class="string">Listing users ...</span></span><br><span class="line"><span class="string">user    tags</span></span><br><span class="line"><span class="string">ljk     [administrator]		# 授权成功</span></span><br><span class="line"><span class="string">guest   [administrator]</span></span><br></pre></td></tr></table></figure>
 
 <p>使用账号 ljk，密码 123456，成功登录 web 管理界面：</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1613882317923.png"></p>
@@ -378,222 +297,60 @@ guest   <span class="token punctuation">[</span>administrator<span class="token 
 </ul>
 <p><strong>推荐设计架构：</strong></p>
 <p>在一个 rabbitmq 集群里，有 3 台或以上机器，其中 1 台使用磁盘模式（数据保存到内存和磁盘），其它节点使用内存模式（数据只保存到内存），使用磁盘模式的节点，作为数据备份使用</p>
-<h3 id="Ubuntu-1804-安装集群版-RabbitMQ"><a href="#Ubuntu-1804-安装集群版-RabbitMQ" class="headerlink" title="Ubuntu 1804 安装集群版 RabbitMQ"></a>Ubuntu 1804 安装集群版 RabbitMQ</h3><pre class="language-none"><code class="language-none">10.0.1.101 mq1.ljk.cn mq1
-10.0.1.102 mq1.ljk.cn mq2
-10.0.1.103 mq1.ljk.cn mq3</code></pre>
+<h3 id="Ubuntu-1804-安装集群版-RabbitMQ"><a href="#Ubuntu-1804-安装集群版-RabbitMQ" class="headerlink" title="Ubuntu 1804 安装集群版 RabbitMQ"></a>Ubuntu 1804 安装集群版 RabbitMQ</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.0.1.101 mq1.ljk.cn mq1</span><br><span class="line">10.0.1.102 mq1.ljk.cn mq2</span><br><span class="line">10.0.1.103 mq1.ljk.cn mq3</span><br></pre></td></tr></table></figure>
 
 <p>Rabbitmq 的集群是依赖于 erlang 的集群来工作的，所以必须先构建起 erlang 的集群环境,而 Erlang 的集群中各节点是通过一个 magic cookie 来实现的，这个 cookie 存放在 &#x2F;var&#x2F;lib&#x2F;rabbitmq&#x2F;.erlang.cookie 中，文件是 400 的权限,所以必须保证各节点 cookie 保持一致，否则节点之间就无法通信</p>
 <ol>
 <li><p>各节点安装 RabbitMQ 并安装插件，参考上面单机部署</p>
 </li>
 <li><p>各服务器关闭 RabbitMQ</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> stop rabbitmq-server.service
-<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> stop rabbitmq-server.service
-<span class="token punctuation">[</span>root@mq3 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> stop rabbitmq-server.service</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$systemctl</span> stop rabbitmq-server.service</span><br><span class="line">[root@mq2 ~]<span class="variable">$systemctl</span> stop rabbitmq-server.service</span><br><span class="line">[root@mq3 ~]<span class="variable">$systemctl</span> stop rabbitmq-server.service</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>在 mq1 同步.erlang.cookie 至其他两台服务器</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /var/lib/rabbitmq/
-<span class="token punctuation">[</span>root@mq1 rabbitmq<span class="token punctuation">]</span><span class="token variable">$scp</span> .erlang.cookie <span class="token number">10.0</span>.1.102:/var/lib/rabbitmq
-<span class="token punctuation">[</span>root@mq1 rabbitmq<span class="token punctuation">]</span><span class="token variable">$scp</span> .erlang.cookie <span class="token number">10.0</span>.1.103:/var/lib/rabbitmq</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$cd</span> /var/lib/rabbitmq/</span><br><span class="line">[root@mq1 rabbitmq]<span class="variable">$scp</span> .erlang.cookie 10.0.1.102:/var/lib/rabbitmq</span><br><span class="line">[root@mq1 rabbitmq]<span class="variable">$scp</span> .erlang.cookie 10.0.1.103:/var/lib/rabbitmq</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>各服务器启动 RabbitMQ</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start rabbitmq-server.service
-<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start rabbitmq-server.service
-<span class="token punctuation">[</span>root@mq3 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start rabbitmq-server.service</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$systemctl</span> start rabbitmq-server.service</span><br><span class="line">[root@mq2 ~]<span class="variable">$systemctl</span> start rabbitmq-server.service</span><br><span class="line">[root@mq3 ~]<span class="variable">$systemctl</span> start rabbitmq-server.service</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>查看当前集群状态</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status
-<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status
-<span class="token punctuation">[</span>root@mq3 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> cluster_status</span><br><span class="line">[root@mq2 ~]<span class="variable">$rabbitmqctl</span> cluster_status</span><br><span class="line">[root@mq3 ~]<span class="variable">$rabbitmqctl</span> cluster_status</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>创建 RabbitMQ 集群：mq1、mq2 作为内存节点，mq3 作为磁盘节点</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> stop_app 	<span class="token comment">#停止 app 服务</span>
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> reset 		<span class="token comment">#清空元数据</span>
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> join_cluster rabbit@mq3 <span class="token parameter variable">--ram</span> 	<span class="token comment">#将mq1添加到集群中，并成为内存节点，不加--ram默认是磁盘节点</span>
-<span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> start_app	<span class="token comment">#启动 app 服务</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> stop_app 	<span class="comment">#停止 app 服务</span></span><br><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> reset 		<span class="comment">#清空元数据</span></span><br><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> join_cluster rabbit@mq3 --ram 	<span class="comment">#将mq1添加到集群中，并成为内存节点，不加--ram默认是磁盘节点</span></span><br><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> start_app	<span class="comment">#启动 app 服务</span></span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> stop_app
-<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> reset
-<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> join_cluster rabbit@mq3 <span class="token parameter variable">--ram</span>
-<span class="token punctuation">[</span>root@mq2 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> start_app</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@mq2 ~]<span class="variable">$rabbitmqctl</span> stop_app</span><br><span class="line">[root@mq2 ~]<span class="variable">$rabbitmqctl</span> reset</span><br><span class="line">[root@mq2 ~]<span class="variable">$rabbitmqctl</span> join_cluster rabbit@mq3 --ram</span><br><span class="line">[root@mq2 ~]<span class="variable">$rabbitmqctl</span> start_app</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>将集群设置为镜像模式，任意节点执行以下命令</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> set_policy ha-all <span class="token string">"#"</span> <span class="token string">'&#123;"ha-mode":"all"&#125;'</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> set_policy ha-all <span class="string">&quot;#&quot;</span> <span class="string">&#x27;&#123;&quot;ha-mode&quot;:&quot;all&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>查看集群状态</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> cluster_status
-Cluster status of <span class="token function">node</span> rabbit@mq1 <span class="token punctuation">..</span>.
-Basics
-
-Cluster name: rabbit@mq3.ljk.cn
-
-Disk Nodes
-
-rabbit@mq3
-
-RAM Nodes
-
-rabbit@mq1
-rabbit@mq2
-
-Running Nodes
-
-rabbit@mq1
-rabbit@mq2
-rabbit@mq3
-
-Versions
-
-rabbit@mq1: RabbitMQ <span class="token number">3.8</span>.12 on Erlang <span class="token number">23.2</span>.5
-rabbit@mq2: RabbitMQ <span class="token number">3.8</span>.12 on Erlang <span class="token number">23.2</span>.5
-rabbit@mq3: RabbitMQ <span class="token number">3.8</span>.12 on Erlang <span class="token number">23.2</span>.5
-
-Maintenance status
-
-Node: rabbit@mq1, status: not under maintenance
-Node: rabbit@mq2, status: not under maintenance
-Node: rabbit@mq3, status: not under maintenance
-
-Alarms
-
-<span class="token punctuation">(</span>none<span class="token punctuation">)</span>
-
-Network Partitions
-
-<span class="token punctuation">(</span>none<span class="token punctuation">)</span>
-
-Listeners
-
-Node: rabbit@mq1, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">15672</span>, protocol: http, purpose: HTTP API
-Node: rabbit@mq1, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">25672</span>, protocol: clustering, purpose: inter-node and CLI tool communication
-Node: rabbit@mq1, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">5672</span>, protocol: amqp, purpose: AMQP <span class="token number">0</span>-9-1 and AMQP <span class="token number">1.0</span>
-Node: rabbit@mq2, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">25672</span>, protocol: clustering, purpose: inter-node and CLI tool communication
-Node: rabbit@mq2, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">5672</span>, protocol: amqp, purpose: AMQP <span class="token number">0</span>-9-1 and AMQP <span class="token number">1.0</span>
-Node: rabbit@mq2, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">15672</span>, protocol: http, purpose: HTTP API
-Node: rabbit@mq3, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">25672</span>, protocol: clustering, purpose: inter-node and CLI tool communication
-Node: rabbit@mq3, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">5672</span>, protocol: amqp, purpose: AMQP <span class="token number">0</span>-9-1 and AMQP <span class="token number">1.0</span>
-Node: rabbit@mq3, interface: <span class="token punctuation">[</span>::<span class="token punctuation">]</span>, port: <span class="token number">15672</span>, protocol: http, purpose: HTTP API
-
-Feature flags
-
-Flag: drop_unroutable_metric, state: enabled
-Flag: empty_basic_get_metric, state: enabled
-Flag: implicit_default_bindings, state: enabled
-Flag: maintenance_mode_status, state: enabled
-Flag: quorum_queue, state: enabled
-Flag: user_limits, state: enabled
-Flag: virtual_host_metadata, state: enabled</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> cluster_status</span><br><span class="line">Cluster status of node rabbit@mq1 ...</span><br><span class="line">Basics</span><br><span class="line"></span><br><span class="line">Cluster name: rabbit@mq3.ljk.cn</span><br><span class="line"></span><br><span class="line">Disk Nodes</span><br><span class="line"></span><br><span class="line">rabbit@mq3</span><br><span class="line"></span><br><span class="line">RAM Nodes</span><br><span class="line"></span><br><span class="line">rabbit@mq1</span><br><span class="line">rabbit@mq2</span><br><span class="line"></span><br><span class="line">Running Nodes</span><br><span class="line"></span><br><span class="line">rabbit@mq1</span><br><span class="line">rabbit@mq2</span><br><span class="line">rabbit@mq3</span><br><span class="line"></span><br><span class="line">Versions</span><br><span class="line"></span><br><span class="line">rabbit@mq1: RabbitMQ 3.8.12 on Erlang 23.2.5</span><br><span class="line">rabbit@mq2: RabbitMQ 3.8.12 on Erlang 23.2.5</span><br><span class="line">rabbit@mq3: RabbitMQ 3.8.12 on Erlang 23.2.5</span><br><span class="line"></span><br><span class="line">Maintenance status</span><br><span class="line"></span><br><span class="line">Node: rabbit@mq1, status: not under maintenance</span><br><span class="line">Node: rabbit@mq2, status: not under maintenance</span><br><span class="line">Node: rabbit@mq3, status: not under maintenance</span><br><span class="line"></span><br><span class="line">Alarms</span><br><span class="line"></span><br><span class="line">(none)</span><br><span class="line"></span><br><span class="line">Network Partitions</span><br><span class="line"></span><br><span class="line">(none)</span><br><span class="line"></span><br><span class="line">Listeners</span><br><span class="line"></span><br><span class="line">Node: rabbit@mq1, interface: [::], port: 15672, protocol: http, purpose: HTTP API</span><br><span class="line">Node: rabbit@mq1, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication</span><br><span class="line">Node: rabbit@mq1, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0</span><br><span class="line">Node: rabbit@mq2, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication</span><br><span class="line">Node: rabbit@mq2, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0</span><br><span class="line">Node: rabbit@mq2, interface: [::], port: 15672, protocol: http, purpose: HTTP API</span><br><span class="line">Node: rabbit@mq3, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication</span><br><span class="line">Node: rabbit@mq3, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0</span><br><span class="line">Node: rabbit@mq3, interface: [::], port: 15672, protocol: http, purpose: HTTP API</span><br><span class="line"></span><br><span class="line">Feature flags</span><br><span class="line"></span><br><span class="line">Flag: drop_unroutable_metric, state: enabled</span><br><span class="line">Flag: empty_basic_get_metric, state: enabled</span><br><span class="line">Flag: implicit_default_bindings, state: enabled</span><br><span class="line">Flag: maintenance_mode_status, state: enabled</span><br><span class="line">Flag: quorum_queue, state: enabled</span><br><span class="line">Flag: user_limits, state: enabled</span><br><span class="line">Flag: virtual_host_metadata, state: enabled</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h2 id="RabbitMQ-常用命令"><a href="#RabbitMQ-常用命令" class="headerlink" title="RabbitMQ 常用命令"></a>RabbitMQ 常用命令</h2><ul>
 <li><p>创建 vhost</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> add_vhost <span class="token builtin class-name">test</span>
-Adding vhost <span class="token string">"test"</span> <span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> add_vhost <span class="built_in">test</span></span><br><span class="line">Adding vhost <span class="string">&quot;test&quot;</span> ...</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>列出所有 vhost</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_vhosts
-Listing vhosts <span class="token punctuation">..</span>.
-name
-/
-<span class="token builtin class-name">test</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> list_vhosts</span><br><span class="line">Listing vhosts ...</span><br><span class="line">name</span><br><span class="line">/</span><br><span class="line"><span class="built_in">test</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>列出所有队列</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> list_queues
-Timeout: <span class="token number">60.0</span> seconds <span class="token punctuation">..</span>.
-Listing queues <span class="token keyword">for</span> vhost / <span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> list_queues</span><br><span class="line">Timeout: 60.0 seconds ...</span><br><span class="line">Listing queues <span class="keyword">for</span> vhost / ...</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>删除指定 vhost</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> delete_vhost <span class="token builtin class-name">test</span>
-Deleting vhost <span class="token string">"test"</span> <span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> delete_vhost <span class="built_in">test</span></span><br><span class="line">Deleting vhost <span class="string">&quot;test&quot;</span> ...</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>添加账户 jack 密码为 123456</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> add_user jack <span class="token number">123456</span>
-Adding user <span class="token string">"jack"</span> <span class="token punctuation">..</span>.
-Done. Don<span class="token string">'t forget to grant the user permissions to some virtual hosts! See '</span>rabbitmqctl <span class="token builtin class-name">help</span> set_permissions' to learn more.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> add_user jack 123456</span><br><span class="line">Adding user <span class="string">&quot;jack&quot;</span> ...</span><br><span class="line">Done. Don<span class="string">&#x27;t forget to grant the user permissions to some virtual hosts! See &#x27;</span>rabbitmqctl <span class="built_in">help</span> set_permissions<span class="string">&#x27; to learn more.</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>更改用户密码</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> change_password jack <span class="token number">654321</span>
-Changing password <span class="token keyword">for</span> user <span class="token string">"jack"</span> <span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> change_password jack 654321</span><br><span class="line">Changing password <span class="keyword">for</span> user <span class="string">&quot;jack&quot;</span> ...</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>设置 jack 用户对 test 的 vhost 有读写权限，三个点为配置正则、读和写</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@mq1 ~<span class="token punctuation">]</span><span class="token variable">$rabbitmqctl</span> set_permissions <span class="token parameter variable">-p</span> <span class="token builtin class-name">test</span> jack <span class="token string">".*"</span> <span class="token string">".*"</span> <span class="token string">".*"</span></code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mq1 ~]<span class="variable">$rabbitmqctl</span> set_permissions -p <span class="built_in">test</span> jack <span class="string">&quot;.*&quot;</span> <span class="string">&quot;.*&quot;</span> <span class="string">&quot;.*&quot;</span></span><br></pre></td></tr></table></figure></li>
 </ul>
-<h2 id="RabbitMQ-API"><a href="#RabbitMQ-API" class="headerlink" title="RabbitMQ API"></a>RabbitMQ API</h2><h2 id="RabbitMQ-Cluster-Monitor"><a href="#RabbitMQ-Cluster-Monitor" class="headerlink" title="RabbitMQ Cluster Monitor"></a>RabbitMQ Cluster Monitor</h2><h3 id="集群状态监控"><a href="#集群状态监控" class="headerlink" title="集群状态监控"></a>集群状态监控</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/env python</span>
-<span class="token comment"># coding:utf-8</span>
-<span class="token comment">#Author: ZhangJie</span>
-<span class="token function">import</span> subprocess
+<h2 id="RabbitMQ-API"><a href="#RabbitMQ-API" class="headerlink" title="RabbitMQ API"></a>RabbitMQ API</h2><h2 id="RabbitMQ-Cluster-Monitor"><a href="#RabbitMQ-Cluster-Monitor" class="headerlink" title="RabbitMQ Cluster Monitor"></a>RabbitMQ Cluster Monitor</h2><h3 id="集群状态监控"><a href="#集群状态监控" class="headerlink" title="集群状态监控"></a>集群状态监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/env python</span></span><br><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"><span class="comment">#Author: ZhangJie</span></span><br><span class="line">import subprocess</span><br><span class="line"></span><br><span class="line">running_list = []</span><br><span class="line">error_list = []</span><br><span class="line"><span class="literal">false</span> = <span class="string">&quot;false&quot;</span></span><br><span class="line"><span class="literal">true</span> = <span class="string">&quot;true&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def get_status():</span><br><span class="line">    obj = subprocess.Popen(</span><br><span class="line">        (<span class="string">&quot;curl - s - u guest: guest http: // localhost: 15672/api/nodes &amp; &gt; / dev/null&quot;</span>), shell=True, stdout=subprocess.PIPE)</span><br><span class="line"></span><br><span class="line">    data = obj.stdout.read()</span><br><span class="line">    data1 = <span class="built_in">eval</span>(data)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> data1:</span><br><span class="line">        <span class="keyword">if</span> i.get(<span class="string">&quot;running&quot;</span>) == <span class="string">&quot;true&quot;</span>:</span><br><span class="line">            running_list.append(i.get(<span class="string">&quot;name&quot;</span>))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            error_list.append(i.get(<span class="string">&quot;name&quot;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def count_server():</span><br><span class="line">    <span class="keyword">if</span> len(running_list) &lt; 3:   <span class="comment"># 可以判断错误列表大于 0 或者运行列表小于 3，3未总计的节点数量</span></span><br><span class="line">        <span class="built_in">print</span>(101)              <span class="comment"># 100 就是集群内有节点运行不正常了</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(50)               <span class="comment"># 50 为所有节点全部运行正常</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    get_status()</span><br><span class="line">    count_server()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
 
-running_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-error_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-<span class="token boolean">false</span> <span class="token operator">=</span> <span class="token string">"false"</span>
-<span class="token boolean">true</span> <span class="token operator">=</span> <span class="token string">"true"</span>
-
-
-def get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>:
-    obj <span class="token operator">=</span> subprocess.Popen<span class="token punctuation">(</span>
-        <span class="token punctuation">(</span><span class="token string">"curl - s - u guest: guest http: // localhost: 15672/api/nodes &amp; > / dev/null"</span><span class="token punctuation">)</span>, <span class="token assign-left variable">shell</span><span class="token operator">=</span>True, <span class="token assign-left variable">stdout</span><span class="token operator">=</span>subprocess.PIPE<span class="token punctuation">)</span>
-
-    data <span class="token operator">=</span> obj.stdout.read<span class="token punctuation">(</span><span class="token punctuation">)</span>
-    data1 <span class="token operator">=</span> eval<span class="token punctuation">(</span>data<span class="token punctuation">)</span>
-    <span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> data1:
-        <span class="token keyword">if</span> i.get<span class="token punctuation">(</span><span class="token string">"running"</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">"true"</span><span class="token builtin class-name">:</span>
-            running_list.append<span class="token punctuation">(</span>i.get<span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">))</span>
-        else:
-            error_list.append<span class="token punctuation">(</span>i.get<span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">))</span>
-
-
-def count_server<span class="token punctuation">(</span><span class="token punctuation">)</span>:
-    <span class="token keyword">if</span> len<span class="token punctuation">(</span>running_list<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">3</span>:   <span class="token comment"># 可以判断错误列表大于 0 或者运行列表小于 3，3未总计的节点数量</span>
-        print<span class="token punctuation">(</span><span class="token number">101</span><span class="token punctuation">)</span>              <span class="token comment"># 100 就是集群内有节点运行不正常了</span>
-    else:
-        print<span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span>               <span class="token comment"># 50 为所有节点全部运行正常</span>
-
-
-def main<span class="token punctuation">(</span><span class="token punctuation">)</span>:
-    get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>
-    count_server<span class="token punctuation">(</span><span class="token punctuation">)</span>
-
-
-<span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">"__main__"</span><span class="token builtin class-name">:</span>
-    main<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre>
-
-<h3 id="内存使用监控"><a href="#内存使用监控" class="headerlink" title="内存使用监控"></a>内存使用监控</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cat rabbitmq_memory.py</span>
-<span class="token comment">#!/bin/env python</span>
-<span class="token comment"># coding:utf-8</span>
-<span class="token comment">#Author: ZhangJie</span>
-<span class="token function">import</span> subprocess
-<span class="token function">import</span> sys
-
-running_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-error_list <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-<span class="token boolean">false</span> <span class="token operator">=</span> <span class="token string">"false"</span>
-<span class="token boolean">true</span> <span class="token operator">=</span> <span class="token string">"true"</span>
-
-
-def get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>:
-    obj <span class="token operator">=</span> subprocess.Popen<span class="token punctuation">(</span>
-        <span class="token punctuation">(</span><span class="token string">"curl - s - u guest: guest http: // localhost: 15672/api/nodes &amp; > / dev/null"</span><span class="token punctuation">)</span>, <span class="token assign-left variable">shell</span><span class="token operator">=</span>True, <span class="token assign-left variable">stdout</span><span class="token operator">=</span>subprocess.PIPE<span class="token punctuation">)</span>
-
-    data <span class="token operator">=</span> obj.stdout.read<span class="token punctuation">(</span><span class="token punctuation">)</span>
-    data1 <span class="token operator">=</span> eval<span class="token punctuation">(</span>data<span class="token punctuation">)</span>
-    <span class="token comment"># print(data1)</span>
-    <span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> data1:
-        <span class="token keyword">if</span> i.get<span class="token punctuation">(</span><span class="token string">"name"</span><span class="token punctuation">)</span> <span class="token operator">==</span> sys.argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>:
-            print<span class="token punctuation">(</span>i.get<span class="token punctuation">(</span><span class="token string">"mem_used"</span><span class="token punctuation">))</span>
-
-
-def main<span class="token punctuation">(</span><span class="token punctuation">)</span>:
-    get_status<span class="token punctuation">(</span><span class="token punctuation">)</span>
-
-
-<span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">"__main__"</span><span class="token builtin class-name">:</span>
-    main<span class="token punctuation">(</span><span class="token punctuation">)</span>
-
-root@mq-server3: ~  <span class="token comment"># python3 rabbitmq_memory.py rabbit@mq-server1</span>
-<span class="token number">85774336</span>
-root@mq-server3: ~  <span class="token comment"># python3 rabbitmq_memory.py rabbit@mq-server2</span>
-<span class="token number">91099136</span>
-root@mq-server3: ~  <span class="token comment"># python3 rabbitmq_memory.py rabbit@mq-server3</span>
-<span class="token number">96428032</span></code></pre>
+<h3 id="内存使用监控"><a href="#内存使用监控" class="headerlink" title="内存使用监控"></a>内存使用监控</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat rabbitmq_memory.py</span></span><br><span class="line"><span class="comment">#!/bin/env python</span></span><br><span class="line"><span class="comment"># coding:utf-8</span></span><br><span class="line"><span class="comment">#Author: ZhangJie</span></span><br><span class="line">import subprocess</span><br><span class="line">import sys</span><br><span class="line"></span><br><span class="line">running_list = []</span><br><span class="line">error_list = []</span><br><span class="line"><span class="literal">false</span> = <span class="string">&quot;false&quot;</span></span><br><span class="line"><span class="literal">true</span> = <span class="string">&quot;true&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def get_status():</span><br><span class="line">    obj = subprocess.Popen(</span><br><span class="line">        (<span class="string">&quot;curl - s - u guest: guest http: // localhost: 15672/api/nodes &amp; &gt; / dev/null&quot;</span>), shell=True, stdout=subprocess.PIPE)</span><br><span class="line"></span><br><span class="line">    data = obj.stdout.read()</span><br><span class="line">    data1 = <span class="built_in">eval</span>(data)</span><br><span class="line">    <span class="comment"># print(data1)</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> data1:</span><br><span class="line">        <span class="keyword">if</span> i.get(<span class="string">&quot;name&quot;</span>) == sys.argv[1]:</span><br><span class="line">            <span class="built_in">print</span>(i.get(<span class="string">&quot;mem_used&quot;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    get_status()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br><span class="line"></span><br><span class="line">root@mq-server3: ~  <span class="comment"># python3 rabbitmq_memory.py rabbit@mq-server1</span></span><br><span class="line">85774336</span><br><span class="line">root@mq-server3: ~  <span class="comment"># python3 rabbitmq_memory.py rabbit@mq-server2</span></span><br><span class="line">91099136</span><br><span class="line">root@mq-server3: ~  <span class="comment"># python3 rabbitmq_memory.py rabbit@mq-server3</span></span><br><span class="line">96428032</span><br></pre></td></tr></table></figure>
 
     </div>
 

@@ -274,39 +274,10 @@
 <p>进程都在<code>/proc/</code>目录下，例如有不明进程 724 占用 CPU 过高，可以<code>cat /dev/null &gt; /proc/724/exe</code>先清空进程，然后再排查问题，不直接 kill 是怕这个进程是木马程序，kill 掉还会重启。</p>
 <p>进程都是由父进程创建，使用 fork()函数创建子进程。fork（）会产生一个和父进程完全相同的子进程，只有进程空间的各段的内容要发生变化时，才会将父进程的内容复制一份给子进程。这种机制就叫<strong>写时复制</strong>。</p>
 <p>写时复制在 php 中的应用：</p>
-<pre class="language-php" data-language="php"><code class="language-php"><span class="token variable">$a</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'this is string'</span><span class="token punctuation">;</span>
-<span class="token variable">$b</span> <span class="token operator">=</span> <span class="token variable">$a</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$a</span> = <span class="string">&#x27;this is string&#x27;</span>;</span><br><span class="line"><span class="variable">$b</span> = <span class="variable">$a</span>;</span><br></pre></td></tr></table></figure>
 
 <p>此时,$a和$b 在内存中指向同一地址, 当修改$a或者$b 的时候, 才会复制一份, 然后对复制的这份进行修改。</p>
-<pre class="language-c" data-language="c"><code class="language-c"><span class="token number">146</span> <span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_refcounted_h</span> <span class="token punctuation">&#123;</span>
-<span class="token number">147</span>     <span class="token class-name">uint32_t</span>         refcount<span class="token punctuation">;</span>          <span class="token comment">/* reference counter 32-bit
-148     php7.1中常量字符串refcount=0，依靠u来标记常量，在7.3中已经改掉了*/</span>
-<span class="token number">149</span>     <span class="token keyword">union</span> <span class="token punctuation">&#123;</span>
-<span class="token number">150</span>         <span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
-<span class="token number">151</span>             <span class="token function">ZEND_ENDIAN_LOHI_3</span><span class="token punctuation">(</span>
-<span class="token number">152</span>                 zend_uchar    type<span class="token punctuation">,</span>
-<span class="token number">153</span>                 zend_uchar    flags<span class="token punctuation">,</span>    <span class="token comment">/* used for strings &amp; objects
-154                 存储字符串的类型，例如：常量字符串2，变量字符串0 */</span>
-<span class="token number">155</span>                 <span class="token class-name">uint16_t</span>      gc_info<span class="token punctuation">)</span>  <span class="token comment">/* keeps GC root number (or 0) and color */</span>
-<span class="token number">156</span>         <span class="token punctuation">&#125;</span> v<span class="token punctuation">;</span>
-<span class="token number">157</span>         <span class="token class-name">uint32_t</span> type_info<span class="token punctuation">;</span>
-<span class="token number">158</span>     <span class="token punctuation">&#125;</span> u<span class="token punctuation">;</span>
-<span class="token number">159</span> <span class="token punctuation">&#125;</span> zend_refcounted_h<span class="token punctuation">;</span>
-<span class="token number">160</span>
-<span class="token number">161</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_refcounted</span> <span class="token punctuation">&#123;</span>
-<span class="token number">162</span>     zend_refcounted_h gc<span class="token punctuation">;</span>
-<span class="token number">163</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-<span class="token number">165</span> <span class="token comment">// 写时复制：对于整型或者其他简单类型的，因为zval 16个字节就可以表示了，所以是直接复制的</span>
-<span class="token number">166</span> <span class="token comment">// 而对于zend_string, `$a = 'string'; $b = $a;` $a和$b的zval指向的是同一个zend_string,用zend_string中的</span>
-<span class="token number">167</span> <span class="token comment">// gc中的refcount进行标记，2，表示这个zeng_string被两个zval引用了，当我们修改$b的时候，就是修改$b指向的zval，</span>
-<span class="token number">168</span> <span class="token comment">// $b指向zval的地址没变，但是zval的内容变了</span>
-<span class="token number">169</span> <span class="token comment">// 同时原先的zend_string的gc也会修改，refcount减1</span>
-<span class="token number">170</span> <span class="token keyword">struct</span> <span class="token class-name">_zend_string</span> <span class="token punctuation">&#123;</span>
-<span class="token number">171</span>     zend_refcounted_h gc<span class="token punctuation">;</span>
-<span class="token number">172</span>     zend_ulong        h<span class="token punctuation">;</span>                <span class="token comment">/* hash value 以空间换时间 */</span>
-<span class="token number">173</span>     <span class="token class-name">size_t</span>            len<span class="token punctuation">;</span>
-<span class="token number">174</span>     <span class="token keyword">char</span>              val<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>   <span class="token comment">// 柔性数组一定放在结构体的尾部</span>
-<span class="token number">175</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">146</span> <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">zend_refcounted_h</span> &#123;</span></span><br><span class="line"><span class="number">147</span>     <span class="type">uint32_t</span>         refcount;          <span class="comment">/* reference counter 32-bit</span></span><br><span class="line"><span class="comment">148     php7.1中常量字符串refcount=0，依靠u来标记常量，在7.3中已经改掉了*/</span></span><br><span class="line"><span class="number">149</span>     <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line"><span class="number">150</span>         <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line"><span class="number">151</span>             ZEND_ENDIAN_LOHI_3(</span><br><span class="line"><span class="number">152</span>                 zend_uchar    type,</span><br><span class="line"><span class="number">153</span>                 zend_uchar    flags,    <span class="comment">/* used for strings &amp; objects</span></span><br><span class="line"><span class="comment">154                 存储字符串的类型，例如：常量字符串2，变量字符串0 */</span></span><br><span class="line"><span class="number">155</span>                 <span class="type">uint16_t</span>      gc_info)  <span class="comment">/* keeps GC root number (or 0) and color */</span></span><br><span class="line"><span class="number">156</span>         &#125; v;</span><br><span class="line"><span class="number">157</span>         <span class="type">uint32_t</span> type_info;</span><br><span class="line"><span class="number">158</span>     &#125; u;</span><br><span class="line"><span class="number">159</span> &#125; zend_refcounted_h;</span><br><span class="line"><span class="number">160</span></span><br><span class="line"><span class="number">161</span> <span class="class"><span class="keyword">struct</span> _<span class="title">zend_refcounted</span> &#123;</span></span><br><span class="line"><span class="number">162</span>     zend_refcounted_h gc;</span><br><span class="line"><span class="number">163</span> &#125;;</span><br><span class="line"><span class="number">165</span> <span class="comment">// 写时复制：对于整型或者其他简单类型的，因为zval 16个字节就可以表示了，所以是直接复制的</span></span><br><span class="line"><span class="number">166</span> <span class="comment">// 而对于zend_string, `$a = &#x27;string&#x27;; $b = $a;` $a和$b的zval指向的是同一个zend_string,用zend_string中的</span></span><br><span class="line"><span class="number">167</span> <span class="comment">// gc中的refcount进行标记，2，表示这个zeng_string被两个zval引用了，当我们修改$b的时候，就是修改$b指向的zval，</span></span><br><span class="line"><span class="number">168</span> <span class="comment">// $b指向zval的地址没变，但是zval的内容变了</span></span><br><span class="line"><span class="number">169</span> <span class="comment">// 同时原先的zend_string的gc也会修改，refcount减1</span></span><br><span class="line"><span class="number">170</span> <span class="class"><span class="keyword">struct</span> _<span class="title">zend_string</span> &#123;</span></span><br><span class="line"><span class="number">171</span>     zend_refcounted_h gc;</span><br><span class="line"><span class="number">172</span>     zend_ulong        h;                <span class="comment">/* hash value 以空间换时间 */</span></span><br><span class="line"><span class="number">173</span>     <span class="type">size_t</span>            len;</span><br><span class="line"><span class="number">174</span>     <span class="type">char</span>              val[<span class="number">1</span>];   <span class="comment">// 柔性数组一定放在结构体的尾部</span></span><br><span class="line"><span class="number">175</span> &#125;;</span><br></pre></td></tr></table></figure>
 
 <h3 id="进程结构"><a href="#进程结构" class="headerlink" title="进程结构"></a>进程结构</h3><p>内核把进程存放在任务队列中，任务队列是双向循环链表结构。</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1598441043167.png"></p>
@@ -333,21 +304,15 @@
 <li>多进程、线程根据 cpu 核数不一样可能是并行的，但是协程是在一个线程中，所以肯定是并发</li>
 </ol>
 <h3 id="进程相关概念"><a href="#进程相关概念" class="headerlink" title="进程相关概念"></a>进程相关概念</h3><p>进程运行在内存中，所以有必要了解一下内存。磁盘给文件分配空间的最小单位是块，一般是 4K，内存给进程分配空间的最小单位是<strong>页</strong>，又叫<strong>页框</strong>，大小也是 4K</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 kernels<span class="token punctuation">]</span><span class="token comment"># getconf -a | grep -i size</span>
-<span class="token punctuation">..</span>.
-PAGE_SIZE                           <span class="token number">4096</span>
-<span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 kernels]<span class="comment"># getconf -a | grep -i size</span></span><br><span class="line">...</span><br><span class="line">PAGE_SIZE                           4096</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <p>getconf 命令可以查看系统参数。比如 系统位数、页面大小等。-a 获取所有系统参数信息。</p>
 <p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 kernels<span class="token punctuation">]</span><span class="token comment"># getconf LONG_BIT</span>
-<span class="token number">64</span>
-<span class="token punctuation">[</span>root@centos7 kernels<span class="token punctuation">]</span><span class="token comment"># getconf PAGE_SIZE</span>
-<span class="token number">4096</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 kernels]<span class="comment"># getconf LONG_BIT</span></span><br><span class="line">64</span><br><span class="line">[root@centos7 kernels]<span class="comment"># getconf PAGE_SIZE</span></span><br><span class="line">4096</span><br></pre></td></tr></table></figure>
 
 <h4 id="物理地址空间和虚拟地址空间"><a href="#物理地址空间和虚拟地址空间" class="headerlink" title="物理地址空间和虚拟地址空间"></a>物理地址空间和虚拟地址空间</h4><p>物理地址空间：你插了两根 8G 的内存条，就有 16G 的物理地址空间。</p>
 <p>虚拟地址空间 和 交换空间 swap 没有关系，是进程“需要的”虚拟内存大小，包括进程使用的库、代码、数据，以及 malloc、new 分配的堆空间和分配的栈空间等。假如进程申请 100m 的内存，但实际上只使用 了 10m，那么它会增长 100m，而不是实际的使用量。现代操作系统里面分配虚拟地址空间操作不同于分配物理内存。在 64 位操作系统上，可用的最大虚拟地址空间有 16EB，即大概 180 亿 GB。那么在一台只有 16G 的物理内存的机器上，也可以要求获得 4TB 的地址空间以备将来使用：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">void *mem <span class="token operator">=</span> mmap<span class="token punctuation">(</span><span class="token number">0</span>, 4ul * 1024ul * 1024ul * 1024ul * 1024ul, PROT_READ <span class="token operator">|</span> PROT_WRITE, MAP_PRIVATE <span class="token operator">|</span> MAP_ANONYMOUS <span class="token operator">|</span> MAP_NORESERVE, -1, <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">void *mem = mmap(0, 4ul * 1024ul * 1024ul * 1024ul * 1024ul, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE, -1, 0);</span><br></pre></td></tr></table></figure>
 
 <p>当使用 mmap 并设置 MAP_NORESERVE 标志时，并不会要求实际的物理内存和 swap 空间存在。执行上述代码，可以在 top 中看到使用了 4096g 的 VIRT 虚拟内存，这当然不是真实的内存，它只是表示使用了 4096GB 的地址空间而已。</p>
 <p>一般来说不用太在意 VIRT 太高，因为你有 16EB 的空间可以使用。</p>
@@ -383,7 +348,7 @@ PAGE_SIZE                           <span class="token number">4096</span>
 <h5 id="内存溢出：Memory-Overflow"><a href="#内存溢出：Memory-Overflow" class="headerlink" title="内存溢出：Memory Overflow"></a>内存溢出：Memory Overflow</h5><p>指程序申请了 10M 的空间，但是在这个空间写入 10M 以上字节的数据，就是溢出</p>
 <h5 id="内存不足：OOM"><a href="#内存不足：OOM" class="headerlink" title="内存不足：OOM"></a>内存不足：OOM</h5><p>OOM 即 Out Of Memory，“内存用完了”,在情况在 java 程序中比较常见。</p>
 <p>在日志 messages 中看到类似下面的提示：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">Jul <span class="token number">10</span> <span class="token number">10</span>:20:30 kernel: Out of memory: Kill process <span class="token number">9527</span> <span class="token punctuation">(</span>java<span class="token punctuation">)</span> score <span class="token number">88</span> or sacrifice child</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jul 10 10:20:30 kernel: Out of memory: Kill process 9527 (java) score 88 or sacrifice child</span><br></pre></td></tr></table></figure>
 
 <p>当 JVM 因为没有足够的内存来为对象分配空间并且垃圾回收器也已经没有空间可回收时，就会选一个进程杀掉。</p>
 <p>导致原因：</p>
@@ -392,9 +357,7 @@ PAGE_SIZE                           <span class="token number">4096</span>
 <li>内存泄露和内存溢出导致内存不够用</li>
 </ul>
 <p>相关内核参数：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token number">2</span> <span class="token operator">></span> /proc/sys/vm/overcommit_memory
-<span class="token builtin class-name">echo</span> <span class="token number">80</span> <span class="token operator">></span> /proc/sys/vm/overcommit_ratio
-<span class="token builtin class-name">echo</span> <span class="token number">2</span> <span class="token operator">></span> /proc/sys/vm/panic_on_oom</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 2 &gt; /proc/sys/vm/overcommit_memory</span><br><span class="line"><span class="built_in">echo</span> 80 &gt; /proc/sys/vm/overcommit_ratio</span><br><span class="line"><span class="built_in">echo</span> 2 &gt; /proc/sys/vm/panic_on_oom</span><br></pre></td></tr></table></figure>
 
 <p>Linux 默认是允许 memory overcommit 的，只要你来申请内存我就给你，寄希望于进程实际上用不到那么多内存，但万一用到那么多了呢？Linux 设计了一个 OOM killer 机制挑选一个进程出来杀死，以腾出部分内存，如果还不够就继续。也可通过设置内核参数 vm.panic_on_oom 使得发生 OOM 时自动重启系统。这都是有风险的机制，重启有可能造成业务中断，杀死进程也有可能导致业务中断。所以 Linux<br>2.6 之后允许通过内核参数 vm.overcommit_memory 禁止 memory overcommit。</p>
 <ul>
@@ -442,16 +405,9 @@ PAGE_SIZE                           <span class="token number">4096</span>
 </ul>
 </li>
 </ul>
-<h3 id="LRU-算法"><a href="#LRU-算法" class="headerlink" title="LRU 算法"></a>LRU 算法</h3><h3 id="IPC-进程间通信"><a href="#IPC-进程间通信" class="headerlink" title="IPC 进程间通信"></a>IPC 进程间通信</h3><h4 id="同一主机"><a href="#同一主机" class="headerlink" title="同一主机"></a>同一主机</h4><pre class="language-none"><code class="language-none">pipe	管道，单向传输
-socket	套接字文件
-Memory-maped file	文件映射,将文件中的一段数据映射到物理内存，多个进程共享这片内存
-shm shared memory	共享内存
-signal	信号
-Lock	对资源上锁，如果资源已被某进程锁住，则其它进程想修改甚至读取这些资源，都将被阻塞，直到锁被打开
-semaphore	信号量，一种计数器</code></pre>
+<h3 id="LRU-算法"><a href="#LRU-算法" class="headerlink" title="LRU 算法"></a>LRU 算法</h3><h3 id="IPC-进程间通信"><a href="#IPC-进程间通信" class="headerlink" title="IPC 进程间通信"></a>IPC 进程间通信</h3><h4 id="同一主机"><a href="#同一主机" class="headerlink" title="同一主机"></a>同一主机</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pipe	管道，单向传输</span><br><span class="line">socket	套接字文件</span><br><span class="line">Memory-maped file	文件映射,将文件中的一段数据映射到物理内存，多个进程共享这片内存</span><br><span class="line">shm shared memory	共享内存</span><br><span class="line">signal	信号</span><br><span class="line">Lock	对资源上锁，如果资源已被某进程锁住，则其它进程想修改甚至读取这些资源，都将被阻塞，直到锁被打开</span><br><span class="line">semaphore	信号量，一种计数器</span><br></pre></td></tr></table></figure>
 
-<h4 id="不同主机：socket-x3D-ip-port"><a href="#不同主机：socket-x3D-ip-port" class="headerlink" title="不同主机：socket&#x3D;ip:port"></a>不同主机：socket&#x3D;ip:port</h4><pre class="language-none"><code class="language-none">RPC	remote procedure call
-MQ	消息队列，生产者和消费者，如：kafka、RabbitMQ，ActiveMQ</code></pre>
+<h4 id="不同主机：socket-x3D-ip-port"><a href="#不同主机：socket-x3D-ip-port" class="headerlink" title="不同主机：socket&#x3D;ip:port"></a>不同主机：socket&#x3D;ip:port</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RPC	remote procedure call</span><br><span class="line">MQ	消息队列，生产者和消费者，如：kafka、RabbitMQ，ActiveMQ</span><br></pre></td></tr></table></figure>
 
 <h3 id="进程优先级"><a href="#进程优先级" class="headerlink" title="进程优先级"></a>进程优先级</h3><img data-src="//img.to2b.cn/blog/ljk/1598495063607.png" style="zoom:80%;" />
 

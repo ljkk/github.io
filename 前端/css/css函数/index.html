@@ -313,24 +313,14 @@
 <p>相对来说，计算相关的函数其实兼容性一般，对于个人项目或移动端项目可以做尝试</p>
 </blockquote>
 <h3 id="min-取最小值"><a href="#min-取最小值" class="headerlink" title="min() 取最小值"></a>min() 取最小值</h3><p>对于 dialog 这一类元素，其长度应当适应于不同分辨率下，以往可能需要使用 vw &#x2F; % 等来渲染，但是会有一个问题，那就是在不同分辨率下可能 60vw &#x2F; 60% 下，dialog 的宽度在 1920 分辨率下看着还算正常，但是在 1366 等比较小的分辨率下会出现宽度不足以容纳内部元素，或者做适配时不太优雅展示的时候，可以考虑结合这一类计算函数来进行。</p>
-<pre class="language-css" data-language="css"><code class="language-css"><span class="token selector">.dialog</span> <span class="token punctuation">&#123;</span>
-    <span class="token property">width</span><span class="token punctuation">:</span> <span class="token function">min</span><span class="token punctuation">(</span>700px<span class="token punctuation">,</span>80vw<span class="token punctuation">)</span>
-  <span class="token comment">/* 解析为宽度取 700px 和 80vw 中较小的那一个数值 */</span>
-<span class="token punctuation">&#125;</span>
-复制代码</code></pre>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.dialog</span> &#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="built_in">min</span>(<span class="number">700px</span>,<span class="number">80vw</span>)</span><br><span class="line">  <span class="comment">/* 解析为宽度取 700px 和 80vw 中较小的那一个数值 */</span></span><br><span class="line">&#125;</span><br><span class="line">复制代码</span><br></pre></td></tr></table></figure>
 
 <h3 id="max-取最大值"><a href="#max-取最大值" class="headerlink" title="max() 取最大值"></a>max() 取最大值</h3><p>同 min() 取值逻辑</p>
 <h3 id="clamp-取值范围"><a href="#clamp-取值范围" class="headerlink" title="clamp() 取值范围"></a>clamp() 取值范围</h3><p><strong>clamp(MIN, VAL, MAX) &#x3D; max(MIN, min(VAL, MAX))</strong></p>
 <blockquote>
 <p>其中 MIN 表示最小值，VAL 表示首选值，MAX 表示最大值。意思是，如果 VAL 在 MIN 和 MAX 范围之间，则使用 VAL 作为函数返回值；如果 VAL 大于 MAX，则使用 MAX 作为返回值；如果 VAL 小于 MIN，则使用 MIN 作为返回值。</p>
 </blockquote>
-<pre class="language-css" data-language="css"><code class="language-css"><span class="token selector">.dialog</span> <span class="token punctuation">&#123;</span>
-    <span class="token property">width</span><span class="token punctuation">:</span> <span class="token function">clamp</span><span class="token punctuation">(</span>240px<span class="token punctuation">,</span> 50vw<span class="token punctuation">,</span> 600px<span class="token punctuation">)</span>
-  <span class="token comment">/* 解析为当 50vw > 600px 时，.dialog width值等于600px */</span>
-  <span class="token comment">/* 当 240px &lt;= 50vw &lt;= 600px 时，.dialog width值等于50vw  */</span>
-    <span class="token comment">/* 进一步缩小，当 50vw &lt; 240px时，.dialog width值等于 240px */</span>
-<span class="token punctuation">&#125;</span>
-复制代码</code></pre>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.dialog</span> &#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="built_in">clamp</span>(<span class="number">240px</span>, <span class="number">50vw</span>, <span class="number">600px</span>)</span><br><span class="line">  <span class="comment">/* 解析为当 50vw &gt; 600px 时，.dialog width值等于600px */</span></span><br><span class="line">  <span class="comment">/* 当 240px &lt;= 50vw &lt;= 600px 时，.dialog width值等于50vw  */</span></span><br><span class="line">    <span class="comment">/* 进一步缩小，当 50vw &lt; 240px时，.dialog width值等于 240px */</span></span><br><span class="line">&#125;</span><br><span class="line">复制代码</span><br></pre></td></tr></table></figure>
 
 <p>相关例子效果展示可以参考张鑫旭老师博客中的在线代码，地址如下:</p>
 <p><a href="https://link.juejin.cn/?target=https://www.zhangxinxu.com/study/202004/css-clamp-function-demo.php">www.zhangxinxu.com/study/20200…</a></p>
@@ -365,27 +355,11 @@
 <p>:root { –main-bg-color: pink; –ml: 20px; –mlv: 20; –primary-size: 20px; –base-font-size: var(–primary-size); &#x2F;_ 变量声明时的调用 <em>&#x2F; } body { background-color: var(–main-bg-color); &#x2F;</em> 表现结果为：背景色为粉红 <em>&#x2F; } .ml20 { margin-left: var(–ml); margin-left: calc(var(–mlv) * 1px); &#x2F;</em> 表现结果都是左间距 20px,此处的变量运用需区别带单位和不带单位的使用差异 _&#x2F; }</p>
 </li>
 </ul>
-<h3 id="CSS-变量作用域"><a href="#CSS-变量作用域" class="headerlink" title="CSS 变量作用域"></a>CSS 变量作用域</h3><pre class="language-css" data-language="css"><code class="language-css"><span class="token selector">:root</span> <span class="token punctuation">&#123;</span> <span class="token property">--color</span><span class="token punctuation">:</span> purple<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
-<span class="token selector">div</span> <span class="token punctuation">&#123;</span> <span class="token property">--color</span><span class="token punctuation">:</span> green<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
-<span class="token selector">#alert</span> <span class="token punctuation">&#123;</span> <span class="token property">--color</span><span class="token punctuation">:</span> red<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
-<span class="token selector">*</span> <span class="token punctuation">&#123;</span> <span class="token property">color</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--color<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
-
-&lt;p>我的紫色继承于根元素&lt;/p>
-&lt;div>我的绿色来自直接设置&lt;/div>
-&lt;div id=<span class="token string">'alert'</span>>
-  ID选择器权重更高，因此阿拉是红色！
-  &lt;p>我也是红色，占了继承的光&lt;/p>
-&lt;/div>
-复制代码</code></pre>
+<h3 id="CSS-变量作用域"><a href="#CSS-变量作用域" class="headerlink" title="CSS 变量作用域"></a>CSS 变量作用域</h3><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-pseudo">:root</span> &#123; <span class="attr">--color</span>: purple; &#125;</span><br><span class="line"><span class="selector-tag">div</span> &#123; <span class="attr">--color</span>: green; &#125;</span><br><span class="line"><span class="selector-id">#alert</span> &#123; <span class="attr">--color</span>: red; &#125;</span><br><span class="line">* &#123; <span class="attribute">color</span>: <span class="built_in">var</span>(--color); &#125;</span><br><span class="line"></span><br><span class="line">&lt;<span class="selector-tag">p</span>&gt;我的紫色继承于根元素&lt;/<span class="selector-tag">p</span>&gt;</span><br><span class="line">&lt;<span class="selector-tag">div</span>&gt;我的绿色来自直接设置&lt;/<span class="selector-tag">div</span>&gt;</span><br><span class="line">&lt;<span class="selector-tag">div</span> id=&#x27;alert&#x27;&gt;</span><br><span class="line">  ID选择器权重更高，因此阿拉是红色！</span><br><span class="line">  &lt;<span class="selector-tag">p</span>&gt;我也是红色，占了继承的光&lt;/<span class="selector-tag">p</span>&gt;</span><br><span class="line">&lt;/<span class="selector-tag">div</span>&gt;</span><br><span class="line">复制代码</span><br></pre></td></tr></table></figure>
 
 <p>上述代码中，显示出了 CSS 变量也是具有作用域的</p>
 <p>: root 取全局作用域，div 取所有的 div 元素，#alert 取所有 id 为 alert 的元素使用，按照 css 解析顺序，上面案例代码的元素颜色即和文字表述一致</p>
-<h3 id="JS-读取-CSS-变量"><a href="#JS-读取-CSS-变量" class="headerlink" title="JS 读取 CSS 变量"></a>JS 读取 CSS 变量</h3><pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token key attr-name">var cssVarColor</span> <span class="token punctuation">=</span> <span class="token value attr-value">getComputedStyle(box).getPropertyValue('--color');</span>
-
-// 输出cssVarColor
-// 输出变量值是：#cd0000
-console.log(cssVarColor);
-复制代码</code></pre>
+<h3 id="JS-读取-CSS-变量"><a href="#JS-读取-CSS-变量" class="headerlink" title="JS 读取 CSS 变量"></a>JS 读取 CSS 变量</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">var <span class="attr">cssVarColor</span> = getComputedStyle(box).getPropertyValue(<span class="string">&#x27;--color&#x27;</span>)<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">// 输出cssVarColor</span><br><span class="line">// 输出变量值是：<span class="comment">#cd0000</span></span><br><span class="line">console.log(cssVarColor)<span class="comment">;</span></span><br><span class="line">复制代码</span><br></pre></td></tr></table></figure>
 
     </div>
 

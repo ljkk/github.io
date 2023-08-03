@@ -295,17 +295,12 @@
 </ol>
 <h3 id="service-的类型"><a href="#service-的类型" class="headerlink" title="service 的类型"></a>service 的类型</h3><p>service 支持的类型也就是 kubernetes 中服务暴露的方式，默认有四种：ClusterIP、NodePort、LoadBalancer、ExternelName</p>
 <h4 id="ClusterIP"><a href="#ClusterIP" class="headerlink" title="ClusterIP"></a>ClusterIP</h4><p>kubernetes 集群默认的服务暴露方式，它只能用于集群内部通信，可以被各 pod 访问，其访问方式为：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">pod ---<span class="token operator">></span> ClusterIP:ServicePort --<span class="token operator">></span> <span class="token punctuation">(</span>iptables<span class="token punctuation">)</span>DNAT --<span class="token operator">></span> PodIP:containePort
-
-<span class="token comment"># 集群内pod直接访问service的ip即可</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pod ---&gt; ClusterIP:ServicePort --&gt; (iptables)DNAT --&gt; PodIP:containePort</span><br><span class="line"></span><br><span class="line"><span class="comment"># 集群内pod直接访问service的ip即可</span></span><br></pre></td></tr></table></figure>
 
 <img data-src="//img.to2b.cn/blog/ljk/1616166170835.png" style="zoom: 50%;" />
 
 <h4 id="NodePort"><a href="#NodePort" class="headerlink" title="NodePort"></a>NodePort</h4><p>如果想要在集群外访问集群内部的服务，可以使用 NodePort 类型的 service，在集群内部署了 kube-proxy 的节点打开一个指定的端口，将访问 node 此端口的流量直接发送到这个端口，然后会被转发到 service 后端真实的服务进行访问。<strong>Nodeport 构建在 ClusterIP 上</strong>，其访问链路如下所示：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">client ---<span class="token operator">></span> NodeIP:NodePort ---<span class="token operator">></span> ClusterIP:ServicePort ---<span class="token operator">></span> <span class="token punctuation">(</span>iptables<span class="token punctuation">)</span>DNAT ---<span class="token operator">></span> PodIP:containePort
-
-<span class="token comment"># 外部流量请求先到node，再到service</span>
-<span class="token comment"># 只要安装了kube-proxy的node，都可以处理外部流量，有实力的话可以单独拿出几个node，打上污点，然后负载均衡只会将外部流量转发到这几个node</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">client ---&gt; NodeIP:NodePort ---&gt; ClusterIP:ServicePort ---&gt; (iptables)DNAT ---&gt; PodIP:containePort</span><br><span class="line"></span><br><span class="line"><span class="comment"># 外部流量请求先到node，再到service</span></span><br><span class="line"><span class="comment"># 只要安装了kube-proxy的node，都可以处理外部流量，有实力的话可以单独拿出几个node，打上污点，然后负载均衡只会将外部流量转发到这几个node</span></span><br></pre></td></tr></table></figure>
 
 <img data-src="//img.to2b.cn/blog/ljk/1616166008315.png" style="zoom:50%;" />
 
@@ -318,51 +313,13 @@
 <p>虽然 service 的 endpoints 解决了容器发现问题，但不提前知道 service 的 Cluster IP，怎么发现 service 服务呢？service 当前支持两种类型的服务发现机制，一种是通过环境变量，另一种是通过 DNS。在这两种方案中，建议使用后者：</p>
 <p>在集群中部署 CoreDNS 服务， 来达到集群内部的 pod 通过 DNS 的方式进行集群内部各个服务之间的通讯</p>
 <p>当前 kubernetes 集群默认使用 CoreDNS 作为默认的 DNS 服务，主要原因是 CoreDNS 是基于 Plugin 的方式进行扩展的，简单，灵活，并且不完全被 Kubernetes 所捆绑</p>
-<h3 id="service-的使用"><a href="#service-的使用" class="headerlink" title="service 的使用"></a>service 的使用</h3><h4 id="ClusterIP-方式"><a href="#ClusterIP-方式" class="headerlink" title="ClusterIP 方式"></a>ClusterIP 方式</h4><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx <span class="token comment">#service的名称，此名称会被DNS解析</span>
-<span class="token key atrule">spec</span><span class="token punctuation">:</span>
-  <span class="token key atrule">clusterIP</span><span class="token punctuation">:</span> 10.105.146.177
-  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># Service的端口号</span>
-      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
-      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">8080</span> <span class="token comment"># 后端目标进程的端口号或名称，名称需由Pod规范定义</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
-  <span class="token key atrule">sessionAffinity</span><span class="token punctuation">:</span> None
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> ClusterIP</code></pre>
+<h3 id="service-的使用"><a href="#service-的使用" class="headerlink" title="service 的使用"></a>service 的使用</h3><h4 id="ClusterIP-方式"><a href="#ClusterIP-方式" class="headerlink" title="ClusterIP 方式"></a>ClusterIP 方式</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-nginx</span> <span class="comment">#service的名称，此名称会被DNS解析</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">clusterIP:</span> <span class="number">10.105</span><span class="number">.146</span><span class="number">.177</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">80</span> <span class="comment"># Service的端口号</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">      <span class="attr">targetPort:</span> <span class="number">8080</span> <span class="comment"># 后端目标进程的端口号或名称，名称需由Pod规范定义</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">my-nginx</span></span><br><span class="line">  <span class="attr">sessionAffinity:</span> <span class="string">None</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">ClusterIP</span></span><br></pre></td></tr></table></figure>
 
-<h4 id="NodePort-方式"><a href="#NodePort-方式" class="headerlink" title="NodePort 方式"></a>NodePort 方式</h4><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
-<span class="token key atrule">spec</span><span class="token punctuation">:</span>
-  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30090</span> <span class="token comment"># 节点端口，kube-proxy监听本机此端口，将访问此端口的流量转发到service</span>
-      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># service端口</span>
-      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
-      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">8080</span> <span class="token comment"># 目标pod端口</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
-  <span class="token key atrule">sessionAffinity</span><span class="token punctuation">:</span> None
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort</code></pre>
+<h4 id="NodePort-方式"><a href="#NodePort-方式" class="headerlink" title="NodePort 方式"></a>NodePort 方式</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">nodePort:</span> <span class="number">30090</span> <span class="comment"># 节点端口，kube-proxy监听本机此端口，将访问此端口的流量转发到service</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">80</span> <span class="comment"># service端口</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">      <span class="attr">targetPort:</span> <span class="number">8080</span> <span class="comment"># 目标pod端口</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">my-nginx</span></span><br><span class="line">  <span class="attr">sessionAffinity:</span> <span class="string">None</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">NodePort</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="Headless-service-就是没有-Cluster-IP-的-service"><a href="#Headless-service-就是没有-Cluster-IP-的-service" class="headerlink" title="Headless service(就是没有 Cluster IP 的 service )"></a>Headless service(就是没有 Cluster IP 的 service )</h3><p>当不需要负载均衡以及单独的 ClusterIP 时，可以通过指定 spec.clusterIP 的值为 None 来创建 Headless service，它会给一个集群内部的每个成员提供一个唯一的 DNS 域名来作为每个成员的网络标识，集群内部成员之间使用域名通信。</p>
 <p>deployment 中对应的服务是 service，而 statefulset 中与之对应的服务就是 headless service</p>
-<pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx
-<span class="token key atrule">spec</span><span class="token punctuation">:</span>
-  <span class="token key atrule">clusterIP</span><span class="token punctuation">:</span> None
-  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30090</span>
-      <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">80</span>
-      <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
-      <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">8080</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> my<span class="token punctuation">-</span>nginx</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">clusterIP:</span> <span class="string">None</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">nodePort:</span> <span class="number">30090</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">      <span class="attr">targetPort:</span> <span class="number">8080</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">my-nginx</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="Ingress"><a href="#Ingress" class="headerlink" title="Ingress"></a>Ingress</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/ingress/">https://kubernetes.io/zh/docs/concepts/services-networking/ingress/</a><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/ingress-controllers/">https://kubernetes.io/zh/docs/concepts/services-networking/ingress-controllers/</a></p>
 <p>上面介绍的 ClusterIP 、NodePort 、LoadBalancer 都是基于 ip 和 port 做负载均衡，属于四层负载均衡</p>
@@ -371,11 +328,7 @@
 <img data-src="//img.to2b.cn/blog/ljk/1616165748076.png" style="zoom:67%;" />
 
 <p>kube-proxy 监听 node 的指定端口，将此端口的流量转发到 ingress，然后 ingress 再转发到不同的 service</p>
-<pre class="language-none"><code class="language-none">反正都是实现七层代理，也可以使用deployment创建一组pod，提供nginx服务，实现代替ingress的效果：
-
-kube-proxy监听node的指定端口，将此端口的流量转发到nginx service，然后nginx在转发到不同的service，可以配置service ip，也可以使用服务发现
-
-建议：域名多、流量大，使用nginx；反之使用ingress</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">反正都是实现七层代理，也可以使用deployment创建一组pod，提供nginx服务，实现代替ingress的效果：</span><br><span class="line"></span><br><span class="line">kube-proxy监听node的指定端口，将此端口的流量转发到nginx service，然后nginx在转发到不同的service，可以配置service ip，也可以使用服务发现</span><br><span class="line"></span><br><span class="line">建议：域名多、流量大，使用nginx；反之使用ingress</span><br></pre></td></tr></table></figure>
 
 <h2 id="其他服务类型"><a href="#其他服务类型" class="headerlink" title="其他服务类型"></a>其他服务类型</h2><p>完全不使用 k8s 内置的 service，而是通过注册中心自动发现 pod 地址，如果开发有实力，推荐使用这种方式</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1616323318334.png"></p>

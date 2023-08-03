@@ -304,20 +304,11 @@
 <p>LBA：逻辑块寻址，LBA 是一个整数，表示从第几个扇区开始，到第几个扇区结束就完了，没有柱面磁头等概念，扇区这个概念也是逻辑上的，一个扇区通常是 512 个字节</p>
 <h3 id="创建设备文件"><a href="#创建设备文件" class="headerlink" title="创建设备文件"></a>创建设备文件</h3><p>如果两个设备文件的类型、主次号码都相同，那这俩就是同一个设备</p>
 <p>touch 创建普通文件，mknod 创建设备文件，删除用 rm，不能 cp 直接拷贝，如果要拷贝，使用<code>cp -a</code>保留属性即可拷贝</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ll /dev/null /dev/zero</span>
-crw-rw-rw-. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">3</span> Aug <span class="token number">18</span> <span class="token number">14</span>:39 /dev/null
-crw-rw-rw-. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">5</span> Aug <span class="token number">18</span> <span class="token number">14</span>:39 /dev/zero
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#mknod ./testnull c 1 3</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#mknod ./testzero c 1 5</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ll</span>
-total <span class="token number">0</span>
-crw-r--r--. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">3</span> Aug <span class="token number">18</span> <span class="token number">17</span>:16 testnull
-crw-r--r--. <span class="token number">1</span> root root <span class="token number">1</span>, <span class="token number">5</span> Aug <span class="token number">18</span> <span class="token number">17</span>:17 testzero</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment">#ll /dev/null /dev/zero</span></span><br><span class="line">crw-rw-rw-. 1 root root 1, 3 Aug 18 14:39 /dev/null</span><br><span class="line">crw-rw-rw-. 1 root root 1, 5 Aug 18 14:39 /dev/zero</span><br><span class="line">[root@centos7 ~]<span class="comment">#mknod ./testnull c 1 3</span></span><br><span class="line">[root@centos7 ~]<span class="comment">#mknod ./testzero c 1 5</span></span><br><span class="line">[root@centos7 ~]<span class="comment">#ll</span></span><br><span class="line">total 0</span><br><span class="line">crw-r--r--. 1 root root 1, 3 Aug 18 17:16 testnull</span><br><span class="line">crw-r--r--. 1 root root 1, 5 Aug 18 17:17 testzero</span><br></pre></td></tr></table></figure>
 
 <h2 id="分区类型"><a href="#分区类型" class="headerlink" title="分区类型"></a>分区类型</h2><p>两种分区方式：mbr、gpt</p>
 <h3 id="给虚拟机添加硬盘"><a href="#给虚拟机添加硬盘" class="headerlink" title="给虚拟机添加硬盘"></a>给虚拟机添加硬盘</h3><p>虚拟机-&gt;添加-&gt;硬盘-&gt;scsi-&gt;虚拟硬盘-&gt;单个文件-&gt;完成</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> - - - <span class="token operator">></span> /sys/class/scsi_host/host0/scan
-<span class="token comment"># 如果lsblk还不显示，再试试host1和host2</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> - - - &gt; /sys/class/scsi_host/host0/scan</span><br><span class="line"><span class="comment"># 如果lsblk还不显示，再试试host1和host2</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="MBR"><a href="#MBR" class="headerlink" title="MBR"></a>MBR</h3><p>mbr 最多四个主分区，可以 3 个主分区+1 扩展分区（N 个逻辑分区）</p>
 <p>主分区和扩展分区对应 1~4，&#x2F;dev&#x2F;sda3，逻辑分区从 5 开始，&#x2F;dev&#x2F;sda5</p>
@@ -339,7 +330,7 @@ crw-r--r--. <span class="token number">1</span> root root <span class="token num
 <h3 id="GPT"><a href="#GPT" class="headerlink" title="GPT"></a>GPT</h3><p>gpt 支持 128 个分区，一般来说，windows 只能是 bios+mbr 或者 uefi+gpt 的组合，而 Linux 可以 bios+gpt 通过 grub 启动</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1597846560522.png"></p>
 <h2 id="磁盘常用命令"><a href="#磁盘常用命令" class="headerlink" title="磁盘常用命令"></a>磁盘常用命令</h2><h3 id="df"><a href="#df" class="headerlink" title="df"></a>df</h3><p>查看文件系统空间实际占用等信息</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>FILE<span class="token punctuation">]</span><span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> [OPTION]... [FILE]...</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>-H 进制为 1000，而不是 1024</li>
@@ -349,7 +340,7 @@ crw-r--r--. <span class="token number">1</span> root root <span class="token num
 <li>-P 以 Posix 兼容的格式输出</li>
 </ul>
 <h3 id="du"><a href="#du" class="headerlink" title="du"></a>du</h3><p>查看某目录总体空间实际占用状态</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">du</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. DIR</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">du</span> [OPTION]... DIR</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>-h human-readable</li>
@@ -358,12 +349,10 @@ crw-r--r--. <span class="token number">1</span> root root <span class="token num
 <li>-x 忽略不在同一个文件系统的目录</li>
 </ul>
 <p>问题：如果 df 和 du 统计的结果差距过大，是为什么？</p>
-<pre class="language-none"><code class="language-none">如果差距比较小，只有几十或者几十百m，是正常情况。如果差距过大，则是因为删除大文件导致。df直接统计分区，du对目录下的文件逐个统计，如果删除大文件，但是还有进程引用这个文件，此时df还会统计到它，而du是统计不到它的，这样就会造成df和du统计的结果差距过大
-
-解决方法：&#96;lsof | grep delete&#96; 找出占用已删除文件的进程，然后杀掉就行了</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">如果差距比较小，只有几十或者几十百m，是正常情况。如果差距过大，则是因为删除大文件导致。df直接统计分区，du对目录下的文件逐个统计，如果删除大文件，但是还有进程引用这个文件，此时df还会统计到它，而du是统计不到它的，这样就会造成df和du统计的结果差距过大</span><br><span class="line"></span><br><span class="line">解决方法：`lsof | grep delete` 找出占用已删除文件的进程，然后杀掉就行了</span><br></pre></td></tr></table></figure>
 
 <h3 id="dd"><a href="#dd" class="headerlink" title="dd"></a>dd</h3><p>从目标文件 1 拷贝内容写入到目标文件 2</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/<span class="token environment constant">PATH</span>/FROM/SRC <span class="token assign-left variable">of</span><span class="token operator">=</span>/<span class="token environment constant">PATH</span>/TO/DEST <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token comment"># count=#</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/PATH/FROM/SRC of=/PATH/TO/DEST bs=<span class="comment"># count=#</span></span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>if&#x3D;file1：in file &#x3D; file1 从 file1 读取内容</li>
@@ -387,49 +376,7 @@ crw-r--r--. <span class="token number">1</span> root root <span class="token num
 </li>
 </ul>
 <p>范例:</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#备份MBR</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">of</span><span class="token operator">=</span>/tmp/mbr.bak <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">512</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span>
-
-<span class="token comment">#破坏MBR中的bootloader</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">seek</span><span class="token operator">=</span><span class="token number">446</span>
-
-<span class="token comment">#有一个大与2K的二进制文件fileA。现在想从第64个字节位置开始读取，需要读取的大小是128Byts。又有fileB, 想把上面读取到的128Bytes写到第32个字节开始的位置，替换128Bytes，实现如下</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>fileA <span class="token assign-left variable">of</span><span class="token operator">=</span>fileB <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">128</span> <span class="token assign-left variable">skip</span><span class="token operator">=</span><span class="token number">63</span> <span class="token assign-left variable">seek</span><span class="token operator">=</span><span class="token number">31</span> <span class="token assign-left variable">conv</span><span class="token operator">=</span>notrunc
-
-<span class="token comment">#将本地的/dev/sdx整盘备份到/dev/sdy</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sdx <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdy
-
-<span class="token comment">#将/dev/sdx全盘数据备份到指定路径的image文件</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sdx <span class="token assign-left variable">of</span><span class="token operator">=</span>/path/to/image
-
-<span class="token comment">#备份/dev/sdx全盘数据，并利用gzip压缩，保存到指定路径</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sdx <span class="token operator">|</span> <span class="token function">gzip</span> <span class="token operator">></span>/path/to/image.gz
-
-<span class="token comment">#将备份文件恢复到指定盘</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/path/to/image <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdx
-
-<span class="token comment">#将压缩的备份文件恢复到指定盘</span>
-<span class="token function">gzip</span> <span class="token parameter variable">-dc</span> /path/to/image.gz <span class="token operator">|</span> <span class="token function">dd</span> <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdx
-
-<span class="token comment">#将内存里的数据拷贝到root目录下的mem.bin文件</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/mem <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/mem.bin <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1024</span>
-
-<span class="token comment">#拷贝光盘数据到root文件夹下，并保存为cdrom.iso文件</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/cdrom <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/cdrom.iso
-
-<span class="token comment">#销毁磁盘数据</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/urandom <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sda1
-
-<span class="token comment">#通过比较dd指令输出中命令的执行时间，即可确定系统最佳的block size大小</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1000000</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">2048</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">500000</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">4096</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">250000</span>
-
-<span class="token comment">#测试硬盘写速度</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1000000</span>
-
-<span class="token comment">#测试硬盘读速度</span>
-<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/root/1Gb.file <span class="token assign-left variable">bs</span><span class="token operator">=</span>64k <span class="token operator">|</span> <span class="token function">dd</span> <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/null</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#备份MBR</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sda of=/tmp/mbr.bak bs=512 count=1</span><br><span class="line"></span><br><span class="line"><span class="comment">#破坏MBR中的bootloader</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/dev/sda bs=64 count=1 seek=446</span><br><span class="line"></span><br><span class="line"><span class="comment">#有一个大与2K的二进制文件fileA。现在想从第64个字节位置开始读取，需要读取的大小是128Byts。又有fileB, 想把上面读取到的128Bytes写到第32个字节开始的位置，替换128Bytes，实现如下</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=fileA of=fileB bs=1 count=128 skip=63 seek=31 conv=notrunc</span><br><span class="line"></span><br><span class="line"><span class="comment">#将本地的/dev/sdx整盘备份到/dev/sdy</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sdx of=/dev/sdy</span><br><span class="line"></span><br><span class="line"><span class="comment">#将/dev/sdx全盘数据备份到指定路径的image文件</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sdx of=/path/to/image</span><br><span class="line"></span><br><span class="line"><span class="comment">#备份/dev/sdx全盘数据，并利用gzip压缩，保存到指定路径</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sdx | gzip &gt;/path/to/image.gz</span><br><span class="line"></span><br><span class="line"><span class="comment">#将备份文件恢复到指定盘</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/path/to/image of=/dev/sdx</span><br><span class="line"></span><br><span class="line"><span class="comment">#将压缩的备份文件恢复到指定盘</span></span><br><span class="line">gzip -dc /path/to/image.gz | <span class="built_in">dd</span> of=/dev/sdx</span><br><span class="line"></span><br><span class="line"><span class="comment">#将内存里的数据拷贝到root目录下的mem.bin文件</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/mem of=/root/mem.bin bs=1024</span><br><span class="line"></span><br><span class="line"><span class="comment">#拷贝光盘数据到root文件夹下，并保存为cdrom.iso文件</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/cdrom of=/root/cdrom.iso</span><br><span class="line"></span><br><span class="line"><span class="comment">#销毁磁盘数据</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/urandom of=/dev/sda1</span><br><span class="line"></span><br><span class="line"><span class="comment">#通过比较dd指令输出中命令的执行时间，即可确定系统最佳的block size大小</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/root/1Gb.file bs=1024 count=1000000</span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/root/1Gb.file bs=2048 count=500000</span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/root/1Gb.file bs=4096 count=250000</span><br><span class="line"></span><br><span class="line"><span class="comment">#测试硬盘写速度</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/root/1Gb.file bs=1024 count=1000000</span><br><span class="line"></span><br><span class="line"><span class="comment">#测试硬盘读速度</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/root/1Gb.file bs=64k | <span class="built_in">dd</span> of=/dev/null</span><br></pre></td></tr></table></figure>
 
 <p>练习：</p>
 <ol>
@@ -438,33 +385,25 @@ crw-r--r--. <span class="token number">1</span> root root <span class="token num
 <li>将 CentOS6 的 CentOS-6.10-x86_64-bin-DVD1.iso 和 CentOS-6.10-x86_64-bin-DVD2.iso 两个文件，<br>合并成一个 CentOS-6.10-x86_64-Everything.iso 文件，并将其配置为 yum 源</li>
 </ol>
 <h2 id="管理分区"><a href="#管理分区" class="headerlink" title="管理分区"></a>管理分区</h2><h3 id="lsblk"><a href="#lsblk" class="headerlink" title="lsblk"></a>lsblk</h3><p>列出块设备</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">lsblk <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>device<span class="token operator">></span> <span class="token punctuation">..</span>.<span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsblk [options] [&lt;device&gt; ...]</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>-f：列出文件系统相关信息</li>
 </ul>
 <h3 id="blkid"><a href="#blkid" class="headerlink" title="blkid"></a>blkid</h3><p>查看块设备（包括交换分区）所使用的文件系统类型、LABEL、UUID 等信息</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">blkid <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>DEVICE<span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">blkid [OPTION]... [DEVICE]</span><br></pre></td></tr></table></figure>
 
 <p>-U UUID 根据指定的 UUID 来查找对应的设备<br>-L LABEL 根据指定的 LABEL 来查找对应的设备</p>
 <h3 id="fdisk"><a href="#fdisk" class="headerlink" title="fdisk"></a>fdisk</h3><p>管理 mbr 分区。交互式，根据提示操作即可。</p>
-<pre class="language-none"><code class="language-none">m：查看帮助
-p：查看分区
-n：增加分区
-d：删除分区
-w：保存并退出
-q：不保存并退出</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">m：查看帮助</span><br><span class="line">p：查看分区</span><br><span class="line">n：增加分区</span><br><span class="line">d：删除分区</span><br><span class="line">w：保存并退出</span><br><span class="line">q：不保存并退出</span><br></pre></td></tr></table></figure>
 
 <p>对硬盘进行分区操作，如果硬盘上已有其他已经挂载的分区，w 保存操作后，centos7 及以前的系统识别不到分区更改，需要手动通知内核重新读取硬盘分区表</p>
 <p>硬盘增加分区，前提是硬盘要有未分配的空间</p>
 <h3 id="重新加载分区表"><a href="#重新加载分区表" class="headerlink" title="重新加载分区表"></a>重新加载分区表</h3><p>centos7 和 centos5：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">partprobe</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">partprobe</span><br></pre></td></tr></table></figure>
 
 <p>centos6：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 增加分区</span>
-partx <span class="token parameter variable">-a</span> /dev/DEVICE
-<span class="token comment"># 删除分区</span>
-partx <span class="token parameter variable">-d</span> <span class="token parameter variable">--nr</span> M-N /dev/DEVICE</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 增加分区</span></span><br><span class="line">partx -a /dev/DEVICE</span><br><span class="line"><span class="comment"># 删除分区</span></span><br><span class="line">partx -d --nr M-N /dev/DEVICE</span><br></pre></td></tr></table></figure>
 
 <h3 id="gdisk"><a href="#gdisk" class="headerlink" title="gdisk"></a>gdisk</h3><p>管理 gpt 分区，操作和 fdisk 雷同</p>
 <h3 id="parted"><a href="#parted" class="headerlink" title="parted"></a>parted</h3><p>高级分区操作，可以使交互式或非交互式，parted 的操作都是实时生效的，所以一般不用</p>
@@ -478,178 +417,53 @@ partx <span class="token parameter variable">-d</span> <span class="token parame
 <p>新硬盘，先 fdisk 分区，然后 mkfs 创建文件系统，最后 mount 挂载</p>
 <p>文件系统是操作系统用于明确存储设备或分区上的文件的方法和数据结构；即在存储设备上组织文件的方法。操作系统中负责管理和存储文件信息的软件结构称为文件管理系统，简称文件系统从系统角度来看，文件系统是对文件存储设备的空间进行组织和分配，负责文件存储并对存入的文件进行保护和检索的系统。具体地说，它负责为用户建立文件，存入、读出、修改、转储文件，控制文件的存取，安全控制，日志，压缩，加密等</p>
 <p>当前系统支持的文件系统：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/kernel-3.10.0-1127.el7.x86_64</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/kernel-3.10.0-1127.el7.x86_64</span></span><br></pre></td></tr></table></figure>
 
 <p>上面显示的不全，我不知道为什么，通过查看内核包可以看到所有支持的文件系统，每个 xz 压缩包都是对应文件系统的驱动。</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># centos7</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/</span>
-kernel-3.10.0-1127.el7.x86_64
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># rpm -ql `!!` | grep '/fs/'</span>
-<span class="token function">rpm</span> <span class="token parameter variable">-ql</span> <span class="token variable"><span class="token variable">`</span><span class="token function">rpm</span> <span class="token parameter variable">-qf</span> /lib/modules/3.10.0-1127.el7.x86_64/<span class="token variable">`</span></span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'/fs/'</span>
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/binfmt_misc.ko.xz
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/btrfs
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/btrfs/btrfs.ko.xz
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cachefiles
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cachefiles/cachefiles.ko.xz
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/ceph
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/ceph/ceph.ko.xz
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cifs
-/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cifs/cifs.ko.xz
-<span class="token punctuation">..</span>.
-<span class="token punctuation">..</span>.
-
-<span class="token comment"># ubuntu18.04</span>
-lujinkai@Z510:~$ dpkg <span class="token parameter variable">-S</span> /lib/modules/5.4.0-42-generic/kernel/fs/
-linux-modules-extra-5.4.0-42-generic, linux-modules-5.4.0-42-generic: /lib/modules/5.4.0-42-generic/kernel/fs
-lujinkai@Z510:~$ dpkg <span class="token parameter variable">-L</span> linux-modules-extra-5.4.0-42-generic <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'/fs/'</span>
-/lib/modules/5.4.0-42-generic/kernel/fs/9p
-/lib/modules/5.4.0-42-generic/kernel/fs/adfs
-/lib/modules/5.4.0-42-generic/kernel/fs/adfs/adfs.ko
-/lib/modules/5.4.0-42-generic/kernel/fs/affs
-/lib/modules/5.4.0-42-generic/kernel/fs/affs/affs.ko
-/lib/modules/5.4.0-42-generic/kernel/fs/afs
-/lib/modules/5.4.0-42-generic/kernel/fs/afs/kafs.ko
-/lib/modules/5.4.0-42-generic/kernel/fs/aufs
-/lib/modules/5.4.0-42-generic/kernel/fs/autofs
-/lib/modules/5.4.0-42-generic/kernel/fs/befs
-/lib/modules/5.4.0-42-generic/kernel/fs/befs/befs.ko
-/lib/modules/5.4.0-42-generic/kernel/fs/bfs
-/lib/modules/5.4.0-42-generic/kernel/fs/bfs/bfs.ko
-<span class="token punctuation">..</span>.
-<span class="token punctuation">..</span>.
-<span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># centos7</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/</span></span><br><span class="line">kernel-3.10.0-1127.el7.x86_64</span><br><span class="line">[root@centos7 ~]<span class="comment"># rpm -ql `!!` | grep &#x27;/fs/&#x27;</span></span><br><span class="line">rpm -ql `rpm -qf /lib/modules/3.10.0-1127.el7.x86_64/` | grep <span class="string">&#x27;/fs/&#x27;</span></span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/binfmt_misc.ko.xz</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/btrfs</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/btrfs/btrfs.ko.xz</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cachefiles</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cachefiles/cachefiles.ko.xz</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/ceph</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/ceph/ceph.ko.xz</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cifs</span><br><span class="line">/lib/modules/3.10.0-1127.el7.x86_64/kernel/fs/cifs/cifs.ko.xz</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># ubuntu18.04</span></span><br><span class="line">lujinkai@Z510:~$ dpkg -S /lib/modules/5.4.0-42-generic/kernel/fs/</span><br><span class="line">linux-modules-extra-5.4.0-42-generic, linux-modules-5.4.0-42-generic: /lib/modules/5.4.0-42-generic/kernel/fs</span><br><span class="line">lujinkai@Z510:~$ dpkg -L linux-modules-extra-5.4.0-42-generic | grep <span class="string">&#x27;/fs/&#x27;</span></span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/9p</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/adfs</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/adfs/adfs.ko</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/affs</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/affs/affs.ko</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/afs</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/afs/kafs.ko</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/aufs</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/autofs</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/befs</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/befs/befs.ko</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/bfs</span><br><span class="line">/lib/modules/5.4.0-42-generic/kernel/fs/bfs/bfs.ko</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <p>或者查看 &#x2F;proc&#x2F;filesystems，nodev 标注的文件系统不需要块文件，也就是说不需要硬盘，文件就可以</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># cat /proc/filesystems</span>
-nodev	sysfs
-nodev	rootfs
-nodev	ramfs
-nodev	bdev
-nodev	proc
-nodev	cgroup
-nodev	cpuset
-nodev	tmpfs
-nodev	devtmpfs
-nodev	debugfs
-nodev	securityfs
-nodev	sockfs
-nodev	dax
-nodev	bpf
-nodev	pipefs
-nodev	configfs
-nodev	devpts
-nodev	hugetlbfs
-nodev	autofs
-nodev	pstore
-nodev	mqueue
-nodev	selinuxfs
-	xfs
-	iso9660
-	ext3
-	ext2
-	ext4
-	vfat
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># cat /proc/filesystems</span></span><br><span class="line">nodev	sysfs</span><br><span class="line">nodev	rootfs</span><br><span class="line">nodev	ramfs</span><br><span class="line">nodev	bdev</span><br><span class="line">nodev	proc</span><br><span class="line">nodev	cgroup</span><br><span class="line">nodev	cpuset</span><br><span class="line">nodev	tmpfs</span><br><span class="line">nodev	devtmpfs</span><br><span class="line">nodev	debugfs</span><br><span class="line">nodev	securityfs</span><br><span class="line">nodev	sockfs</span><br><span class="line">nodev	dax</span><br><span class="line">nodev	bpf</span><br><span class="line">nodev	pipefs</span><br><span class="line">nodev	configfs</span><br><span class="line">nodev	devpts</span><br><span class="line">nodev	hugetlbfs</span><br><span class="line">nodev	autofs</span><br><span class="line">nodev	pstore</span><br><span class="line">nodev	mqueue</span><br><span class="line">nodev	selinuxfs</span><br><span class="line">	xfs</span><br><span class="line">	iso9660</span><br><span class="line">	ext3</span><br><span class="line">	ext2</span><br><span class="line">	ext4</span><br><span class="line">	vfat</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<h3 id="超级块和-inode-table"><a href="#超级块和-inode-table" class="headerlink" title="超级块和 inode table"></a>超级块和 inode table</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># mkfs.ext4 /dev/sdb5</span>
-<span class="token function">mke2fs</span> <span class="token number">1.42</span>.9 <span class="token punctuation">(</span><span class="token number">28</span>-Dec-2013<span class="token punctuation">)</span>
-Filesystem <span class="token assign-left variable">label</span><span class="token operator">=</span>
-OS type: Linux
-Block <span class="token assign-left variable">size</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token punctuation">(</span>log<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span>
-Fragment <span class="token assign-left variable">size</span><span class="token operator">=</span><span class="token number">1024</span> <span class="token punctuation">(</span>log<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span>
-<span class="token assign-left variable">Stride</span><span class="token operator">=</span><span class="token number">0</span> blocks, Stripe <span class="token assign-left variable">width</span><span class="token operator">=</span><span class="token number">0</span> blocks
-<span class="token number">128016</span> inodes, <span class="token number">512000</span> blocks
-<span class="token number">25600</span> blocks <span class="token punctuation">(</span><span class="token number">5.00</span>%<span class="token punctuation">)</span> reserved <span class="token keyword">for</span> the super user
-First data <span class="token assign-left variable">block</span><span class="token operator">=</span><span class="token number">1</span>
-Maximum filesystem <span class="token assign-left variable">blocks</span><span class="token operator">=</span><span class="token number">34078720</span>
-<span class="token number">63</span> block <span class="token function">groups</span>
-<span class="token number">8192</span> blocks per group, <span class="token number">8192</span> fragments per group
-<span class="token number">2032</span> inodes per group
-Superblock backups stored on blocks:
-	<span class="token number">8193</span>, <span class="token number">24577</span>, <span class="token number">40961</span>, <span class="token number">57345</span>, <span class="token number">73729</span>, <span class="token number">204801</span>, <span class="token number">221185</span>, <span class="token number">401409</span>
-
-Allocating group tables: <span class="token keyword">done</span>
-Writing inode tables: <span class="token keyword">done</span>
-Creating journal <span class="token punctuation">(</span><span class="token number">8192</span> blocks<span class="token punctuation">)</span>: <span class="token keyword">done</span>
-Writing superblocks and filesystem accounting information: <span class="token keyword">done</span></code></pre>
+<h3 id="超级块和-inode-table"><a href="#超级块和-inode-table" class="headerlink" title="超级块和 inode table"></a>超级块和 inode table</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># mkfs.ext4 /dev/sdb5</span></span><br><span class="line">mke2fs 1.42.9 (28-Dec-2013)</span><br><span class="line">Filesystem label=</span><br><span class="line">OS <span class="built_in">type</span>: Linux</span><br><span class="line">Block size=1024 (<span class="built_in">log</span>=0)</span><br><span class="line">Fragment size=1024 (<span class="built_in">log</span>=0)</span><br><span class="line">Stride=0 blocks, Stripe width=0 blocks</span><br><span class="line">128016 inodes, 512000 blocks</span><br><span class="line">25600 blocks (5.00%) reserved <span class="keyword">for</span> the super user</span><br><span class="line">First data block=1</span><br><span class="line">Maximum filesystem blocks=34078720</span><br><span class="line">63 block <span class="built_in">groups</span></span><br><span class="line">8192 blocks per group, 8192 fragments per group</span><br><span class="line">2032 inodes per group</span><br><span class="line">Superblock backups stored on blocks:</span><br><span class="line">	8193, 24577, 40961, 57345, 73729, 204801, 221185, 401409</span><br><span class="line"></span><br><span class="line">Allocating group tables: <span class="keyword">done</span></span><br><span class="line">Writing inode tables: <span class="keyword">done</span></span><br><span class="line">Creating journal (8192 blocks): <span class="keyword">done</span></span><br><span class="line">Writing superblocks and filesystem accounting information: <span class="keyword">done</span></span><br></pre></td></tr></table></figure>
 
 <p>文件系统把每个分区分成多个块组（block group），每个块组中有很多块，每个块的大小通常为 4K，具体块组的组成看下图。超级块（super block）中存储了所有块组的元数据，超级块存储在块组 0 中，并在其他部分块组有备份；块组描述符表（GDT）是块组描述符的集合，和超级组一样，也是储存块组 0 中，在其他部分块组中备份；块位图（block bitmap）描述了块的使用情况；节点位图（inode bitmap）描述了节点的使用情况。节点表（inode table）存储节点；数据块（data blocks）存储数据</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1597908144289.png"></p>
 <p><strong>块组描述符</strong><br>Ext3 文件系统的每个块组描述符占用 32 字节，用以描述块组中的位图起始地址、i-节点表起始地址、空闲块数、空闲 i-节点数等信息，每个块组都有这样的一个块组描述符，所有的块组描述符集中存放，组成块组描述符表。</p>
 <h3 id="mkfs"><a href="#mkfs" class="headerlink" title="mkfs"></a>mkfs</h3><p>创建文件系统</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.FS_TYPE /dev/DEVICE</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfs.FS_TYPE /dev/DEVICE</span><br></pre></td></tr></table></figure>
 
 <p>FS_TYPE：ext4、xfs 等，具体 tab 可以提示</p>
 <h3 id="tune2fs-、dumpefs、xfs-info"><a href="#tune2fs-、dumpefs、xfs-info" class="headerlink" title="tune2fs 、dumpefs、xfs_info"></a>tune2fs 、dumpefs、xfs_info</h3><p>tune2fs 查看超级块信息，dumpe2fs 查看超级块和各个块组的信息，tune2fs 和 dump2fs 只适用于 ext 文件系统，xfs 文件系统使用 xfs_info 命令</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># tune2fs -l /dev/sdb5</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># dumpe2fs /dev/sdb5</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># xfs_info /dev/sda1</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># tune2fs -l /dev/sdb5</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># dumpe2fs /dev/sdb5</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># xfs_info /dev/sda1</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="fsck、e2fsck、xfs-repair"><a href="#fsck、e2fsck、xfs-repair" class="headerlink" title="fsck、e2fsck、xfs_repair"></a>fsck、e2fsck、xfs_repair</h3><p>tune2fs、dumpe2fs 查看分区的 ext 文件系统信息，Filesystem state 标记为 no clean，说明文件系统发生故障。使用 e2fsck 可以修复。如果是 xfs 文件系统发生故障，使用 xfs_repair 修改。fsck 通用，不管什么文件系统都可以修复</p>
 <p>注意：1. 修复之前一定要 umount 先取消挂载</p>
 <ol start="2">
 <li>数据不一定能恢复</li>
 </ol>
-<pre class="language-bash" data-language="bash"><code class="language-bash">fsck.FS_TYPE  /dev/DEVICE
-e2fsck  /dev/DEVICE
-xfs_repair /dev/DEVICE</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fsck.FS_TYPE  /dev/DEVICE</span><br><span class="line">e2fsck  /dev/DEVICE</span><br><span class="line">xfs_repair /dev/DEVICE</span><br></pre></td></tr></table></figure>
 
-<h2 id="挂载设备"><a href="#挂载设备" class="headerlink" title="挂载设备"></a>挂载设备</h2><h3 id="mount"><a href="#mount" class="headerlink" title="mount"></a>mount</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mount</span>  device MOUNT_POINT
-
-<span class="token function">mount</span> <span class="token punctuation">[</span>-lhV<span class="token punctuation">]</span>
-<span class="token function">mount</span> <span class="token parameter variable">-a</span> <span class="token punctuation">[</span>-fFnrsvw<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t vfstype<span class="token punctuation">]</span> <span class="token punctuation">[</span>-O optlist<span class="token punctuation">]</span>
-<span class="token function">mount</span> <span class="token punctuation">[</span>-fnrsvw<span class="token punctuation">]</span> <span class="token punctuation">[</span>-o option<span class="token punctuation">[</span>,option<span class="token punctuation">]</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span>  device<span class="token operator">|</span><span class="token function">dir</span>
-<span class="token function">mount</span> <span class="token punctuation">[</span>-fnrsvw<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t vfstype<span class="token punctuation">]</span> <span class="token punctuation">[</span>-o options<span class="token punctuation">]</span> device <span class="token function">dir</span></code></pre>
+<h2 id="挂载设备"><a href="#挂载设备" class="headerlink" title="挂载设备"></a>挂载设备</h2><h3 id="mount"><a href="#mount" class="headerlink" title="mount"></a>mount</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mount  device MOUNT_POINT</span><br><span class="line"></span><br><span class="line">mount [-lhV]</span><br><span class="line">mount -a [-fFnrsvw] [-t vfstype] [-O optlist]</span><br><span class="line">mount [-fnrsvw] [-o option[,option]...]  device|<span class="built_in">dir</span></span><br><span class="line">mount [-fnrsvw] [-t vfstype] [-o options] device <span class="built_in">dir</span></span><br></pre></td></tr></table></figure>
 
 <p>device：设备文件:例如:&#x2F;dev&#x2F;sda5、伪文件系统名称:proc, sysfs, devtmpfs, configfs</p>
 <p>MOUNT_POINT：挂载点目录必须事先存在,建议使用空目录</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看当前已挂载的所有设备</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># mount</span>
-sysfs on /sys <span class="token builtin class-name">type</span> sysfs <span class="token punctuation">(</span>rw,nosuid,nodev,noexec,relatime,seclabel<span class="token punctuation">)</span>
-proc on /proc <span class="token builtin class-name">type</span> proc <span class="token punctuation">(</span>rw,nosuid,nodev,noexec,relatime<span class="token punctuation">)</span>
-devtmpfs on /dev <span class="token builtin class-name">type</span> devtmpfs <span class="token punctuation">(</span>rw,nosuid,seclabel,size<span class="token operator">=</span>487128k,nr_inodes<span class="token operator">=</span><span class="token number">121782</span>,mode<span class="token operator">=</span><span class="token number">755</span><span class="token punctuation">)</span>
-securityfs on /sys/kernel/security <span class="token builtin class-name">type</span> securityfs <span class="token punctuation">(</span>rw,nosuid,nodev,noexec,relatime<span class="token punctuation">)</span>
-tmpfs on /dev/shm <span class="token builtin class-name">type</span> tmpfs <span class="token punctuation">(</span>rw,nosuid,nodev,seclabel<span class="token punctuation">)</span>
-devpts on /dev/pts <span class="token builtin class-name">type</span> devpts <span class="token punctuation">(</span>rw,nosuid,noexec,relatime,seclabel,gid<span class="token operator">=</span><span class="token number">5</span>,mode<span class="token operator">=</span><span class="token number">620</span>,ptmxmode<span class="token operator">=</span>000<span class="token punctuation">)</span>
-<span class="token punctuation">..</span>.
-<span class="token punctuation">..</span>.
-<span class="token punctuation">..</span>.
-<span class="token comment"># 通过查看/etc/mtab文件显示当前已挂载的所有设备</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># ll /etc/mtab</span>
-lrwxrwxrwx. <span class="token number">1</span> root root <span class="token number">17</span> Aug <span class="token number">14</span> <span class="token number">19</span>:22 /etc/mtab -<span class="token operator">></span> /proc/self/mounts
-
-<span class="token comment"># 查看内核追踪到的已挂载的所有设备</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># ll /proc/mounts</span>
-lrwxrwxrwx. <span class="token number">1</span> root root <span class="token number">11</span> Aug <span class="token number">20</span> <span class="token number">18</span>:06 /proc/mounts -<span class="token operator">></span> self/mounts</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看当前已挂载的所有设备</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># mount</span></span><br><span class="line">sysfs on /sys <span class="built_in">type</span> sysfs (rw,nosuid,nodev,noexec,relatime,seclabel)</span><br><span class="line">proc on /proc <span class="built_in">type</span> proc (rw,nosuid,nodev,noexec,relatime)</span><br><span class="line">devtmpfs on /dev <span class="built_in">type</span> devtmpfs (rw,nosuid,seclabel,size=487128k,nr_inodes=121782,mode=755)</span><br><span class="line">securityfs on /sys/kernel/security <span class="built_in">type</span> securityfs (rw,nosuid,nodev,noexec,relatime)</span><br><span class="line">tmpfs on /dev/shm <span class="built_in">type</span> tmpfs (rw,nosuid,nodev,seclabel)</span><br><span class="line">devpts on /dev/pts <span class="built_in">type</span> devpts (rw,nosuid,noexec,relatime,seclabel,gid=5,mode=620,ptmxmode=000)</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"><span class="comment"># 通过查看/etc/mtab文件显示当前已挂载的所有设备</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># ll /etc/mtab</span></span><br><span class="line">lrwxrwxrwx. 1 root root 17 Aug 14 19:22 /etc/mtab -&gt; /proc/self/mounts</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看内核追踪到的已挂载的所有设备</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># ll /proc/mounts</span></span><br><span class="line">lrwxrwxrwx. 1 root root 11 Aug 20 18:06 /proc/mounts -&gt; self/mounts</span><br></pre></td></tr></table></figure>
 
 <h4 id="mount-o-options"><a href="#mount-o-options" class="headerlink" title="mount -o options"></a><code>mount -o options</code></h4><p>挂载不同的文件系统，-o 的 options 是不同的，具体有哪些 option，参考对应的文件系统的挂载选项，例如：要挂载 nfs，<code>man mount.nfs</code> 查看对应 option，要挂载 cifs，<code>man mount.cifs</code>查看对应的 option …</p>
-<h3 id="umount"><a href="#umount" class="headerlink" title="umount"></a>umount</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">umount</span> MOUNT_POINT<span class="token operator">|</span>device</code></pre>
+<h3 id="umount"><a href="#umount" class="headerlink" title="umount"></a>umount</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">umount MOUNT_POINT|device</span><br></pre></td></tr></table></figure>
 
 <h3 id="findmnt"><a href="#findmnt" class="headerlink" title="findmnt"></a>findmnt</h3><p>查看挂载点信息</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">findmnt MOUNT_POINT<span class="token operator">|</span>device</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">findmnt MOUNT_POINT|device</span><br></pre></td></tr></table></figure>
 
 <h3 id="lsof、fuser"><a href="#lsof、fuser" class="headerlink" title="lsof、fuser"></a>lsof、fuser</h3><p>查看正在访问指定文件系统的进程</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">lsof</span> MOUNT_POINT</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof MOUNT_POINT</span><br></pre></td></tr></table></figure>
 
 <p>终止所有正在访问指定挂载点的进程</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">fuser</span> <span class="token parameter variable">-km</span> MOUNT_POINT</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fuser -km MOUNT_POINT</span><br></pre></td></tr></table></figure>
 
 <h3 id="持久挂载"><a href="#持久挂载" class="headerlink" title="持久挂载"></a>持久挂载</h3><p>mount 命令是临时挂载，将挂载信息写入到&#x2F;etc&#x2F;fstab 中可以下次开机时自动启用挂载。</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># cat /etc/fstab</span>
-
-<span class="token comment">#</span>
-<span class="token comment"># /etc/fstab</span>
-<span class="token comment"># Created by anaconda on Wed Jul 29 17:08:37 2020</span>
-<span class="token comment">#</span>
-<span class="token comment"># Accessible filesystems, by reference, are maintained under '/dev/disk'</span>
-<span class="token comment"># See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</span>
-<span class="token comment">#</span>
-<span class="token assign-left variable">UUID</span><span class="token operator">=</span>28eb957c-1e98-4175-9a00-3efdef247355 /                       xfs     defaults        <span class="token number">0</span> <span class="token number">0</span>
-<span class="token assign-left variable">UUID</span><span class="token operator">=</span>25ea1f67-ee88-44b1-935e-8af77eadf856 /boot                   xfs     defaults        <span class="token number">0</span> <span class="token number">0</span>
-<span class="token assign-left variable">UUID</span><span class="token operator">=</span>91664c04-1540-4e35-8711-c3f183a556ca /data                   xfs     defaults        <span class="token number">0</span> <span class="token number">0</span>
-<span class="token assign-left variable">UUID</span><span class="token operator">=</span>a1966abb-acf9-4f53-8a86-733a93c2d576 swap                    swap    defaults        <span class="token number">0</span> <span class="token number">0</span>
-
-/dev/sr0 /data/repo/centos/7/x86_64 iso9660 defaults <span class="token number">0</span> <span class="token number">0</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># cat /etc/fstab</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># /etc/fstab</span></span><br><span class="line"><span class="comment"># Created by anaconda on Wed Jul 29 17:08:37 2020</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Accessible filesystems, by reference, are maintained under &#x27;/dev/disk&#x27;</span></span><br><span class="line"><span class="comment"># See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">UUID=28eb957c-1e98-4175-9a00-3efdef247355 /                       xfs     defaults        0 0</span><br><span class="line">UUID=25ea1f67-ee88-44b1-935e-8af77eadf856 /boot                   xfs     defaults        0 0</span><br><span class="line">UUID=91664c04-1540-4e35-8711-c3f183a556ca /data                   xfs     defaults        0 0</span><br><span class="line">UUID=a1966abb-acf9-4f53-8a86-733a93c2d576 swap                    swap    defaults        0 0</span><br><span class="line"></span><br><span class="line">/dev/sr0 /data/repo/centos/7/x86_64 iso9660 defaults 0 0</span><br></pre></td></tr></table></figure>
 
 <p>注意&#x2F;etc&#x2F;fstab 中 device 一般用 UUID 指代，而不是路径，因为 UUID 稳定，一般不会更改，&#x2F;dev&#x2F;sr0 这种不是特别合适。</p>
 <p><code>man 5 fstab</code>可以查看&#x2F;etc&#x2F;fstab 文件的格式，最后两个选项：</p>
@@ -670,42 +484,10 @@ lrwxrwxrwx. <span class="token number">1</span> root root <span class="token num
 <li>使用<code>swapon -a</code> 激活交换空间</li>
 </ol>
 <p>范例：以文件实现 swap 功能</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># dd if=/dev/zero of=/swapfile bs=1M count=1024</span>
-<span class="token number">1024</span>+0 records <span class="token keyword">in</span>
-<span class="token number">1024</span>+0 records out
-<span class="token number">1073741824</span> bytes <span class="token punctuation">(</span><span class="token number">1.1</span> GB<span class="token punctuation">)</span> copied, <span class="token number">2.04882</span> s, <span class="token number">524</span> MB/s
-
-<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># mkswap /swapfile</span>
-Setting up swapspace version <span class="token number">1</span>, size <span class="token operator">=</span> <span class="token number">1048572</span> KiB
-no label, <span class="token assign-left variable">UUID</span><span class="token operator">=</span>8ae1b7bc-7038-4f6a-9940-b75ec91beb21
-
-<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># chmod 600 /swapfile</span>
-<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># swapon /swapfile</span>
-
-<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># swapon -s</span>
-Filename				Type		    Size	           Used	Priority
-/dev/sda5               partition	<span class="token number">2097148</span>	      <span class="token number">0</span>	         <span class="token parameter variable">-2</span>
-/swapfile                <span class="token function">file</span>	            <span class="token number">1048572</span>	       <span class="token number">0</span>	     <span class="token parameter variable">-3</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 /]<span class="comment"># dd if=/dev/zero of=/swapfile bs=1M count=1024</span></span><br><span class="line">1024+0 records <span class="keyword">in</span></span><br><span class="line">1024+0 records out</span><br><span class="line">1073741824 bytes (1.1 GB) copied, 2.04882 s, 524 MB/s</span><br><span class="line"></span><br><span class="line">[root@centos7 /]<span class="comment"># mkswap /swapfile</span></span><br><span class="line">Setting up swapspace version 1, size = 1048572 KiB</span><br><span class="line">no label, UUID=8ae1b7bc-7038-4f6a-9940-b75ec91beb21</span><br><span class="line"></span><br><span class="line">[root@centos7 /]<span class="comment"># chmod 600 /swapfile</span></span><br><span class="line">[root@centos7 /]<span class="comment"># swapon /swapfile</span></span><br><span class="line"></span><br><span class="line">[root@centos7 /]<span class="comment"># swapon -s</span></span><br><span class="line">Filename				Type		    Size	           Used	Priority</span><br><span class="line">/dev/sda5               partition	2097148	      0	         -2</span><br><span class="line">/swapfile                file	            1048572	       0	     -3</span><br></pre></td></tr></table></figure>
 
 <h3 id="swap-的使用策略"><a href="#swap-的使用策略" class="headerlink" title="swap 的使用策略"></a>swap 的使用策略</h3><p>&#x2F;proc&#x2F;sys&#x2F;vm&#x2F;swappiness 的值决定了当内存占用达到一定的百分比时,会启用 swap 分区的空间，例如 swappiness 的值为 30，说明当物理内存使用到 70%，就开始使用 swap，应该将这个值设置为 0</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 临时修改</span>
-<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># echo 0 > /proc/sys/vm/swappiness</span>
-
-<span class="token comment"># 永久修改</span>
-<span class="token comment"># centos7</span>
-<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token comment"># echo 'vm.swappiness=0' >> /etc/sysctl.conf</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># sysctl -p</span>
-vm.swappiness <span class="token operator">=</span> <span class="token number">0</span>
-
-<span class="token comment"># ubuntu18.04</span>
-lujinkai@Z510:~$ <span class="token builtin class-name">echo</span> <span class="token string">'vm.swappiness=0'</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">of</span><span class="token operator">=</span>/etc/sysctl.conf <span class="token assign-left variable">oflag</span><span class="token operator">=</span>append <span class="token assign-left variable">conv</span><span class="token operator">=</span>notrunc
-<span class="token punctuation">[</span>sudo<span class="token punctuation">]</span> password <span class="token keyword">for</span> lujinkai:
-<span class="token number">0</span>+1 records <span class="token keyword">in</span>
-<span class="token number">0</span>+1 records out
-<span class="token number">16</span> bytes copied, <span class="token number">0.000102837</span> s, <span class="token number">156</span> kB/s
-lujinkai@Z510:~$ <span class="token function">sudo</span> <span class="token function">sysctl</span> <span class="token parameter variable">-p</span>
-vm.swappiness <span class="token operator">=</span> <span class="token number">0</span>
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 临时修改</span></span><br><span class="line">[root@centos7 /]<span class="comment"># echo 0 &gt; /proc/sys/vm/swappiness</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 永久修改</span></span><br><span class="line"><span class="comment"># centos7</span></span><br><span class="line">[root@centos7 /]<span class="comment"># echo &#x27;vm.swappiness=0&#x27; &gt;&gt; /etc/sysctl.conf</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># sysctl -p</span></span><br><span class="line">vm.swappiness = 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># ubuntu18.04</span></span><br><span class="line">lujinkai@Z510:~$ <span class="built_in">echo</span> <span class="string">&#x27;vm.swappiness=0&#x27;</span> | sudo <span class="built_in">dd</span> of=/etc/sysctl.conf oflag=append conv=notrunc</span><br><span class="line">[sudo] password <span class="keyword">for</span> lujinkai:</span><br><span class="line">0+1 records <span class="keyword">in</span></span><br><span class="line">0+1 records out</span><br><span class="line">16 bytes copied, 0.000102837 s, 156 kB/s</span><br><span class="line">lujinkai@Z510:~$ sudo sysctl -p</span><br><span class="line">vm.swappiness = 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h2 id="RAID-管理"><a href="#RAID-管理" class="headerlink" title="RAID 管理"></a>RAID 管理</h2><p>RAID：独立硬盘冗余阵列，简称磁盘阵列，利用虚拟化存储技术把多个硬盘组合起来,成为一个或多个硬盘阵列组,目的为提升性能或数据冗余,或是两者同时提升。</p>
 <p>简单来说,RAID 把多个硬盘组合成为一个逻辑硬盘,因此,操作系统只会把它当作一个实体硬盘。</p>
@@ -741,7 +523,7 @@ vm.swappiness <span class="token operator">=</span> <span class="token number">0
 <p><img data-src="//img.to2b.cn/blog/ljk/1597932121999.png"></p>
 <p>物理卷：还是&#x2F;dev&#x2F;sda、&#x2F;dev&#x2F;sdb 等，名称系统分配</p>
 <p>逻辑卷：&#x2F;dev&#x2F;vg0&#x2F;lv1 等，名称自定义</p>
-<h3 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h3><h4 id="1-安装-lvm2-包"><a href="#1-安装-lvm2-包" class="headerlink" title="1. 安装 lvm2 包"></a>1. 安装 lvm2 包</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># yum -y install lvm2</span></code></pre>
+<h3 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h3><h4 id="1-安装-lvm2-包"><a href="#1-安装-lvm2-包" class="headerlink" title="1. 安装 lvm2 包"></a>1. 安装 lvm2 包</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># yum -y install lvm2</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="2-将设备指定为物理卷"><a href="#2-将设备指定为物理卷" class="headerlink" title="2. 将设备指定为物理卷"></a>2. 将设备指定为物理卷</h4><ul>
 <li><code>pvs</code> 简要显示 pv 信息</li>
@@ -754,87 +536,14 @@ vm.swappiness <span class="token operator">=</span> <span class="token number">0
 </ul>
 </li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvcreate /dev/sdb</span>
-WARNING: dos signature detected on /dev/sdb at offset <span class="token number">510</span>. Wipe it? <span class="token punctuation">[</span>y/n<span class="token punctuation">]</span>: y
-  Wiping dos signature on /dev/sdb.
-  Physical volume <span class="token string">"/dev/sdb"</span> successfully created.
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvcreate /dev/sdc</span>
-  Physical volume <span class="token string">"/dev/sdc"</span> successfully created.
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lsblk -f</span>
-NAME   FSTYPE   LABEL           UUID                                   MOUNTPOINT
-sda
-<span class="token operator">|</span>-sda1 xfs                      25ea1f67-ee88-44b1-935e-8af77eadf856   /boot
-<span class="token operator">|</span>-sda2 xfs                      28eb957c-1e98-4175-9a00-3efdef247355   /
-<span class="token operator">|</span>-sda3 xfs                      91664c04-1540-4e35-8711-c3f183a556ca   /data
-<span class="token operator">|</span>-sda4
-<span class="token operator">|</span>-sda5 swap                     a1966abb-acf9-4f53-8a86-733a93c2d576   <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
-<span class="token operator">|</span>-sda6
-`-sda7
-sdb    LVM2_mem                 F4zIYp-IM1g-gJS6-ktqS-OZOD-u46a-z6YrQd
-sdc    LVM2_mem                 rAL8Wi-ln8P-LmUK-FaQn-40Mk-iGw4-ocXIUe
-sr0    iso9660  CentOS <span class="token number">7</span> x86_64 <span class="token number">2020</span>-04-22-00-51-40-00                 /data/repo/
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvs</span>
-  PV         VG Fmt  Attr PSize  PFree
-  /dev/sdb      lvm2 ---  <span class="token number">10</span>.00g <span class="token number">10</span>.00g
-  /dev/sdc      lvm2 ---   <span class="token number">5</span>.00g  <span class="token number">5</span>.00g
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># pvdisplay</span>
-  <span class="token string">"/dev/sdb"</span> is a new physical volume of <span class="token string">"10.00 GiB"</span>
-  --- NEW Physical volume ---
-  PV Name               /dev/sdb
-  VG Name
-  PV Size               <span class="token number">10.00</span> GiB
-  Allocatable           NO
-  PE Size               <span class="token number">0</span>
-  Total PE              <span class="token number">0</span>
-  Free PE               <span class="token number">0</span>
-  Allocated PE          <span class="token number">0</span>
-  PV UUID               F4zIYp-IM1g-gJS6-ktqS-OZOD-u46a-z6YrQd
-
-  <span class="token string">"/dev/sdc"</span> is a new physical volume of <span class="token string">"5.00 GiB"</span>
-  --- NEW Physical volume ---
-  PV Name               /dev/sdc
-  VG Name
-  PV Size               <span class="token number">5.00</span> GiB
-  Allocatable           NO
-  PE Size               <span class="token number">0</span>
-  Total PE              <span class="token number">0</span>
-  Free PE               <span class="token number">0</span>
-  Allocated PE          <span class="token number">0</span>
-  PV UUID               rAL8Wi-ln8P-LmUK-FaQn-40Mk-iGw4-ocXIUe
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># pvcreate /dev/sdb</span></span><br><span class="line">WARNING: dos signature detected on /dev/sdb at offset 510. Wipe it? [y/n]: y</span><br><span class="line">  Wiping dos signature on /dev/sdb.</span><br><span class="line">  Physical volume <span class="string">&quot;/dev/sdb&quot;</span> successfully created.</span><br><span class="line">[root@centos7 ~]<span class="comment"># pvcreate /dev/sdc</span></span><br><span class="line">  Physical volume <span class="string">&quot;/dev/sdc&quot;</span> successfully created.</span><br><span class="line">[root@centos7 ~]<span class="comment"># lsblk -f</span></span><br><span class="line">NAME   FSTYPE   LABEL           UUID                                   MOUNTPOINT</span><br><span class="line">sda</span><br><span class="line">|-sda1 xfs                      25ea1f67-ee88-44b1-935e-8af77eadf856   /boot</span><br><span class="line">|-sda2 xfs                      28eb957c-1e98-4175-9a00-3efdef247355   /</span><br><span class="line">|-sda3 xfs                      91664c04-1540-4e35-8711-c3f183a556ca   /data</span><br><span class="line">|-sda4</span><br><span class="line">|-sda5 swap                     a1966abb-acf9-4f53-8a86-733a93c2d576   [SWAP]</span><br><span class="line">|-sda6</span><br><span class="line">`-sda7</span><br><span class="line">sdb    LVM2_mem                 F4zIYp-IM1g-gJS6-ktqS-OZOD-u46a-z6YrQd</span><br><span class="line">sdc    LVM2_mem                 rAL8Wi-ln8P-LmUK-FaQn-40Mk-iGw4-ocXIUe</span><br><span class="line">sr0    iso9660  CentOS 7 x86_64 2020-04-22-00-51-40-00                 /data/repo/</span><br><span class="line">[root@centos7 ~]<span class="comment"># pvs</span></span><br><span class="line">  PV         VG Fmt  Attr PSize  PFree</span><br><span class="line">  /dev/sdb      lvm2 ---  10.00g 10.00g</span><br><span class="line">  /dev/sdc      lvm2 ---   5.00g  5.00g</span><br><span class="line">[root@centos7 ~]<span class="comment"># pvdisplay</span></span><br><span class="line">  <span class="string">&quot;/dev/sdb&quot;</span> is a new physical volume of <span class="string">&quot;10.00 GiB&quot;</span></span><br><span class="line">  --- NEW Physical volume ---</span><br><span class="line">  PV Name               /dev/sdb</span><br><span class="line">  VG Name</span><br><span class="line">  PV Size               10.00 GiB</span><br><span class="line">  Allocatable           NO</span><br><span class="line">  PE Size               0</span><br><span class="line">  Total PE              0</span><br><span class="line">  Free PE               0</span><br><span class="line">  Allocated PE          0</span><br><span class="line">  PV UUID               F4zIYp-IM1g-gJS6-ktqS-OZOD-u46a-z6YrQd</span><br><span class="line"></span><br><span class="line">  <span class="string">&quot;/dev/sdc&quot;</span> is a new physical volume of <span class="string">&quot;5.00 GiB&quot;</span></span><br><span class="line">  --- NEW Physical volume ---</span><br><span class="line">  PV Name               /dev/sdc</span><br><span class="line">  VG Name</span><br><span class="line">  PV Size               5.00 GiB</span><br><span class="line">  Allocatable           NO</span><br><span class="line">  PE Size               0</span><br><span class="line">  Total PE              0</span><br><span class="line">  Free PE               0</span><br><span class="line">  Allocated PE          0</span><br><span class="line">  PV UUID               rAL8Wi-ln8P-LmUK-FaQn-40Mk-iGw4-ocXIUe</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h4 id="3-用一个或多个物理卷来创建一个卷组"><a href="#3-用一个或多个物理卷来创建一个卷组" class="headerlink" title="3. 用一个或多个物理卷来创建一个卷组"></a>3. 用一个或多个物理卷来创建一个卷组</h4><ul>
 <li><code>vgs</code> 显示卷组</li>
 <li><code>vgdisplay</code> 显示卷组</li>
 <li><code>vgcreate 卷组名 物理卷列表</code> 创建卷组</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 指定PE大小为16M，默认4M</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># vgcreate -s 16M vg0 /dev/sdb /dev/sdc</span>
-  Volume group <span class="token string">"vg0"</span> successfully created
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># vgs</span>
-  VG  <span class="token comment">#PV #LV #SN Attr   VSize   VFree</span>
-  vg0   <span class="token number">2</span>   <span class="token number">0</span>   <span class="token number">0</span> wz--n- <span class="token operator">&lt;</span><span class="token number">14</span>.97g <span class="token operator">&lt;</span><span class="token number">14</span>.97g
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># vgdisplay</span>
-  --- Volume group ---
-  VG Name               vg0
-  System ID
-  Format                lvm2
-  Metadata Areas        <span class="token number">2</span>
-  Metadata Sequence No  <span class="token number">1</span>
-  VG Access             read/write
-  VG Status             resizable
-  MAX LV                <span class="token number">0</span>
-  Cur LV                <span class="token number">0</span>
-  Open LV               <span class="token number">0</span>
-  Max PV                <span class="token number">0</span>
-  Cur PV                <span class="token number">2</span>
-  Act PV                <span class="token number">2</span>
-  VG Size               <span class="token operator">&lt;</span><span class="token number">14.97</span> GiB
-  PE Size               <span class="token number">16.00</span> MiB
-  Total PE              <span class="token number">958</span>
-  Alloc PE / Size       <span class="token number">0</span> / <span class="token number">0</span>
-  Free  PE / Size       <span class="token number">958</span> / <span class="token operator">&lt;</span><span class="token number">14.97</span> GiB
-  VG UUID               zszcPb-urGs-jKX8-ZOCu-Xlb8-JPrD-b5bVt8</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定PE大小为16M，默认4M</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># vgcreate -s 16M vg0 /dev/sdb /dev/sdc</span></span><br><span class="line">  Volume group <span class="string">&quot;vg0&quot;</span> successfully created</span><br><span class="line">[root@centos7 ~]<span class="comment"># vgs</span></span><br><span class="line">  VG  <span class="comment">#PV #LV #SN Attr   VSize   VFree</span></span><br><span class="line">  vg0   2   0   0 wz--n- &lt;14.97g &lt;14.97g</span><br><span class="line">[root@centos7 ~]<span class="comment"># vgdisplay</span></span><br><span class="line">  --- Volume group ---</span><br><span class="line">  VG Name               vg0</span><br><span class="line">  System ID</span><br><span class="line">  Format                lvm2</span><br><span class="line">  Metadata Areas        2</span><br><span class="line">  Metadata Sequence No  1</span><br><span class="line">  VG Access             <span class="built_in">read</span>/write</span><br><span class="line">  VG Status             resizable</span><br><span class="line">  MAX LV                0</span><br><span class="line">  Cur LV                0</span><br><span class="line">  Open LV               0</span><br><span class="line">  Max PV                0</span><br><span class="line">  Cur PV                2</span><br><span class="line">  Act PV                2</span><br><span class="line">  VG Size               &lt;14.97 GiB</span><br><span class="line">  PE Size               16.00 MiB</span><br><span class="line">  Total PE              958</span><br><span class="line">  Alloc PE / Size       0 / 0</span><br><span class="line">  Free  PE / Size       958 / &lt;14.97 GiB</span><br><span class="line">  VG UUID               zszcPb-urGs-jKX8-ZOCu-Xlb8-JPrD-b5bVt8</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><code>vgextend 卷组名 物理卷列表</code> 向卷组中添加物理卷</li>
@@ -853,31 +562,12 @@ sr0    iso9660  CentOS <span class="token number">7</span> x86_64 <span class="t
 <ul>
 <li>n 后面跟逻辑卷名</li>
 <li>s 创建快照</li>
-<li>l 指定逻辑卷的大小（LE 数）<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 卷组vg0分配100个PE给新建逻辑卷lv0，这样lv0的大小就是100个LE</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvcreate -l 100 -n lv0 vg0</span>
-<span class="token comment"># 其他范例</span>
-lvcreate <span class="token parameter variable">-l</span> <span class="token number">60</span>%VG <span class="token parameter variable">-n</span> mylv testvg
-lvcreate <span class="token parameter variable">-l</span> <span class="token number">100</span>%FREE <span class="token parameter variable">-n</span> yourlv testvg</code></pre></li>
-<li>L 指定逻辑卷的大小，单位为“kKmMgGtT”<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 卷组vg0分配1G给新建逻辑卷lv1</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvcreate -L 1G -n lv1 vg0</span></code></pre></li>
+<li>l 指定逻辑卷的大小（LE 数）<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 卷组vg0分配100个PE给新建逻辑卷lv0，这样lv0的大小就是100个LE</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># lvcreate -l 100 -n lv0 vg0</span></span><br><span class="line"><span class="comment"># 其他范例</span></span><br><span class="line">lvcreate -l 60%VG -n mylv testvg</span><br><span class="line">lvcreate -l 100%FREE -n yourlv testvg</span><br></pre></td></tr></table></figure></li>
+<li>L 指定逻辑卷的大小，单位为“kKmMgGtT”<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 卷组vg0分配1G给新建逻辑卷lv1</span></span><br><span class="line">[root@centos7 ~]<span class="comment"># lvcreate -L 1G -n lv1 vg0</span></span><br></pre></td></tr></table></figure></li>
 </ul>
 </li>
 <li><p><code>lvremove 逻辑卷</code> 删除逻辑卷</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvs</span>
-  LV   VG  Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
-  lv0  vg0 -wi-a-----   <span class="token number">1</span>.56g
-  lv1  vg0 -wi-a-----   <span class="token number">1</span>.00g
-  lv2  vg0 -wi-a----- <span class="token operator">&lt;</span><span class="token number">12</span>.41g
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvremove lv2</span>
-  Volume group <span class="token string">"lv2"</span> not found
-  Cannot process volume group lv2
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvremove /dev/vg0/lv2</span>
-Do you really want to remove active logical volume vg0/lv2? <span class="token punctuation">[</span>y/n<span class="token punctuation">]</span>: y
-  Logical volume <span class="token string">"lv2"</span> successfully removed
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvs</span>
-  LV   VG  Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
-  lv0  vg0 -wi-a----- <span class="token number">1</span>.56g
-  lv1  vg0 -wi-a----- <span class="token number">1</span>.00g</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># lvs</span></span><br><span class="line">  LV   VG  Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  lv0  vg0 -wi-a-----   1.56g</span><br><span class="line">  lv1  vg0 -wi-a-----   1.00g</span><br><span class="line">  lv2  vg0 -wi-a----- &lt;12.41g</span><br><span class="line">[root@centos7 ~]<span class="comment"># lvremove lv2</span></span><br><span class="line">  Volume group <span class="string">&quot;lv2&quot;</span> not found</span><br><span class="line">  Cannot process volume group lv2</span><br><span class="line">[root@centos7 ~]<span class="comment"># lvremove /dev/vg0/lv2</span></span><br><span class="line">Do you really want to remove active logical volume vg0/lv2? [y/n]: y</span><br><span class="line">  Logical volume <span class="string">&quot;lv2&quot;</span> successfully removed</span><br><span class="line">[root@centos7 ~]<span class="comment"># lvs</span></span><br><span class="line">  LV   VG  Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  lv0  vg0 -wi-a----- 1.56g</span><br><span class="line">  lv1  vg0 -wi-a----- 1.00g</span><br></pre></td></tr></table></figure>
 </li>
 <li><p><code>lvextend</code> 扩展逻辑卷</p>
 <ul>
@@ -885,18 +575,9 @@ Do you really want to remove active logical volume vg0/lv2? <span class="token p
 <li>-l [+]Number[PERCENT]</li>
 <li>-r 如果逻辑卷上已经有文件系统，同步扩展文件系统</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 两步实现：</span>
-<span class="token comment"># 1. 实现逻辑卷的空间扩展</span>
-lvextend <span class="token parameter variable">-L</span> <span class="token punctuation">[</span>+<span class="token punctuation">]</span><span class="token comment">#[mMgGtT] /dev/VG_NAME/LV_NAME</span>
-<span class="token comment"># 2. 实现文件系统的扩展</span>
-resize2fs /dev/VG_NAME/LV_NAME	<span class="token comment"># 针对ext</span>
-<span class="token comment"># 或：</span>
-xfs_growfs MOUNTPOINT			<span class="token comment"># 针对xfs</span>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 两步实现：</span></span><br><span class="line"><span class="comment"># 1. 实现逻辑卷的空间扩展</span></span><br><span class="line">lvextend -L [+]<span class="comment">#[mMgGtT] /dev/VG_NAME/LV_NAME</span></span><br><span class="line"><span class="comment"># 2. 实现文件系统的扩展</span></span><br><span class="line">resize2fs /dev/VG_NAME/LV_NAME	<span class="comment"># 针对ext</span></span><br><span class="line"><span class="comment"># 或：</span></span><br><span class="line">xfs_growfs MOUNTPOINT			<span class="comment"># 针对xfs</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 一步实现</span></span><br><span class="line">lvresize -r -l +100%FREE /dev/VG_NAME/LV_NAME</span><br></pre></td></tr></table></figure>
 
-<span class="token comment"># 一步实现</span>
-lvresize <span class="token parameter variable">-r</span> <span class="token parameter variable">-l</span> +100%FREE /dev/VG_NAME/LV_NAME</code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># lvextend -r -L +1G /dev/vg0/lv1</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 ~]<span class="comment"># lvextend -r -L +1G /dev/vg0/lv1</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p><code>lvreduce</code> 缩减逻辑卷，只针对 ext 文件系统，xfs 不支持缩减，缩减有风险，最好先备份数据</p>
 <ul>
@@ -905,8 +586,7 @@ lvresize <span class="token parameter variable">-r</span> <span class="token par
 </ul>
 </li>
 </ul>
-<h4 id="5-在逻辑卷上创建文件系统并挂载"><a href="#5-在逻辑卷上创建文件系统并挂载" class="headerlink" title="5. 在逻辑卷上创建文件系统并挂载"></a>5. 在逻辑卷上创建文件系统并挂载</h4><pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.ext4 /dev/vg0/lv1
-<span class="token function">mount</span> /dev/vg0/lv1 /mnt/lv1/</code></pre>
+<h4 id="5-在逻辑卷上创建文件系统并挂载"><a href="#5-在逻辑卷上创建文件系统并挂载" class="headerlink" title="5. 在逻辑卷上创建文件系统并挂载"></a>5. 在逻辑卷上创建文件系统并挂载</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkfs.ext4 /dev/vg0/lv1</span><br><span class="line">mount /dev/vg0/lv1 /mnt/lv1/</span><br></pre></td></tr></table></figure>
 
 <h4 id="6-跨主机迁移卷组"><a href="#6-跨主机迁移卷组" class="headerlink" title="6. 跨主机迁移卷组"></a>6. 跨主机迁移卷组</h4><ol>
 <li><p>在旧系统中,umount 所有卷组上的逻辑卷</p>
@@ -915,25 +595,22 @@ lvresize <span class="token parameter variable">-r</span> <span class="token par
 <p>vgchange 用于修改卷组的属性，经常被用来设置卷组是处于活动状态或者非活动状态。</p>
 </li>
 </ol>
-<pre class="language-bash" data-language="bash"><code class="language-bash">vgchange –a n vg0
-lvdisplay</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vgchange –a n vg0</span><br><span class="line">lvdisplay</span><br></pre></td></tr></table></figure>
 
 <ol start="3">
 <li>导出卷组</li>
 </ol>
-<pre class="language-bash" data-language="bash"><code class="language-bash">vgexport vg0
-pvscan
-vgdisplay</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vgexport vg0</span><br><span class="line">pvscan</span><br><span class="line">vgdisplay</span><br></pre></td></tr></table></figure>
 
 <ol start="4">
 <li>拆下旧硬盘在目标计算机上,并导入卷组</li>
 </ol>
-<pre class="language-bash" data-language="bash"><code class="language-bash">vgimport vg0</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vgimport vg0</span><br></pre></td></tr></table></figure>
 
 <ol start="5">
 <li>启用</li>
 </ol>
-<pre class="language-bash" data-language="bash"><code class="language-bash">vgchange –ay vg0</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vgchange –ay vg0</span><br></pre></td></tr></table></figure>
 
 <ol start="6">
 <li>mount 所有卷组上的逻辑卷</li>
@@ -944,25 +621,7 @@ vgdisplay</code></pre>
 <li>pvremove 从机器上移除物理卷</li>
 </ol>
 <h3 id="逻辑卷快照"><a href="#逻辑卷快照" class="headerlink" title="逻辑卷快照"></a>逻辑卷快照</h3><p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">mkfs.xfs	/dev/vg0/data
-<span class="token function">mount</span>	/dev/vg0/data/	/mnt/data
-
-<span class="token comment">#为现有逻辑卷创建快照，快照大小一般指定为十分之一</span>
-<span class="token comment">#  -p|--permission rw|r</span>
-lvcreate	<span class="token parameter variable">-l</span>	<span class="token number">64</span>	<span class="token parameter variable">-s</span>	<span class="token parameter variable">-n</span>	data-snapshot	<span class="token parameter variable">-p</span>	r	/dev/vg0/data
-
-<span class="token comment">#挂载快照</span>
-<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /mnt/snap
-<span class="token function">mount</span> <span class="token parameter variable">-o</span> ro,nouuid /dev/vg0/data-snapshot /mnt/snap		<span class="token comment">#  -o ro,nouuid 只读，不校验重复uuid</span>
-
-<span class="token comment">#恢复快照</span>
-<span class="token function">umount</span> /dev/vg0/data-snapshot
-<span class="token function">umount</span> /dev/vg0/data
-lvconvert <span class="token parameter variable">--merge</span> /dev/vg0/data-snapshot
-
-<span class="token comment">#删除快照</span>
-<span class="token function">umount</span>	/mnt/snap
-lvremove	/dev/vg0/data-snapshot</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">mkfs.xfs	/dev/vg0/data</span><br><span class="line">mount	/dev/vg0/data/	/mnt/data</span><br><span class="line"></span><br><span class="line"><span class="comment">#为现有逻辑卷创建快照，快照大小一般指定为十分之一</span></span><br><span class="line"><span class="comment">#  -p|--permission rw|r</span></span><br><span class="line">lvcreate	-l	64	-s	-n	data-snapshot	-p	r	/dev/vg0/data</span><br><span class="line"></span><br><span class="line"><span class="comment">#挂载快照</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /mnt/snap</span><br><span class="line">mount -o ro,nouuid /dev/vg0/data-snapshot /mnt/snap		<span class="comment">#  -o ro,nouuid 只读，不校验重复uuid</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#恢复快照</span></span><br><span class="line">umount /dev/vg0/data-snapshot</span><br><span class="line">umount /dev/vg0/data</span><br><span class="line">lvconvert --merge /dev/vg0/data-snapshot</span><br><span class="line"></span><br><span class="line"><span class="comment">#删除快照</span></span><br><span class="line">umount	/mnt/snap</span><br><span class="line">lvremove	/dev/vg0/data-snapshot</span><br></pre></td></tr></table></figure>
 
     </div>
 

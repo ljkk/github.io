@@ -18,12 +18,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="安装为双系统后，默认为 ubuntu 启动 现在将其设为，默认启动上次选择启动的系统（让 grub 记住上次启动时选择的系统）: sudo vim &#x2F;etc&#x2F;default&#x2F;grub  GRUB_DEFAULT&#x3D;0（0 为 ubuntu 启动）改为 GRUB_DEFAULT&#x3D;saved 文件末尾添加 GRUB_SAVEDEFAULT&#x3D;tr">
+    <meta name="description" content="安装为双系统后，默认为 ubuntu 启动 现在将其设为，默认启动上次选择启动的系统（让 grub 记住上次启动时选择的系统）: 1sudo vim &#x2F;etc&#x2F;default&#x2F;grub  GRUB_DEFAULT&#x3D;0（0 为 ubuntu 启动）改为 GRUB_DEFAULT&#x3D;saved 文件末尾添加 GRUB_SAVEDEFAULT&#x3D;true（这行命令可以修复只修改">
 <meta property="og:type" content="article">
 <meta property="og:title" content="双系统修改引导启动顺序">
 <meta property="og:url" content="http://blog.lujinkai.cn/%E5%B7%A5%E5%85%B7/ubuntu/%E5%8F%8C%E7%B3%BB%E7%BB%9F%E4%BF%AE%E6%94%B9%E5%BC%95%E5%AF%BC%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F/index.html">
 <meta property="og:site_name" content="LJKのBlog">
-<meta property="og:description" content="安装为双系统后，默认为 ubuntu 启动 现在将其设为，默认启动上次选择启动的系统（让 grub 记住上次启动时选择的系统）: sudo vim &#x2F;etc&#x2F;default&#x2F;grub  GRUB_DEFAULT&#x3D;0（0 为 ubuntu 启动）改为 GRUB_DEFAULT&#x3D;saved 文件末尾添加 GRUB_SAVEDEFAULT&#x3D;tr">
+<meta property="og:description" content="安装为双系统后，默认为 ubuntu 启动 现在将其设为，默认启动上次选择启动的系统（让 grub 记住上次启动时选择的系统）: 1sudo vim &#x2F;etc&#x2F;default&#x2F;grub  GRUB_DEFAULT&#x3D;0（0 为 ubuntu 启动）改为 GRUB_DEFAULT&#x3D;saved 文件末尾添加 GRUB_SAVEDEFAULT&#x3D;true（这行命令可以修复只修改">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-12-07T13:29:47.000Z">
 <meta property="article:modified_time" content="2023-05-29T08:58:05.482Z">
@@ -258,7 +258,7 @@
     
     <div class="post-body" itemprop="articleBody"><p>安装为双系统后，默认为 ubuntu 启动</p>
 <p>现在将其设为，默认启动上次选择启动的系统（让 grub 记住上次启动时选择的系统）:</p>
-<pre class="language-none"><code class="language-none">sudo vim &#x2F;etc&#x2F;default&#x2F;grub</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/default/grub</span><br></pre></td></tr></table></figure>
 
 <p>GRUB_DEFAULT&#x3D;0（0 为 ubuntu 启动）改为 GRUB_DEFAULT&#x3D;saved</p>
 <p>文件末尾添加 GRUB_SAVEDEFAULT&#x3D;true（这行命令可以修复只修改“grub_deault&#x3D;saved”，但是启动时依然不能记住上次的启动的 GRUB2 的 bug）</p>
@@ -269,42 +269,7 @@
 <p>GRUB_TIMEOUT&#x3D;10 可调整自动进入时间</p>
 <p>要固定默认启动系统，只需调整 GRUB_DEFAULT&#x3D;0 为 windows10 所在序号（ubuntu 为 0 以此类推），然后更新配置文件</p>
 <p>附&#x2F;etc&#x2F;default&#x2F;grub 配置文件详解：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># 设定默认启动项，推荐使用数字</span>
-<span class="token key attr-name">GRUB_DEFAULT</span><span class="token punctuation">=</span><span class="token value attr-value">0</span>
-
-<span class="token comment"># 注释掉下面这行将会显示引导菜单</span>
-<span class="token comment">#GRUB_HIDDEN_TIMEOUT=0</span>
-
-<span class="token comment"># 黑屏，并且不显示GRUB_HIDDEN_TIMEOUT过程中的倒计时</span>
-<span class="token key attr-name">GRUB_HIDDEN_TIMEOUT_QUIET</span><span class="token punctuation">=</span><span class="token value attr-value">true</span>
-
-<span class="token comment"># 设定超时时间，默认为10秒</span>
-<span class="token comment"># 设定为-1取消倒计时</span>
-<span class="token key attr-name">GRUB_TIMEOUT</span><span class="token punctuation">=</span><span class="token value attr-value">10</span>
-
-<span class="token comment"># 获得发行版名称（比如Ubuntu, Debian）</span>
-<span class="token key attr-name">GRUB_DISTRIBUTOR</span><span class="token punctuation">=</span><span class="token value attr-value">`lsb_release -i -s 2> /dev/null || echo Debian`</span>
-
-<span class="token comment"># 将会导入到每个启动项（包括recovery mode启动项)的'linux'命令行</span>
-<span class="token key attr-name">GRUB_CMDLINE_LINUX</span><span class="token punctuation">=</span><span class="token value attr-value">""</span>
-
-<span class="token comment"># 同上，但是只会添加到 normal mode 的启动项</span>
-<span class="token key attr-name">GRUB_CMDLINE_LINUX_DEFAULT</span><span class="token punctuation">=</span><span class="token value attr-value">"<span class="token inner-value">quiet splash</span>"</span>
-
-<span class="token comment"># 取消注释以允许图形终端（只适合grub-pc）</span>
-<span class="token comment">#GRUB_TERMINAL=console</span>
-
-<span class="token comment"># 分辨率设定，否则采用默认值</span>
-<span class="token comment">#GRUB_GFXMODE=640x480</span>
-
-<span class="token comment"># 取消注释以阻止GRUB将传递参数 "root=UUID=xxx" 传递给 Linux</span>
-<span class="token comment">#GRUB_DISABLE_LINUX_UUID=true</span>
-
-<span class="token comment"># 取消启动菜单中的“Recovery Mode”选项</span>
-<span class="token comment">#GRUB_DISABLE_LINUX_RECOVERY="true"</span>
-
-<span class="token comment"># 当GRUB菜单出现时发出鸣音提醒</span>
-<span class="token comment">#GRUB_INIT_TUNE="480 440 1"</span></code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设定默认启动项，推荐使用数字</span></span><br><span class="line"><span class="attr">GRUB_DEFAULT</span>=<span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 注释掉下面这行将会显示引导菜单</span></span><br><span class="line"><span class="comment">#GRUB_HIDDEN_TIMEOUT=0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 黑屏，并且不显示GRUB_HIDDEN_TIMEOUT过程中的倒计时</span></span><br><span class="line"><span class="attr">GRUB_HIDDEN_TIMEOUT_QUIET</span>=<span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设定超时时间，默认为10秒</span></span><br><span class="line"><span class="comment"># 设定为-1取消倒计时</span></span><br><span class="line"><span class="attr">GRUB_TIMEOUT</span>=<span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获得发行版名称（比如Ubuntu, Debian）</span></span><br><span class="line"><span class="attr">GRUB_DISTRIBUTOR</span>=`lsb_release -i -s <span class="number">2</span>&gt; /dev/null || echo Debian`</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将会导入到每个启动项（包括recovery mode启动项)的&#x27;linux&#x27;命令行</span></span><br><span class="line"><span class="attr">GRUB_CMDLINE_LINUX</span>=<span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 同上，但是只会添加到 normal mode 的启动项</span></span><br><span class="line"><span class="attr">GRUB_CMDLINE_LINUX_DEFAULT</span>=<span class="string">&quot;quiet splash&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取消注释以允许图形终端（只适合grub-pc）</span></span><br><span class="line"><span class="comment">#GRUB_TERMINAL=console</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分辨率设定，否则采用默认值</span></span><br><span class="line"><span class="comment">#GRUB_GFXMODE=640x480</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取消注释以阻止GRUB将传递参数 &quot;root=UUID=xxx&quot; 传递给 Linux</span></span><br><span class="line"><span class="comment">#GRUB_DISABLE_LINUX_UUID=true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取消启动菜单中的“Recovery Mode”选项</span></span><br><span class="line"><span class="comment">#GRUB_DISABLE_LINUX_RECOVERY=&quot;true&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 当GRUB菜单出现时发出鸣音提醒</span></span><br><span class="line"><span class="comment">#GRUB_INIT_TUNE=&quot;480 440 1&quot;</span></span><br></pre></td></tr></table></figure>
 
     </div>
 

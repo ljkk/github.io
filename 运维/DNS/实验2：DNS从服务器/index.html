@@ -263,97 +263,32 @@
 <h2 id="前提准备"><a href="#前提准备" class="headerlink" title="前提准备"></a>前提准备</h2><p>关闭 SElinux<br>关闭防火墙<br>时间同步</p>
 <h2 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h2><h3 id="主-DNS-服务器配置"><a href="#主-DNS-服务器配置" class="headerlink" title="主 DNS 服务器配置"></a>主 DNS 服务器配置</h3><p>参照前面案例的配置，修改只有两处：allow-transfer 和 slave</p>
 <p><strong>1. 配置 &#x2F;etc&#x2F;named.conf：</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># allow-transfer &#123; 从服务器IP;&#125;;	只允许从服务器进行区域传输</span>
-<span class="token comment"># 同步全部，将配置写入option&#123;&#125;；同步区域，将配置写入zone "ZONE_NAME" &#123;&#125;</span>
-
-options <span class="token punctuation">&#123;</span>
-	<span class="token punctuation">..</span>.
-	allow-transfer <span class="token punctuation">&#123;</span><span class="token number">10.0</span>.0.79<span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-	<span class="token punctuation">..</span>.
-<span class="token punctuation">&#125;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># allow-transfer &#123; 从服务器IP;&#125;;	只允许从服务器进行区域传输</span></span><br><span class="line"><span class="comment"># 同步全部，将配置写入option&#123;&#125;；同步区域，将配置写入zone &quot;ZONE_NAME&quot; &#123;&#125;</span></span><br><span class="line"></span><br><span class="line">options &#123;</span><br><span class="line">	...</span><br><span class="line">	allow-transfer &#123;10.0.0.79;&#125;;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>1.1 配置 &#x2F;etc&#x2F;named.rfc1912.zones</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">zone <span class="token string">"magedu.local"</span> IN <span class="token punctuation">&#123;</span>
-    <span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
-    <span class="token function">file</span> <span class="token string">"magedu.local.zone"</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">&quot;magedu.local&quot;</span> IN &#123;</span><br><span class="line">    <span class="built_in">type</span> master;</span><br><span class="line">    file <span class="string">&quot;magedu.local.zone&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p><strong>2. 修改 DNS 区域数据库文件 &#x2F;var&#x2F;named&#x2F;magedu.org.zone</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$TTL</span> 1D
-@       IN      SOA     master  admin.magedu.org. <span class="token punctuation">(</span>
-                                                        <span class="token number">0</span> <span class="token punctuation">;</span> serial
-                                                        1D <span class="token punctuation">;</span> refresh
-                                                        1H <span class="token punctuation">;</span> retry
-                                                        1W <span class="token punctuation">;</span> expire
-                                                        3H <span class="token punctuation">)</span> <span class="token punctuation">;</span> minimum
-                NS      master
-master          A       <span class="token number">10.0</span>.0.175
-www             A       <span class="token number">10.0</span>.0.8
-slave           A       <span class="token number">10.0</span>.0.6</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$TTL</span> 1D</span><br><span class="line">@       IN      SOA     master  admin.magedu.org. (</span><br><span class="line">                                                        0 ; serial</span><br><span class="line">                                                        1D ; refresh</span><br><span class="line">                                                        1H ; retry</span><br><span class="line">                                                        1W ; expire</span><br><span class="line">                                                        3H ) ; minimum</span><br><span class="line">                NS      master</span><br><span class="line">master          A       10.0.0.175</span><br><span class="line">www             A       10.0.0.8</span><br><span class="line">slave           A       10.0.0.6</span><br></pre></td></tr></table></figure>
 
 <p><strong>3. 检查并重启 DNS 主服务器</strong></p>
-<pre class="language-none"><code class="language-none">[root@centos8 ~]$named-checkconf
-[root@centos8 slaves]$named-checkzone magedu.loacl &#x2F;var&#x2F;named&#x2F;magedu.local.zone
-zone magedu.loacl&#x2F;IN: loaded serial 0
-OK
-[root@centos8 ~]$rndc reload
-server reload successful</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$named-checkconf</span><br><span class="line">[root@centos8 slaves]$named-checkzone magedu.loacl /var/named/magedu.local.zone</span><br><span class="line">zone magedu.loacl/IN: loaded serial 0</span><br><span class="line">OK</span><br><span class="line">[root@centos8 ~]$rndc reload</span><br><span class="line">server reload successful</span><br></pre></td></tr></table></figure>
 
-<h3 id="从-DNS-服务器配置"><a href="#从-DNS-服务器配置" class="headerlink" title="从 DNS 服务器配置"></a>从 DNS 服务器配置</h3><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> <span class="token builtin class-name">bind</span> <span class="token parameter variable">-y</span></code></pre>
+<h3 id="从-DNS-服务器配置"><a href="#从-DNS-服务器配置" class="headerlink" title="从 DNS 服务器配置"></a>从 DNS 服务器配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install <span class="built_in">bind</span> -y</span><br></pre></td></tr></table></figure>
 
 <p>修改 &#x2F;etc&#x2F;named.conf</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">options <span class="token punctuation">&#123;</span>
-	<span class="token punctuation">..</span>.
-	// listen-on port <span class="token number">53</span> <span class="token punctuation">&#123;</span> <span class="token number">127.0</span>.0.1<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-    // allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-    <span class="token comment">#不允许其它主机进行区域传输</span>
-    allow-transfer <span class="token punctuation">&#123;</span> none<span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-	<span class="token punctuation">..</span>.
-<span class="token punctuation">&#125;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">	...</span><br><span class="line">	// listen-on port 53 &#123; 127.0.0.1; &#125;;</span><br><span class="line">    // allow-query &#123; localhost; &#125;;</span><br><span class="line">    <span class="comment">#不允许其它主机进行区域传输</span></span><br><span class="line">    allow-transfer &#123; none;&#125;;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>配置 &#x2F;etc&#x2F;named.rfc1912.zones</p>
-<pre class="language-none"><code class="language-none">zone &quot;magedu.local&quot; IN &#123;
-    type slave;
-    masters &#123;10.0.0.175;&#125;;
-    file &quot;slaves&#x2F;magedu.local.slave&quot;;
-&#125;;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;magedu.local&quot; IN &#123;</span><br><span class="line">    type slave;</span><br><span class="line">    masters &#123;10.0.0.175;&#125;;</span><br><span class="line">    file &quot;slaves/magedu.local.slave&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>检查并启动</p>
-<pre class="language-none"><code class="language-none">[root@centos6 ~]$named-checkconf
-[root@centos6 slaves]$service named start
-Generating &#x2F;etc&#x2F;rndc.key:                                  [  OK  ]
-Starting named:                                            [  OK  ]</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 ~]$named-checkconf</span><br><span class="line">[root@centos6 slaves]$service named start</span><br><span class="line">Generating /etc/rndc.key:                                  [  OK  ]</span><br><span class="line">Starting named:                                            [  OK  ]</span><br></pre></td></tr></table></figure>
 
 <p>查看是否生成 magedu.local.slave，注意，DNS 主从服务器都要配置正确才能生成，一开始 DNS 主服务器的 allow-transfer 配置错了从 DNS 从服务器的地址，就怎么也生成不了</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos6 named<span class="token punctuation">]</span><span class="token variable">$ll</span> /var/named/slaves/magedu.local.slave
--rw-r--r-- <span class="token number">1</span> named named <span class="token number">361</span> Sep <span class="token number">17</span> <span class="token number">20</span>:29 /var/named/slaves/magedu.local.slave
-<span class="token punctuation">[</span>root@centos6 named<span class="token punctuation">]</span><span class="token variable">$cat</span> <span class="token operator">!</span>$
-<span class="token function">cat</span> /var/named/slaves/magedu.local.slave
-<span class="token variable">$ORIGIN</span> <span class="token builtin class-name">.</span>
-<span class="token variable">$TTL</span> <span class="token number">86400</span>      <span class="token punctuation">;</span> <span class="token number">1</span> day
-magedu.local            IN SOA  master.magedu.local. admin.magedu.org. <span class="token punctuation">(</span>
-                                <span class="token number">0</span>          <span class="token punctuation">;</span> serial
-                                <span class="token number">86400</span>      <span class="token punctuation">;</span> refresh <span class="token punctuation">(</span><span class="token number">1</span> day<span class="token punctuation">)</span>
-                                <span class="token number">3600</span>       <span class="token punctuation">;</span> retry <span class="token punctuation">(</span><span class="token number">1</span> hour<span class="token punctuation">)</span>
-                                <span class="token number">604800</span>     <span class="token punctuation">;</span> expire <span class="token punctuation">(</span><span class="token number">1</span> week<span class="token punctuation">)</span>
-                                <span class="token number">10800</span>      <span class="token punctuation">;</span> minimum <span class="token punctuation">(</span><span class="token number">3</span> hours<span class="token punctuation">)</span>
-                                <span class="token punctuation">)</span>
-                        NS      master.magedu.local.
-<span class="token variable">$ORIGIN</span> magedu.local.
-master                  A       <span class="token number">10.0</span>.0.175
-slave                   A       <span class="token number">10.0</span>.0.6
-www                     A       <span class="token number">10.0</span>.0.8</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@centos6 named]<span class="variable">$ll</span> /var/named/slaves/magedu.local.slave</span><br><span class="line">-rw-r--r-- 1 named named 361 Sep 17 20:29 /var/named/slaves/magedu.local.slave</span><br><span class="line">[root@centos6 named]<span class="variable">$cat</span> !$</span><br><span class="line"><span class="built_in">cat</span> /var/named/slaves/magedu.local.slave</span><br><span class="line"><span class="variable">$ORIGIN</span> .</span><br><span class="line"><span class="variable">$TTL</span> 86400      ; 1 day</span><br><span class="line">magedu.local            IN SOA  master.magedu.local. admin.magedu.org. (</span><br><span class="line">                                0          ; serial</span><br><span class="line">                                86400      ; refresh (1 day)</span><br><span class="line">                                3600       ; retry (1 hour)</span><br><span class="line">                                604800     ; expire (1 week)</span><br><span class="line">                                10800      ; minimum (3 hours)</span><br><span class="line">                                )</span><br><span class="line">                        NS      master.magedu.local.</span><br><span class="line"><span class="variable">$ORIGIN</span> magedu.local.</span><br><span class="line">master                  A       10.0.0.175</span><br><span class="line">slave                   A       10.0.0.6</span><br><span class="line">www                     A       10.0.0.8</span><br></pre></td></tr></table></figure>
 
-<h3 id="客户端测试主从-DNS-服务架构"><a href="#客户端测试主从-DNS-服务架构" class="headerlink" title="客户端测试主从 DNS 服务架构"></a>客户端测试主从 DNS 服务架构</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加DNS从服务器ip到/etc/resolv.conf</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$cat</span> /etc/resolv.conf
-<span class="token comment"># Generated by NetworkManager</span>
-search magedu.org
-nameserver <span class="token number">10.0</span>.0.175
-nameserver <span class="token number">10.0</span>.0.79
-
-<span class="token comment"># 测试，将DNS主服务器关掉服务，只保留从DNS从服务器服务，或者关掉DNS从服务器服务，只保留DNS主服务器服务，结果是都能访问web服务器的http服务，只有DNS主从服务器都关掉服务，才无法访问web服务器的http服务</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$curl</span> www.magedu.local
-www.magedu.local</code></pre>
+<h3 id="客户端测试主从-DNS-服务架构"><a href="#客户端测试主从-DNS-服务架构" class="headerlink" title="客户端测试主从 DNS 服务架构"></a>客户端测试主从 DNS 服务架构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加DNS从服务器ip到/etc/resolv.conf</span></span><br><span class="line">[root@centos7 ~]<span class="variable">$cat</span> /etc/resolv.conf</span><br><span class="line"><span class="comment"># Generated by NetworkManager</span></span><br><span class="line">search magedu.org</span><br><span class="line">nameserver 10.0.0.175</span><br><span class="line">nameserver 10.0.0.79</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试，将DNS主服务器关掉服务，只保留从DNS从服务器服务，或者关掉DNS从服务器服务，只保留DNS主服务器服务，结果是都能访问web服务器的http服务，只有DNS主从服务器都关掉服务，才无法访问web服务器的http服务</span></span><br><span class="line">[root@centos7 ~]<span class="variable">$curl</span> www.magedu.local</span><br><span class="line">www.magedu.local</span><br></pre></td></tr></table></figure>
 
     </div>
 

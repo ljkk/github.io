@@ -265,18 +265,7 @@
 <blockquote>
 <p>systemd 服务异常自动重启很好用，但有的时候希望某些服务只在特定情况下进行重启，其他时候不要自动重启(比如 OOM，需要人工介入)。 本文抛砖引玉，旨在能够让读者对 systemd 的重启机制有一定了解。</p>
 </blockquote>
-<h2 id="最简单的自动重启范例"><a href="#最简单的自动重启范例" class="headerlink" title="最简单的自动重启范例"></a>最简单的自动重启范例</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
-<span class="token assign-left variable">Description</span><span class="token operator">=</span>mytest
-
-<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
-<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/root/mytest.sh
-<span class="token assign-left variable">Restart</span><span class="token operator">=</span>always
-<span class="token assign-left variable">RestartSec</span><span class="token operator">=</span><span class="token number">5</span>
-<span class="token assign-left variable">StartLimitInterval</span><span class="token operator">=</span><span class="token number">0</span>
-
-<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
-<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target</code></pre>
+<h2 id="最简单的自动重启范例"><a href="#最简单的自动重启范例" class="headerlink" title="最简单的自动重启范例"></a>最简单的自动重启范例</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=mytest</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/root/mytest.sh</span><br><span class="line">Restart=always</span><br><span class="line">RestartSec=5</span><br><span class="line">StartLimitInterval=0</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
 
 <p>重点参数详解</p>
 <ul>
@@ -289,7 +278,7 @@
 <h2 id="RestartPreventExitStatus-参数"><a href="#RestartPreventExitStatus-参数" class="headerlink" title="RestartPreventExitStatus 参数"></a>RestartPreventExitStatus 参数</h2><p>查询 man systemd.service 发现，systemd 的[Service]段落里支持一个参数，叫做 RestartPreventExitStatus</p>
 <p>该参数从字面上看，意思是当符合某些退出状态时不要进行重启。</p>
 <p>该参数的值支持 exit code 和信号名 2 种，可写多个，以空格分隔，例如：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">RestartPreventExitStatus</span><span class="token operator">=</span><span class="token number">143</span> <span class="token number">137</span> SIGTERM SIGKILL</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RestartPreventExitStatus=143 137 SIGTERM SIGKILL</span><br></pre></td></tr></table></figure>
 
 <p>表示，当退出情况只要符合以下 4 种情况中任意一种时候，则不再进行重启</p>
 <ul>
@@ -300,61 +289,15 @@
 </ul>
 <p>但具体如何使用，请继续往下看</p>
 <h2 id="测试方法"><a href="#测试方法" class="headerlink" title="测试方法"></a>测试方法</h2><p>&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;mytest.service</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
-<span class="token assign-left variable">Description</span><span class="token operator">=</span>mytest
-
-<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
-<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/root/mem
-<span class="token assign-left variable">Restart</span><span class="token operator">=</span>always
-<span class="token assign-left variable">RestartSec</span><span class="token operator">=</span><span class="token number">5</span>
-<span class="token assign-left variable">StartLimitInterval</span><span class="token operator">=</span><span class="token number">0</span>
-<span class="token assign-left variable">RestartPreventExitStatus</span><span class="token operator">=</span>SIGKILL
-
-<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
-<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=mytest</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/root/mem</span><br><span class="line">Restart=always</span><br><span class="line">RestartSec=5</span><br><span class="line">StartLimitInterval=0</span><br><span class="line">RestartPreventExitStatus=SIGKILL</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
 
 <p>&#x2F;root&#x2F;mem.c（不断消耗内存直至发生 OOM）</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#include &lt;stdio.h></span>
-<span class="token comment">#include &lt;malloc.h></span>
-<span class="token comment">#include &lt;stdlib.h></span>
-<span class="token comment">#include &lt;string.h></span>
-<span class="token comment">#include &lt;unistd.h></span>
-
-  int <span class="token function-name function">main</span> <span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token punctuation">&#123;</span>
-      char *p <span class="token operator">=</span> NULL<span class="token punctuation">;</span>
-      int count <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
-      while<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
-          p <span class="token operator">=</span> <span class="token punctuation">(</span>char *<span class="token punctuation">)</span>malloc<span class="token punctuation">(</span><span class="token number">1024</span>*1024*100<span class="token punctuation">)</span><span class="token punctuation">;</span>
-          if<span class="token punctuation">(</span><span class="token operator">!</span>p<span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
-              printf<span class="token punctuation">(</span><span class="token string">"malloc error!n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-              <span class="token builtin class-name">return</span> -1<span class="token punctuation">;</span>
-          <span class="token punctuation">&#125;</span>
-          memset<span class="token punctuation">(</span>p, <span class="token number">0</span>, <span class="token number">1024</span>*1024*100<span class="token punctuation">)</span><span class="token punctuation">;</span>
-          printf<span class="token punctuation">(</span><span class="token string">"malloc %dM memoryn"</span>, <span class="token number">100</span>*count++<span class="token punctuation">)</span><span class="token punctuation">;</span>
-          usleep<span class="token punctuation">(</span><span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">&#125;</span>
-   <span class="token punctuation">&#125;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;malloc.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;string.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;unistd.h&gt;</span></span><br><span class="line"></span><br><span class="line">  int <span class="function"><span class="title">main</span></span> ()</span><br><span class="line">  &#123;</span><br><span class="line">      char *p = NULL;</span><br><span class="line">      int count = 1;</span><br><span class="line">      <span class="keyword">while</span>(1)&#123;</span><br><span class="line">          p = (char *)malloc(1024*1024*100);</span><br><span class="line">          <span class="keyword">if</span>(!p)&#123;</span><br><span class="line">              <span class="built_in">printf</span>(<span class="string">&quot;malloc error!n&quot;</span>);</span><br><span class="line">              <span class="built_in">return</span> -1;</span><br><span class="line">          &#125;</span><br><span class="line">          memset(p, 0, 1024*1024*100);</span><br><span class="line">          <span class="built_in">printf</span>(<span class="string">&quot;malloc %dM memoryn&quot;</span>, 100*count++);</span><br><span class="line">          usleep(500000);</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <p>编译及执行</p>
-<pre class="language-none"><code class="language-none">gcc -o &#x2F;root&#x2F;mem &#x2F;root&#x2F;mem.c
-systemctl daemon-reload
-systemctl start mytest</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gcc -o /root/mem /root/mem.c</span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl start mytest</span><br></pre></td></tr></table></figure>
 
-<h2 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@fzxiaomange ~<span class="token punctuation">]</span><span class="token comment"># systemctl status mytest</span>
-      ● mytest.service - mytest
-         Loaded: loaded <span class="token punctuation">(</span>/usr/lib/systemd/system/mytest.service<span class="token punctuation">;</span> disabled<span class="token punctuation">;</span> vendor preset: disabled<span class="token punctuation">)</span>
-         Active: failed <span class="token punctuation">(</span>Result: signal<span class="token punctuation">)</span> since Sat <span class="token number">2018</span>-10-20 <span class="token number">23</span>:32:24 CST<span class="token punctuation">;</span> 45s ago
-        Process: <span class="token number">10555</span> <span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/root/mem <span class="token punctuation">(</span>code<span class="token operator">=</span>killed, <span class="token assign-left variable">signal</span><span class="token operator">=</span>KILL<span class="token punctuation">)</span>
-       Main PID: <span class="token number">10555</span> <span class="token punctuation">(</span>code<span class="token operator">=</span>killed, <span class="token assign-left variable">signal</span><span class="token operator">=</span>KILL<span class="token punctuation">)</span>
-
-
-      Oct <span class="token number">20</span> <span class="token number">23</span>:31:55 fzxiaomange.com systemd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: Started mytest.
-      Oct <span class="token number">20</span> <span class="token number">23</span>:31:55 fzxiaomange.com systemd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: Starting mytest<span class="token punctuation">..</span>.
-      Oct <span class="token number">20</span> <span class="token number">23</span>:32:24 fzxiaomange.com systemd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: mytest.service: main process exited, <span class="token assign-left variable">code</span><span class="token operator">=</span>killed, <span class="token assign-left variable">status</span><span class="token operator">=</span><span class="token number">9</span>/KILL
-      Oct <span class="token number">20</span> <span class="token number">23</span>:32:24 fzxiaomange.com systemd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: Unit mytest.service entered failed state.
-      Oct <span class="token number">20</span> <span class="token number">23</span>:32:24 fzxiaomange.com systemd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: mytest.service failed.</code></pre>
+<h2 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@fzxiaomange ~]<span class="comment"># systemctl status mytest</span></span><br><span class="line">      ● mytest.service - mytest</span><br><span class="line">         Loaded: loaded (/usr/lib/systemd/system/mytest.service; disabled; vendor preset: disabled)</span><br><span class="line">         Active: failed (Result: signal) since Sat 2018-10-20 23:32:24 CST; 45s ago</span><br><span class="line">        Process: 10555 ExecStart=/root/mem (code=killed, signal=KILL)</span><br><span class="line">       Main PID: 10555 (code=killed, signal=KILL)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      Oct 20 23:31:55 fzxiaomange.com systemd[1]: Started mytest.</span><br><span class="line">      Oct 20 23:31:55 fzxiaomange.com systemd[1]: Starting mytest...</span><br><span class="line">      Oct 20 23:32:24 fzxiaomange.com systemd[1]: mytest.service: main process exited, code=killed, status=9/KILL</span><br><span class="line">      Oct 20 23:32:24 fzxiaomange.com systemd[1]: Unit mytest.service entered failed state.</span><br><span class="line">      Oct 20 23:32:24 fzxiaomange.com systemd[1]: mytest.service failed.</span><br></pre></td></tr></table></figure>
 
 <p>重点看上面第 6 行 <code>MainPID:10555(code=killed,signal=KILL)</code>，这行表示主进程的状态，常见有 2 种情况</p>
 <ul>
@@ -368,11 +311,7 @@ systemctl start mytest</code></pre>
 <h3 id="kill-子进程会是什么情况"><a href="#kill-子进程会是什么情况" class="headerlink" title="kill 子进程会是什么情况"></a>kill 子进程会是什么情况</h3><p>若 systemd 启动的不是一个简单进程，而是会派生子进程的情况（比如执行 shell 脚本，shell 脚本里启动多个程序），那么当另外开一个窗口通过 <code>kill-信号</code>测试时，会是什么情况呢，先贴出测试方法</p>
 <p>ExecStart&#x3D;&#x2F;root&#x2F;mem 改为 ExecStart&#x3D;&#x2F;root&#x2F;mytest.sh</p>
 <p>&#x2F;root&#x2F;mytest.sh 内容为</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/bash</span>
-
-<span class="token function">sleep</span> <span class="token number">100000</span> <span class="token operator">&amp;</span>
-
-<span class="token function">sleep</span> <span class="token number">200000</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">sleep</span> 100000 &amp;</span><br><span class="line"></span><br><span class="line"><span class="built_in">sleep</span> 200000</span><br></pre></td></tr></table></figure>
 
 <p>测试结果</p>
 <ul>

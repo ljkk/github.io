@@ -18,12 +18,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="表达式求值中的类型转换CONCAT() 隐式转换CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。 mysql&gt; SELECT 1+&#39;1&#39;;         -&gt; 2 mysql&gt; SELECT CONCAT(2,&#39; test&#39;);         -&gt; &#39;2 test&#39;  如果想显式转换，请使用 CAST mysql&gt; SELECT 38.8, CAST(38.8 A">
+    <meta name="description" content="表达式求值中的类型转换CONCAT() 隐式转换CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。 1234mysql&gt; SELECT 1+&amp;#x27;1&amp;#x27;;        -&gt; 2mysql&gt; SELECT CONCAT(2,&amp;#x27; test&amp;#x27;);        -&gt; &amp;#x27;2 test&amp;#x27;  如果想显式">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mysql5.7内置函数和操作">
 <meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/MySQL/mysql5.7%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0%E5%92%8C%E6%93%8D%E4%BD%9C/index.html">
 <meta property="og:site_name" content="LJKのBlog">
-<meta property="og:description" content="表达式求值中的类型转换CONCAT() 隐式转换CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。 mysql&gt; SELECT 1+&#39;1&#39;;         -&gt; 2 mysql&gt; SELECT CONCAT(2,&#39; test&#39;);         -&gt; &#39;2 test&#39;  如果想显式转换，请使用 CAST mysql&gt; SELECT 38.8, CAST(38.8 A">
+<meta property="og:description" content="表达式求值中的类型转换CONCAT() 隐式转换CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。 1234mysql&gt; SELECT 1+&amp;#x27;1&amp;#x27;;        -&gt; 2mysql&gt; SELECT CONCAT(2,&amp;#x27; test&amp;#x27;);        -&gt; &amp;#x27;2 test&amp;#x27;  如果想显式">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-09-24T06:11:42.000Z">
 <meta property="article:modified_time" content="2023-05-29T08:58:05.502Z">
@@ -258,16 +258,10 @@
     
     
     <div class="post-body" itemprop="articleBody"><h2 id="表达式求值中的类型转换"><a href="#表达式求值中的类型转换" class="headerlink" title="表达式求值中的类型转换"></a>表达式求值中的类型转换</h2><h3 id="CONCAT-隐式转换"><a href="#CONCAT-隐式转换" class="headerlink" title="CONCAT() 隐式转换"></a>CONCAT() 隐式转换</h3><p>CONCAT()的参数为string类型，所以如果传入其他类型，会被隐式转换。</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">mysql<span class="token operator">></span> SELECT <span class="token number">1</span>+<span class="token string">'1'</span><span class="token punctuation">;</span>
-        -<span class="token operator">></span> <span class="token number">2</span>
-mysql<span class="token operator">></span> SELECT CONCAT<span class="token punctuation">(</span><span class="token number">2</span>,<span class="token string">' test'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        -<span class="token operator">></span> <span class="token string">'2 test'</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 1+<span class="string">&#x27;1&#x27;</span>;</span><br><span class="line">        -&gt; 2</span><br><span class="line">mysql&gt; SELECT CONCAT(2,<span class="string">&#x27; test&#x27;</span>);</span><br><span class="line">        -&gt; <span class="string">&#x27;2 test&#x27;</span></span><br></pre></td></tr></table></figure>
 
 <p>如果想显式转换，请使用 CAST</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">mysql<span class="token operator">></span> SELECT <span class="token number">38.8</span>, CAST<span class="token punctuation">(</span><span class="token number">38.8</span> AS CHAR<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        -<span class="token operator">></span> <span class="token number">38.8</span>, <span class="token string">'38.8'</span>
-mysql<span class="token operator">></span> SELECT <span class="token number">38.8</span>, CONCAT<span class="token punctuation">(</span><span class="token number">38.8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        -<span class="token operator">></span> <span class="token number">38.8</span>, <span class="token string">'38.8'</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 38.8, CAST(38.8 AS CHAR);</span><br><span class="line">        -&gt; 38.8, <span class="string">&#x27;38.8&#x27;</span></span><br><span class="line">mysql&gt; SELECT 38.8, CONCAT(38.8);</span><br><span class="line">        -&gt; 38.8, <span class="string">&#x27;38.8&#x27;</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="比较操作"><a href="#比较操作" class="headerlink" title="比较操作"></a>比较操作</h3><ul>
 <li>NULL和任何数据进行对比，都返回NULL，除非使用&lt;&#x3D;&gt;运算符，&lt;&#x3D;&gt;相比&#x3D;，可以对NULL进行比较，两个NULL使用&lt;&#x3D;&gt;比较，返回true。</li>
@@ -280,7 +274,7 @@ mysql<span class="token operator">></span> SELECT <span class="token number">38.
 </ul>
 <h3 id="字符串与数字的比较"><a href="#字符串与数字的比较" class="headerlink" title="字符串与数字的比较"></a>字符串与数字的比较</h3><ul>
 <li><p><strong>对于字符串与数字的比较，如果字符串上有索引，索引会失效</strong>，例如下例中，很多不同的字符串都可以转换为1，例如“1“、” 1“或者”1a“</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">SELECT * FROM tbl_name WHERE str_col&#x3D;1;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM tbl_name WHERE str_col=1;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>对于大数字符串和大数之间的比较，应该要把大数转成字符串再进行比较</p>
 </li>
@@ -518,23 +512,7 @@ mysql<span class="token operator">></span> SELECT <span class="token number">38.
 </tr>
 </tbody></table>
 <h3 id="运算符优先级"><a href="#运算符优先级" class="headerlink" title="运算符优先级"></a>运算符优先级</h3><p>以下列表中，从上到下，优先级从高到低。一行中的运算符具有相同的优先级。</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">INTERVAL
-BINARY, COLLATE
-!
-- (unary minus), ~ (unary bit inversion)
-^
-*, &#x2F;, DIV, %, MOD
--, +
-&lt;&lt;, &gt;&gt;
-&amp;
-|
-&#x3D; (comparison), &lt;&#x3D;&gt;, &gt;&#x3D;, &gt;, &lt;&#x3D;, &lt;, &lt;&gt;, !&#x3D;, IS, LIKE, REGEXP, IN
-BETWEEN, CASE, WHEN, THEN, ELSE
-NOT
-AND, &amp;&amp;
-XOR
-OR, ||
-&#x3D; (assignment), :&#x3D;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">INTERVAL</span><br><span class="line">BINARY, COLLATE</span><br><span class="line">!</span><br><span class="line">- (unary minus), ~ (unary bit inversion)</span><br><span class="line">^</span><br><span class="line">*, /, DIV, %, MOD</span><br><span class="line">-, +</span><br><span class="line">&lt;&lt;, &gt;&gt;</span><br><span class="line">&amp;</span><br><span class="line">|</span><br><span class="line">= (comparison), &lt;=&gt;, &gt;=, &gt;, &lt;=, &lt;, &lt;&gt;, !=, IS, LIKE, REGEXP, IN</span><br><span class="line">BETWEEN, CASE, WHEN, THEN, ELSE</span><br><span class="line">NOT</span><br><span class="line">AND, &amp;&amp;</span><br><span class="line">XOR</span><br><span class="line">OR, ||</span><br><span class="line">= (assignment), :=</span><br></pre></td></tr></table></figure>
 
 <p>&#x3D; 的优先级取决于它是用作 比较 还是 赋值</p>
 <p>记不住优先级没关系，会用括号就行。</p>
@@ -638,22 +616,11 @@ OR, ||
 <td align="left">比较两个字符串</td>
 </tr>
 </tbody></table>
-<h4 id="INTERVAL-N-N1-N2-N3-…"><a href="#INTERVAL-N-N1-N2-N3-…" class="headerlink" title="INTERVAL(N,N1,N2,N3,…)"></a>INTERVAL(N,N1,N2,N3,…)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT INTERVAL(23, 1, 15, 17, 30, 44, 200);		&#x2F;&#x2F; 17 &lt;&#x3D; 23 &lt; 30，1和15之间返回1,15和17之间返回2，17和30之间返回3
-        -&gt; 3
-mysql&gt; SELECT INTERVAL(10, 1, 10, 100, 1000);			&#x2F;&#x2F; 10 &lt;&#x3D; 10 &lt; 100，区间前闭后开
-        -&gt; 2
-mysql&gt; SELECT INTERVAL(22, 23, 30, 44, 200);			&#x2F;&#x2F; 22 &lt; 23
-        -&gt; 0</code></pre>
+<h4 id="INTERVAL-N-N1-N2-N3-…"><a href="#INTERVAL-N-N1-N2-N3-…" class="headerlink" title="INTERVAL(N,N1,N2,N3,…)"></a>INTERVAL(N,N1,N2,N3,…)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT INTERVAL(23, 1, 15, 17, 30, 44, 200);		// 17 &lt;= 23 &lt; 30，1和15之间返回1,15和17之间返回2，17和30之间返回3</span><br><span class="line">        -&gt; 3</span><br><span class="line">mysql&gt; SELECT INTERVAL(10, 1, 10, 100, 1000);			// 10 &lt;= 10 &lt; 100，区间前闭后开</span><br><span class="line">        -&gt; 2</span><br><span class="line">mysql&gt; SELECT INTERVAL(22, 23, 30, 44, 200);			// 22 &lt; 23</span><br><span class="line">        -&gt; 0</span><br></pre></td></tr></table></figure>
 
-<h4 id="IS-bool-value"><a href="#IS-bool-value" class="headerlink" title="IS bool_value"></a>IS bool_value</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 IS TRUE, 0 IS FALSE, NULL IS UNKNOWN;
-        -&gt; 1, 1, 1</code></pre>
+<h4 id="IS-bool-value"><a href="#IS-bool-value" class="headerlink" title="IS bool_value"></a>IS bool_value</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 1 IS TRUE, 0 IS FALSE, NULL IS UNKNOWN;</span><br><span class="line">        -&gt; 1, 1, 1</span><br></pre></td></tr></table></figure>
 
-<h4 id="LEAST-value1-value2-…"><a href="#LEAST-value1-value2-…" class="headerlink" title="LEAST(value1,value2,…)"></a>LEAST(value1,value2,…)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT LEAST(2,0);
-        -&gt; 0
-mysql&gt; SELECT LEAST(34.0,3.0,5.0,767.0);
-        -&gt; 3.0
-mysql&gt; SELECT LEAST(&#39;B&#39;,&#39;A&#39;,&#39;C&#39;);
-        -&gt; &#39;A&#39;</code></pre>
+<h4 id="LEAST-value1-value2-…"><a href="#LEAST-value1-value2-…" class="headerlink" title="LEAST(value1,value2,…)"></a>LEAST(value1,value2,…)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT LEAST(2,0);</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT LEAST(34.0,3.0,5.0,767.0);</span><br><span class="line">        -&gt; 3.0</span><br><span class="line">mysql&gt; SELECT LEAST(&#x27;B&#x27;,&#x27;A&#x27;,&#x27;C&#x27;);</span><br><span class="line">        -&gt; &#x27;A&#x27;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>如果参数中有 NULL，则直接返回 NULL</li>
@@ -668,26 +635,13 @@ mysql&gt; SELECT LEAST(&#39;B&#39;,&#39;A&#39;,&#39;C&#39;);
 </ul>
 <p>转义符是 \</p>
 <p>LIKE匹配字符串不区分大小写，除非expr或者pattern区分大小写（使用区分大小写的排序规则或二进制字符串）：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT &#39;abc&#39; LIKE &#39;ABC&#39;;
-        -&gt; 1
-mysql&gt; SELECT &#39;abc&#39; LIKE _latin1 &#39;ABC&#39; COLLATE latin1_general_cs;
-        -&gt; 0
-mysql&gt; SELECT &#39;abc&#39; LIKE _latin1 &#39;ABC&#39; COLLATE latin1_bin;
-        -&gt; 0
-mysql&gt; SELECT &#39;abc&#39; LIKE BINARY &#39;ABC&#39;;
-        -&gt; 0</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT &#x27;abc&#x27; LIKE &#x27;ABC&#x27;;</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT &#x27;abc&#x27; LIKE _latin1 &#x27;ABC&#x27; COLLATE latin1_general_cs;</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT &#x27;abc&#x27; LIKE _latin1 &#x27;ABC&#x27; COLLATE latin1_bin;</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT &#x27;abc&#x27; LIKE BINARY &#x27;ABC&#x27;;</span><br><span class="line">        -&gt; 0</span><br></pre></td></tr></table></figure>
 
 <p>作为标准 SQL 的扩展，MySQL 允许在数值表达式上使用 LIKE：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 10 LIKE &#39;1%&#39;;
-        -&gt; 1</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 10 LIKE &#x27;1%&#x27;;</span><br><span class="line">        -&gt; 1</span><br></pre></td></tr></table></figure>
 
 <h4 id="STRCMP-expr1-expr2"><a href="#STRCMP-expr1-expr2" class="headerlink" title="STRCMP(expr1,expr2)"></a>STRCMP(expr1,expr2)</h4><p>如果字符串相同，返回0，如果根据当前排序顺序，第一个参数小于第二个参数，返回 -1；否则返回1</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT STRCMP(&#39;text&#39;, &#39;text2&#39;);
-        -&gt; -1
-mysql&gt; SELECT STRCMP(&#39;text2&#39;, &#39;text&#39;);
-        -&gt; 1
-mysql&gt; SELECT STRCMP(&#39;text&#39;, &#39;text&#39;);
-        -&gt; 0</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT STRCMP(&#x27;text&#x27;, &#x27;text2&#x27;);</span><br><span class="line">        -&gt; -1</span><br><span class="line">mysql&gt; SELECT STRCMP(&#x27;text2&#x27;, &#x27;text&#x27;);</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT STRCMP(&#x27;text&#x27;, &#x27;text&#x27;);</span><br><span class="line">        -&gt; 0</span><br></pre></td></tr></table></figure>
 
 <h3 id="逻辑运算符"><a href="#逻辑运算符" class="headerlink" title="逻辑运算符"></a>逻辑运算符</h3><table>
 <thead>
@@ -715,54 +669,15 @@ mysql&gt; SELECT STRCMP(&#39;text&#39;, &#39;text&#39;);
 </tbody></table>
 <p>在 SQL 中，所有逻辑运算符的计算结果为 TRUE、 FALSE 或 NULL (UNKNOWN)。在 MySQL 中，它们被实现为1(TRUE)、0(FALSE)和 NULL。</p>
 <p>MySQL 将任何非零、非 NULL 值计算为 TRUE：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 10 IS TRUE;
--&gt; 1
-mysql&gt; SELECT -10 IS TRUE;
--&gt; 1
-mysql&gt; SELECT &#39;string&#39; IS NOT NULL;
--&gt; 1</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 10 IS TRUE;</span><br><span class="line">-&gt; 1</span><br><span class="line">mysql&gt; SELECT -10 IS TRUE;</span><br><span class="line">-&gt; 1</span><br><span class="line">mysql&gt; SELECT &#x27;string&#x27; IS NOT NULL;</span><br><span class="line">-&gt; 1</span><br></pre></td></tr></table></figure>
 
-<h4 id="NOT"><a href="#NOT" class="headerlink" title="NOT,!"></a>NOT,!</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT NOT 10;
-        -&gt; 0
-mysql&gt; SELECT NOT 0;
-        -&gt; 1
-mysql&gt; SELECT NOT NULL;
-        -&gt; NULL
-mysql&gt; SELECT ! (1+1);
-        -&gt; 0
-mysql&gt; SELECT ! 1+1;
-        -&gt; 1</code></pre>
+<h4 id="NOT"><a href="#NOT" class="headerlink" title="NOT,!"></a>NOT,!</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT NOT 10;</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT NOT 0;</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT NOT NULL;</span><br><span class="line">        -&gt; NULL</span><br><span class="line">mysql&gt; SELECT ! (1+1);</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT ! 1+1;</span><br><span class="line">        -&gt; 1</span><br></pre></td></tr></table></figure>
 
-<h4 id="AND-amp-amp"><a href="#AND-amp-amp" class="headerlink" title="AND,&amp;&amp;"></a>AND,&amp;&amp;</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 AND 1;
-        -&gt; 1
-mysql&gt; SELECT 1 AND 0;
-        -&gt; 0
-mysql&gt; SELECT 1 AND NULL;
-        -&gt; NULL
-mysql&gt; SELECT 0 AND NULL;
-        -&gt; 0
-mysql&gt; SELECT NULL AND 0;
-        -&gt; 0</code></pre>
+<h4 id="AND-amp-amp"><a href="#AND-amp-amp" class="headerlink" title="AND,&amp;&amp;"></a>AND,&amp;&amp;</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 1 AND 1;</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT 1 AND 0;</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT 1 AND NULL;</span><br><span class="line">        -&gt; NULL</span><br><span class="line">mysql&gt; SELECT 0 AND NULL;</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT NULL AND 0;</span><br><span class="line">        -&gt; 0</span><br></pre></td></tr></table></figure>
 
-<h4 id="OR"><a href="#OR" class="headerlink" title="OR,||"></a>OR,||</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 OR 1;
-        -&gt; 1
-mysql&gt; SELECT 1 OR 0;
-        -&gt; 1
-mysql&gt; SELECT 0 OR 0;
-        -&gt; 0
-mysql&gt; SELECT 0 OR NULL;
-        -&gt; NULL
-mysql&gt; SELECT 1 OR NULL;
-        -&gt; 1</code></pre>
+<h4 id="OR"><a href="#OR" class="headerlink" title="OR,||"></a>OR,||</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 1 OR 1;</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT 1 OR 0;</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT 0 OR 0;</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT 0 OR NULL;</span><br><span class="line">        -&gt; NULL</span><br><span class="line">mysql&gt; SELECT 1 OR NULL;</span><br><span class="line">        -&gt; 1</span><br></pre></td></tr></table></figure>
 
-<h4 id="XOR"><a href="#XOR" class="headerlink" title="XOR"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_xor"><code>XOR</code></a></h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT 1 XOR 1;
-        -&gt; 0
-mysql&gt; SELECT 1 XOR 0;
-        -&gt; 1
-mysql&gt; SELECT 1 XOR NULL;
-        -&gt; NULL
-mysql&gt; SELECT 1 XOR 1 XOR 1;
-        -&gt; 1</code></pre>
+<h4 id="XOR"><a href="#XOR" class="headerlink" title="XOR"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/logical-operators.html#operator_xor"><code>XOR</code></a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 1 XOR 1;</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT 1 XOR 0;</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT 1 XOR NULL;</span><br><span class="line">        -&gt; NULL</span><br><span class="line">mysql&gt; SELECT 1 XOR 1 XOR 1;</span><br><span class="line">        -&gt; 1</span><br></pre></td></tr></table></figure>
 
 <h3 id="分配运算符"><a href="#分配运算符" class="headerlink" title="分配运算符 :="></a>分配运算符 <code>:=</code></h3><p>与 <code>=</code> 不同，<code>:=</code> 运算符从不被解释为比较运算符</p>
 <h2 id="流程控制"><a href="#流程控制" class="headerlink" title="流程控制"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/flow-control-functions.html">流程控制</a></h2><table>
@@ -789,41 +704,17 @@ mysql&gt; SELECT 1 XOR 1 XOR 1;
 <td align="left">Return NULL if expr1 &#x3D; expr2</td>
 </tr>
 </tbody></table>
-<h4 id="CASE"><a href="#CASE" class="headerlink" title="CASE"></a>CASE</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">CASE value WHEN compare_value THEN result [WHEN compare_value THEN result ...] [ELSE result] END
+<h4 id="CASE"><a href="#CASE" class="headerlink" title="CASE"></a>CASE</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CASE value WHEN compare_value THEN result [WHEN compare_value THEN result ...] [ELSE result] END</span><br><span class="line"></span><br><span class="line">CASE WHEN condition THEN result [WHEN condition THEN result ...] [ELSE result] END</span><br></pre></td></tr></table></figure>
 
-CASE WHEN condition THEN result [WHEN condition THEN result ...] [ELSE result] END</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT CASE 1 WHEN 1 THEN &#x27;one&#x27;</span><br><span class="line">    -&gt;     WHEN 2 THEN &#x27;two&#x27; ELSE &#x27;more&#x27; END;</span><br><span class="line">        -&gt; &#x27;one&#x27;</span><br><span class="line">mysql&gt; SELECT CASE WHEN 1&gt;0 THEN &#x27;true&#x27; ELSE &#x27;false&#x27; END;</span><br><span class="line">        -&gt; &#x27;true&#x27;</span><br><span class="line">mysql&gt; SELECT CASE BINARY &#x27;B&#x27;</span><br><span class="line">    -&gt;     WHEN &#x27;a&#x27; THEN 1 WHEN &#x27;b&#x27; THEN 2 END;</span><br><span class="line">        -&gt; NULL</span><br></pre></td></tr></table></figure>
 
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT CASE 1 WHEN 1 THEN &#39;one&#39;
-    -&gt;     WHEN 2 THEN &#39;two&#39; ELSE &#39;more&#39; END;
-        -&gt; &#39;one&#39;
-mysql&gt; SELECT CASE WHEN 1&gt;0 THEN &#39;true&#39; ELSE &#39;false&#39; END;
-        -&gt; &#39;true&#39;
-mysql&gt; SELECT CASE BINARY &#39;B&#39;
-    -&gt;     WHEN &#39;a&#39; THEN 1 WHEN &#39;b&#39; THEN 2 END;
-        -&gt; NULL</code></pre>
-
-<h4 id="IF-expr1-expr2-expr3"><a href="#IF-expr1-expr2-expr3" class="headerlink" title="IF(expr1,expr2,expr3)"></a>IF(expr1,expr2,expr3)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT IF(1&gt;2,2,3);
-        -&gt; 3
-mysql&gt; SELECT IF(1&lt;2,&#39;yes&#39;,&#39;no&#39;);
-        -&gt; &#39;yes&#39;
-mysql&gt; SELECT IF(STRCMP(&#39;test&#39;,&#39;test1&#39;),&#39;no&#39;,&#39;yes&#39;);
-        -&gt; &#39;no&#39;</code></pre>
+<h4 id="IF-expr1-expr2-expr3"><a href="#IF-expr1-expr2-expr3" class="headerlink" title="IF(expr1,expr2,expr3)"></a>IF(expr1,expr2,expr3)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT IF(1&gt;2,2,3);</span><br><span class="line">        -&gt; 3</span><br><span class="line">mysql&gt; SELECT IF(1&lt;2,&#x27;yes&#x27;,&#x27;no&#x27;);</span><br><span class="line">        -&gt; &#x27;yes&#x27;</span><br><span class="line">mysql&gt; SELECT IF(STRCMP(&#x27;test&#x27;,&#x27;test1&#x27;),&#x27;no&#x27;,&#x27;yes&#x27;);</span><br><span class="line">        -&gt; &#x27;no&#x27;</span><br></pre></td></tr></table></figure>
 
 <h4 id="IFNULL-expr1-expr2"><a href="#IFNULL-expr1-expr2" class="headerlink" title="IFNULL(expr1,expr2)"></a>IFNULL(expr1,expr2)</h4><p>如果 expr1不为 NULL，则 IFNULL ()返回 expr1; 否则返回 expr2</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT IFNULL(1,0);
-        -&gt; 1
-mysql&gt; SELECT IFNULL(NULL,10);
-        -&gt; 10
-mysql&gt; SELECT IFNULL(1&#x2F;0,10);
-        -&gt; 10
-mysql&gt; SELECT IFNULL(1&#x2F;0,&#39;yes&#39;);
-        -&gt; &#39;yes&#39;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT IFNULL(1,0);</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT IFNULL(NULL,10);</span><br><span class="line">        -&gt; 10</span><br><span class="line">mysql&gt; SELECT IFNULL(1/0,10);</span><br><span class="line">        -&gt; 10</span><br><span class="line">mysql&gt; SELECT IFNULL(1/0,&#x27;yes&#x27;);</span><br><span class="line">        -&gt; &#x27;yes&#x27;</span><br></pre></td></tr></table></figure>
 
 <h4 id="NULLIF-expr1-expr2"><a href="#NULLIF-expr1-expr2" class="headerlink" title="NULLIF(expr1,expr2)"></a>NULLIF(expr1,expr2)</h4><p>如果 expr1 &#x3D; expr2为 true，则返回 NULL，否则返回 expr1。这与 <code>CASE WHEN expr1 = expr2 THEN NULL ELSE expr1 END</code> 相同。</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT NULLIF(1,1);
-        -&gt; NULL
-mysql&gt; SELECT NULLIF(1,2);
-        -&gt; 1</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT NULLIF(1,1);</span><br><span class="line">        -&gt; NULL</span><br><span class="line">mysql&gt; SELECT NULLIF(1,2);</span><br><span class="line">        -&gt; 1</span><br></pre></td></tr></table></figure>
 
 <p>注意：如果参数不相等，MySQL 将计算 expr1两次</p>
 <h2 id="数值函数和运算符-Numeric"><a href="#数值函数和运算符-Numeric" class="headerlink" title="数值函数和运算符(Numeric)"></a>数值函数和运算符(Numeric)</h2><h3 id="算术运算符"><a href="#算术运算符" class="headerlink" title="算术运算符"></a>算术运算符</h3><table>
@@ -916,61 +807,19 @@ mysql&gt; SELECT NULLIF(1,2);
 </tr>
 </tbody></table>
 <h4 id="CONV-N-from-base-to-base"><a href="#CONV-N-from-base-to-base" class="headerlink" title="CONV(N,from_base,to_base)"></a>CONV(N,from_base,to_base)</h4><p>N是待转换的数字，from_base是N当前的进制，to_base是N要输出的进制。</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT CONV(2,10,2);			&#x2F;&#x2F; 将10进制中的2转换为2进制输出
-		-&gt; &#39;10&#39;
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT CONV(2,10,2);			// 将10进制中的2转换为2进制输出</span><br><span class="line">		-&gt; &#x27;10&#x27;</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT CONV(&#x27;a&#x27;,16,2);		// 16进制中，a是10</span><br><span class="line">        -&gt; &#x27;1010&#x27;</span><br><span class="line">mysql&gt; SELECT CONV(&#x27;6E&#x27;,18,8);</span><br><span class="line">        -&gt; &#x27;172&#x27;</span><br><span class="line">mysql&gt; SELECT CONV(-17,10,-18);</span><br><span class="line">        -&gt; &#x27;-H&#x27;</span><br><span class="line">mysql&gt; SELECT CONV(10+&#x27;10&#x27;+&#x27;10&#x27;+X&#x27;0a&#x27;,10,10);</span><br><span class="line">        -&gt; &#x27;40&#x27;</span><br></pre></td></tr></table></figure>
 
-mysql&gt; SELECT CONV(&#39;a&#39;,16,2);		&#x2F;&#x2F; 16进制中，a是10
-        -&gt; &#39;1010&#39;
-mysql&gt; SELECT CONV(&#39;6E&#39;,18,8);
-        -&gt; &#39;172&#39;
-mysql&gt; SELECT CONV(-17,10,-18);
-        -&gt; &#39;-H&#39;
-mysql&gt; SELECT CONV(10+&#39;10&#39;+&#39;10&#39;+X&#39;0a&#39;,10,10);
-        -&gt; &#39;40&#39;</code></pre>
-
-<h4 id="POW-X-Y"><a href="#POW-X-Y" class="headerlink" title="POW(X,Y)"></a>POW(X,Y)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT POW(2,3);
-        -&gt; 8
-mysql&gt; SELECT POW(2,-2);
-        -&gt; 0.25</code></pre>
+<h4 id="POW-X-Y"><a href="#POW-X-Y" class="headerlink" title="POW(X,Y)"></a>POW(X,Y)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT POW(2,3);</span><br><span class="line">        -&gt; 8</span><br><span class="line">mysql&gt; SELECT POW(2,-2);</span><br><span class="line">        -&gt; 0.25</span><br></pre></td></tr></table></figure>
 
 <h4 id="ROUND-X-ROUND-X-D"><a href="#ROUND-X-ROUND-X-D" class="headerlink" title="ROUND(X), ROUND(X,D)"></a>ROUND(X), ROUND(X,D)</h4><p>将参数 X 四舍五入到小数位 D，D默认是0，D可以为负，D绝对值最大30：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT ROUND(-1.23);
-        -&gt; -1
-mysql&gt; SELECT ROUND(-1.58);
-        -&gt; -2
-mysql&gt; SELECT ROUND(1.58);
-        -&gt; 2
-mysql&gt; SELECT ROUND(1.298, 1);
-        -&gt; 1.3
-mysql&gt; SELECT ROUND(1.298, 0);
-        -&gt; 1
-mysql&gt; SELECT ROUND(23.298, -1);
-        -&gt; 20
-mysql&gt; SELECT ROUND(.12345678901234567890123456789012345, 35);
-        -&gt; 0.123456789012345678901234567890</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT ROUND(-1.23);</span><br><span class="line">        -&gt; -1</span><br><span class="line">mysql&gt; SELECT ROUND(-1.58);</span><br><span class="line">        -&gt; -2</span><br><span class="line">mysql&gt; SELECT ROUND(1.58);</span><br><span class="line">        -&gt; 2</span><br><span class="line">mysql&gt; SELECT ROUND(1.298, 1);</span><br><span class="line">        -&gt; 1.3</span><br><span class="line">mysql&gt; SELECT ROUND(1.298, 0);</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT ROUND(23.298, -1);</span><br><span class="line">        -&gt; 20</span><br><span class="line">mysql&gt; SELECT ROUND(.12345678901234567890123456789012345, 35);</span><br><span class="line">        -&gt; 0.123456789012345678901234567890</span><br></pre></td></tr></table></figure>
 
-<h4 id="SIGN-X"><a href="#SIGN-X" class="headerlink" title="SIGN(X)"></a>SIGN(X)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT SIGN(-32);
-        -&gt; -1
-mysql&gt; SELECT SIGN(0);
-        -&gt; 0
-mysql&gt; SELECT SIGN(234);
-        -&gt; 1</code></pre>
+<h4 id="SIGN-X"><a href="#SIGN-X" class="headerlink" title="SIGN(X)"></a>SIGN(X)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT SIGN(-32);</span><br><span class="line">        -&gt; -1</span><br><span class="line">mysql&gt; SELECT SIGN(0);</span><br><span class="line">        -&gt; 0</span><br><span class="line">mysql&gt; SELECT SIGN(234);</span><br><span class="line">        -&gt; 1</span><br></pre></td></tr></table></figure>
 
-<h4 id="TRUNCATE-X-D"><a href="#TRUNCATE-X-D" class="headerlink" title="TRUNCATE(X,D)"></a>TRUNCATE(X,D)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT TRUNCATE(1.223,1);
-        -&gt; 1.2
-mysql&gt; SELECT TRUNCATE(1.999,1);
-        -&gt; 1.9
-mysql&gt; SELECT TRUNCATE(1.999,0);
-        -&gt; 1
-mysql&gt; SELECT TRUNCATE(-1.999,1);
-        -&gt; -1.9
-mysql&gt; SELECT TRUNCATE(122,-2);
-       -&gt; 100
-mysql&gt; SELECT TRUNCATE(10.28*100,0);
-       -&gt; 1028</code></pre>
+<h4 id="TRUNCATE-X-D"><a href="#TRUNCATE-X-D" class="headerlink" title="TRUNCATE(X,D)"></a>TRUNCATE(X,D)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT TRUNCATE(1.223,1);</span><br><span class="line">        -&gt; 1.2</span><br><span class="line">mysql&gt; SELECT TRUNCATE(1.999,1);</span><br><span class="line">        -&gt; 1.9</span><br><span class="line">mysql&gt; SELECT TRUNCATE(1.999,0);</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT TRUNCATE(-1.999,1);</span><br><span class="line">        -&gt; -1.9</span><br><span class="line">mysql&gt; SELECT TRUNCATE(122,-2);</span><br><span class="line">       -&gt; 100</span><br><span class="line">mysql&gt; SELECT TRUNCATE(10.28*100,0);</span><br><span class="line">       -&gt; 1028</span><br></pre></td></tr></table></figure>
 
 <h2 id="日期和时间函数"><a href="#日期和时间函数" class="headerlink" title="日期和时间函数"></a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html">日期和时间函数</a></h2><h3 id="INTERVAL-运算符"><a href="#INTERVAL-运算符" class="headerlink" title="INTERVAL 运算符"></a>INTERVAL 运算符</h3><p>INTERVAL 运算符表示时间间隔，用法如下：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">INTERVAL expr unit</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INTERVAL expr unit</span><br></pre></td></tr></table></figure>
 
 <p><code>expr</code>和<code>unit</code>的对应关系</p>
 <table>
@@ -1092,23 +941,12 @@ mysql&gt; SELECT TRUNCATE(10.28*100,0);
 </ul>
 <h4 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h4><ul>
 <li><p>某些函数，如 DATE _ ADD ()、 DATE _ SUB ()、EXTRACT()</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT DATE_ADD(&#39;2018-05-01&#39;,INTERVAL 1 DAY);
-        -&gt; &#39;2018-05-02&#39;
-mysql&gt; SELECT DATE_SUB(&#39;2018-05-01&#39;,INTERVAL 1 YEAR);
-        -&gt; &#39;2017-05-01&#39;
-mysql&gt; SELECT EXTRACT(YEAR FROM &#39;2019-07-02&#39;);
-        -&gt; 2019</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT DATE_ADD(&#x27;2018-05-01&#x27;,INTERVAL 1 DAY);</span><br><span class="line">        -&gt; &#x27;2018-05-02&#x27;</span><br><span class="line">mysql&gt; SELECT DATE_SUB(&#x27;2018-05-01&#x27;,INTERVAL 1 YEAR);</span><br><span class="line">        -&gt; &#x27;2017-05-01&#x27;</span><br><span class="line">mysql&gt; SELECT EXTRACT(YEAR FROM &#x27;2019-07-02&#x27;);</span><br><span class="line">        -&gt; 2019</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>+&#x2F;-运算</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">date + INTERVAL expr unit
-date - INTERVAL expr unit</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">date + INTERVAL expr unit</span><br><span class="line">date - INTERVAL expr unit</span><br></pre></td></tr></table></figure>
 
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT &#39;2018-12-31 23:59:59&#39; + INTERVAL 1 SECOND;
-        -&gt; &#39;2019-01-01 00:00:00&#39;
-mysql&gt; SELECT INTERVAL 1 DAY + &#39;2018-12-31&#39;;
-        -&gt; &#39;2019-01-01&#39;
-mysql&gt; SELECT &#39;2025-01-01&#39; - INTERVAL 1 SECOND;
-        -&gt; &#39;2024-12-31 23:59:59&#39;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT &#x27;2018-12-31 23:59:59&#x27; + INTERVAL 1 SECOND;</span><br><span class="line">        -&gt; &#x27;2019-01-01 00:00:00&#x27;</span><br><span class="line">mysql&gt; SELECT INTERVAL 1 DAY + &#x27;2018-12-31&#x27;;</span><br><span class="line">        -&gt; &#x27;2019-01-01&#x27;</span><br><span class="line">mysql&gt; SELECT &#x27;2025-01-01&#x27; - INTERVAL 1 SECOND;</span><br><span class="line">        -&gt; &#x27;2024-12-31 23:59:59&#x27;</span><br></pre></td></tr></table></figure>
 
 <p>注：对于-运算，<code>INTERVAL expr</code> 只允许在右边，因为从一个间隔中减去一个日期或日期时间值是没有意义的。</p>
 </li>
@@ -1350,26 +1188,15 @@ mysql&gt; SELECT &#39;2025-01-01&#39; - INTERVAL 1 SECOND;
 </tr>
 </tbody></table>
 <h4 id="ADDDATE-date-INTERVAL-expr-unit-ADDDATE-expr-days"><a href="#ADDDATE-date-INTERVAL-expr-unit-ADDDATE-expr-days" class="headerlink" title="ADDDATE(date,INTERVAL expr unit), ADDDATE(expr,days)"></a>ADDDATE(date,INTERVAL expr unit), ADDDATE(expr,days)</h4><p>以下两种写法等价：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT ADDDATE(&#39;2008-01-02&#39;, INTERVAL 31 DAY);
-        -&gt; &#39;2008-02-02&#39;
-        
-mysql&gt; SELECT ADDDATE(&#39;2008-01-02&#39;, 31);
-        -&gt; &#39;2008-02-02&#39;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT ADDDATE(&#x27;2008-01-02&#x27;, INTERVAL 31 DAY);</span><br><span class="line">        -&gt; &#x27;2008-02-02&#x27;</span><br><span class="line">        </span><br><span class="line">mysql&gt; SELECT ADDDATE(&#x27;2008-01-02&#x27;, 31);</span><br><span class="line">        -&gt; &#x27;2008-02-02&#x27;</span><br></pre></td></tr></table></figure>
 
 <h4 id="ADDTIME-expr1-expr2"><a href="#ADDTIME-expr1-expr2" class="headerlink" title="ADDTIME(expr1,expr2)"></a>ADDTIME(expr1,expr2)</h4><p><code>expr1</code>是time或datetime，<code>expr2</code>是time：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT ADDTIME(&#39;2007-12-31 23:59:59.999999&#39;, &#39;1 1:1:1.000002&#39;);
-        -&gt; &#39;2008-01-02 01:01:01.000001&#39;
-mysql&gt; SELECT ADDTIME(&#39;01:00:00.999999&#39;, &#39;02:00:00.999998&#39;);
-        -&gt; &#39;03:00:01.999997&#39;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT ADDTIME(&#x27;2007-12-31 23:59:59.999999&#x27;, &#x27;1 1:1:1.000002&#x27;);</span><br><span class="line">        -&gt; &#x27;2008-01-02 01:01:01.000001&#x27;</span><br><span class="line">mysql&gt; SELECT ADDTIME(&#x27;01:00:00.999999&#x27;, &#x27;02:00:00.999998&#x27;);</span><br><span class="line">        -&gt; &#x27;03:00:01.999997&#x27;</span><br></pre></td></tr></table></figure>
 
 <h4 id="CURDATE"><a href="#CURDATE" class="headerlink" title="CURDATE()"></a>CURDATE()</h4><p>以“ YYYY-MM-DD”或 YYYYMMDD 格式返回当前日期值，具体取决于函数是在字符串上下文中使用还是在数字上下文中使用：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT CURDATE();
-        -&gt; &#39;2008-06-13&#39;
-mysql&gt; SELECT CURDATE() + 0;
-        -&gt; 20080613</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT CURDATE();</span><br><span class="line">        -&gt; &#x27;2008-06-13&#x27;</span><br><span class="line">mysql&gt; SELECT CURDATE() + 0;</span><br><span class="line">        -&gt; 20080613</span><br></pre></td></tr></table></figure>
 
-<h4 id="DATE-expr"><a href="#DATE-expr" class="headerlink" title="DATE(expr)"></a>DATE(expr)</h4><pre class="language-none"><code class="language-none">mysql&gt; SELECT DATE(&#39;2003-12-31 01:02:03&#39;);
-        -&gt; &#39;2003-12-31&#39;</code></pre>
+<h4 id="DATE-expr"><a href="#DATE-expr" class="headerlink" title="DATE(expr)"></a>DATE(expr)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT DATE(&#x27;2003-12-31 01:02:03&#x27;);</span><br><span class="line">        -&gt; &#x27;2003-12-31&#x27;</span><br></pre></td></tr></table></figure>
 
 <h4 id="DATE-FORMAT-date-format"><a href="#DATE-FORMAT-date-format" class="headerlink" title="DATE_FORMAT(date,format)"></a>DATE_FORMAT(date,format)</h4><p>常用format：也适用于其他函数: <code>STR_TO_DATE()</code>、 <code>TIME_formAT()</code>、 <code>UNIX_TIMESTAMP()</code></p>
 <table>
@@ -1453,31 +1280,13 @@ mysql&gt; SELECT CURDATE() + 0;
 </tr>
 </tbody></table>
 <h4 id="DATEDIFF-expr1-expr2"><a href="#DATEDIFF-expr1-expr2" class="headerlink" title="DATEDIFF(expr1,expr2)"></a>DATEDIFF(expr1,expr2)</h4><p>返回以天为单位表示的 <code>expr1</code> - <code>expr2</code>，计算中只使用expr1和expr2的date的部分，会直接舍弃time的部分。</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT DATEDIFF(&#39;2007-12-31 23:59:59&#39;,&#39;2007-12-30&#39;);
-        -&gt; 1
-mysql&gt; SELECT DATEDIFF(&#39;2010-11-30 23:59:59&#39;,&#39;2010-12-31&#39;);
-        -&gt; -31</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT DATEDIFF(&#x27;2007-12-31 23:59:59&#x27;,&#x27;2007-12-30&#x27;);</span><br><span class="line">        -&gt; 1</span><br><span class="line">mysql&gt; SELECT DATEDIFF(&#x27;2010-11-30 23:59:59&#x27;,&#x27;2010-12-31&#x27;);</span><br><span class="line">        -&gt; -31</span><br></pre></td></tr></table></figure>
 
-<h4 id="DAYOFMONTH-date"><a href="#DAYOFMONTH-date" class="headerlink" title="DAYOFMONTH(date)"></a>DAYOFMONTH(date)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT DAYOFMONTH(&#39;2007-02-03&#39;);
-        -&gt; 3</code></pre>
+<h4 id="DAYOFMONTH-date"><a href="#DAYOFMONTH-date" class="headerlink" title="DAYOFMONTH(date)"></a>DAYOFMONTH(date)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT DAYOFMONTH(&#x27;2007-02-03&#x27;);</span><br><span class="line">        -&gt; 3</span><br></pre></td></tr></table></figure>
 
-<h4 id="EXTRACT-unit-FROM-date"><a href="#EXTRACT-unit-FROM-date" class="headerlink" title="EXTRACT(unit FROM date)"></a>EXTRACT(unit FROM date)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT EXTRACT(YEAR FROM &#39;2019-07-02&#39;);
-        -&gt; 2019
-mysql&gt; SELECT EXTRACT(YEAR_MONTH FROM &#39;2019-07-02 01:02:03&#39;);
-        -&gt; 201907
-mysql&gt; SELECT EXTRACT(DAY_MINUTE FROM &#39;2019-07-02 01:02:03&#39;);
-        -&gt; 20102
-mysql&gt; SELECT EXTRACT(MICROSECOND
-    -&gt;                FROM &#39;2003-01-02 10:30:00.000123&#39;);
-        -&gt; 123</code></pre>
+<h4 id="EXTRACT-unit-FROM-date"><a href="#EXTRACT-unit-FROM-date" class="headerlink" title="EXTRACT(unit FROM date)"></a>EXTRACT(unit FROM date)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT EXTRACT(YEAR FROM &#x27;2019-07-02&#x27;);</span><br><span class="line">        -&gt; 2019</span><br><span class="line">mysql&gt; SELECT EXTRACT(YEAR_MONTH FROM &#x27;2019-07-02 01:02:03&#x27;);</span><br><span class="line">        -&gt; 201907</span><br><span class="line">mysql&gt; SELECT EXTRACT(DAY_MINUTE FROM &#x27;2019-07-02 01:02:03&#x27;);</span><br><span class="line">        -&gt; 20102</span><br><span class="line">mysql&gt; SELECT EXTRACT(MICROSECOND</span><br><span class="line">    -&gt;                FROM &#x27;2003-01-02 10:30:00.000123&#x27;);</span><br><span class="line">        -&gt; 123</span><br></pre></td></tr></table></figure>
 
-<h4 id="FROM-UNIXTIME-unix-timestamp-format"><a href="#FROM-UNIXTIME-unix-timestamp-format" class="headerlink" title="FROM_UNIXTIME(unix_timestamp[,format])"></a>FROM_UNIXTIME(unix_timestamp[,format])</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT FROM_UNIXTIME(1447430881);
-        -&gt; &#39;2015-11-13 10:08:01&#39;
-mysql&gt; SELECT FROM_UNIXTIME(1447430881) + 0;
-        -&gt; 20151113100801
-mysql&gt; SELECT FROM_UNIXTIME(1447430881,
-    -&gt;                      &#39;%Y %D %M %h:%i:%s %x&#39;);
-        -&gt; &#39;2015 13th November 10:08:01 2015&#39;</code></pre>
+<h4 id="FROM-UNIXTIME-unix-timestamp-format"><a href="#FROM-UNIXTIME-unix-timestamp-format" class="headerlink" title="FROM_UNIXTIME(unix_timestamp[,format])"></a>FROM_UNIXTIME(unix_timestamp[,format])</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT FROM_UNIXTIME(1447430881);</span><br><span class="line">        -&gt; &#x27;2015-11-13 10:08:01&#x27;</span><br><span class="line">mysql&gt; SELECT FROM_UNIXTIME(1447430881) + 0;</span><br><span class="line">        -&gt; 20151113100801</span><br><span class="line">mysql&gt; SELECT FROM_UNIXTIME(1447430881,</span><br><span class="line">    -&gt;                      &#x27;%Y %D %M %h:%i:%s %x&#x27;);</span><br><span class="line">        -&gt; &#x27;2015 13th November 10:08:01 2015&#x27;</span><br></pre></td></tr></table></figure>
 
 <h4 id="GET-FORMAT-DATE-TIME-DATETIME-‘EUR’-’USA’-’JIS’-’ISO’-’INTERNAL’"><a href="#GET-FORMAT-DATE-TIME-DATETIME-‘EUR’-’USA’-’JIS’-’ISO’-’INTERNAL’" class="headerlink" title="GET_FORMAT({DATE|TIME|DATETIME}, {‘EUR’|’USA’|’JIS’|’ISO’|’INTERNAL’})"></a>GET_FORMAT({DATE|TIME|DATETIME}, {‘EUR’|’USA’|’JIS’|’ISO’|’INTERNAL’})</h4><table>
 <thead>
@@ -1548,33 +1357,15 @@ mysql&gt; SELECT FROM_UNIXTIME(1447430881,
 </tr>
 </tbody></table>
 <h4 id="HOUR-time"><a href="#HOUR-time" class="headerlink" title="HOUR(time)"></a>HOUR(time)</h4><p>返回时间的小时。对于时间值，返回值的范围是0到23。但是，TIME 值的范围实际上要大得多，因此 HOUR 可以返回大于23的值：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT HOUR(&#39;10:05:03&#39;);
-        -&gt; 10
-mysql&gt; SELECT HOUR(&#39;272:59:59&#39;);
-        -&gt; 272</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT HOUR(&#x27;10:05:03&#x27;);</span><br><span class="line">        -&gt; 10</span><br><span class="line">mysql&gt; SELECT HOUR(&#x27;272:59:59&#x27;);</span><br><span class="line">        -&gt; 272</span><br></pre></td></tr></table></figure>
 
 <h4 id="LAST-DAY-date"><a href="#LAST-DAY-date" class="headerlink" title="LAST_DAY(date)"></a>LAST_DAY(date)</h4><p>返回date或datetime所在月最后一天。如果参数无效，返回 NULL：</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT LAST_DAY(&#39;2003-02-05&#39;);
-        -&gt; &#39;2003-02-28&#39;
-mysql&gt; SELECT LAST_DAY(&#39;2004-02-05&#39;);
-        -&gt; &#39;2004-02-29&#39;
-mysql&gt; SELECT LAST_DAY(&#39;2004-01-01 01:01:01&#39;);
-        -&gt; &#39;2004-01-31&#39;
-mysql&gt; SELECT LAST_DAY(&#39;2003-03-32&#39;);
-        -&gt; NULL</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT LAST_DAY(&#x27;2003-02-05&#x27;);</span><br><span class="line">        -&gt; &#x27;2003-02-28&#x27;</span><br><span class="line">mysql&gt; SELECT LAST_DAY(&#x27;2004-02-05&#x27;);</span><br><span class="line">        -&gt; &#x27;2004-02-29&#x27;</span><br><span class="line">mysql&gt; SELECT LAST_DAY(&#x27;2004-01-01 01:01:01&#x27;);</span><br><span class="line">        -&gt; &#x27;2004-01-31&#x27;</span><br><span class="line">mysql&gt; SELECT LAST_DAY(&#x27;2003-03-32&#x27;);</span><br><span class="line">        -&gt; NULL</span><br></pre></td></tr></table></figure>
 
 <h4 id="MAKEDATE-year-dayofyear"><a href="#MAKEDATE-year-dayofyear" class="headerlink" title="MAKEDATE(year,dayofyear)"></a>MAKEDATE(year,dayofyear)</h4><p>dayofyear 必须大于0，否则返回NULL</p>
-<pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT MAKEDATE(2011,31), MAKEDATE(2011,32);
-        -&gt; &#39;2011-01-31&#39;, &#39;2011-02-01&#39;
-mysql&gt; SELECT MAKEDATE(2011,365), MAKEDATE(2014,365);
-        -&gt; &#39;2011-12-31&#39;, &#39;2014-12-31&#39;
-mysql&gt; SELECT MAKEDATE(2011,0);
-        -&gt; NULL</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT MAKEDATE(2011,31), MAKEDATE(2011,32);</span><br><span class="line">        -&gt; &#x27;2011-01-31&#x27;, &#x27;2011-02-01&#x27;</span><br><span class="line">mysql&gt; SELECT MAKEDATE(2011,365), MAKEDATE(2014,365);</span><br><span class="line">        -&gt; &#x27;2011-12-31&#x27;, &#x27;2014-12-31&#x27;</span><br><span class="line">mysql&gt; SELECT MAKEDATE(2011,0);</span><br><span class="line">        -&gt; NULL</span><br></pre></td></tr></table></figure>
 
-<h4 id="TIMESTAMP-expr-TIMESTAMP-expr1-expr2"><a href="#TIMESTAMP-expr-TIMESTAMP-expr1-expr2" class="headerlink" title="TIMESTAMP(expr), TIMESTAMP(expr1,expr2)"></a>TIMESTAMP(expr), TIMESTAMP(expr1,expr2)</h4><pre class="language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; SELECT TIMESTAMP(&#39;2003-12-31&#39;);
-        -&gt; &#39;2003-12-31 00:00:00&#39;
-mysql&gt; SELECT TIMESTAMP(&#39;2003-12-31 12:00:00&#39;,&#39;12:00:00&#39;);
-        -&gt; &#39;2004-01-01 00:00:00&#39;</code></pre>
+<h4 id="TIMESTAMP-expr-TIMESTAMP-expr1-expr2"><a href="#TIMESTAMP-expr-TIMESTAMP-expr1-expr2" class="headerlink" title="TIMESTAMP(expr), TIMESTAMP(expr1,expr2)"></a>TIMESTAMP(expr), TIMESTAMP(expr1,expr2)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT TIMESTAMP(&#x27;2003-12-31&#x27;);</span><br><span class="line">        -&gt; &#x27;2003-12-31 00:00:00&#x27;</span><br><span class="line">mysql&gt; SELECT TIMESTAMP(&#x27;2003-12-31 12:00:00&#x27;,&#x27;12:00:00&#x27;);</span><br><span class="line">        -&gt; &#x27;2004-01-01 00:00:00&#x27;</span><br></pre></td></tr></table></figure>
 
 
 

@@ -457,110 +457,39 @@
 </tr>
 </tbody></table>
 <h2 id="ipvsadm"><a href="#ipvsadm" class="headerlink" title="ipvsadm"></a>ipvsadm</h2><p>ipvsadm 的核心功能：管理集群服务 和 集群服务的 RS</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> ipvsadm
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$rpm</span> <span class="token parameter variable">-ql</span> ipvsadm
-/etc/sysconfig/ipvsadm-config					<span class="token comment"># 配置文件</span>
-/usr/lib/systemd/system/ipvsadm.service			<span class="token comment">#</span>
-/usr/sbin/ipvsadm								<span class="token comment"># 主程序</span>
-/usr/sbin/ipvsadm-restore						<span class="token comment"># 规则重载工具</span>
-/usr/sbin/ipvsadm-save							<span class="token comment"># 规则保存工具</span>
-<span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@c71 ~]<span class="variable">$yum</span> -y install ipvsadm</span><br><span class="line">[root@c71 ~]<span class="variable">$rpm</span> -ql ipvsadm</span><br><span class="line">/etc/sysconfig/ipvsadm-config					<span class="comment"># 配置文件</span></span><br><span class="line">/usr/lib/systemd/system/ipvsadm.service			<span class="comment">#</span></span><br><span class="line">/usr/sbin/ipvsadm								<span class="comment"># 主程序</span></span><br><span class="line">/usr/sbin/ipvsadm-restore						<span class="comment"># 规则重载工具</span></span><br><span class="line">/usr/sbin/ipvsadm-save							<span class="comment"># 规则保存工具</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
-<h3 id="管理集群服务"><a href="#管理集群服务" class="headerlink" title="管理集群服务"></a>管理集群服务</h3><pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -A<span class="token operator">|</span>E -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token punctuation">[</span>-s scheduler<span class="token punctuation">]</span> <span class="token punctuation">[</span>-p <span class="token punctuation">[</span>timeout<span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>-M netmask<span class="token punctuation">]</span> <span class="token punctuation">[</span>--pe persistence_engine<span class="token punctuation">]</span> <span class="token punctuation">[</span>-b sched-flags<span class="token punctuation">]</span>
+<h3 id="管理集群服务"><a href="#管理集群服务" class="headerlink" title="管理集群服务"></a>管理集群服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [<span class="built_in">timeout</span>]] [-M netmask] [--pe persistence_engine] [-b sched-flags]</span><br><span class="line"></span><br><span class="line">-A		<span class="comment"># add</span></span><br><span class="line">-E		<span class="comment"># edit</span></span><br><span class="line"></span><br><span class="line">service-address		<span class="comment"># vip:port 如：10.0.0.100:80</span></span><br><span class="line">    -t		<span class="comment"># tcp协议</span></span><br><span class="line">    -u		<span class="comment"># udp协议</span></span><br><span class="line">    -f		<span class="comment"># firewall mark，标记，一个数字</span></span><br><span class="line"></span><br><span class="line">-s		<span class="comment"># 指定集群的调度算法，默认为wlc</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 范例</span></span><br><span class="line">ipvsadm -A -t 10.0.0.100:80 -s wrr</span><br></pre></td></tr></table></figure>
 
-<span class="token parameter variable">-A</span>		<span class="token comment"># add</span>
-<span class="token parameter variable">-E</span>		<span class="token comment"># edit</span>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -D -t|u|f service-address 	<span class="comment"># 删除</span></span><br><span class="line">ipvsadm –C 							<span class="comment"># 清空定义的所有内容</span></span><br><span class="line">ipvsadm –R 							<span class="comment"># 重载,相当于ipvsadm-restore</span></span><br><span class="line">ipvsadm -S [-n] 					<span class="comment"># 保存,相当于ipvsadm-save</span></span><br></pre></td></tr></table></figure>
 
-service-address		<span class="token comment"># vip:port 如：10.0.0.100:80</span>
-    <span class="token parameter variable">-t</span>		<span class="token comment"># tcp协议</span>
-    <span class="token parameter variable">-u</span>		<span class="token comment"># udp协议</span>
-    <span class="token parameter variable">-f</span>		<span class="token comment"># firewall mark，标记，一个数字</span>
+<h3 id="管理集群上的-RS"><a href="#管理集群上的-RS" class="headerlink" title="管理集群上的 RS"></a>管理集群上的 RS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -a|e -t|u|f service-address -r server-address [-g|i|m] [-w weight]</span><br><span class="line"></span><br><span class="line">-a		<span class="comment"># add</span></span><br><span class="line">-e		<span class="comment"># edit</span></span><br><span class="line">-r		<span class="comment"># rip[:port] 如省略port，不作端口映射</span></span><br><span class="line">    -g		<span class="comment"># gateway，dr类型，默认</span></span><br><span class="line">    -i		<span class="comment"># ipip，tun类型</span></span><br><span class="line">    -m		<span class="comment"># masquerade，nat类型</span></span><br><span class="line">-w		<span class="comment"># 权重</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 范例</span></span><br><span class="line">ipvsadm -a -t 10.0.0.100:80 -r 10.0.0.8:8080 -m -w 3</span><br></pre></td></tr></table></figure>
 
-<span class="token parameter variable">-s</span>		<span class="token comment"># 指定集群的调度算法，默认为wlc</span>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -d -t|u|f service-address -r server-address		<span class="comment"># 删除</span></span><br><span class="line">ipvsadm -Z [-t|u|f service-address]						<span class="comment"># 清空计数器</span></span><br></pre></td></tr></table></figure>
 
-<span class="token comment"># 范例</span>
-ipvsadm <span class="token parameter variable">-A</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-s</span> wrr</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -L|l [options]	<span class="comment"># 查看</span></span><br><span class="line"></span><br><span class="line">options：</span><br><span class="line">-n：			以数字形式输出地址和端口号</span><br><span class="line">--exact：	扩展信息,精确值</span><br><span class="line">-c：			当前IPVS连接输出</span><br><span class="line">--stats：	统计信息</span><br><span class="line">--rate：		输出速率信息</span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm <span class="token parameter variable">-D</span> -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address 	<span class="token comment"># 删除</span>
-ipvsadm –C 							<span class="token comment"># 清空定义的所有内容</span>
-ipvsadm –R 							<span class="token comment"># 重载,相当于ipvsadm-restore</span>
-ipvsadm <span class="token parameter variable">-S</span> <span class="token punctuation">[</span>-n<span class="token punctuation">]</span> 					<span class="token comment"># 保存,相当于ipvsadm-save</span></code></pre>
+<h3 id="ipvs-规则"><a href="#ipvs-规则" class="headerlink" title="ipvs 规则"></a>ipvs 规则</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/proc/net/ip_vs</span><br></pre></td></tr></table></figure>
 
-<h3 id="管理集群上的-RS"><a href="#管理集群上的-RS" class="headerlink" title="管理集群上的 RS"></a>管理集群上的 RS</h3><pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -a<span class="token operator">|</span>e -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token parameter variable">-r</span> server-address <span class="token punctuation">[</span>-g<span class="token operator">|</span>i<span class="token operator">|</span>m<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w weight<span class="token punctuation">]</span>
-
-<span class="token parameter variable">-a</span>		<span class="token comment"># add</span>
-<span class="token parameter variable">-e</span>		<span class="token comment"># edit</span>
-<span class="token parameter variable">-r</span>		<span class="token comment"># rip[:port] 如省略port，不作端口映射</span>
-    <span class="token parameter variable">-g</span>		<span class="token comment"># gateway，dr类型，默认</span>
-    <span class="token parameter variable">-i</span>		<span class="token comment"># ipip，tun类型</span>
-    <span class="token parameter variable">-m</span>		<span class="token comment"># masquerade，nat类型</span>
-<span class="token parameter variable">-w</span>		<span class="token comment"># 权重</span>
-
-<span class="token comment"># 范例</span>
-ipvsadm <span class="token parameter variable">-a</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.8:8080 <span class="token parameter variable">-m</span> <span class="token parameter variable">-w</span> <span class="token number">3</span></code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm <span class="token parameter variable">-d</span> -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token parameter variable">-r</span> server-address		<span class="token comment"># 删除</span>
-ipvsadm <span class="token parameter variable">-Z</span> <span class="token punctuation">[</span>-t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address<span class="token punctuation">]</span>						<span class="token comment"># 清空计数器</span></code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -L<span class="token operator">|</span>l <span class="token punctuation">[</span>options<span class="token punctuation">]</span>	<span class="token comment"># 查看</span>
-
-options：
--n：			以数字形式输出地址和端口号
---exact：	扩展信息,精确值
--c：			当前IPVS连接输出
---stats：	统计信息
---rate：		输出速率信息</code></pre>
-
-<h3 id="ipvs-规则"><a href="#ipvs-规则" class="headerlink" title="ipvs 规则"></a>ipvs 规则</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/proc/net/ip_vs</code></pre>
-
-<h3 id="ipvs-连接"><a href="#ipvs-连接" class="headerlink" title="ipvs 连接"></a>ipvs 连接</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/proc/net/ip_vs_conn</code></pre>
+<h3 id="ipvs-连接"><a href="#ipvs-连接" class="headerlink" title="ipvs 连接"></a>ipvs 连接</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/proc/net/ip_vs_conn</span><br></pre></td></tr></table></figure>
 
 <h3 id="保存规则"><a href="#保存规则" class="headerlink" title="保存规则"></a>保存规则</h3><p>ipvs 调度规则建议保存至 &#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm.rules</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm-save <span class="token operator">></span> /etc/sysconfig/ipvsadm.rules
-ipvsadm <span class="token parameter variable">-S</span> <span class="token operator">></span> /etc/sysconfig/ipvsadm.rules	<span class="token comment"># ipvsadm -S 和 ipvsadm-save等价</span>
-systemctl stop ipvsadm.service			<span class="token comment"># 会自动保存规则至/etc/sysconfig/ipvsadm.rules</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm-save &gt; /etc/sysconfig/ipvsadm.rules</span><br><span class="line">ipvsadm -S &gt; /etc/sysconfig/ipvsadm.rules	<span class="comment"># ipvsadm -S 和 ipvsadm-save等价</span></span><br><span class="line">systemctl stop ipvsadm.service			<span class="comment"># 会自动保存规则至/etc/sysconfig/ipvsadm.rules</span></span><br></pre></td></tr></table></figure>
 
-<h3 id="重载"><a href="#重载" class="headerlink" title="重载"></a>重载</h3><pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm-restore <span class="token operator">&lt;</span> /etc/sysconfig/ipvsadm.rules
-systemctl start ipvsadm.service			<span class="token comment"># #会自动加载/etc/sysconfig/ipvsadm.rules中规则</span></code></pre>
+<h3 id="重载"><a href="#重载" class="headerlink" title="重载"></a>重载</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm-restore &lt; /etc/sysconfig/ipvsadm.rules</span><br><span class="line">systemctl start ipvsadm.service			<span class="comment"># #会自动加载/etc/sysconfig/ipvsadm.rules中规则</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="防火墙标记"><a href="#防火墙标记" class="headerlink" title="防火墙标记"></a>防火墙标记</h3><p>FWM：FireWall Mark</p>
 <p>借助防火墙标记来分类报文，而后基于标记定义集群服务，可将多个不同的应用使用同一个集群服务进行调度</p>
 <p>实现方法：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 在VS主机打标记</span>
-iptables <span class="token parameter variable">-t</span> mangle <span class="token parameter variable">-A</span> PREROUTING <span class="token parameter variable">-d</span> <span class="token variable">$vip</span> <span class="token parameter variable">-p</span> <span class="token variable">$proto</span> <span class="token parameter variable">-m</span> multiport <span class="token parameter variable">--dports</span> <span class="token variable">$port1</span>,<span class="token variable">$port2</span>,<span class="token punctuation">..</span>. <span class="token parameter variable">-j</span> MARK --set-mark NUMBER
-
-<span class="token comment"># 2. 在VS主机基于标记定义集群服务</span>
-ipvsadm <span class="token parameter variable">-A</span> <span class="token parameter variable">-f</span> NUMBER <span class="token punctuation">[</span>options<span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 在VS主机打标记</span></span><br><span class="line">iptables -t mangle -A PREROUTING -d <span class="variable">$vip</span> -p <span class="variable">$proto</span> -m multiport --dports <span class="variable">$port1</span>,<span class="variable">$port2</span>,... -j MARK --set-mark NUMBER</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 在VS主机基于标记定义集群服务</span></span><br><span class="line">ipvsadm -A -f NUMBER [options]</span><br></pre></td></tr></table></figure>
 
 <p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$iptables</span> <span class="token parameter variable">-t</span> mangle <span class="token parameter variable">-A</span> PREROUTING <span class="token parameter variable">-d</span> <span class="token number">172.16</span>.0.100 <span class="token parameter variable">-p</span> tcp <span class="token parameter variable">-m</span> multiport <span class="token parameter variable">--dports</span> <span class="token number">80,443</span> <span class="token parameter variable">-j</span> MARK --set-mark <span class="token number">10</span>
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-C</span>
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-A</span> <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-s</span> rr
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.72 <span class="token parameter variable">-g</span>
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.73 <span class="token parameter variable">-g</span>
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$ipvsadm</span> <span class="token parameter variable">-Ln</span>
-IP Virtual Server version <span class="token number">1.2</span>.1 <span class="token punctuation">(</span>size<span class="token operator">=</span><span class="token number">4096</span><span class="token punctuation">)</span>
-Prot LocalAddress:Port Scheduler Flags
-  -<span class="token operator">></span> RemoteAddress:Port           Forward Weight ActiveConn InActConn
-FWM  <span class="token number">10</span> rr
-  -<span class="token operator">></span> <span class="token number">10.0</span>.0.72:0                  Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.0.73:0                  Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$cat</span> /proc/net/ip_vs
-IP Virtual Server version <span class="token number">1.2</span>.1 <span class="token punctuation">(</span>size<span class="token operator">=</span><span class="token number">4096</span><span class="token punctuation">)</span>
-Prot LocalAddress:Port Scheduler Flags
-  -<span class="token operator">></span> RemoteAddress:Port Forward Weight ActiveConn InActConn
-FWM  0000000A rr
-  -<span class="token operator">></span> 0A000049:0000      Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> 0A000048:0000      Route   <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@c71 ~]<span class="variable">$iptables</span> -t mangle -A PREROUTING -d 172.16.0.100 -p tcp -m multiport --dports 80,443 -j MARK --set-mark 10</span><br><span class="line">[root@c71 ~]<span class="variable">$ipvsadm</span> -C</span><br><span class="line">[root@c71 ~]<span class="variable">$ipvsadm</span> -A -f 10 -s rr</span><br><span class="line">[root@c71 ~]<span class="variable">$ipvsadm</span> -a -f 10 -r 10.0.0.72 -g</span><br><span class="line">[root@c71 ~]<span class="variable">$ipvsadm</span> -a -f 10 -r 10.0.0.73 -g</span><br><span class="line">[root@c71 ~]<span class="variable">$ipvsadm</span> -Ln</span><br><span class="line">IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">FWM  10 rr</span><br><span class="line">  -&gt; 10.0.0.72:0                  Route   1      0          0</span><br><span class="line">  -&gt; 10.0.0.73:0                  Route   1      0          0</span><br><span class="line">[root@c71 ~]<span class="variable">$cat</span> /proc/net/ip_vs</span><br><span class="line">IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port Forward Weight ActiveConn InActConn</span><br><span class="line">FWM  0000000A rr</span><br><span class="line">  -&gt; 0A000049:0000      Route   1      0          0</span><br><span class="line">  -&gt; 0A000048:0000      Route   1      0          0</span><br></pre></td></tr></table></figure>
 
 <h3 id="持久标记"><a href="#持久标记" class="headerlink" title="持久标记"></a>持久标记</h3><p>session 绑定：对共享同一组 RS 的多个集群服务，需要统一进行绑定，IPVS 调度算法无法实现</p>
 <p>持久连接模板：无论使用任何调度算法，在一段时间内（默认 360s），能够实现将来自同一地址的请求始终发往同一个 RS</p>
 <p>实现方法：ipvsadm 指定 -p 选项即可</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">ipvsadm -A<span class="token operator">|</span>E -t<span class="token operator">|</span>u<span class="token operator">|</span>f service-address <span class="token punctuation">[</span>-s scheduler<span class="token punctuation">]</span> <span class="token parameter variable">-p</span> <span class="token punctuation">[</span>timeout<span class="token punctuation">]</span> <span class="token punctuation">[</span>-M netmask<span class="token punctuation">]</span> <span class="token punctuation">[</span>--pe persistence_engine<span class="token punctuation">]</span> <span class="token punctuation">[</span>-b sched-flags<span class="token punctuation">]</span>
-
-<span class="token comment"># 范例：</span>
-ipvsadm -A<span class="token operator">|</span>E <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-p</span>
-ipvsadm -A<span class="token operator">|</span>E <span class="token parameter variable">-f</span> <span class="token number">10</span> <span class="token parameter variable">-p</span> <span class="token number">3600</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A|E -t|u|f service-address [-s scheduler] -p [<span class="built_in">timeout</span>] [-M netmask] [--pe persistence_engine] [-b sched-flags]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 范例：</span></span><br><span class="line">ipvsadm -A|E -f 10 -p</span><br><span class="line">ipvsadm -A|E -f 10 -p 3600</span><br></pre></td></tr></table></figure>
 
 <h2 id="LVS-实战案例"><a href="#LVS-实战案例" class="headerlink" title="LVS 实战案例"></a>LVS 实战案例</h2><p>重点掌握 LVS-DR 模式即可，其他模式如果用到再复习</p>
 <h3 id="LVS-DR-模式单网段案例"><a href="#LVS-DR-模式单网段案例" class="headerlink" title="LVS-DR 模式单网段案例"></a>LVS-DR 模式单网段案例</h3><p>DR 模式中各主机上均需配置 VIP，解决地址冲突的方式有三种，最常用的是修改 RS 的内核参数：</p>
@@ -579,21 +508,7 @@ ipvsadm -A<span class="token operator">|</span>E <span class="token parameter va
 </li>
 </ul>
 <p><img data-src="//img.to2b.cn/blog/ljk/1605495268542.png"></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">环境：五台主机
-
-一台客户机：eht0：仅主机 <span class="token number">192.168</span>.10.6/24 GW：192.168.10.200
-
-一台路由器：
-eht0：NAT <span class="token number">10.0</span>.0.200/24
-eht1：仅主机 <span class="token number">192.168</span>.10.200/24
-启用ip_forward
-
-<span class="token comment"># dr模式下，vs只负责转发请求，不往外网发送请求，所以网关可以随便设置一个ip，但是不能不配置，因为如果不配置，vs会认为自己和外网没有通信的可能，就不会转发请求了</span>
-一台VS：eht0：NAT <span class="token number">10.0</span>.0.8/24 GW：10.0.0.200		lo：10.0.0.100/32
-
-两台RS：
-RS1：eth0：NAT <span class="token number">10.0</span>.0.7/24 GW:10.0.0.200		lo：10.0.0.100/32
-RS2：eth0：NAT <span class="token number">10.0</span>.0.17/24 GW:10.0.0.200		lo：10.0.0.100/32</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">环境：五台主机</span><br><span class="line"></span><br><span class="line">一台客户机：eht0：仅主机 192.168.10.6/24 GW：192.168.10.200</span><br><span class="line"></span><br><span class="line">一台路由器：</span><br><span class="line">eht0：NAT 10.0.0.200/24</span><br><span class="line">eht1：仅主机 192.168.10.200/24</span><br><span class="line">启用ip_forward</span><br><span class="line"></span><br><span class="line"><span class="comment"># dr模式下，vs只负责转发请求，不往外网发送请求，所以网关可以随便设置一个ip，但是不能不配置，因为如果不配置，vs会认为自己和外网没有通信的可能，就不会转发请求了</span></span><br><span class="line">一台VS：eht0：NAT 10.0.0.8/24 GW：10.0.0.200		lo：10.0.0.100/32</span><br><span class="line"></span><br><span class="line">两台RS：</span><br><span class="line">RS1：eth0：NAT 10.0.0.7/24 GW:10.0.0.200		lo：10.0.0.100/32</span><br><span class="line">RS2：eth0：NAT 10.0.0.17/24 GW:10.0.0.200		lo：10.0.0.100/32</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><p>RS 要可以出网，所以配置了网关</p>
@@ -601,20 +516,7 @@ RS2：eth0：NAT <span class="token number">10.0</span>.0.17/24 GW:10.0.0.200		l
 <li><p>VIP 是 10.0.0.100，给 VS 和 RS 的 lo 网卡都配置上</p>
 </li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 客户机配置过程略。。。</span>
-<span class="token comment"># 路由器配置过程略。。。</span>
-<span class="token comment"># RS配置：将arp_ignore设置为1、arp_announce设置为2；lo的ip配置为VIP</span>
-<span class="token builtin class-name">echo</span> <span class="token number">1</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/all/arp_ignore
-<span class="token builtin class-name">echo</span> <span class="token number">1</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/lo/arp_ignore
-<span class="token builtin class-name">echo</span> <span class="token number">2</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/all/arp_announce
-<span class="token builtin class-name">echo</span> <span class="token number">2</span> <span class="token operator">></span> /proc/sys/net/ipv4/conf/lo/arp_announce
-<span class="token function">ip</span> a <span class="token function">add</span> <span class="token number">10.0</span>.0.100/32 dev lo label lo:1
-<span class="token comment"># VS配置：lo的ip配置为VIP，配置ipvs规则</span>
-ipvsadm <span class="token parameter variable">-A</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-s</span> rr
-ipvsadm <span class="token parameter variable">-a</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.7:80 <span class="token parameter variable">-g</span>
-ipvsadm <span class="token parameter variable">-a</span> <span class="token parameter variable">-t</span> <span class="token number">10.0</span>.0.100:80 <span class="token parameter variable">-r</span> <span class="token number">10.0</span>.0.17:80 <span class="token parameter variable">-g</span>
-
-<span class="token comment"># 测试访问：客户机多次执行 curl 10.0.0.100</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 客户机配置过程略。。。</span></span><br><span class="line"><span class="comment"># 路由器配置过程略。。。</span></span><br><span class="line"><span class="comment"># RS配置：将arp_ignore设置为1、arp_announce设置为2；lo的ip配置为VIP</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line"><span class="built_in">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line"><span class="built_in">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line">ip a add 10.0.0.100/32 dev lo label lo:1</span><br><span class="line"><span class="comment"># VS配置：lo的ip配置为VIP，配置ipvs规则</span></span><br><span class="line">ipvsadm -A -t 10.0.0.100:80 -s rr</span><br><span class="line">ipvsadm -a -t 10.0.0.100:80 -r 10.0.0.7:80 -g</span><br><span class="line">ipvsadm -a -t 10.0.0.100:80 -r 10.0.0.17:80 -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试访问：客户机多次执行 curl 10.0.0.100</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="LVS-DR-模式多网段案例"><a href="#LVS-DR-模式多网段案例" class="headerlink" title="LVS-DR 模式多网段案例"></a>LVS-DR 模式多网段案例</h3><p>前面的单网段案例中，lo 和 eth0 在同一个网段，如果把 lo 和 eth0 的 ip 设置在不同的网段就是多网段，这种情况是物理上单网段，逻辑上多网段</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1605497471540.png"></p>

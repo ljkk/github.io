@@ -435,21 +435,11 @@
 <li>半虚拟化设备的驱动必须安装在客机操作系统上</li>
 <li>当虚拟机运行大小需要密集 I&#x2F;O 操作的应用程序时，推荐使用半虚拟化设备,而不是使用仿真设备</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash">半虚拟化网络设备：virtio-net
-半虚拟化块设备：virtio-blk
-半虚拟化控制器设备：virtio-scsi
-半虚拟化时钟：
-半虚拟化串口设备：virtio-serial
-气球设备：virtio-balloon
-半虚拟化随机数字生成器：virtio-rng
-半虚拟化图形卡：</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">半虚拟化网络设备：virtio-net</span><br><span class="line">半虚拟化块设备：virtio-blk</span><br><span class="line">半虚拟化控制器设备：virtio-scsi</span><br><span class="line">半虚拟化时钟：</span><br><span class="line">半虚拟化串口设备：virtio-serial</span><br><span class="line">气球设备：virtio-balloon</span><br><span class="line">半虚拟化随机数字生成器：virtio-rng</span><br><span class="line">半虚拟化图形卡：</span><br></pre></td></tr></table></figure>
 
 <p><strong>透传物理主机设备：</strong></p>
 <p>特定硬件平台允许虚拟机直接访问多种硬件设备及组件。在虚拟化中,此操作被称为“设备分配 ”(device assignment)。设备分配又被称作 “传递 ”(passthrough)</p>
-<pre class="language-none"><code class="language-none">VFIO 设备分配：
-USB 传递：
-SR-IOV：
-NPIV：</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">VFIO 设备分配：</span><br><span class="line">USB 传递：</span><br><span class="line">SR-IOV：</span><br><span class="line">NPIV：</span><br></pre></td></tr></table></figure>
 
 <h3 id="KVM-集中管理和控制"><a href="#KVM-集中管理和控制" class="headerlink" title="KVM 集中管理和控制"></a>KVM 集中管理和控制</h3><ul>
 <li>oVirt：功能强大，Redhat 虚拟化管理平台 RHEV 的开源版</li>
@@ -484,18 +474,13 @@ NPIV：</code></pre>
 <h4 id="安装-KVM-相关包"><a href="#安装-KVM-相关包" class="headerlink" title="安装 KVM 相关包"></a>安装 KVM 相关包</h4><ul>
 <li>CentOS</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token parameter variable">-y</span> <span class="token function">install</span> qemu-kvm libvirt virt-manager virt-install  virt-viewer
-systemctl start <span class="token parameter variable">--now</span> libvirtd
-
-<span class="token comment"># CentOS 8 还提供基于Web的虚拟机管理方式</span>
-yum <span class="token parameter variable">-y</span> <span class="token function">install</span> cockpit</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum -y install qemu-kvm libvirt virt-manager virt-install  virt-viewer</span><br><span class="line">systemctl start --now libvirtd</span><br><span class="line"></span><br><span class="line"><span class="comment"># CentOS 8 还提供基于Web的虚拟机管理方式</span></span><br><span class="line">yum -y install cockpit</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>Ubuntu</li>
 </ul>
 <p>官方文档：<a target="_blank" rel="noopener" href="https://ubuntu.com/server/docs/virtualization-libvirt">https://ubuntu.com/server/docs/virtualization-libvirt</a></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># kvm-ok 验证是否支持kvm,只有Ubuntu支持,CentOS 不支持</span>
-<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token parameter variable">-y</span> <span class="token function">install</span> qemu-kvm virt-manager libvirt-daemon-system</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kvm-ok 验证是否支持kvm,只有Ubuntu支持,CentOS 不支持</span></span><br><span class="line">sudo apt -y install qemu-kvm virt-manager libvirt-daemon-system</span><br></pre></td></tr></table></figure>
 
 <h2 id="创建虚拟机"><a href="#创建虚拟机" class="headerlink" title="创建虚拟机"></a>创建虚拟机</h2><p>三种方式：</p>
 <ol>
@@ -504,97 +489,34 @@ yum <span class="token parameter variable">-y</span> <span class="token function
 <li>基于现有虚拟机磁盘为模版创建新的虚拟机</li>
 </ol>
 <p>重点掌握 virt-install 命令配合 PXE 自动实现自动安装系统</p>
-<h3 id="virt-install-命令"><a href="#virt-install-命令" class="headerlink" title="virt-install 命令"></a>virt-install 命令</h3><pre class="language-bash" data-language="bash"><code class="language-bash">virt-install <span class="token parameter variable">--help</span></code></pre>
+<h3 id="virt-install-命令"><a href="#virt-install-命令" class="headerlink" title="virt-install 命令"></a>virt-install 命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virt-install --<span class="built_in">help</span></span><br></pre></td></tr></table></figure>
 
 <p>virt-install 的选项很多，需要好好研究，但是这里就不一一列举了</p>
 <h3 id="qemu-img-命令"><a href="#qemu-img-命令" class="headerlink" title="qemu-img 命令"></a>qemu-img 命令</h3><p>利用 qemu-img 命令创建虚拟磁盘，注意: qemu-img create 会覆盖原文件，所以要先检查是否有同名文件存在</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> qemu-img create <span class="token parameter variable">-f</span> qcow2 /var/lib/libvirt/images/centos7-pxe1.qcow2 20G</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-pxe1.qcow2 20G</span><br></pre></td></tr></table></figure>
 
 <h3 id="范例：virt-install-amp-PXE"><a href="#范例：virt-install-amp-PXE" class="headerlink" title="范例：virt-install &amp; PXE"></a>范例：virt-install &amp; PXE</h3><p>HostOS：ubuntu20.04 （物理机）</p>
 <p>GuestOS：Centos7</p>
 <ol>
 <li><p>配置 PXE 环境，参考前面的笔记</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">install</span>
-xconfig <span class="token parameter variable">--startxonboot</span>
-keyboard <span class="token parameter variable">--vckeymap</span><span class="token operator">=</span>us <span class="token parameter variable">--xlayouts</span><span class="token operator">=</span><span class="token string">'us'</span>
-lang en_US.UTF-8
-rootpw <span class="token parameter variable">--iscrypted</span> <span class="token variable">$1</span><span class="token variable">$YyodG</span>.X7<span class="token variable">$LzhHqxWONgSh0NBoC730o0</span>
-url <span class="token parameter variable">--url</span><span class="token operator">=</span><span class="token string">"http://10.0.0.1/centos/7/os/x86_64"</span>
-auth <span class="token parameter variable">--useshadow</span> <span class="token parameter variable">--passalgo</span><span class="token operator">=</span>sha512
-text
-firstboot <span class="token parameter variable">--enable</span>
-selinux <span class="token parameter variable">--disabled</span>
-skipx
-services <span class="token parameter variable">--disabled</span><span class="token operator">=</span><span class="token string">"chronyd"</span>
-ignoredisk --only-use<span class="token operator">=</span>vda
-firewall <span class="token parameter variable">--disabled</span>
-network <span class="token parameter variable">--bootproto</span><span class="token operator">=</span>dhcp <span class="token parameter variable">--device</span><span class="token operator">=</span>eth0
-network <span class="token parameter variable">--hostname</span><span class="token operator">=</span>c7
-<span class="token function">reboot</span>
-timezone Asia/Shanghai <span class="token parameter variable">--nontp</span>
-bootloader <span class="token parameter variable">--append</span><span class="token operator">=</span><span class="token string">"net.ifnames=0"</span> <span class="token parameter variable">--location</span><span class="token operator">=</span>mbr --boot-drive<span class="token operator">=</span>vda
-zerombr
-clearpart <span class="token parameter variable">--all</span> <span class="token parameter variable">--initlabel</span>
-part /boot <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--ondisk</span><span class="token operator">=</span>vda <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">300</span>
-part pv.01 <span class="token parameter variable">--size</span> <span class="token number">1</span> <span class="token parameter variable">--grow</span>
-volgroup volgrp pv.01
-logvol swap <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>swap <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"swap"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">2048</span>
-logvol / <span class="token parameter variable">--vgname</span><span class="token operator">=</span>volgrp <span class="token parameter variable">--name</span><span class="token operator">=</span>root <span class="token parameter variable">--fstype</span><span class="token operator">=</span><span class="token string">"ext4"</span> <span class="token parameter variable">--size</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">--grow</span>
-%post
-<span class="token function">useradd</span> lujinkai
-%end
-%packages
-@^minimal
-@core
-%end</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">install</span><br><span class="line">xconfig --startxonboot</span><br><span class="line">keyboard --vckeymap=us --xlayouts=<span class="string">&#x27;us&#x27;</span></span><br><span class="line">lang en_US.UTF-8</span><br><span class="line">rootpw --iscrypted $1<span class="variable">$YyodG</span>.X7<span class="variable">$LzhHqxWONgSh0NBoC730o0</span></span><br><span class="line">url --url=<span class="string">&quot;http://10.0.0.1/centos/7/os/x86_64&quot;</span></span><br><span class="line">auth --useshadow --passalgo=sha512</span><br><span class="line">text</span><br><span class="line">firstboot --<span class="built_in">enable</span></span><br><span class="line">selinux --disabled</span><br><span class="line">skipx</span><br><span class="line">services --disabled=<span class="string">&quot;chronyd&quot;</span></span><br><span class="line">ignoredisk --only-use=vda</span><br><span class="line">firewall --disabled</span><br><span class="line">network --bootproto=dhcp --device=eth0</span><br><span class="line">network --hostname=c7</span><br><span class="line">reboot</span><br><span class="line">timezone Asia/Shanghai --nontp</span><br><span class="line">bootloader --append=<span class="string">&quot;net.ifnames=0&quot;</span> --location=mbr --boot-drive=vda</span><br><span class="line">zerombr</span><br><span class="line">clearpart --all --initlabel</span><br><span class="line">part /boot --fstype=<span class="string">&quot;ext4&quot;</span> --ondisk=vda --size=300</span><br><span class="line">part pv.01 --size 1 --grow</span><br><span class="line">volgroup volgrp pv.01</span><br><span class="line">logvol swap --vgname=volgrp --name=swap --fstype=<span class="string">&quot;swap&quot;</span> --size=2048</span><br><span class="line">logvol / --vgname=volgrp --name=root --fstype=<span class="string">&quot;ext4&quot;</span> --size=1 --grow</span><br><span class="line">%post</span><br><span class="line">useradd lujinkai</span><br><span class="line">%end</span><br><span class="line">%packages</span><br><span class="line">@^minimal</span><br><span class="line">@core</span><br><span class="line">%end</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>qemu-img 命令创建虚拟磁盘</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> qemu-img create <span class="token parameter variable">-f</span> qcow2 /var/lib/libvirt/images/centos7-pxe1.qcow2 20G</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo qemu-img create -f qcow2 /var/lib/libvirt/images/centos7-pxe1.qcow2 20G</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>virt-install 命令安装</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> virt-install <span class="token punctuation">\</span>
---virt-type kvm <span class="token punctuation">\</span>
-<span class="token parameter variable">--name</span> centos7-pxe1 <span class="token punctuation">\</span>
-<span class="token parameter variable">--memory</span> <span class="token number">2048</span> <span class="token punctuation">\</span>
-<span class="token parameter variable">--vcpus</span> <span class="token number">1</span> <span class="token punctuation">\</span>
-<span class="token parameter variable">--disk</span> <span class="token assign-left variable">path</span><span class="token operator">=</span>/var/lib/libvirt/images/centos7-pxe1.qcow2,bus<span class="token operator">=</span>virtio <span class="token punctuation">\</span>
-<span class="token parameter variable">--network</span> <span class="token assign-left variable">network</span><span class="token operator">=</span>default <span class="token punctuation">\</span>
-<span class="token parameter variable">--graphics</span> vnc,listen<span class="token operator">=</span><span class="token number">0.0</span>.0.0 <span class="token punctuation">\</span>
-<span class="token parameter variable">--location</span><span class="token operator">=</span>/usr/local/src/CentOS-7-x86_64-Minimal-2003.iso <span class="token punctuation">\</span>
---extra-args<span class="token operator">=</span><span class="token string">"ks=http://10.0.0.1/ks/centos7.cfg"</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sudo virt-install \</span><br><span class="line">--virt-type kvm \</span><br><span class="line">--name centos7-pxe1 \</span><br><span class="line">--memory 2048 \</span><br><span class="line">--vcpus 1 \</span><br><span class="line">--disk path=/var/lib/libvirt/images/centos7-pxe1.qcow2,bus=virtio \</span><br><span class="line">--network network=default \</span><br><span class="line">--graphics vnc,listen=0.0.0.0 \</span><br><span class="line">--location=/usr/local/src/CentOS-7-x86_64-Minimal-2003.iso \</span><br><span class="line">--extra-args=<span class="string">&quot;ks=http://10.0.0.1/ks/centos7.cfg&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p><font color=red>注意：</font> –disk 的 bus 选项一定要指定，因为默认 bus&#x3D;scsi，而这里直接在 ubutu 物理机中安装，硬盘是 sata，可以指定 bus&#x3D;sata，不过这样是全虚拟化，而指定 bus&#x3D;virtio 是半虚拟化，性能更好</p>
 </li>
 <li><p>安装成功，初始化配置，这里只说一点：</p>
 <p>关于 ssh 连接慢的问题，宿主机 ubuntu 修改&#x2F;etc&#x2F;ssh&#x2F;ssh_conf：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">GSSAPIAuthentication no
-
-ServerAliveInterval <span class="token number">55</span>
-ServerAliveCountMax <span class="token number">9</span>
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GSSAPIAuthentication no</span><br><span class="line"></span><br><span class="line">ServerAliveInterval 55</span><br><span class="line">ServerAliveCountMax 9</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>来宾机 centos 修改&#x2F;etc&#x2F;ssh&#x2F;sshd_conf：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">UseDNS no	<span class="token comment"># 跳过dns验证</span></code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UseDNS no	<span class="comment"># 跳过dns验证</span></span><br></pre></td></tr></table></figure></li>
 </ol>
-<h3 id="范例：基于现有虚拟机磁盘为模版创建新的虚拟机"><a href="#范例：基于现有虚拟机磁盘为模版创建新的虚拟机" class="headerlink" title="范例：基于现有虚拟机磁盘为模版创建新的虚拟机"></a>范例：基于现有虚拟机磁盘为模版创建新的虚拟机</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 先复制</span>
-lujinkai@Z510:~$ <span class="token builtin class-name">cd</span> /var/lib/libvirt/images/
-lujinkai@Z510:/var/lib/libvirt/images$ <span class="token function">sudo</span> <span class="token function">cp</span> centos7-pxe1.qcow2 centos7-pxe3.qcow2
-<span class="token comment"># 然后创建</span>
-lujinkai@Z510:/var/lib/libvirt/images$ <span class="token function">sudo</span> virt-install <span class="token punctuation">\</span>
-<span class="token operator">></span> --virt-type kvm <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--name</span> centos7-pxe3 <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--memory</span> <span class="token number">2048</span> <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--vcpus</span> <span class="token number">1</span> <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--disk</span> <span class="token assign-left variable">bus</span><span class="token operator">=</span>virtio,path<span class="token operator">=</span>/var/lib/libvirt/images/centos7-pxe3.qcow2 <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--network</span> <span class="token assign-left variable">network</span><span class="token operator">=</span>default,model<span class="token operator">=</span>virtio <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--graphics</span> vnc,listen<span class="token operator">=</span><span class="token number">0.0</span>.0.0 <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--noautoconsole</span> <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--autostart</span> <span class="token punctuation">\</span>
-<span class="token operator">></span> <span class="token parameter variable">--boot</span> hd
-WARNING  未检测到操作系统，虚拟机性能可能会受到影响。使用 --os-variant 选项指定操作系统以获得最佳性能。
-
-开始安装<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>
-域创建完成。</code></pre>
+<h3 id="范例：基于现有虚拟机磁盘为模版创建新的虚拟机"><a href="#范例：基于现有虚拟机磁盘为模版创建新的虚拟机" class="headerlink" title="范例：基于现有虚拟机磁盘为模版创建新的虚拟机"></a>范例：基于现有虚拟机磁盘为模版创建新的虚拟机</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先复制</span></span><br><span class="line">lujinkai@Z510:~$ <span class="built_in">cd</span> /var/lib/libvirt/images/</span><br><span class="line">lujinkai@Z510:/var/lib/libvirt/images$ sudo <span class="built_in">cp</span> centos7-pxe1.qcow2 centos7-pxe3.qcow2</span><br><span class="line"><span class="comment"># 然后创建</span></span><br><span class="line">lujinkai@Z510:/var/lib/libvirt/images$ sudo virt-install \</span><br><span class="line">&gt; --virt-type kvm \</span><br><span class="line">&gt; --name centos7-pxe3 \</span><br><span class="line">&gt; --memory 2048 \</span><br><span class="line">&gt; --vcpus 1 \</span><br><span class="line">&gt; --disk bus=virtio,path=/var/lib/libvirt/images/centos7-pxe3.qcow2 \</span><br><span class="line">&gt; --network network=default,model=virtio \</span><br><span class="line">&gt; --graphics vnc,listen=0.0.0.0 \</span><br><span class="line">&gt; --noautoconsole \</span><br><span class="line">&gt; --autostart \</span><br><span class="line">&gt; --boot hd</span><br><span class="line">WARNING  未检测到操作系统，虚拟机性能可能会受到影响。使用 --os-variant 选项指定操作系统以获得最佳性能。</span><br><span class="line"></span><br><span class="line">开始安装......</span><br><span class="line">域创建完成。</span><br></pre></td></tr></table></figure>
 
 <p>这样相当于直接拷贝镜像，开机后会发现 ip 冲突，需要手动修改 ip，不过 MAC 没有冲突</p>
 <h2 id="管理虚拟机"><a href="#管理虚拟机" class="headerlink" title="管理虚拟机"></a>管理虚拟机</h2><h3 id="使用半虚拟化驱动-virtio"><a href="#使用半虚拟化驱动-virtio" class="headerlink" title="使用半虚拟化驱动 virtio"></a>使用半虚拟化驱动 virtio</h3><p>为了提高内存、硬盘、网络的性能，需要支持半虚拟化</p>
@@ -616,47 +538,19 @@ WARNING  未检测到操作系统，虚拟机性能可能会受到影响。使�
 </ul>
 <p><img data-src="//img.to2b.cn/blog/ljk/1604973998582.png"></p>
 <h4 id="virtio-驱动安装"><a href="#virtio-驱动安装" class="headerlink" title="virtio 驱动安装"></a>virtio 驱动安装</h4><p>Linux 自带，Windows 需要额外安装</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 如果有红帽的RHN订阅,可以从以下位置下载virtio-win包</span>
-https://rhn.redhat.com/rhn/software/packages/details/Overview.do?pid<span class="token operator">=</span><span class="token number">868414</span>
-<span class="token comment"># 从社区获得</span>
-http://www.linux-kvm.org/page/Downloads
-https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果有红帽的RHN订阅,可以从以下位置下载virtio-win包</span></span><br><span class="line">https://rhn.redhat.com/rhn/software/packages/details/Overview.<span class="keyword">do</span>?pid=868414</span><br><span class="line"><span class="comment"># 从社区获得</span></span><br><span class="line">http://www.linux-kvm.org/page/Downloads</span><br><span class="line">https://docs.fedoraproject.org/en-US/quick-docs/creating-windows-virtual-machines-using-virtio-drivers/index.html</span><br></pre></td></tr></table></figure>
 
 <h3 id="安装与配置-QEMU-guest-agent"><a href="#安装与配置-QEMU-guest-agent" class="headerlink" title="安装与配置 QEMU guest agent"></a>安装与配置 QEMU guest agent</h3><p>在 GuestOS（VM）中安装 QEMU guest agent，HostOS 就可以调用 libvirt 向 VM 发送命令，例如：“冻结”、“释放文件系统、虚拟 CPU 的热添加及移除等</p>
 <ul>
 <li>RHEL&#x2F;CentOS 中有相应的安装包：qemu-guest-agent-xxx.rpm</li>
 <li>Windows 需要手工安装</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装</span>
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$yum</span> <span class="token function">install</span> qemu-guest-agent.x86_64
-<span class="token comment"># 启动</span>
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$systemctl</span> start qemu-guest-agent.service</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">[root@c71 ~]<span class="variable">$yum</span> install qemu-guest-agent.x86_64</span><br><span class="line"><span class="comment"># 启动</span></span><br><span class="line">[root@c71 ~]<span class="variable">$systemctl</span> start qemu-guest-agent.service</span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token function">shutdown</span> <span class="token parameter variable">--mode</span><span class="token operator">=</span>agen	<span class="token comment"># 比--mode=acpi更加安全地关闭操作系统</span>
-<span class="token function">virsh</span> snapshot-create <span class="token parameter variable">-quiesce</span>	<span class="token comment"># 在创建快照之前面,将缓存的内容刷入到磁盘</span>
-<span class="token function">virsh</span> domfsfreeze	<span class="token comment"># 静默文件系统</span>
-<span class="token function">virsh</span> domfsthaw		<span class="token comment"># 恢复静默的文件系统</span>
-<span class="token function">virsh</span> domfstrim		<span class="token comment"># 让虚拟机trim文件系统</span>
-<span class="token function">virsh</span> domtime		<span class="token comment"># 获得虚拟机的时间</span>
-<span class="token function">virsh</span> setvcpus		<span class="token comment"># 配置虚拟机的vCPU</span>
-<span class="token function">virsh</span> domifaddr <span class="token parameter variable">--source</span> agent	<span class="token comment"># 查询虚拟机的IP地址</span>
-<span class="token function">virsh</span> domfsinfo		<span class="token comment"># 显示虚拟机的文件系统列表</span>
-<span class="token function">virsh</span> set-user-password <span class="token comment"># 设置虚拟机用户的密码</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">virsh shutdown --mode=agen	<span class="comment"># 比--mode=acpi更加安全地关闭操作系统</span></span><br><span class="line">virsh snapshot-create -quiesce	<span class="comment"># 在创建快照之前面,将缓存的内容刷入到磁盘</span></span><br><span class="line">virsh domfsfreeze	<span class="comment"># 静默文件系统</span></span><br><span class="line">virsh domfsthaw		<span class="comment"># 恢复静默的文件系统</span></span><br><span class="line">virsh domfstrim		<span class="comment"># 让虚拟机trim文件系统</span></span><br><span class="line">virsh domtime		<span class="comment"># 获得虚拟机的时间</span></span><br><span class="line">virsh setvcpus		<span class="comment"># 配置虚拟机的vCPU</span></span><br><span class="line">virsh domifaddr --<span class="built_in">source</span> agent	<span class="comment"># 查询虚拟机的IP地址</span></span><br><span class="line">virsh domfsinfo		<span class="comment"># 显示虚拟机的文件系统列表</span></span><br><span class="line">virsh set-user-password <span class="comment"># 设置虚拟机用户的密码</span></span><br></pre></td></tr></table></figure>
 
 <p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ <span class="token function">virsh</span> domfsinfo centos7-pxe1
- Mountpoint   Name   Type   Target
-------------------------------------
- /            dm-0   ext4   vda
- /boot        vda1   ext4   vda
-
-lujinkai@Z510:~$ <span class="token function">virsh</span> domifaddr <span class="token parameter variable">--source</span> agent centos7-pxe1
- Name       MAC address          Protocol     Address
--------------------------------------------------------------------------------
- lo         00:00:00:00:00:00    ipv4         <span class="token number">127.0</span>.0.1/8
- -          -                    ipv6         ::1/128
- eth0       <span class="token number">52</span>:54:00:5b:08:5d    ipv4         <span class="token number">10.0</span>.0.71/24
- -          -                    ipv6         fe80::5054:ff:fe5b:85d/64</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">lujinkai@Z510:~$ virsh domfsinfo centos7-pxe1</span><br><span class="line"> Mountpoint   Name   Type   Target</span><br><span class="line">------------------------------------</span><br><span class="line"> /            dm-0   ext4   vda</span><br><span class="line"> /boot        vda1   ext4   vda</span><br><span class="line"></span><br><span class="line">lujinkai@Z510:~$ virsh domifaddr --<span class="built_in">source</span> agent centos7-pxe1</span><br><span class="line"> Name       MAC address          Protocol     Address</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line"> lo         00:00:00:00:00:00    ipv4         127.0.0.1/8</span><br><span class="line"> -          -                    ipv6         ::1/128</span><br><span class="line"> eth0       52:54:00:5b:08:5d    ipv4         10.0.0.71/24</span><br><span class="line"> -          -                    ipv6         fe80::5054:ff:fe5b:85d/64</span><br></pre></td></tr></table></figure>
 
 <h3 id="安装和配置-SPICE-agent"><a href="#安装和配置-SPICE-agent" class="headerlink" title="安装和配置 SPICE agent"></a>安装和配置 SPICE agent</h3><p>在 VM 操作系统中安装 SPICE client、SPICE agent 可以让 virt-manager 等图形应用程序更加流畅</p>
 <ul>
@@ -667,45 +561,40 @@ lujinkai@Z510:~$ <span class="token function">virsh</span> domifaddr <span class
 <h2 id="libvirt-管理虚拟机"><a href="#libvirt-管理虚拟机" class="headerlink" title="libvirt 管理虚拟机"></a>libvirt 管理虚拟机</h2><p>主要通过 virsh 和 virst-manager 这两个工具调用 libvirt 来实现虚拟机的管理</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1604989585145.png"></p>
 <p><strong>注意: 如果 libvirtd 服务意外关闭，将导致相关工具，如 virt-manager 和 virsh 等无法和虚拟机连接，但虚拟机仍会正常运行</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">systemctl start libvirtd.service</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start libvirtd.service</span><br></pre></td></tr></table></figure>
 
 <h3 id="virsh-命令"><a href="#virsh-命令" class="headerlink" title="virsh 命令"></a>virsh 命令</h3><p>virsh 可以认为是 virt-manager 的命令行工具</p>
 <p>两种工作模式：交互式和非交互式，重点掌握非交互式</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token parameter variable">--help</span>	<span class="token comment"># 查看帮助</span>
-<span class="token function">virsh</span> <span class="token builtin class-name">help</span> <span class="token builtin class-name">command</span>	<span class="token comment"># 查看子命令帮助</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">virsh --<span class="built_in">help</span>	<span class="comment"># 查看帮助</span></span><br><span class="line">virsh <span class="built_in">help</span> <span class="built_in">command</span>	<span class="comment"># 查看子命令帮助</span></span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>启动和关闭虚拟机</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> list						<span class="token comment"># 查看运行中的虚拟机</span>
-<span class="token function">virsh</span> list <span class="token parameter variable">--all</span>				<span class="token comment"># 查看所有虚拟机</span>
-<span class="token function">virsh</span> start     				<span class="token comment"># 启动虚拟机</span>
-<span class="token function">virsh</span> <span class="token function">shutdown</span>      			<span class="token comment"># 关闭虚拟机</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">virsh list						<span class="comment"># 查看运行中的虚拟机</span></span><br><span class="line">virsh list --all				<span class="comment"># 查看所有虚拟机</span></span><br><span class="line">virsh start     				<span class="comment"># 启动虚拟机</span></span><br><span class="line">virsh shutdown      			<span class="comment"># 关闭虚拟机</span></span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>暂停和恢复虚拟机</li>
 </ul>
 <p>暂停时，将内存、寄存器，缓存等全部状态保存到硬盘<br>恢复时，将保存下来的数据读取回去，所以就能按原来的状态运行了</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> <span class="token function">suspend</span>		<span class="token comment"># 暂停虚拟机</span>
-<span class="token function">virsh</span> resume		<span class="token comment"># 回复虚拟机</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">virsh <span class="built_in">suspend</span>		<span class="comment"># 暂停虚拟机</span></span><br><span class="line">virsh resume		<span class="comment"># 回复虚拟机</span></span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>配置虚拟机开机自启动：</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> autostart centos7-pxe1</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh autostart centos7-pxe1</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>查看虚拟机配置：</li>
 </ul>
 <p>每个虚拟机的配置默认存放在 &#x2F;etc&#x2F;libvirt&#x2F;qemu 目录下的 xml 文件中</p>
 <p>查看虚拟机配置：相当于查看 &#x2F;etc&#x2F;libvirt&#x2F;qemu&#x2F;centos7-pxe1.xml 文件</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> dumpxml <span class="token parameter variable">--domain</span> centos7-pxe1</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh dumpxml --domain centos7-pxe1</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>删除虚拟机配置：</li>
 </ul>
 <p>删除虚拟机配置（qemu&#x2F;xxx.xml），但是不删除磁盘文件（images&#x2F;xxx.qcow2）</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">virsh</span> undefine centos7-pxe1</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh undefine centos7-pxe1</span><br></pre></td></tr></table></figure>
 
 <h2 id="存储管理"><a href="#存储管理" class="headerlink" title="存储管理"></a>存储管理</h2><p>KVM 中，存储主要有两个概念：</p>
 <ol>
@@ -714,23 +603,7 @@ lujinkai@Z510:~$ <span class="token function">virsh</span> domifaddr <span class
 </ol>
 <h3 id="存储池"><a href="#存储池" class="headerlink" title="存储池"></a>存储池</h3><p>libvirt 以存储池的形式对存储进行统一管理，简化操作</p>
 <p>存储池有很多种类型，这取决于存储池是基于什么“介质”创建的，以下是存储池支持的“介质”，分为两种：文件系统 和 磁盘：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 文件系统：</span>
-dir：文件系统目录，就是一个目录
-fs：预格式化设备，就是一个创建了文件系统的分区，例如：/dev/sdb6
-netfs：网络导出的目录，例如 nfs、samba
-
-<span class="token comment"># 磁盘：</span>
-disk：物理磁盘设备，直接读写硬盘设备，例如： /dev/sdb
-scsi：本地SCSI存储，例如：host0（/sys/class/scsi_host/host0）
-iscsi：网络共享iSCSI存储
-logical：LVM卷组，最常用，推荐
-
-<span class="token comment"># 不太清楚文件系统还是磁盘：</span>
-gluster：Gluster 文件系统
-mpath：多路径设备枚举器
-rbd:RADOS 设备块/Ceph
-sheepdog：Sheepdog文件系统，分布式文件系统
-zfs：ZFS pool</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 文件系统：</span></span><br><span class="line"><span class="built_in">dir</span>：文件系统目录，就是一个目录</span><br><span class="line">fs：预格式化设备，就是一个创建了文件系统的分区，例如：/dev/sdb6</span><br><span class="line">netfs：网络导出的目录，例如 nfs、samba</span><br><span class="line"></span><br><span class="line"><span class="comment"># 磁盘：</span></span><br><span class="line">disk：物理磁盘设备，直接读写硬盘设备，例如： /dev/sdb</span><br><span class="line">scsi：本地SCSI存储，例如：host0（/sys/class/scsi_host/host0）</span><br><span class="line">iscsi：网络共享iSCSI存储</span><br><span class="line">logical：LVM卷组，最常用，推荐</span><br><span class="line"></span><br><span class="line"><span class="comment"># 不太清楚文件系统还是磁盘：</span></span><br><span class="line">gluster：Gluster 文件系统</span><br><span class="line">mpath：多路径设备枚举器</span><br><span class="line">rbd:RADOS 设备块/Ceph</span><br><span class="line">sheepdog：Sheepdog文件系统，分布式文件系统</span><br><span class="line">zfs：ZFS pool</span><br></pre></td></tr></table></figure>
 
 <h3 id="存储卷"><a href="#存储卷" class="headerlink" title="存储卷"></a>存储卷</h3><p><img data-src="//img.to2b.cn/blog/ljk/1605619798709.png"></p>
 <p>存储卷在存储池中，存储卷的类型取决于存储池的类型：</p>
@@ -752,7 +625,7 @@ zfs：ZFS pool</code></pre>
 <p>安装完后启动可能会报错，重启 libvirt 就好了</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1605616246298.png"></p>
 <p>virt-install 安装虚拟机到逻辑卷，和前面安装虚拟机到磁盘镜像中的区别就是–disk 选项，其他都一样：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--disk</span> <span class="token assign-left variable">path</span><span class="token operator">=</span>/dev/vm_images_lvm/lv2,bus<span class="token operator">=</span>virtio <span class="token punctuation">\</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--disk path=/dev/vm_images_lvm/lv2,bus=virtio \</span><br></pre></td></tr></table></figure>
 
 <h3 id="离线工具"><a href="#离线工具" class="headerlink" title="离线工具"></a>离线工具</h3><p>不启动虚拟机的情况下，直接访问管理虚拟机对应的磁盘，即离线访问</p>
 <h4 id="离线工具应用"><a href="#离线工具应用" class="headerlink" title="离线工具应用"></a>离线工具应用</h4><ul>
@@ -766,37 +639,12 @@ zfs：ZFS pool</code></pre>
 <h4 id="guestfs"><a href="#guestfs" class="headerlink" title="guestfs"></a>guestfs</h4><p>guestfish 是一个基于 libguestfs API 的交互 shell</p>
 <p>libguestfs 提供了一个简单地访问虚机磁盘镜像文件的方法，即使是在虚拟机无法启动的情况下</p>
 <p>libguestfs 是由一组丰富的工具集组成，可以让管理员访问虚机文件，甚至调整和挽救文件</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">dnf <span class="token parameter variable">-y</span> <span class="token function">install</span> libguestfs-tools
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">dnf -y install libguestfs-tools</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看虚拟机的磁盘文件</span></span><br><span class="line">virsh domblklist centos7</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只读方式打开虚拟磁盘，选项-i可以实现自动探查后进行自动挂载</span></span><br><span class="line">guestfish --ro -a /var/lib/libvirt/images/centos7.qcow2 -i		<span class="comment"># 交互式</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 读写方式打开虚拟磁盘</span></span><br><span class="line">guestfish -d centos7 -i		<span class="comment"># 交互式</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<span class="token comment"># 查看虚拟机的磁盘文件</span>
-<span class="token function">virsh</span> domblklist centos7
-
-<span class="token comment"># 只读方式打开虚拟磁盘，选项-i可以实现自动探查后进行自动挂载</span>
-guestfish <span class="token parameter variable">--ro</span> <span class="token parameter variable">-a</span> /var/lib/libvirt/images/centos7.qcow2 <span class="token parameter variable">-i</span>		<span class="token comment"># 交互式</span>
-
-<span class="token comment"># 读写方式打开虚拟磁盘</span>
-guestfish <span class="token parameter variable">-d</span> centos7 <span class="token parameter variable">-i</span>		<span class="token comment"># 交互式</span>
-</code></pre>
-
-<h4 id="其他离线工具"><a href="#其他离线工具" class="headerlink" title="其他离线工具"></a>其他离线工具</h4><pre class="language-bash" data-language="bash"><code class="language-bash">virt-df 			<span class="token comment"># 监视磁盘使用</span>
-virt-resize 		<span class="token comment"># 离线调整虚拟磁盘大小</span>
-virt-inspector 		<span class="token comment"># 虚拟机检视</span>
-virt-win-reg 		<span class="token comment"># Windows注册表读取和修改</span>
-virt-sysprep 		<span class="token comment"># 虚拟机设置重置</span></code></pre>
+<h4 id="其他离线工具"><a href="#其他离线工具" class="headerlink" title="其他离线工具"></a>其他离线工具</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">virt-df 			<span class="comment"># 监视磁盘使用</span></span><br><span class="line">virt-resize 		<span class="comment"># 离线调整虚拟磁盘大小</span></span><br><span class="line">virt-inspector 		<span class="comment"># 虚拟机检视</span></span><br><span class="line">virt-win-reg 		<span class="comment"># Windows注册表读取和修改</span></span><br><span class="line">virt-sysprep 		<span class="comment"># 虚拟机设置重置</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="网络管理"><a href="#网络管理" class="headerlink" title="网络管理"></a>网络管理</h2><p>官方文档：<a target="_blank" rel="noopener" href="https://wiki.libvirt.org/page/VirtualNetworking">https://wiki.libvirt.org/page/VirtualNetworking</a></p>
-<h3 id="nmcli-实现网桥"><a href="#nmcli-实现网桥" class="headerlink" title="nmcli 实现网桥"></a>nmcli 实现网桥</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建网桥</span>
-nmcli connection <span class="token function">add</span> <span class="token builtin class-name">type</span> bridge con-name br0 ifname br0
-nmcli connection modify br0 ipv4.addresses <span class="token number">10.0</span>.0.100/24 ipv4.method manual
-nmcli connection reload
-nmcli connection up br0
-
-<span class="token comment">#加入物理网卡</span>
-nmcli con <span class="token function">add</span> <span class="token builtin class-name">type</span> bridge-slave con-name br0-port0 ifname eth0 master br0
-nmcli con <span class="token function">add</span> <span class="token builtin class-name">type</span> bridge-slave con-name br0-port1 ifname eth1 master br0
-nmcli connection reload
-nmcli con up br0-port0
-nmcli con up br0-port1</code></pre>
+<h3 id="nmcli-实现网桥"><a href="#nmcli-实现网桥" class="headerlink" title="nmcli 实现网桥"></a>nmcli 实现网桥</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建网桥</span></span><br><span class="line">nmcli connection add <span class="built_in">type</span> bridge con-name br0 ifname br0</span><br><span class="line">nmcli connection modify br0 ipv4.addresses 10.0.0.100/24 ipv4.method manual</span><br><span class="line">nmcli connection reload</span><br><span class="line">nmcli connection up br0</span><br><span class="line"></span><br><span class="line"><span class="comment">#加入物理网卡</span></span><br><span class="line">nmcli con add <span class="built_in">type</span> bridge-slave con-name br0-port0 ifname eth0 master br0</span><br><span class="line">nmcli con add <span class="built_in">type</span> bridge-slave con-name br0-port1 ifname eth1 master br0</span><br><span class="line">nmcli connection reload</span><br><span class="line">nmcli con up br0-port0</span><br><span class="line">nmcli con up br0-port1</span><br></pre></td></tr></table></figure>
 
 <h3 id="qemu-kvm-支持的网络"><a href="#qemu-kvm-支持的网络" class="headerlink" title="qemu-kvm 支持的网络"></a>qemu-kvm 支持的网络</h3><h3 id="默认网络架构"><a href="#默认网络架构" class="headerlink" title="默认网络架构"></a>默认网络架构</h3><p>默认虚拟机网络配置为 NAT 模式，相当于 wmware 的 ANT 模式</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1605578835894.png"></p>

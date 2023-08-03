@@ -312,234 +312,32 @@
 <h3 id="Redis-安装及连接"><a href="#Redis-安装及连接" class="headerlink" title="Redis 安装及连接"></a>Redis 安装及连接</h3><h4 id="编译安装"><a href="#编译安装" class="headerlink" title="编译安装"></a>编译安装</h4><p>见脚本，注意 redis 不建议设置密码</p>
 <h4 id="解决启动时的三个警告提示"><a href="#解决启动时的三个警告提示" class="headerlink" title="解决启动时的三个警告提示"></a>解决启动时的三个警告提示</h4><ol>
 <li><p>tcp-backlog</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#vim /etc/sysctl.conf</span>
-net.core.somaxconn <span class="token operator">=</span> <span class="token number">1024</span>
-<span class="token comment">#sysctl -p</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#vim /etc/sysctl.conf</span></span><br><span class="line">net.core.somaxconn = 1024</span><br><span class="line"><span class="comment">#sysctl -p</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>vm.overcommit_memory</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 0、表示内核将检查是否有足够的可用内存供应用进程使用；如果有足够的可用内存，内存申请允许；否则，内存申请失败，并把错误返回给应用进程。</span>
-<span class="token comment"># 1、表示内核允许分配所有的物理内存，而不管当前的内存状态如何</span>
-<span class="token comment"># 2、表示内核允许分配超过所有物理内存和交换空间总和的内存</span>
-
-<span class="token comment"># 范例：</span>
-<span class="token comment">#vim /etc/sysctl.conf</span>
-vm.overcommit_memory <span class="token operator">=</span> <span class="token number">1</span>
-<span class="token comment">#sysctl -p</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 0、表示内核将检查是否有足够的可用内存供应用进程使用；如果有足够的可用内存，内存申请允许；否则，内存申请失败，并把错误返回给应用进程。</span></span><br><span class="line"><span class="comment"># 1、表示内核允许分配所有的物理内存，而不管当前的内存状态如何</span></span><br><span class="line"><span class="comment"># 2、表示内核允许分配超过所有物理内存和交换空间总和的内存</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 范例：</span></span><br><span class="line"><span class="comment">#vim /etc/sysctl.conf</span></span><br><span class="line">vm.overcommit_memory = 1</span><br><span class="line"><span class="comment">#sysctl -p</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>transparent hugepage</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 警告：您在内核中启用了透明大页面（THP,不同于一般内存页的4k为2M）支持。 这将在Redis中造成延迟和内存使用问题。 要解决此问题，请以root 用户身份运行命令“echo never> /sys/kernel/mm/transparent_hugepage/enabled”，并将其添加到您的/etc/rc.local中，以便在重启后保留设置。禁用THP后，必须重新启动Redis。</span>
-
-<span class="token builtin class-name">echo</span> <span class="token string">'echo never > /sys/kernel/mm/transparent_hugepage/enabled'</span> <span class="token operator">>></span> /etc/rc.d/rc.local</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 警告：您在内核中启用了透明大页面（THP,不同于一般内存页的4k为2M）支持。 这将在Redis中造成延迟和内存使用问题。 要解决此问题，请以root 用户身份运行命令“echo never&gt; /sys/kernel/mm/transparent_hugepage/enabled”，并将其添加到您的/etc/rc.local中，以便在重启后保留设置。禁用THP后，必须重新启动Redis。</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled&#x27;</span> &gt;&gt; /etc/rc.d/rc.local</span><br></pre></td></tr></table></figure></li>
 </ol>
-<h3 id="Redis-配置和优化"><a href="#Redis-配置和优化" class="headerlink" title="Redis 配置和优化"></a>Redis 配置和优化</h3><h4 id="主要配置项"><a href="#主要配置项" class="headerlink" title="主要配置项"></a>主要配置项</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 绑定网卡，监听地址，可以用空格隔开后多个监听IP</span>
-<span class="token builtin class-name">bind</span> <span class="token number">0.0</span>.0.0
-<span class="token comment"># redis3.2之后加入的新特性，在没有设置bind IP和密码的时候,redis只允许访问127.0.0.1:6379，可以远程连接，但当访问将提示警告信息并拒绝远程访问</span>
-protected-mode <span class="token function">yes</span>
-<span class="token comment"># 监听端口,默认6379/tcp</span>
-port <span class="token number">6379</span>
-<span class="token comment"># 三次握手的时候server端收到client ack确认号之后的队列值，即全连接队列长度</span>
-tcp-backlog <span class="token number">511</span>
-<span class="token comment"># 客户端和Redis服务端的连接超时时间，默认是0，表示永不超时</span>
-<span class="token function">timeout</span> <span class="token number">0</span>
-<span class="token comment"># tcp 会话保持时间300s</span>
-tcp-keepalive <span class="token number">300</span>
-<span class="token comment"># 默认no,即直接运行redis-server程序时,不作为守护进程运行，而是以前台方式运行，如果想在后台运行需改成yes,当redis作为守护进程运行的时候，它会写一个pid 到/var/run/redis.pid 文件</span>
-daemonize no
-<span class="token comment"># 和OS相关参数，可设置通过upstart和systemd管理Redis守护进程，centos7后都使用systemd</span>
-supervised no
-<span class="token comment"># pid文件路径</span>
-pidfile /var/run/redis_6379.pid
-<span class="token comment"># 日志级别</span>
-loglevel notice
-<span class="token comment"># 日志路径,示例:logfile "/apps/redis/log/redis_6379.log"</span>
-logfile <span class="token string">"/path/redis.log"</span>
-<span class="token comment"># 设置数据库数量，默认：0-15，共16个库</span>
-databases <span class="token number">16</span>
-<span class="token comment"># 在启动redis时是否显示或在日志中记录记录redis的logo</span>
-always-show-logo <span class="token function">yes</span>
-<span class="token comment"># 在900秒内有1个key内容发生更改,就执行快照机制</span>
-save <span class="token number">900</span> <span class="token number">1</span>
-<span class="token comment"># 在300秒内有10个key内容发生更改,就执行快照机制</span>
-save <span class="token number">300</span> <span class="token number">10</span>
-<span class="token comment"># 60秒内如果有10000个key以上的变化，就自动快照备份</span>
-save <span class="token number">60</span> <span class="token number">10000</span>
-<span class="token comment"># 默认为yes时,可能会因空间满等原因快照无法保存出错时，会禁止redis写入操作，生产建议为no</span>
-<span class="token comment"># 此项只针对配置文件中的自动save有效</span>
-stop-writes-on-bgsave-error <span class="token function">yes</span>
-<span class="token comment"># 持久化到RDB文件时，是否压缩，"yes"为压缩，"no"则反之</span>
-rdbcompression <span class="token function">yes</span>
-<span class="token comment"># 是否对备份文件开启RC64校验，默认是开启</span>
-rdbchecksum <span class="token function">yes</span>
-<span class="token comment"># 快照文件名</span>
-dbfilename dump.rdb
-<span class="token comment"># 快照文件保存路径，示例：dir "/apps/redis/data"</span>
-<span class="token function">dir</span> ./
-
-<span class="token comment">#主从复制相关</span>
-<span class="token comment"># replicaof &lt;masterip> &lt;masterport> # 指定复制的master主机地址和端口，5.0版之前的指令为slaveof</span>
-<span class="token comment"># masterauth &lt;master-password> # 指定复制的master主机的密码</span>
-
-<span class="token comment"># 当从库同主库失去连接或者复制正在进行，从机库有两种运行方式：</span>
-<span class="token comment"># 1、设置为yes(默认设置)，从库会继续响应客户端的读请求，此为建议值</span>
-<span class="token comment"># 2、设置为no，除去特定命令外的任何请求都会返回一个错误"SYNC with master in progress"。</span>
-replica-serve-stale-data <span class="token function">yes</span>
-<span class="token comment"># 是否设置从库只读，建议值为yes,否则主库同步从库时可能会覆盖数据，造成数据丢失</span>
-replica-read-only <span class="token function">yes</span>
-
-<span class="token comment"># 是否使用socket方式复制数据(无盘同步)，新slave第一次连接master时需要做数据的全量同步，redis server就要从内存dump出新的RDB文件，然后从master传到slave，有两种方式把RDB文件传输给客户端：</span>
-<span class="token comment"># 1、基于硬盘（disk-backed）：为no时，master创建一个新进程dump生成RDB磁盘文件，RDB完成之后由父进程（即主进程）将RDB文件发送给slaves，此为默认值</span>
-<span class="token comment"># 2、基于socket（diskless）：master创建一个新进程直接dump RDB至slave的网络socket，不经过主进程和硬盘</span>
-<span class="token comment"># 推荐使用基于硬盘（为no），是因为RDB文件创建后，可以同时传输给更多的slave，但是基于socket(为yes)，新slave连接到master之后得逐个同步数据。只有当磁盘I/O较慢且网络较快时，可用diskless(yes),否则一般建议使用磁盘(no)</span>
-repl-diskless-sync no
-
-<span class="token comment"># diskless时复制的服务器等待的延迟时间，设置0为关闭，在延迟时间内到达的客户端，会一起通过diskless方式同步数据，但是一旦复制开始，master节点不会再接收新slave的复制请求，直到下一次同步开始才再接收新请求。即无法为延迟时间后到达的新副本提供服务，新副本将排队等待下一次RDB传输，因此服务器会等待一段时间才能让更多副本到达。推荐值：30-60</span>
-repl-diskless-sync-delay <span class="token number">5</span>
-<span class="token comment"># slave根据master指定的时间进行周期性的PING master,用于监测master状态,默认10s</span>
-repl-ping-replica-period <span class="token number">10</span>
-<span class="token comment"># 复制连接的超时时间，需要大于repl-ping-slave-period，否则会经常报超时</span>
-repl-timeout <span class="token number">60</span>
-<span class="token comment"># 是否在slave套接字发送SYNC之后禁用TCP_NODELAY，如果选择"yes"，Redis将合并多个报文为一个大的报文，从而使用更少数量的包向slaves发送数据，但是将使数据传输到slave上有延迟，Linux内核的默认配置会达到40毫秒，如果 "no" ，数据传输到slave的延迟将会减少，但要使用更多的带宽</span>
-repl-disable-tcp-nodelay no
-<span class="token comment"># 复制缓冲区内存大小，当slave断开连接一段时间后，该缓冲区会累积复制副本数据，因此当slave重新连接时，通常不需要完全重新同步，只需传递在副本中的断开连接后没有同步的部分数据即可。只有在至少有一个slave连接之后才分配此内存空间,建议建立主从时此值要调大一些或在低峰期配置,否则会导致同步到slave失败</span>
-repl-backlog-size 512mb
-
-<span class="token comment"># 多长时间内master没有slave连接，就清空backlog缓冲区</span>
-repl-backlog-ttl <span class="token number">3600</span>
-
-<span class="token comment"># 当master不可用，哨兵Sentinel会根据slave的优先级选举一个master，此值最低的slave会优先当选master，而配置成0，永远不会被选举，一般多个slave都设为一样的值，让其自动选择</span>
-replica-priority <span class="token number">100</span>
-
-<span class="token comment"># 至少有3个可连接的slave，mater才接受写操作</span>
-min-replicas-to-write <span class="token number">3</span>
-
-<span class="token comment"># 和上面至少3个slave的ping延迟不能超过10秒，否则master也将停止写操作</span>
-min-replicas-max-lag <span class="token number">10</span>
-
-<span class="token comment"># 设置redis连接密码，之后需要AUTH pass,如果有特殊符号，用" "引起来,生产建议设置</span>
-requirepass foobared
-
-<span class="token comment"># 重命名一些高危命令，示例：rename-command FLUSHALL "" 禁用命令</span>
-<span class="token comment"># rename-command del magedu</span>
-rename-command CONFIG <span class="token string">""</span>
-
-<span class="token comment"># Redis最大连接客户端</span>
-maxclients <span class="token number">10000</span>
-
-<span class="token comment"># redis使用的最大内存，单位为bytes字节，0为不限制，建议设为物理内存一半，8G内存的计算方式8(G)*1024(MB)1024(KB)*1024(Kbyte)，需要注意的是缓冲区是不计算在maxmemory内,生产中如果不设置此项,可能会导致OOM</span>
-maxmemory <span class="token operator">&lt;</span>bytes<span class="token operator">></span>
-
-<span class="token comment"># 是否开启AOF日志记录，默认redis使用的是rdb方式持久化，这种方式在许多应用中已经足够用了，但是redis如果中途宕机，会导致可能有几分钟的数据丢失(取决于dump数据的间隔时间)，根据save来策略进行持久化，Append Only File是另一种持久化方式，可以提供更好的持久化特性，Redis会把每次写入的数据在接收后都写入 appendonly.aof 文件，每次启动时Redis都会先把这个文件的数据读入内存里，先忽略RDB文件。默认不启用此功能</span>
-appendonly no
-
-<span class="token comment"># 文本文件AOF的文件名，存放在dir指令指定的目录中</span>
-appendfilename <span class="token string">"appendonly.aof"</span>
-
-<span class="token comment"># aof持久化策略的配置</span>
-<span class="token comment"># no表示由操作系统保证数据同步到磁盘,Linux的默认fsync策略是30秒，最多会丢失30s的数据</span>
-<span class="token comment"># always表示每次写入都执行fsync，以保证数据同步到磁盘,安全性高,性能较差</span>
-<span class="token comment"># everysec表示每秒执行一次fsync，可能会导致丢失这1s数据,此为默认值,也生产建议值</span>
-appendfsync everysec
-
-<span class="token comment"># 同时在执行bgrewriteaof操作和主进程写aof文件的操作，两者都会操作磁盘，而bgrewriteaof往往会涉及大量磁盘操作，这样就会造成主进程在写aof文件的时候出现阻塞的情形,以下参数实现控制</span>
-<span class="token comment"># 在aof rewrite期间,是否对aof新记录的append暂缓使用文件同步策略,主要考虑磁盘IO开支和请求阻塞时间。</span>
-<span class="token comment"># no：默认设置，表示"不暂缓"，新aof记录仍然被立即同步到磁盘，是最安全的方式，不丢失数据，但要忍受阻塞的问题</span>
-<span class="token comment"># yes：相当于将appendfsync设置为no，这说明并没有执行磁盘操作，只是写入了缓冲区，因此这样并不会造成阻塞（因为没有竞争磁盘），但是如果这个时候redis挂掉，就会丢失数据。丢失多少数据呢？Linux的默认fsync策略是30秒，最多会丢失30s的数据,但由于yes性能较好而且会避免出现阻塞，因此比较推荐</span>
-<span class="token comment"># rewrite 即对aof文件进行整理,将空闲空间回收,从而可以减少恢复数据时间</span>
-no-appendfsync-on-rewrite no
-
-<span class="token comment"># 当Aof log增长超过指定百分比例时，重写AOF文件，设置为0表示不自动重写Aof日志，重写是为了使aof体积保持最小，但是还可以确保保存最完整的数据</span>
-auto-aof-rewrite-percentage <span class="token number">100</span>
-<span class="token comment"># 触发aof rewrite的最小文件大小</span>
-auto-aof-rewrite-min-size 64mb
-<span class="token comment"># 是否加载由于某些原因导致的末尾异常的AOF文件(主进程被kill/断电等)，建议yes</span>
-aof-load-truncated <span class="token function">yes</span>
-<span class="token comment"># redis4.0新增RDB-AOF混合持久化格式，在开启了这个功能之后，AOF重写产生的文件将同时包含RDB格式的内容和AOF格式的内容，其中RDB格式的内容用于记录已有的数据，而AOF格式的内容则用于记录最近发生了变化的数据，这样Redis就可以同时兼有RDB持久化和AOF持久化的优点（既能够快速地生成重写文件，也能够在出现问题时，快速地载入数据）,默认为no,即不启用此功能</span>
-aof-use-rdb-preamble no
-
-<span class="token comment"># lua脚本的最大执行时间，单位为毫秒</span>
-lua-time-limit <span class="token number">5000</span>
-
-<span class="token comment"># 是否开启集群模式，默认不开启,即单机模式</span>
-cluster-enabled <span class="token function">yes</span>
-<span class="token comment"># 由node节点自动生成的集群配置文件名称</span>
-cluster-config-file nodes-6379.conf
-
-<span class="token comment"># 集群中node节点连接超时时间，单位ms,超过此时间，会踢出集群</span>
-cluster-node-timeout <span class="token number">15000</span>
-
-<span class="token comment"># 单位为次,在执行故障转移的时候可能有些节点和master断开一段时间导致数据比较旧，这些节点就不适用于选举为master，超过这个时间的就不会被进行故障转移,不能当选master，计算公式：(node-timeout * replica-validity-factor) + repl-ping-replica-period</span>
-cluster-replica-validity-factor <span class="token number">10</span>
-<span class="token comment"># 集群迁移屏障，一个主节点至少拥有1个正常工作的从节点，即如果主节点的slave节点故障后会将多余的从节点分配到当前主节点成为其新的从节点</span>
-cluster-migration-barrier <span class="token number">1</span>
-<span class="token comment"># 集群请求槽位全部覆盖，如果一个主库宕机且没有备库就会出现集群槽位不全，那么yes时redis集群槽位验证不全,就不再对外提供服务(对key赋值时,会出现CLUSTERDOWN The cluster is down的提示,cluster_state:fail,但ping 仍PONG)，而no则可以继续使用,但是会出现查询数据查不到的情况(因为有数据丢失)。生产建议为no</span>
-cluster-require-full-coverage <span class="token function">yes</span>
-<span class="token comment"># 如果为yes,此选项阻止在主服务器发生故障时尝试对其主服务器进行故障转移。 但是，主服务器仍然可以执行手动强制故障转移，一般为no</span>
-cluster-replica-no-failover no
-
-<span class="token comment"># Slow log 是 Redis 用来记录超过指定执行时间的日志系统，执行时间不包括与客户端交谈，发送回复等I/O操作，而是实际执行命令所需的时间（在该阶段线程被阻塞并且不能同时为其它请求提供服务）,由于slow log 保存在内存里面，读写速度非常快，因此可放心地使用，不必担心因为开启 slow log 而影响Redis 的速度</span>
-<span class="token comment"># 以微秒为单位的慢日志记录，为负数会禁用慢日志，为0会记录每个命令操作。默认值为10ms,一般一条命令执行都在微秒级,生产建议设为1ms-10ms之间</span>
-slowlog-log-slower-than <span class="token number">10000</span>
-<span class="token comment"># 最多记录多少条慢日志的保存队列长度，达到此长度后，记录新命令会将最旧的命令从命令队列中删除，以此滚动删除,即,先进先出,队列固定长度,默认128,值偏小,生产建议设为1000以上</span>
-slowlog-max-len <span class="token number">128</span></code></pre>
+<h3 id="Redis-配置和优化"><a href="#Redis-配置和优化" class="headerlink" title="Redis 配置和优化"></a>Redis 配置和优化</h3><h4 id="主要配置项"><a href="#主要配置项" class="headerlink" title="主要配置项"></a>主要配置项</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 绑定网卡，监听地址，可以用空格隔开后多个监听IP</span></span><br><span class="line"><span class="built_in">bind</span> 0.0.0.0</span><br><span class="line"><span class="comment"># redis3.2之后加入的新特性，在没有设置bind IP和密码的时候,redis只允许访问127.0.0.1:6379，可以远程连接，但当访问将提示警告信息并拒绝远程访问</span></span><br><span class="line">protected-mode <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 监听端口,默认6379/tcp</span></span><br><span class="line">port 6379</span><br><span class="line"><span class="comment"># 三次握手的时候server端收到client ack确认号之后的队列值，即全连接队列长度</span></span><br><span class="line">tcp-backlog 511</span><br><span class="line"><span class="comment"># 客户端和Redis服务端的连接超时时间，默认是0，表示永不超时</span></span><br><span class="line"><span class="built_in">timeout</span> 0</span><br><span class="line"><span class="comment"># tcp 会话保持时间300s</span></span><br><span class="line">tcp-keepalive 300</span><br><span class="line"><span class="comment"># 默认no,即直接运行redis-server程序时,不作为守护进程运行，而是以前台方式运行，如果想在后台运行需改成yes,当redis作为守护进程运行的时候，它会写一个pid 到/var/run/redis.pid 文件</span></span><br><span class="line">daemonize no</span><br><span class="line"><span class="comment"># 和OS相关参数，可设置通过upstart和systemd管理Redis守护进程，centos7后都使用systemd</span></span><br><span class="line">supervised no</span><br><span class="line"><span class="comment"># pid文件路径</span></span><br><span class="line">pidfile /var/run/redis_6379.pid</span><br><span class="line"><span class="comment"># 日志级别</span></span><br><span class="line">loglevel notice</span><br><span class="line"><span class="comment"># 日志路径,示例:logfile &quot;/apps/redis/log/redis_6379.log&quot;</span></span><br><span class="line">logfile <span class="string">&quot;/path/redis.log&quot;</span></span><br><span class="line"><span class="comment"># 设置数据库数量，默认：0-15，共16个库</span></span><br><span class="line">databases 16</span><br><span class="line"><span class="comment"># 在启动redis时是否显示或在日志中记录记录redis的logo</span></span><br><span class="line">always-show-logo <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 在900秒内有1个key内容发生更改,就执行快照机制</span></span><br><span class="line">save 900 1</span><br><span class="line"><span class="comment"># 在300秒内有10个key内容发生更改,就执行快照机制</span></span><br><span class="line">save 300 10</span><br><span class="line"><span class="comment"># 60秒内如果有10000个key以上的变化，就自动快照备份</span></span><br><span class="line">save 60 10000</span><br><span class="line"><span class="comment"># 默认为yes时,可能会因空间满等原因快照无法保存出错时，会禁止redis写入操作，生产建议为no</span></span><br><span class="line"><span class="comment"># 此项只针对配置文件中的自动save有效</span></span><br><span class="line">stop-writes-on-bgsave-error <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 持久化到RDB文件时，是否压缩，&quot;yes&quot;为压缩，&quot;no&quot;则反之</span></span><br><span class="line">rdbcompression <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 是否对备份文件开启RC64校验，默认是开启</span></span><br><span class="line">rdbchecksum <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 快照文件名</span></span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"><span class="comment"># 快照文件保存路径，示例：dir &quot;/apps/redis/data&quot;</span></span><br><span class="line"><span class="built_in">dir</span> ./</span><br><span class="line"></span><br><span class="line"><span class="comment">#主从复制相关</span></span><br><span class="line"><span class="comment"># replicaof &lt;masterip&gt; &lt;masterport&gt; # 指定复制的master主机地址和端口，5.0版之前的指令为slaveof</span></span><br><span class="line"><span class="comment"># masterauth &lt;master-password&gt; # 指定复制的master主机的密码</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 当从库同主库失去连接或者复制正在进行，从机库有两种运行方式：</span></span><br><span class="line"><span class="comment"># 1、设置为yes(默认设置)，从库会继续响应客户端的读请求，此为建议值</span></span><br><span class="line"><span class="comment"># 2、设置为no，除去特定命令外的任何请求都会返回一个错误&quot;SYNC with master in progress&quot;。</span></span><br><span class="line">replica-serve-stale-data <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 是否设置从库只读，建议值为yes,否则主库同步从库时可能会覆盖数据，造成数据丢失</span></span><br><span class="line">replica-read-only <span class="built_in">yes</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 是否使用socket方式复制数据(无盘同步)，新slave第一次连接master时需要做数据的全量同步，redis server就要从内存dump出新的RDB文件，然后从master传到slave，有两种方式把RDB文件传输给客户端：</span></span><br><span class="line"><span class="comment"># 1、基于硬盘（disk-backed）：为no时，master创建一个新进程dump生成RDB磁盘文件，RDB完成之后由父进程（即主进程）将RDB文件发送给slaves，此为默认值</span></span><br><span class="line"><span class="comment"># 2、基于socket（diskless）：master创建一个新进程直接dump RDB至slave的网络socket，不经过主进程和硬盘</span></span><br><span class="line"><span class="comment"># 推荐使用基于硬盘（为no），是因为RDB文件创建后，可以同时传输给更多的slave，但是基于socket(为yes)，新slave连接到master之后得逐个同步数据。只有当磁盘I/O较慢且网络较快时，可用diskless(yes),否则一般建议使用磁盘(no)</span></span><br><span class="line">repl-diskless-sync no</span><br><span class="line"></span><br><span class="line"><span class="comment"># diskless时复制的服务器等待的延迟时间，设置0为关闭，在延迟时间内到达的客户端，会一起通过diskless方式同步数据，但是一旦复制开始，master节点不会再接收新slave的复制请求，直到下一次同步开始才再接收新请求。即无法为延迟时间后到达的新副本提供服务，新副本将排队等待下一次RDB传输，因此服务器会等待一段时间才能让更多副本到达。推荐值：30-60</span></span><br><span class="line">repl-diskless-sync-delay 5</span><br><span class="line"><span class="comment"># slave根据master指定的时间进行周期性的PING master,用于监测master状态,默认10s</span></span><br><span class="line">repl-ping-replica-period 10</span><br><span class="line"><span class="comment"># 复制连接的超时时间，需要大于repl-ping-slave-period，否则会经常报超时</span></span><br><span class="line">repl-timeout 60</span><br><span class="line"><span class="comment"># 是否在slave套接字发送SYNC之后禁用TCP_NODELAY，如果选择&quot;yes&quot;，Redis将合并多个报文为一个大的报文，从而使用更少数量的包向slaves发送数据，但是将使数据传输到slave上有延迟，Linux内核的默认配置会达到40毫秒，如果 &quot;no&quot; ，数据传输到slave的延迟将会减少，但要使用更多的带宽</span></span><br><span class="line">repl-disable-tcp-nodelay no</span><br><span class="line"><span class="comment"># 复制缓冲区内存大小，当slave断开连接一段时间后，该缓冲区会累积复制副本数据，因此当slave重新连接时，通常不需要完全重新同步，只需传递在副本中的断开连接后没有同步的部分数据即可。只有在至少有一个slave连接之后才分配此内存空间,建议建立主从时此值要调大一些或在低峰期配置,否则会导致同步到slave失败</span></span><br><span class="line">repl-backlog-size 512mb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 多长时间内master没有slave连接，就清空backlog缓冲区</span></span><br><span class="line">repl-backlog-ttl 3600</span><br><span class="line"></span><br><span class="line"><span class="comment"># 当master不可用，哨兵Sentinel会根据slave的优先级选举一个master，此值最低的slave会优先当选master，而配置成0，永远不会被选举，一般多个slave都设为一样的值，让其自动选择</span></span><br><span class="line">replica-priority 100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 至少有3个可连接的slave，mater才接受写操作</span></span><br><span class="line">min-replicas-to-write 3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 和上面至少3个slave的ping延迟不能超过10秒，否则master也将停止写操作</span></span><br><span class="line">min-replicas-max-lag 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置redis连接密码，之后需要AUTH pass,如果有特殊符号，用&quot; &quot;引起来,生产建议设置</span></span><br><span class="line">requirepass foobared</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重命名一些高危命令，示例：rename-command FLUSHALL &quot;&quot; 禁用命令</span></span><br><span class="line"><span class="comment"># rename-command del magedu</span></span><br><span class="line">rename-command CONFIG <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Redis最大连接客户端</span></span><br><span class="line">maxclients 10000</span><br><span class="line"></span><br><span class="line"><span class="comment"># redis使用的最大内存，单位为bytes字节，0为不限制，建议设为物理内存一半，8G内存的计算方式8(G)*1024(MB)1024(KB)*1024(Kbyte)，需要注意的是缓冲区是不计算在maxmemory内,生产中如果不设置此项,可能会导致OOM</span></span><br><span class="line">maxmemory &lt;bytes&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 是否开启AOF日志记录，默认redis使用的是rdb方式持久化，这种方式在许多应用中已经足够用了，但是redis如果中途宕机，会导致可能有几分钟的数据丢失(取决于dump数据的间隔时间)，根据save来策略进行持久化，Append Only File是另一种持久化方式，可以提供更好的持久化特性，Redis会把每次写入的数据在接收后都写入 appendonly.aof 文件，每次启动时Redis都会先把这个文件的数据读入内存里，先忽略RDB文件。默认不启用此功能</span></span><br><span class="line">appendonly no</span><br><span class="line"></span><br><span class="line"><span class="comment"># 文本文件AOF的文件名，存放在dir指令指定的目录中</span></span><br><span class="line">appendfilename <span class="string">&quot;appendonly.aof&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># aof持久化策略的配置</span></span><br><span class="line"><span class="comment"># no表示由操作系统保证数据同步到磁盘,Linux的默认fsync策略是30秒，最多会丢失30s的数据</span></span><br><span class="line"><span class="comment"># always表示每次写入都执行fsync，以保证数据同步到磁盘,安全性高,性能较差</span></span><br><span class="line"><span class="comment"># everysec表示每秒执行一次fsync，可能会导致丢失这1s数据,此为默认值,也生产建议值</span></span><br><span class="line">appendfsync everysec</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时在执行bgrewriteaof操作和主进程写aof文件的操作，两者都会操作磁盘，而bgrewriteaof往往会涉及大量磁盘操作，这样就会造成主进程在写aof文件的时候出现阻塞的情形,以下参数实现控制</span></span><br><span class="line"><span class="comment"># 在aof rewrite期间,是否对aof新记录的append暂缓使用文件同步策略,主要考虑磁盘IO开支和请求阻塞时间。</span></span><br><span class="line"><span class="comment"># no：默认设置，表示&quot;不暂缓&quot;，新aof记录仍然被立即同步到磁盘，是最安全的方式，不丢失数据，但要忍受阻塞的问题</span></span><br><span class="line"><span class="comment"># yes：相当于将appendfsync设置为no，这说明并没有执行磁盘操作，只是写入了缓冲区，因此这样并不会造成阻塞（因为没有竞争磁盘），但是如果这个时候redis挂掉，就会丢失数据。丢失多少数据呢？Linux的默认fsync策略是30秒，最多会丢失30s的数据,但由于yes性能较好而且会避免出现阻塞，因此比较推荐</span></span><br><span class="line"><span class="comment"># rewrite 即对aof文件进行整理,将空闲空间回收,从而可以减少恢复数据时间</span></span><br><span class="line">no-appendfsync-on-rewrite no</span><br><span class="line"></span><br><span class="line"><span class="comment"># 当Aof log增长超过指定百分比例时，重写AOF文件，设置为0表示不自动重写Aof日志，重写是为了使aof体积保持最小，但是还可以确保保存最完整的数据</span></span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line"><span class="comment"># 触发aof rewrite的最小文件大小</span></span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br><span class="line"><span class="comment"># 是否加载由于某些原因导致的末尾异常的AOF文件(主进程被kill/断电等)，建议yes</span></span><br><span class="line">aof-load-truncated <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># redis4.0新增RDB-AOF混合持久化格式，在开启了这个功能之后，AOF重写产生的文件将同时包含RDB格式的内容和AOF格式的内容，其中RDB格式的内容用于记录已有的数据，而AOF格式的内容则用于记录最近发生了变化的数据，这样Redis就可以同时兼有RDB持久化和AOF持久化的优点（既能够快速地生成重写文件，也能够在出现问题时，快速地载入数据）,默认为no,即不启用此功能</span></span><br><span class="line">aof-use-rdb-preamble no</span><br><span class="line"></span><br><span class="line"><span class="comment"># lua脚本的最大执行时间，单位为毫秒</span></span><br><span class="line">lua-time-limit 5000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 是否开启集群模式，默认不开启,即单机模式</span></span><br><span class="line">cluster-enabled <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 由node节点自动生成的集群配置文件名称</span></span><br><span class="line">cluster-config-file nodes-6379.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 集群中node节点连接超时时间，单位ms,超过此时间，会踢出集群</span></span><br><span class="line">cluster-node-timeout 15000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 单位为次,在执行故障转移的时候可能有些节点和master断开一段时间导致数据比较旧，这些节点就不适用于选举为master，超过这个时间的就不会被进行故障转移,不能当选master，计算公式：(node-timeout * replica-validity-factor) + repl-ping-replica-period</span></span><br><span class="line">cluster-replica-validity-factor 10</span><br><span class="line"><span class="comment"># 集群迁移屏障，一个主节点至少拥有1个正常工作的从节点，即如果主节点的slave节点故障后会将多余的从节点分配到当前主节点成为其新的从节点</span></span><br><span class="line">cluster-migration-barrier 1</span><br><span class="line"><span class="comment"># 集群请求槽位全部覆盖，如果一个主库宕机且没有备库就会出现集群槽位不全，那么yes时redis集群槽位验证不全,就不再对外提供服务(对key赋值时,会出现CLUSTERDOWN The cluster is down的提示,cluster_state:fail,但ping 仍PONG)，而no则可以继续使用,但是会出现查询数据查不到的情况(因为有数据丢失)。生产建议为no</span></span><br><span class="line">cluster-require-full-coverage <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 如果为yes,此选项阻止在主服务器发生故障时尝试对其主服务器进行故障转移。 但是，主服务器仍然可以执行手动强制故障转移，一般为no</span></span><br><span class="line">cluster-replica-no-failover no</span><br><span class="line"></span><br><span class="line"><span class="comment"># Slow log 是 Redis 用来记录超过指定执行时间的日志系统，执行时间不包括与客户端交谈，发送回复等I/O操作，而是实际执行命令所需的时间（在该阶段线程被阻塞并且不能同时为其它请求提供服务）,由于slow log 保存在内存里面，读写速度非常快，因此可放心地使用，不必担心因为开启 slow log 而影响Redis 的速度</span></span><br><span class="line"><span class="comment"># 以微秒为单位的慢日志记录，为负数会禁用慢日志，为0会记录每个命令操作。默认值为10ms,一般一条命令执行都在微秒级,生产建议设为1ms-10ms之间</span></span><br><span class="line">slowlog-log-slower-than 10000</span><br><span class="line"><span class="comment"># 最多记录多少条慢日志的保存队列长度，达到此长度后，记录新命令会将最旧的命令从命令队列中删除，以此滚动删除,即,先进先出,队列固定长度,默认128,值偏小,生产建议设为1000以上</span></span><br><span class="line">slowlog-max-len 128</span><br></pre></td></tr></table></figure>
 
 <h4 id="动态修改配置"><a href="#动态修改配置" class="headerlink" title="动态修改配置"></a>动态修改配置</h4><p>config 命令用于查看当前 redis 配置、以及不重启 redis 服务实现动态更改 redis 配置等</p>
 <p>注意：不是所有配置都可以动态修改,且此方式无法持久保存</p>
 <ul>
 <li><p>获取当前配置</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 奇数行为键，偶数行为值</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> config get *
-<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"dbfilename"</span>
-<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"dump.rdb"</span>
-<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"requirepass"</span>
-<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">""</span>
-<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"masterauth"</span>
-<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">""</span>
-<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"cluster-announce-ip"</span>
-<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">""</span>
-<span class="token number">9</span><span class="token punctuation">)</span> <span class="token string">"unixsocket"</span>
-<span class="token number">10</span><span class="token punctuation">)</span> <span class="token string">""</span>
-<span class="token number">11</span><span class="token punctuation">)</span> <span class="token string">"logfile"</span>
-<span class="token number">12</span><span class="token punctuation">)</span> <span class="token string">"/var/log/redis/redis.log"</span>
-<span class="token number">13</span><span class="token punctuation">)</span> <span class="token string">"pidfile"</span>
-<span class="token number">14</span><span class="token punctuation">)</span> <span class="token string">"/var/run/redis_6379.pid"</span>
-<span class="token number">15</span><span class="token punctuation">)</span> <span class="token string">"slave-announce-ip"</span>
-<span class="token number">16</span><span class="token punctuation">)</span> <span class="token string">""</span>
-<span class="token number">17</span><span class="token punctuation">)</span> <span class="token string">"replica-announce-ip"</span>
-<span class="token number">18</span><span class="token punctuation">)</span> <span class="token string">""</span>
-<span class="token number">19</span><span class="token punctuation">)</span> <span class="token string">"maxmemory"</span>
-<span class="token number">20</span><span class="token punctuation">)</span> <span class="token string">"0"</span>
-<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>
-<span class="token comment"># 查看bind</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> config get <span class="token builtin class-name">bind</span>
-<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"bind"</span>
-<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"0.0.0.0"</span>
-<span class="token comment"># 有些设置无法修改</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> CONFIG SET <span class="token builtin class-name">bind</span> <span class="token number">127.0</span>.0.1
-<span class="token punctuation">(</span>error<span class="token punctuation">)</span> ERR Unsupported CONFIG parameter: <span class="token builtin class-name">bind</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 奇数行为键，偶数行为值</span></span><br><span class="line">127.0.0.1:6379&gt; config get *</span><br><span class="line">1) <span class="string">&quot;dbfilename&quot;</span></span><br><span class="line">2) <span class="string">&quot;dump.rdb&quot;</span></span><br><span class="line">3) <span class="string">&quot;requirepass&quot;</span></span><br><span class="line">4) <span class="string">&quot;&quot;</span></span><br><span class="line">5) <span class="string">&quot;masterauth&quot;</span></span><br><span class="line">6) <span class="string">&quot;&quot;</span></span><br><span class="line">7) <span class="string">&quot;cluster-announce-ip&quot;</span></span><br><span class="line">8) <span class="string">&quot;&quot;</span></span><br><span class="line">9) <span class="string">&quot;unixsocket&quot;</span></span><br><span class="line">10) <span class="string">&quot;&quot;</span></span><br><span class="line">11) <span class="string">&quot;logfile&quot;</span></span><br><span class="line">12) <span class="string">&quot;/var/log/redis/redis.log&quot;</span></span><br><span class="line">13) <span class="string">&quot;pidfile&quot;</span></span><br><span class="line">14) <span class="string">&quot;/var/run/redis_6379.pid&quot;</span></span><br><span class="line">15) <span class="string">&quot;slave-announce-ip&quot;</span></span><br><span class="line">16) <span class="string">&quot;&quot;</span></span><br><span class="line">17) <span class="string">&quot;replica-announce-ip&quot;</span></span><br><span class="line">18) <span class="string">&quot;&quot;</span></span><br><span class="line">19) <span class="string">&quot;maxmemory&quot;</span></span><br><span class="line">20) <span class="string">&quot;0&quot;</span></span><br><span class="line">......</span><br><span class="line"><span class="comment"># 查看bind</span></span><br><span class="line">127.0.0.1:6379&gt; config get <span class="built_in">bind</span></span><br><span class="line">1) <span class="string">&quot;bind&quot;</span></span><br><span class="line">2) <span class="string">&quot;0.0.0.0&quot;</span></span><br><span class="line"><span class="comment"># 有些设置无法修改</span></span><br><span class="line">127.0.0.1:6379&gt; CONFIG SET <span class="built_in">bind</span> 127.0.0.1</span><br><span class="line">(error) ERR Unsupported CONFIG parameter: <span class="built_in">bind</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>设置连接密码</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 设置连接密码</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> CONFIG SET requirepass <span class="token number">123456</span>
-OK
-<span class="token comment"># 查看连接密码</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> CONFIG GET requirepass
-<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"requirepass"</span>
-<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"123456"</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置连接密码</span></span><br><span class="line">127.0.0.1:6379&gt; CONFIG SET requirepass 123456</span><br><span class="line">OK</span><br><span class="line"><span class="comment"># 查看连接密码</span></span><br><span class="line">127.0.0.1:6379&gt; CONFIG GET requirepass</span><br><span class="line">1) <span class="string">&quot;requirepass&quot;</span></span><br><span class="line">2) <span class="string">&quot;123456&quot;</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>更改最大内存</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> CONFIG SET maxmemory <span class="token number">8589934592</span>
-OK
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> CONFIG GET maxmemory
-<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"maxmemory"</span>
-<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"8589934592"</span></code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; CONFIG SET maxmemory 8589934592</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; CONFIG GET maxmemory</span><br><span class="line">1) <span class="string">&quot;maxmemory&quot;</span></span><br><span class="line">2) <span class="string">&quot;8589934592&quot;</span></span><br></pre></td></tr></table></figure></li>
 </ul>
 <h4 id="慢查询"><a href="#慢查询" class="headerlink" title="慢查询"></a>慢查询</h4><p><img data-src="//img.to2b.cn/blog/ljk/1604287025690.png"></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">slowlog-log-slower-than <span class="token number">10000</span>
-slowlog-max-len <span class="token number">1024</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">slowlog-log-slower-than 10000</span><br><span class="line">slowlog-max-len 1024</span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SLOWLOG LEN <span class="token comment"># 查看慢日志的记录条数</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SLOWLOG GET <span class="token punctuation">[</span>n<span class="token punctuation">]</span> <span class="token comment"># 查看慢日志的n条记录</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SLOWLOG RESET <span class="token comment"># 清空慢日志</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; SLOWLOG LEN <span class="comment"># 查看慢日志的记录条数</span></span><br><span class="line">127.0.0.1:6379&gt; SLOWLOG GET [n] <span class="comment"># 查看慢日志的n条记录</span></span><br><span class="line">127.0.0.1:6379&gt; SLOWLOG RESET <span class="comment"># 清空慢日志</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h4><p>目前 redis 支持两种不同方式的数据持久化保存机制，分别是 RDB 和 AOF</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1604287491602.png"></p>
@@ -552,14 +350,7 @@ slowlog-max-len <span class="token number">1024</span></code></pre>
 </ul>
 <p><strong>bgsave 过程：</strong>Redis 从 master 主进程先 fork 出一个子进程，使用写时复制(copy-on-write)机制，子进程将内存的数据保存为一个临时文件，比如:tmp-.rdb，当数据保存完成之后再将上一次保存的 RDB 文件替换掉，然后关闭子进程，这样可以保证每一次做 RDB 快照保存的数据都是完整的</p>
 <p>因为直接替换 RDB 文件的时候,可能会出现突然断电等问题,而导致 RDB 文件还没有保存完整就因为突然关机停止保存,而导致数据丢失的情况.后续可以手动将每次生成的 RDB 文件进行备份，这样可以最大化保存历史数据</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">save <span class="token number">900</span> <span class="token number">1</span>
-save <span class="token number">300</span> <span class="token number">10</span>
-save <span class="token number">60</span> <span class="token number">10000</span>
-dbfilename dump.rdb
-<span class="token function">dir</span> ./
-stop-writes-on-bgsave-error <span class="token function">yes</span>
-rdbcompression <span class="token function">yes</span>
-rdbchecksum <span class="token function">yes</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"><span class="built_in">dir</span> ./</span><br><span class="line">stop-writes-on-bgsave-error <span class="built_in">yes</span></span><br><span class="line">rdbcompression <span class="built_in">yes</span></span><br><span class="line">rdbchecksum <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>RDB 模式的优缺点</strong></p>
 <p>优点：</p>
@@ -574,43 +365,7 @@ rdbchecksum <span class="token function">yes</span></code></pre>
 <li>当数据量非常大的时候，从父进程 fork 子进程进行保存至 RDB 文件时需要一点时间，可能是毫秒或者秒，取决于磁盘 IO 性能<br>在数据集比较庞大时，fork()可能会非常耗时，造成服务器在一定时间内停止处理客户端﹔如果数据集非常巨大，并且 CPU 时间非常紧张的话，那么这种停止时间甚至可能会长达整整一秒或更久。虽然 AOF 重写也需要进行 fork()，但无论 AOF 重写的执行间隔有多长，数据的持久性都不会有任何损失</li>
 </ul>
 <p><strong>范例: 手动备份 RDB 文件的脚本</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 配置项</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#vim /apps/redis/etc/redis.conf</span>
-save <span class="token string">""</span>
-dbfilename dump_6379.rdb
-<span class="token function">dir</span> <span class="token string">"/data/redis"</span>
-appendonly no
-
-<span class="token comment"># 备份脚本</span>
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#cat redis_backup_rdb.sh</span>
-<span class="token comment">#!/bin/bash</span>
-<span class="token builtin class-name">.</span> /etc/init.d/functions
-<span class="token assign-left variable">BACKUP</span><span class="token operator">=</span>/backup/redis-rdb
-<span class="token assign-left variable">DIR</span><span class="token operator">=</span>/data/redis
-<span class="token assign-left variable">FILE</span><span class="token operator">=</span>dump_6379.rdb
-<span class="token assign-left variable">PASS</span><span class="token operator">=</span><span class="token number">123456</span>
-
-redis-cli <span class="token parameter variable">-h</span> <span class="token number">127.0</span>.0.1 <span class="token parameter variable">-a</span> <span class="token variable">$PASS</span> --no-auth-warning bgsave
-<span class="token assign-left variable">result</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span>redis-cli <span class="token parameter variable">-a</span> <span class="token number">123456</span> --no-auth-warning info Persistence <span class="token operator">|</span> <span class="token function">grep</span> rdb_bgsave_in_progress <span class="token operator">|</span> <span class="token function">sed</span> <span class="token parameter variable">-rn</span> <span class="token string">'s/.*:([0-9]+).*/\1/p'</span><span class="token variable">)</span></span>
-<span class="token keyword">until</span> <span class="token punctuation">[</span> <span class="token variable">$result</span> <span class="token parameter variable">-eq</span> <span class="token number">0</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">do</span>
-    <span class="token function">sleep</span> <span class="token number">1</span>
-    <span class="token assign-left variable">result</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span>redis-cli <span class="token parameter variable">-a</span> <span class="token number">123456</span> --no-auth-warning info Persistence <span class="token operator">|</span> <span class="token function">grep</span> rdb_bgsave_in_progress <span class="token operator">|</span> <span class="token function">sed</span> <span class="token parameter variable">-rn</span> <span class="token string">'s/.*:([0-9]+).*/\1/p'</span><span class="token variable">)</span></span>
-<span class="token keyword">done</span>
-<span class="token assign-left variable">DATE</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +%F_%H-%M-%S<span class="token variable">)</span></span>
-<span class="token punctuation">[</span> <span class="token parameter variable">-e</span> <span class="token variable">$BACKUP</span> <span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">&#123;</span>
-    <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$BACKUP</span>
-    <span class="token function">chown</span> <span class="token parameter variable">-R</span> redis.redis <span class="token variable">$BACKUP</span>
-<span class="token punctuation">&#125;</span>
-<span class="token function">mv</span> <span class="token variable">$DIR</span>/<span class="token variable">$FILE</span> <span class="token variable">$BACKUP</span>/dump_6379-<span class="token variable">$&#123;DATE&#125;</span>.rdb
-action <span class="token string">"Backup redis RDB"</span>
-
-<span class="token comment"># 执行</span>
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#bash redis_backup_rdb.sh</span>
-Background saving started
-Backup redis RDB <span class="token punctuation">[</span> OK <span class="token punctuation">]</span>
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ll /backup/redis-rdb/ -h</span>
-total 143M
--rw-r--r-- <span class="token number">1</span> redis redis 143M Oct <span class="token number">21</span> <span class="token number">11</span>:08 dump_6379-2020-10-21_11-08-47.rdb</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置项</span></span><br><span class="line">[root@centos7 ~]<span class="comment">#vim /apps/redis/etc/redis.conf</span></span><br><span class="line">save <span class="string">&quot;&quot;</span></span><br><span class="line">dbfilename dump_6379.rdb</span><br><span class="line"><span class="built_in">dir</span> <span class="string">&quot;/data/redis&quot;</span></span><br><span class="line">appendonly no</span><br><span class="line"></span><br><span class="line"><span class="comment"># 备份脚本</span></span><br><span class="line">[root@centos8 ~]<span class="comment">#cat redis_backup_rdb.sh</span></span><br><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line">. /etc/init.d/functions</span><br><span class="line">BACKUP=/backup/redis-rdb</span><br><span class="line">DIR=/data/redis</span><br><span class="line">FILE=dump_6379.rdb</span><br><span class="line">PASS=123456</span><br><span class="line"></span><br><span class="line">redis-cli -h 127.0.0.1 -a <span class="variable">$PASS</span> --no-auth-warning bgsave</span><br><span class="line">result=$(redis-cli -a 123456 --no-auth-warning info Persistence | grep rdb_bgsave_in_progress | sed -rn <span class="string">&#x27;s/.*:([0-9]+).*/\1/p&#x27;</span>)</span><br><span class="line"><span class="keyword">until</span> [ <span class="variable">$result</span> -eq 0 ]; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">sleep</span> 1</span><br><span class="line">    result=$(redis-cli -a 123456 --no-auth-warning info Persistence | grep rdb_bgsave_in_progress | sed -rn <span class="string">&#x27;s/.*:([0-9]+).*/\1/p&#x27;</span>)</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">DATE=$(<span class="built_in">date</span> +%F_%H-%M-%S)</span><br><span class="line">[ -e <span class="variable">$BACKUP</span> ] || &#123;</span><br><span class="line">    <span class="built_in">mkdir</span> -p <span class="variable">$BACKUP</span></span><br><span class="line">    <span class="built_in">chown</span> -R redis.redis <span class="variable">$BACKUP</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">mv</span> <span class="variable">$DIR</span>/<span class="variable">$FILE</span> <span class="variable">$BACKUP</span>/dump_6379-<span class="variable">$&#123;DATE&#125;</span>.rdb</span><br><span class="line">action <span class="string">&quot;Backup redis RDB&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行</span></span><br><span class="line">[root@centos8 ~]<span class="comment">#bash redis_backup_rdb.sh</span></span><br><span class="line">Background saving started</span><br><span class="line">Backup redis RDB [ OK ]</span><br><span class="line">[root@centos8 ~]<span class="comment">#ll /backup/redis-rdb/ -h</span></span><br><span class="line">total 143M</span><br><span class="line">-rw-r--r-- 1 redis redis 143M Oct 21 11:08 dump_6379-2020-10-21_11-08-47.rdb</span><br></pre></td></tr></table></figure>
 
 <h5 id="AOF-模式"><a href="#AOF-模式" class="headerlink" title="AOF 模式"></a>AOF 模式</h5><p><img data-src="//img.to2b.cn/blog/ljk/1604288929556.png"></p>
 <p>按照操作顺序依次将操作追加到指定的日志文件末尾</p>
@@ -621,15 +376,7 @@ total 143M
 <p>将一些重复的，可以合并的，过期的数据重新写入一个新的 AOF 文件，从而节约 AOF 备份占用的硬盘空间，也能加速恢复过程，可以手动执行 bgrewriteaof 触发 AOF 或定义自动 rewrite 策略</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1604289226435.png"></p>
 <p>AOF 文件重写由 Redis 自行触发，我们可以使用 bgrewriteaof 命令手动触发</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 开启aof</span>
-appendonly <span class="token function">yes</span>
-appendfilename <span class="token string">"appendonly.aof"</span>
-appendfsync everysec
-<span class="token function">dir</span> ./
-no-appendfsync-on-rewrite <span class="token function">yes</span>
-auto-aof-rewrite-percentage <span class="token number">100</span>
-auto-aof-rewrite-min-size 64mb
-aof-load-truncated <span class="token function">yes</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开启aof</span></span><br><span class="line">appendonly <span class="built_in">yes</span></span><br><span class="line">appendfilename <span class="string">&quot;appendonly.aof&quot;</span></span><br><span class="line">appendfsync everysec</span><br><span class="line"><span class="built_in">dir</span> ./</span><br><span class="line">no-appendfsync-on-rewrite <span class="built_in">yes</span></span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br><span class="line">aof-load-truncated <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>AOF 模式的优缺点</strong></p>
 <p>优点：</p>
@@ -683,11 +430,7 @@ aof-load-truncated <span class="token function">yes</span></code></pre>
 <li>Subscriber：订阅者</li>
 <li>Channel：频道</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SUBSCRIBE channel1 <span class="token comment"># 订阅频道</span>
-
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> PUBLISH channel1 test1 <span class="token comment"># 发布消息，然后订阅者都能收到消息</span>
-
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> unsubscribe channel1 <span class="token comment"># 取消订阅</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; SUBSCRIBE channel1 <span class="comment"># 订阅频道</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; PUBLISH channel1 test1 <span class="comment"># 发布消息，然后订阅者都能收到消息</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; unsubscribe channel1 <span class="comment"># 取消订阅</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="Redis-高可用和集群"><a href="#Redis-高可用和集群" class="headerlink" title="Redis 高可用和集群"></a>Redis 高可用和集群</h2><h3 id="Redis-主从复制"><a href="#Redis-主从复制" class="headerlink" title="Redis 主从复制"></a>Redis 主从复制</h3><h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><ol>
 <li><p>确保主从的配置文件（redis.conf）中 bind 设置为 0.0.0.0</p>
@@ -708,17 +451,13 @@ aof-load-truncated <span class="token function">yes</span></code></pre>
 <p>主节点故障：需要提升一个从节点为主节点，然后把其他从节点重新指向新的主节点</p>
 <ol>
 <li><p>提升主节点：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 10.0.0.18</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> REPLICAOF NO ONE</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 10.0.0.18</span></span><br><span class="line">127.0.0.1:6379&gt; REPLICAOF NO ONE</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>其他从节点重新指向新的主节点</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SLAVEOF <span class="token number">10.0</span>.0.18 <span class="token number">6379</span></code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; SLAVEOF 10.0.0.18 6379</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h4 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h4><p>主从复制分为全量同步和增量同步，全量复制一般发生在 Slave 首次初始化阶段，这时 Slave 需要将 Master 上的所有数据都复制一份</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 复制缓冲区大小,建议要设置足够大</span>
-repl-backlog-size 1mb
-<span class="token comment"># 当没有slave需要同步的时候，多久可以释放环形队列：</span>
-repl-backlog-ttl <span class="token number">3600</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 复制缓冲区大小,建议要设置足够大</span></span><br><span class="line">repl-backlog-size 1mb</span><br><span class="line"><span class="comment"># 当没有slave需要同步的时候，多久可以释放环形队列：</span></span><br><span class="line">repl-backlog-ttl 3600</span><br></pre></td></tr></table></figure>
 
 <p><strong>避免全量复制：</strong></p>
 <ul>
@@ -731,35 +470,7 @@ repl-backlog-ttl <span class="token number">3600</span></code></pre>
 <li>当主节点重启，多从节点复制</li>
 </ul>
 <p><strong>优化配置：</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 是否使用无盘同步RDB文件，默认为no，no为不使用无盘，需要将RDB文件保存到磁盘后再发送给slave，yes为支持无盘，支持无盘就是RDB文件不需要保存至本地磁盘，而且直接通过socket文件发送给slave</span>
-repl-diskless-sync no
-
-<span class="token comment"># diskless时复制的服务器等待的延迟时间</span>
-repl-diskless-sync-delay <span class="token number">5</span>
-
-<span class="token comment"># slave端向server端发送ping的时间间隔，默认为10秒</span>
-repl-ping-slave-period <span class="token number">10</span>
-
-<span class="token comment"># 设置主从ping连接超时时间,超过此值无法连接,master_link_status显示为down,并记录错误日志</span>
-repl-timeout <span class="token number">60</span>
-
-<span class="token comment"># 是否启用TCP_NODELAY，如设置成yes，则redis会合并小的TCP包从而节省带宽， 但会增加同步延迟（40ms），造成master与slave数据不一致，假如设置成no，则redismaster会立即发送同步数据，没有延迟，yes关注性能，no关注redis服务中的数据一致性</span>
-repl-disable-tcp-nodelay no
-
-<span class="token comment"># master的写入数据缓冲区，用于记录自上一次同步后到下一次同步过程中间的写入命令，计算公式：repl-backlog-size = 允许从节点最大中断时长 * 主实例offset每秒写入量，比如master每秒最大写入64mb，最大允许60秒，那么就要设置为64mb*60秒=3840MB(3.8G),建议此值是设置的足够大</span>
-repl-backlog-size 1mb
-
-<span class="token comment"># 一段时间后slave没有连接到master，则backlog size的内存将会被释放。如果值为0则 表示永远不释放这部份内存</span>
-repl-backlog-ttl <span class="token number">3600</span>
-
-<span class="token comment"># slave端的优先级设置，值是一个整数，数字越小表示优先级越高。当master故障时将会按照优先级来选择slave端进行恢复，如果值设置为0，则表示该slave永远不会被选择</span>
-slave-priority <span class="token number">100</span>
-
-<span class="token comment"># 设置一个master的可用slave不能少于多少个，否则master无法执行写</span>
-min-replicas-to-write <span class="token number">1</span>
-
-<span class="token comment"># 设置至少有上面数量的slave延迟时间都大于多少秒时，master不接收写操作(拒绝写入)</span>
-min-slaves-max-lag <span class="token number">20</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 是否使用无盘同步RDB文件，默认为no，no为不使用无盘，需要将RDB文件保存到磁盘后再发送给slave，yes为支持无盘，支持无盘就是RDB文件不需要保存至本地磁盘，而且直接通过socket文件发送给slave</span></span><br><span class="line">repl-diskless-sync no</span><br><span class="line"></span><br><span class="line"><span class="comment"># diskless时复制的服务器等待的延迟时间</span></span><br><span class="line">repl-diskless-sync-delay 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># slave端向server端发送ping的时间间隔，默认为10秒</span></span><br><span class="line">repl-ping-slave-period 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置主从ping连接超时时间,超过此值无法连接,master_link_status显示为down,并记录错误日志</span></span><br><span class="line">repl-timeout 60</span><br><span class="line"></span><br><span class="line"><span class="comment"># 是否启用TCP_NODELAY，如设置成yes，则redis会合并小的TCP包从而节省带宽， 但会增加同步延迟（40ms），造成master与slave数据不一致，假如设置成no，则redismaster会立即发送同步数据，没有延迟，yes关注性能，no关注redis服务中的数据一致性</span></span><br><span class="line">repl-disable-tcp-nodelay no</span><br><span class="line"></span><br><span class="line"><span class="comment"># master的写入数据缓冲区，用于记录自上一次同步后到下一次同步过程中间的写入命令，计算公式：repl-backlog-size = 允许从节点最大中断时长 * 主实例offset每秒写入量，比如master每秒最大写入64mb，最大允许60秒，那么就要设置为64mb*60秒=3840MB(3.8G),建议此值是设置的足够大</span></span><br><span class="line">repl-backlog-size 1mb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 一段时间后slave没有连接到master，则backlog size的内存将会被释放。如果值为0则 表示永远不释放这部份内存</span></span><br><span class="line">repl-backlog-ttl 3600</span><br><span class="line"></span><br><span class="line"><span class="comment"># slave端的优先级设置，值是一个整数，数字越小表示优先级越高。当master故障时将会按照优先级来选择slave端进行恢复，如果值设置为0，则表示该slave永远不会被选择</span></span><br><span class="line">slave-priority 100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置一个master的可用slave不能少于多少个，否则master无法执行写</span></span><br><span class="line">min-replicas-to-write 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置至少有上面数量的slave延迟时间都大于多少秒时，master不接收写操作(拒绝写入)</span></span><br><span class="line">min-slaves-max-lag 20</span><br></pre></td></tr></table></figure>
 
 <h4 id="常见故障"><a href="#常见故障" class="headerlink" title="常见故障"></a>常见故障</h4><ul>
 <li>master 密码不对</li>
@@ -777,84 +488,23 @@ min-slaves-max-lag <span class="token number">20</span></code></pre>
 <li>Sentinel 节点个数应该为大于等于 3 且最好为奇数</li>
 <li>Sentinel 进程监控 redis 集群中 Master 主服务器工作的状态，在 Master 主服务器发生故障时，可以实现 Master 和 Slave 服务器的切换，保证系统的高可用</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">bind</span> <span class="token number">0.0</span>.0.0
-<span class="token comment"># 如果不设置密码，protected-mode需要设置为no，否则无法远程连接</span>
-protected-mode no
-port <span class="token number">26379</span>
-daemonize no
-pidfile /usr/local/redis/run/redis-sentinel.pid
-logfile <span class="token string">"/usr/local/redis/var/sentinel.log"</span>
-
-<span class="token comment"># sentinel announce-ip &lt;ip></span>
-<span class="token comment"># sentinel announce-port &lt;port></span>
-<span class="token comment"># sentinel announce-ip 1.2.3.4</span>
-
-<span class="token function">dir</span> /tmp
-
-<span class="token comment"># sentinel monitor &lt;master-name> &lt;ip> &lt;redis-port> &lt;quorum></span>
-<span class="token comment"># 主从复制架构中，执行master的ip、端口，当2个哨兵标记master下线，则判定master客观下线</span>
-sentinel monitor mymaster <span class="token number">127.0</span>.0.1 <span class="token number">6379</span> <span class="token number">2</span>
-
-<span class="token comment"># sentinel auth-pass &lt;master-name> &lt;password></span>
-<span class="token comment"># 指定master的账号密码</span>
-<span class="token comment"># sentinel auth-pass mymaster MySUPER--secret-0123passw0rd</span>
-
-<span class="token comment"># sentinel down-after-milliseconds &lt;master-name> &lt;milliseconds></span>
-<span class="token comment"># 超时没有返回ping或者直接返回错误，则标记为下线，默认3秒</span>
-sentinel down-after-milliseconds mymaster <span class="token number">30000</span>
-
-<span class="token comment"># sentinel parallel-syncs &lt;master-name> &lt;numreplicas></span>
-<span class="token comment"># 故障发生后，从节点需要从新的主节点同步数据，此项规定并发同步数，即同时允许几个slave从master同步数据，设置1同步时间最久，对主节点压力最小</span>
-sentinel parallel-syncs mymaster <span class="token number">1</span>
-
-<span class="token comment"># sentinel failover-timeout &lt;master-name> &lt;milliseconds></span>
-<span class="token comment"># failover(故障转移)的超时时间，用于以下四种情况：</span>
-<span class="token comment"># 1.同一个sentinel对同一个master两次failover之间的间隔时间</span>
-<span class="token comment"># 2.当一个slave从一个错误的master那里同步数据开始计算时间。直到slave被纠正为向正确的master那里同步数据时</span>
-<span class="token comment"># 3.当想要取消一个正在进行的failover所需要的时间</span>
-<span class="token comment"># 4.当进行failover时，配置所有slaves指向新的master所需的最大时间。不过，即使过了这个超时，slaves依然会被正确配置为指向master，但是就不按parallel-syncs所配置的规则来了</span>
-sentinel failover-timeout mymaster <span class="token number">180000</span>
-
-<span class="token comment"># sentinel notification-script &lt;master-name> &lt;script-path></span>
-<span class="token comment"># sentinel notification-script mymaster /var/redis/notify.sh</span>
-<span class="token comment"># sentinel client-reconfig-script &lt;master-name> &lt;script-path></span>
-<span class="token comment"># &lt;master-name> &lt;role> &lt;state> &lt;from-ip> &lt;from-port> &lt;to-ip> &lt;to-port></span>
-<span class="token comment"># sentinel client-reconfig-script mymaster /var/redis/reconfig.sh</span>
-
-<span class="token comment"># 禁止修改脚本</span>
-sentinel deny-scripts-reconfig <span class="token function">yes</span>
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">bind</span> 0.0.0.0</span><br><span class="line"><span class="comment"># 如果不设置密码，protected-mode需要设置为no，否则无法远程连接</span></span><br><span class="line">protected-mode no</span><br><span class="line">port 26379</span><br><span class="line">daemonize no</span><br><span class="line">pidfile /usr/local/redis/run/redis-sentinel.pid</span><br><span class="line">logfile <span class="string">&quot;/usr/local/redis/var/sentinel.log&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sentinel announce-ip &lt;ip&gt;</span></span><br><span class="line"><span class="comment"># sentinel announce-port &lt;port&gt;</span></span><br><span class="line"><span class="comment"># sentinel announce-ip 1.2.3.4</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">dir</span> /tmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># sentinel monitor &lt;master-name&gt; &lt;ip&gt; &lt;redis-port&gt; &lt;quorum&gt;</span></span><br><span class="line"><span class="comment"># 主从复制架构中，执行master的ip、端口，当2个哨兵标记master下线，则判定master客观下线</span></span><br><span class="line">sentinel monitor mymaster 127.0.0.1 6379 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># sentinel auth-pass &lt;master-name&gt; &lt;password&gt;</span></span><br><span class="line"><span class="comment"># 指定master的账号密码</span></span><br><span class="line"><span class="comment"># sentinel auth-pass mymaster MySUPER--secret-0123passw0rd</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sentinel down-after-milliseconds &lt;master-name&gt; &lt;milliseconds&gt;</span></span><br><span class="line"><span class="comment"># 超时没有返回ping或者直接返回错误，则标记为下线，默认3秒</span></span><br><span class="line">sentinel down-after-milliseconds mymaster 30000</span><br><span class="line"></span><br><span class="line"><span class="comment"># sentinel parallel-syncs &lt;master-name&gt; &lt;numreplicas&gt;</span></span><br><span class="line"><span class="comment"># 故障发生后，从节点需要从新的主节点同步数据，此项规定并发同步数，即同时允许几个slave从master同步数据，设置1同步时间最久，对主节点压力最小</span></span><br><span class="line">sentinel parallel-syncs mymaster 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># sentinel failover-timeout &lt;master-name&gt; &lt;milliseconds&gt;</span></span><br><span class="line"><span class="comment"># failover(故障转移)的超时时间，用于以下四种情况：</span></span><br><span class="line"><span class="comment"># 1.同一个sentinel对同一个master两次failover之间的间隔时间</span></span><br><span class="line"><span class="comment"># 2.当一个slave从一个错误的master那里同步数据开始计算时间。直到slave被纠正为向正确的master那里同步数据时</span></span><br><span class="line"><span class="comment"># 3.当想要取消一个正在进行的failover所需要的时间</span></span><br><span class="line"><span class="comment"># 4.当进行failover时，配置所有slaves指向新的master所需的最大时间。不过，即使过了这个超时，slaves依然会被正确配置为指向master，但是就不按parallel-syncs所配置的规则来了</span></span><br><span class="line">sentinel failover-timeout mymaster 180000</span><br><span class="line"></span><br><span class="line"><span class="comment"># sentinel notification-script &lt;master-name&gt; &lt;script-path&gt;</span></span><br><span class="line"><span class="comment"># sentinel notification-script mymaster /var/redis/notify.sh</span></span><br><span class="line"><span class="comment"># sentinel client-reconfig-script &lt;master-name&gt; &lt;script-path&gt;</span></span><br><span class="line"><span class="comment"># &lt;master-name&gt; &lt;role&gt; &lt;state&gt; &lt;from-ip&gt; &lt;from-port&gt; &lt;to-ip&gt; &lt;to-port&gt;</span></span><br><span class="line"><span class="comment"># sentinel client-reconfig-script mymaster /var/redis/reconfig.sh</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 禁止修改脚本</span></span><br><span class="line">sentinel deny-scripts-reconfig <span class="built_in">yes</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>启动服务后，redis 会对配置文件做一些修改</p>
 <h4 id="实现-1"><a href="#实现-1" class="headerlink" title="实现"></a>实现</h4><p>范例：master：10.0.0.71、slave：10.0.0.72 和 10.0.0.73</p>
 <ol>
 <li><p>修改配置文件</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 从节点修改 redis.conf</span>
-replicaof <span class="token number">10.0</span>.0.71 <span class="token number">6379</span>
-
-<span class="token comment"># 从节点修改 redis-sentinel.conf</span>
-sentinel monitor mymaster <span class="token number">10.0</span>.0.71 <span class="token number">6379</span> <span class="token number">2</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从节点修改 redis.conf</span></span><br><span class="line">replicaof 10.0.0.71 6379</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从节点修改 redis-sentinel.conf</span></span><br><span class="line">sentinel monitor mymaster 10.0.0.71 6379 2</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>启动 redis 和 redis-sentinel 服务</p>
 </li>
 <li><p>测试</p>
 </li>
 <li><p>手动下线主节点，让 10.0.0.72 提升为主节点</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c72 ~<span class="token punctuation">]</span><span class="token comment">#vim /etc/redis.conf</span>
-replica-priority <span class="token number">10</span> <span class="token comment"># 指定优先级,值越小sentinel会优先将之选为新的master,默为值为100</span>
-
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token comment">#redis-cli -p 26379</span>
-<span class="token number">127.0</span>.0.1:2637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sentinel failover mymaster	<span class="token comment"># 手动下线主节点，任意一个节点均可执行</span>
-OK</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@c72 ~]<span class="comment">#vim /etc/redis.conf</span></span><br><span class="line">replica-priority 10 <span class="comment"># 指定优先级,值越小sentinel会优先将之选为新的master,默为值为100</span></span><br><span class="line"></span><br><span class="line">[root@c71 ~]<span class="comment">#redis-cli -p 26379</span></span><br><span class="line">127.0.0.1:26379&gt; sentinel failover mymaster	<span class="comment"># 手动下线主节点，任意一个节点均可执行</span></span><br><span class="line">OK</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h4 id="应用程序连接"><a href="#应用程序连接" class="headerlink" title="应用程序连接"></a>应用程序连接</h4><p>客户端不直接连接 redis，而是连接 sentinel，不过 sentinel 不是代理，以 python 为例：</p>
-<pre class="language-python" data-language="python"><code class="language-python"><span class="token comment">#!/usr/bin/python3</span>
-<span class="token keyword">import</span> redis
-<span class="token keyword">from</span> redis<span class="token punctuation">.</span>sentinel <span class="token keyword">import</span> Sentinel
-<span class="token comment">#连接哨兵服务器(主机名也可以用域名)</span>
-sentinel <span class="token operator">=</span> Sentinel<span class="token punctuation">(</span><span class="token punctuation">[</span>
-    <span class="token punctuation">(</span><span class="token string">'10.0.0.8'</span><span class="token punctuation">,</span> <span class="token number">26379</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token string">'10.0.0.18'</span><span class="token punctuation">,</span> <span class="token number">26379</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token string">'10.0.0.28'</span><span class="token punctuation">,</span> <span class="token number">26379</span><span class="token punctuation">)</span>
-<span class="token punctuation">]</span><span class="token punctuation">,</span>socket_timeout<span class="token operator">=</span><span class="token number">0.5</span><span class="token punctuation">)</span></code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python3</span></span><br><span class="line"><span class="keyword">import</span> redis</span><br><span class="line"><span class="keyword">from</span> redis.sentinel <span class="keyword">import</span> Sentinel</span><br><span class="line"><span class="comment">#连接哨兵服务器(主机名也可以用域名)</span></span><br><span class="line">sentinel = Sentinel([</span><br><span class="line">    (<span class="string">&#x27;10.0.0.8&#x27;</span>, <span class="number">26379</span>),(<span class="string">&#x27;10.0.0.18&#x27;</span>, <span class="number">26379</span>),(<span class="string">&#x27;10.0.0.28&#x27;</span>, <span class="number">26379</span>)</span><br><span class="line">],socket_timeout=<span class="number">0.5</span>)</span><br></pre></td></tr></table></figure>
 
 <h3 id="Redis-Cluster"><a href="#Redis-Cluster" class="headerlink" title="Redis Cluster"></a>Redis Cluster</h3><p>Sentinel 机制可以解决 master 和 slave 角色的自动切换问题，但单个 Master 的性能瓶颈问题无法解决，类似于 MySQL 中的 MHA 功能，redis 3.0 之前版本中，生产环境一般使用哨兵模式</p>
 <p>redis 3.0 版本之后推出了无中心架构的 redis cluster 机制，在无中心的 redis 集群当中，其每个节点保存当前节点数据和整个集群状态,每个节点都和其他所有节点连接</p>
@@ -872,74 +522,13 @@ sentinel <span class="token operator">=</span> Sentinel<span class="token punctu
 <h4 id="实现-2"><a href="#实现-2" class="headerlink" title="实现"></a>实现</h4><p>6 个节点 10.0.0.[71-76]，其中 10.0.0.[71-73]是主节点、10.0.0.[74-76]是从节点</p>
 <ol>
 <li><p>修改 redis.conf 相关配置</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 开启集群</span>
-cluster-enabled <span class="token function">yes</span>
-<span class="token comment"># 集群状态文件，记录主从关系及slot范围信息，由redis cluster集群自动创建和维护</span>
-cluster-config-file nodes-6379.conf
-<span class="token comment"># 默认yes，一个节点下线整个集群不可用；设置为no，则其他正常节点还可以继续提供对外访问</span>
-cluster-require-full-coverage no</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开启集群</span></span><br><span class="line">cluster-enabled <span class="built_in">yes</span></span><br><span class="line"><span class="comment"># 集群状态文件，记录主从关系及slot范围信息，由redis cluster集群自动创建和维护</span></span><br><span class="line">cluster-config-file nodes-6379.conf</span><br><span class="line"><span class="comment"># 默认yes，一个节点下线整个集群不可用；设置为no，则其他正常节点还可以继续提供对外访问</span></span><br><span class="line">cluster-require-full-coverage no</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>启动 redis 服务</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动之前确保集群中的每个节点是干净的，需要清除dump.rdb、nodes-6379.conf等文件</span>
-<span class="token function">rm</span> <span class="token parameter variable">-rf</span> /usr/local/redis/data/*
-systemctl start redis.service</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动之前确保集群中的每个节点是干净的，需要清除dump.rdb、nodes-6379.conf等文件</span></span><br><span class="line"><span class="built_in">rm</span> -rf /usr/local/redis/data/*</span><br><span class="line">systemctl start redis.service</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>创建集群</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># --cluster-replicas 1 表示每个master对应一个slave节点</span>
-<span class="token punctuation">[</span>root@c71 data<span class="token punctuation">]</span><span class="token variable">$redis</span>-cli <span class="token parameter variable">--cluster</span> create <span class="token number">10.0</span>.0.71:6379 <span class="token number">10.0</span>.0.72:6379 <span class="token number">10.0</span>.0.73:6379 <span class="token number">10.0</span>.0.74:6379 <span class="token number">10.0</span>.0.75:6379 <span class="token number">10.0</span>.0.76:6379 --cluster-replicas <span class="token number">1</span>
-<span class="token operator">>></span><span class="token operator">></span> Performing <span class="token builtin class-name">hash</span> slots allocation on <span class="token number">6</span> nodes<span class="token punctuation">..</span>.
-Master<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">0</span> - <span class="token number">5460</span>
-Master<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">5461</span> - <span class="token number">10922</span>
-Master<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">10923</span> - <span class="token number">16383</span>
-Adding replica <span class="token number">10.0</span>.0.75:6379 to <span class="token number">10.0</span>.0.71:6379
-Adding replica <span class="token number">10.0</span>.0.76:6379 to <span class="token number">10.0</span>.0.72:6379
-Adding replica <span class="token number">10.0</span>.0.74:6379 to <span class="token number">10.0</span>.0.73:6379
-M: 52c617ce1f5e67ee2da39beb8ae99240914f6f6d <span class="token number">10.0</span>.0.71:6379 <span class="token comment"># M：master</span>
-   slots:<span class="token punctuation">[</span><span class="token number">0</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
-M: 4fd60cab86be22d0a9edac1a8b7ac07b293e497d <span class="token number">10.0</span>.0.72:6379
-   slots:<span class="token punctuation">[</span><span class="token number">5461</span>-10922<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5462</span> slots<span class="token punctuation">)</span> master
-M: 8406e58b4d132960300074f431b0b4b9900c94a5 <span class="token number">10.0</span>.0.73:6379
-   slots:<span class="token punctuation">[</span><span class="token number">10923</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
-S: 6c7f8028a16d1f07e7be7a33fa23528e7e9d69c6 <span class="token number">10.0</span>.0.74:6379	<span class="token comment"># S：slave</span>
-   replicates 8406e58b4d132960300074f431b0b4b9900c94a5
-S: 01849d7567cee594e6ebe2b6f09d19008a1e625b <span class="token number">10.0</span>.0.75:6379
-   replicates 52c617ce1f5e67ee2da39beb8ae99240914f6f6d
-S: 461a59fd85df1839d77877e66aaa4a08ffff068f <span class="token number">10.0</span>.0.76:6379
-   replicates 4fd60cab86be22d0a9edac1a8b7ac07b293e497d
-Can I <span class="token builtin class-name">set</span> the above configuration? <span class="token punctuation">(</span>type <span class="token string">'yes'</span> to accept<span class="token punctuation">)</span>: <span class="token function">yes</span> <span class="token comment"># 输入yes自动创建集群</span>
-<span class="token operator">>></span><span class="token operator">></span> Nodes configuration updated
-<span class="token operator">>></span><span class="token operator">></span> Assign a different config epoch to each <span class="token function">node</span>
-<span class="token operator">>></span><span class="token operator">></span> Sending CLUSTER MEET messages to <span class="token function">join</span> the cluster
-Waiting <span class="token keyword">for</span> the cluster to <span class="token function">join</span>
-<span class="token punctuation">..</span><span class="token punctuation">..</span>
-<span class="token operator">>></span><span class="token operator">></span> Performing Cluster Check <span class="token punctuation">(</span>using <span class="token function">node</span> <span class="token number">10.0</span>.0.71:6379<span class="token punctuation">)</span>
-M: 52c617ce1f5e67ee2da39beb8ae99240914f6f6d <span class="token number">10.0</span>.0.71:6379
-   slots:<span class="token punctuation">[</span><span class="token number">0</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master	<span class="token comment"># 分配的槽位</span>
-   <span class="token number">1</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>	<span class="token comment"># 添加一个从节点</span>
-S: 6c7f8028a16d1f07e7be7a33fa23528e7e9d69c6 <span class="token number">10.0</span>.0.74:6379
-   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave	<span class="token comment"># 从节点没有分配槽位</span>
-   replicates 8406e58b4d132960300074f431b0b4b9900c94a5
-M: 8406e58b4d132960300074f431b0b4b9900c94a5 <span class="token number">10.0</span>.0.73:6379
-   slots:<span class="token punctuation">[</span><span class="token number">10923</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
-   <span class="token number">1</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
-S: 461a59fd85df1839d77877e66aaa4a08ffff068f <span class="token number">10.0</span>.0.76:6379
-   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
-   replicates 4fd60cab86be22d0a9edac1a8b7ac07b293e497d
-M: 4fd60cab86be22d0a9edac1a8b7ac07b293e497d <span class="token number">10.0</span>.0.72:6379
-   slots:<span class="token punctuation">[</span><span class="token number">5461</span>-10922<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5462</span> slots<span class="token punctuation">)</span> master
-   <span class="token number">1</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
-S: 01849d7567cee594e6ebe2b6f09d19008a1e625b <span class="token number">10.0</span>.0.75:6379
-   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
-   replicates 52c617ce1f5e67ee2da39beb8ae99240914f6f6d
-<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All nodes agree about slots configuration.
-<span class="token operator">>></span><span class="token operator">></span> Check <span class="token keyword">for</span> <span class="token function">open</span> slots<span class="token punctuation">..</span>.
-<span class="token operator">>></span><span class="token operator">></span> Check slots coverage<span class="token punctuation">..</span>.
-<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All <span class="token number">16384</span> slots covered.
-
-<span class="token comment">#观察以上结果，可以看到3组master/slave</span>
-master:10.0.0.71---slave:10.0.0.74
-master:10.0.0.72---slave:10.0.0.75
-master:10.0.0.73---slave:10.0.0.76</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># --cluster-replicas 1 表示每个master对应一个slave节点</span></span><br><span class="line">[root@c71 data]<span class="variable">$redis</span>-cli --cluster create 10.0.0.71:6379 10.0.0.72:6379 10.0.0.73:6379 10.0.0.74:6379 10.0.0.75:6379 10.0.0.76:6379 --cluster-replicas 1</span><br><span class="line">&gt;&gt;&gt; Performing <span class="built_in">hash</span> slots allocation on 6 nodes...</span><br><span class="line">Master[0] -&gt; Slots 0 - 5460</span><br><span class="line">Master[1] -&gt; Slots 5461 - 10922</span><br><span class="line">Master[2] -&gt; Slots 10923 - 16383</span><br><span class="line">Adding replica 10.0.0.75:6379 to 10.0.0.71:6379</span><br><span class="line">Adding replica 10.0.0.76:6379 to 10.0.0.72:6379</span><br><span class="line">Adding replica 10.0.0.74:6379 to 10.0.0.73:6379</span><br><span class="line">M: 52c617ce1f5e67ee2da39beb8ae99240914f6f6d 10.0.0.71:6379 <span class="comment"># M：master</span></span><br><span class="line">   slots:[0-5460] (5461 slots) master</span><br><span class="line">M: 4fd60cab86be22d0a9edac1a8b7ac07b293e497d 10.0.0.72:6379</span><br><span class="line">   slots:[5461-10922] (5462 slots) master</span><br><span class="line">M: 8406e58b4d132960300074f431b0b4b9900c94a5 10.0.0.73:6379</span><br><span class="line">   slots:[10923-16383] (5461 slots) master</span><br><span class="line">S: 6c7f8028a16d1f07e7be7a33fa23528e7e9d69c6 10.0.0.74:6379	<span class="comment"># S：slave</span></span><br><span class="line">   replicates 8406e58b4d132960300074f431b0b4b9900c94a5</span><br><span class="line">S: 01849d7567cee594e6ebe2b6f09d19008a1e625b 10.0.0.75:6379</span><br><span class="line">   replicates 52c617ce1f5e67ee2da39beb8ae99240914f6f6d</span><br><span class="line">S: 461a59fd85df1839d77877e66aaa4a08ffff068f 10.0.0.76:6379</span><br><span class="line">   replicates 4fd60cab86be22d0a9edac1a8b7ac07b293e497d</span><br><span class="line">Can I <span class="built_in">set</span> the above configuration? (<span class="built_in">type</span> <span class="string">&#x27;yes&#x27;</span> to accept): <span class="built_in">yes</span> <span class="comment"># 输入yes自动创建集群</span></span><br><span class="line">&gt;&gt;&gt; Nodes configuration updated</span><br><span class="line">&gt;&gt;&gt; Assign a different config epoch to each node</span><br><span class="line">&gt;&gt;&gt; Sending CLUSTER MEET messages to <span class="built_in">join</span> the cluster</span><br><span class="line">Waiting <span class="keyword">for</span> the cluster to <span class="built_in">join</span></span><br><span class="line">....</span><br><span class="line">&gt;&gt;&gt; Performing Cluster Check (using node 10.0.0.71:6379)</span><br><span class="line">M: 52c617ce1f5e67ee2da39beb8ae99240914f6f6d 10.0.0.71:6379</span><br><span class="line">   slots:[0-5460] (5461 slots) master	<span class="comment"># 分配的槽位</span></span><br><span class="line">   1 additional replica(s)	<span class="comment"># 添加一个从节点</span></span><br><span class="line">S: 6c7f8028a16d1f07e7be7a33fa23528e7e9d69c6 10.0.0.74:6379</span><br><span class="line">   slots: (0 slots) slave	<span class="comment"># 从节点没有分配槽位</span></span><br><span class="line">   replicates 8406e58b4d132960300074f431b0b4b9900c94a5</span><br><span class="line">M: 8406e58b4d132960300074f431b0b4b9900c94a5 10.0.0.73:6379</span><br><span class="line">   slots:[10923-16383] (5461 slots) master</span><br><span class="line">   1 additional replica(s)</span><br><span class="line">S: 461a59fd85df1839d77877e66aaa4a08ffff068f 10.0.0.76:6379</span><br><span class="line">   slots: (0 slots) slave</span><br><span class="line">   replicates 4fd60cab86be22d0a9edac1a8b7ac07b293e497d</span><br><span class="line">M: 4fd60cab86be22d0a9edac1a8b7ac07b293e497d 10.0.0.72:6379</span><br><span class="line">   slots:[5461-10922] (5462 slots) master</span><br><span class="line">   1 additional replica(s)</span><br><span class="line">S: 01849d7567cee594e6ebe2b6f09d19008a1e625b 10.0.0.75:6379</span><br><span class="line">   slots: (0 slots) slave</span><br><span class="line">   replicates 52c617ce1f5e67ee2da39beb8ae99240914f6f6d</span><br><span class="line">[OK] All nodes agree about slots configuration.</span><br><span class="line">&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...</span><br><span class="line">&gt;&gt;&gt; Check slots coverage...</span><br><span class="line">[OK] All 16384 slots covered.</span><br><span class="line"></span><br><span class="line"><span class="comment">#观察以上结果，可以看到3组master/slave</span></span><br><span class="line">master:10.0.0.71---slave:10.0.0.74</span><br><span class="line">master:10.0.0.72---slave:10.0.0.75</span><br><span class="line">master:10.0.0.73---slave:10.0.0.76</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>在每个节点执行<code>info replication</code> 可以查看此节点的主从信息</p>
 </li>
@@ -955,24 +544,12 @@ master:10.0.0.73---slave:10.0.0.76</code></pre>
 <h4 id="管理"><a href="#管理" class="headerlink" title="管理"></a>管理</h4><h5 id="动态扩容"><a href="#动态扩容" class="headerlink" title="动态扩容"></a>动态扩容</h5><p>目前集群中有 6 个节点 10.0.0.[71-76]，三主三从，现在要将 10.0.0.77 添加到集群中</p>
 <ol>
 <li><p>添加节点：在任意一个节点上执行</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--cluster</span> add-node <span class="token number">10.0</span>.0.77:6379  <span class="token operator">&lt;</span>当前任意集群节点<span class="token operator">></span>:6379</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster add-node 10.0.0.77:6379  &lt;当前任意集群节点&gt;:6379</span><br></pre></td></tr></table></figure>
 
 <p>新节点是 master，且没有分配槽位</p>
 </li>
 <li><p>给新 master 节点分配槽位</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--cluster</span> reshard <span class="token operator">&lt;</span>当前任意集群节点<span class="token operator">></span>:6379
-
-<span class="token comment"># 需要移动多少槽位？ 16384/master个数，这里16384/4=4096</span>
-How many slots <span class="token keyword">do</span> you want to move <span class="token punctuation">(</span>from <span class="token number">1</span> to <span class="token number">16384</span><span class="token punctuation">)</span>?4096
-<span class="token comment"># 哪个节点接收移动的槽位？当然是新添加的master节点了，输入10.0.0.77的node ID</span>
-What is the receiving <span class="token function">node</span> ID?defa5ca3d7aaecea240a79ad2c9b572ebf32464a
-<span class="token comment"># 哪些节点提供槽位，all表示当前所有master节点，或者输入一个或多个node ID，最后输入done表示结束</span>
-Please enter all the <span class="token builtin class-name">source</span> <span class="token function">node</span> IDs.
-Type <span class="token string">'all'</span> to use all the nodes as <span class="token builtin class-name">source</span> nodes <span class="token keyword">for</span> the <span class="token builtin class-name">hash</span> slots.
-Type <span class="token string">'done'</span> once you entered all the <span class="token builtin class-name">source</span> nodes IDs.
-Source <span class="token function">node</span> <span class="token comment">#1:all</span>
-<span class="token comment"># 确认分配</span>
-Do you want to proceed with the proposed reshard plan <span class="token punctuation">(</span>yes/no<span class="token punctuation">)</span>? <span class="token function">yes</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster reshard &lt;当前任意集群节点&gt;:6379</span><br><span class="line"></span><br><span class="line"><span class="comment"># 需要移动多少槽位？ 16384/master个数，这里16384/4=4096</span></span><br><span class="line">How many slots <span class="keyword">do</span> you want to move (from 1 to 16384)?4096</span><br><span class="line"><span class="comment"># 哪个节点接收移动的槽位？当然是新添加的master节点了，输入10.0.0.77的node ID</span></span><br><span class="line">What is the receiving node ID?defa5ca3d7aaecea240a79ad2c9b572ebf32464a</span><br><span class="line"><span class="comment"># 哪些节点提供槽位，all表示当前所有master节点，或者输入一个或多个node ID，最后输入done表示结束</span></span><br><span class="line">Please enter all the <span class="built_in">source</span> node IDs.</span><br><span class="line">Type <span class="string">&#x27;all&#x27;</span> to use all the nodes as <span class="built_in">source</span> nodes <span class="keyword">for</span> the <span class="built_in">hash</span> slots.</span><br><span class="line">Type <span class="string">&#x27;done&#x27;</span> once you entered all the <span class="built_in">source</span> nodes IDs.</span><br><span class="line">Source node <span class="comment">#1:all</span></span><br><span class="line"><span class="comment"># 确认分配</span></span><br><span class="line">Do you want to proceed with the proposed reshard plan (<span class="built_in">yes</span>/no)? <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><p>这样，新的 master 节点就分配了 4096 个槽位，由于这些槽位是其他三个 master 节点平均分配给新 master 节点的，所以避免不了槽位碎片化的问题</p>
@@ -985,15 +562,10 @@ Do you want to proceed with the proposed reshard plan <span class="token punctua
 </li>
 <li><p>为新的 master 添加新的 slave 节点</p>
 <p>新的 master 节点没有 slave 节点，需要添加一个（10.0.0.78）以保证高可用，任意节点执行以下命令：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--cluster</span> add-node <span class="token number">10.0</span>.0.78:6379 <span class="token operator">&lt;</span>任意集群节点<span class="token operator">></span>:6379 --cluster-slave --cluster-master-id defa5ca3d7aaecea240a79ad2c9b572ebf32464a</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster add-node 10.0.0.78:6379 &lt;任意集群节点&gt;:6379 --cluster-slave --cluster-master-id defa5ca3d7aaecea240a79ad2c9b572ebf32464a</span><br></pre></td></tr></table></figure>
 
 <p>或者先将新节点加入集群，再修改为 slave：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--cluster</span> add-node <span class="token number">10.0</span>.0.78:6379 <span class="token operator">&lt;</span>任意集群节点<span class="token operator">></span>:6379
-<span class="token punctuation">[</span>root@c78 ~<span class="token punctuation">]</span><span class="token variable">$redis</span>-cli
-<span class="token comment"># 查看当前集群节点，找到目标master 的ID</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> CLUSTER NODES
-<span class="token comment"># 将其设置slave，命令格式为cluster replicate MASTERID</span>
-<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> CLUSTER REPLICATE 8defa5ca3d7aaecea240a79ad2c9b572ebf32464a</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster add-node 10.0.0.78:6379 &lt;任意集群节点&gt;:6379</span><br><span class="line">[root@c78 ~]<span class="variable">$redis</span>-cli</span><br><span class="line"><span class="comment"># 查看当前集群节点，找到目标master 的ID</span></span><br><span class="line">127.0.0.1:6379&gt; CLUSTER NODES</span><br><span class="line"><span class="comment"># 将其设置slave，命令格式为cluster replicate MASTERID</span></span><br><span class="line">127.0.0.1:6379&gt; CLUSTER REPLICATE 8defa5ca3d7aaecea240a79ad2c9b572ebf32464a</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h5 id="动态缩容"><a href="#动态缩容" class="headerlink" title="动态缩容"></a>动态缩容</h5><ul>
 <li><p>从节点：在任意节点上执行<code>redis-cli --cluster del-node host:port node_id</code></p>
@@ -1004,46 +576,19 @@ Do you want to proceed with the proposed reshard plan <span class="token punctua
 <p>删除 master 节点 10.0.0.71：</p>
 <ul>
 <li><p>交互式：在任意节点上执行</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--cluster</span> reshard <span class="token operator">&lt;</span>任意集群节点<span class="token operator">></span>:6379
-<span class="token punctuation">..</span>.
-M: 52c617ce1f5e67ee2da39beb8ae99240914f6f6d <span class="token number">10.0</span>.0.71:6379
-   slots:<span class="token punctuation">[</span><span class="token number">1364</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">4096</span> slots<span class="token punctuation">)</span> master
-<span class="token punctuation">..</span>.
-
-<span class="token comment"># 需要移动多少槽位？ 10.0.0.71有4096个槽位，需要平均分给其他三个master节点，所以我们分1365、1365、1366三次移动</span>
-How many slots <span class="token keyword">do</span> you want to move <span class="token punctuation">(</span>from <span class="token number">1</span> to <span class="token number">16384</span><span class="token punctuation">)</span>?1365
-<span class="token comment"># 哪个节点接收移动的槽位？经过观察10.0.0.77适合接受，依据是尽量不造成槽位的碎片化</span>
-What is the receiving <span class="token function">node</span> ID?defa5ca3d7aaecea240a79ad2c9b572ebf32464a
-<span class="token comment"># 哪些节点提供槽位，当然是要删除的10.0.0.71了</span>
-Please enter all the <span class="token builtin class-name">source</span> <span class="token function">node</span> IDs.
-Type <span class="token string">'all'</span> to use all the nodes as <span class="token builtin class-name">source</span> nodes <span class="token keyword">for</span> the <span class="token builtin class-name">hash</span> slots.
-Type <span class="token string">'done'</span> once you entered all the <span class="token builtin class-name">source</span> nodes IDs.
-Source <span class="token function">node</span> <span class="token comment">#1:52c617ce1f5e67ee2da39beb8ae99240914f6f6d</span>
-Source <span class="token function">node</span> <span class="token comment">#2:done</span>
-<span class="token comment"># 确认分配</span>
-<span class="token punctuation">..</span>.
-Moving slot <span class="token number">2727</span> from <span class="token number">10.0</span>.0.71:6379 to <span class="token number">10.0</span>.0.77:6379: 	<span class="token comment"># 注意观察，不要出错</span>
-<span class="token punctuation">..</span>.
-Do you want to proceed with the proposed reshard plan <span class="token punctuation">(</span>yes/no<span class="token punctuation">)</span>? <span class="token function">yes</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster reshard &lt;任意集群节点&gt;:6379</span><br><span class="line">...</span><br><span class="line">M: 52c617ce1f5e67ee2da39beb8ae99240914f6f6d 10.0.0.71:6379</span><br><span class="line">   slots:[1364-5460] (4096 slots) master</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 需要移动多少槽位？ 10.0.0.71有4096个槽位，需要平均分给其他三个master节点，所以我们分1365、1365、1366三次移动</span></span><br><span class="line">How many slots <span class="keyword">do</span> you want to move (from 1 to 16384)?1365</span><br><span class="line"><span class="comment"># 哪个节点接收移动的槽位？经过观察10.0.0.77适合接受，依据是尽量不造成槽位的碎片化</span></span><br><span class="line">What is the receiving node ID?defa5ca3d7aaecea240a79ad2c9b572ebf32464a</span><br><span class="line"><span class="comment"># 哪些节点提供槽位，当然是要删除的10.0.0.71了</span></span><br><span class="line">Please enter all the <span class="built_in">source</span> node IDs.</span><br><span class="line">Type <span class="string">&#x27;all&#x27;</span> to use all the nodes as <span class="built_in">source</span> nodes <span class="keyword">for</span> the <span class="built_in">hash</span> slots.</span><br><span class="line">Type <span class="string">&#x27;done&#x27;</span> once you entered all the <span class="built_in">source</span> nodes IDs.</span><br><span class="line">Source node <span class="comment">#1:52c617ce1f5e67ee2da39beb8ae99240914f6f6d</span></span><br><span class="line">Source node <span class="comment">#2:done</span></span><br><span class="line"><span class="comment"># 确认分配</span></span><br><span class="line">...</span><br><span class="line">Moving slot 2727 from 10.0.0.71:6379 to 10.0.0.77:6379: 	<span class="comment"># 注意观察，不要出错</span></span><br><span class="line">...</span><br><span class="line">Do you want to proceed with the proposed reshard plan (<span class="built_in">yes</span>/no)? <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>命令式：在任意节点上执行</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 移动1365个槽位到10.0.0.72</span>
-redis-cli <span class="token parameter variable">--cluster</span> reshard <span class="token operator">&lt;</span>任意集群节点<span class="token operator">></span>:6379 --cluster-slots <span class="token number">1365</span> --cluster-from 52c617ce1f5e67ee2da39beb8ae99240914f6f6d --cluster-to 4fd60cab86be22d0a9edac1a8b7ac07b293e497d --cluster-yes
-
-<span class="token comment"># 移动最后的1366个槽位到10.0.0.73</span>
-redis-cli <span class="token parameter variable">--cluster</span> reshard <span class="token operator">&lt;</span>任意集群节点<span class="token operator">></span>:6379 --cluster-slots <span class="token number">1366</span> --cluster-from 52c617ce1f5e67ee2da39beb8ae99240914f6f6d --cluster-to 8406e58b4d132960300074f431b0b4b9900c94a5 --cluster-yes</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 移动1365个槽位到10.0.0.72</span></span><br><span class="line">redis-cli --cluster reshard &lt;任意集群节点&gt;:6379 --cluster-slots 1365 --cluster-from 52c617ce1f5e67ee2da39beb8ae99240914f6f6d --cluster-to 4fd60cab86be22d0a9edac1a8b7ac07b293e497d --cluster-yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移动最后的1366个槽位到10.0.0.73</span></span><br><span class="line">redis-cli --cluster reshard &lt;任意集群节点&gt;:6379 --cluster-slots 1366 --cluster-from 52c617ce1f5e67ee2da39beb8ae99240914f6f6d --cluster-to 8406e58b4d132960300074f431b0b4b9900c94a5 --cluster-yes</span><br></pre></td></tr></table></figure>
 
 <p>10.0.0.71 上的槽位都移走了之后，其 slave 节点（如果有）也会变成了其他 master 节点的 slave 节点</p>
 </li>
 </ul>
 <p>最后执行 <code>redis-cli --cluster del-node host:port node_id </code>即可将 10.0.0.71 节点删除</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$redis</span>-cli <span class="token parameter variable">--cluster</span> del-node <span class="token number">10.0</span>.0.71:6379 52c617ce1f5e67ee2da39beb8ae99240914f6f6d
-<span class="token operator">>></span><span class="token operator">></span> Removing <span class="token function">node</span> 52c617ce1f5e67ee2da39beb8ae99240914f6f6d from cluster <span class="token number">10.0</span>.0.71:6379
-<span class="token operator">>></span><span class="token operator">></span> Sending CLUSTER FORGET messages to the cluster<span class="token punctuation">..</span>.
-<span class="token operator">>></span><span class="token operator">></span> SHUTDOWN the node.</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@c71 ~]<span class="variable">$redis</span>-cli --cluster del-node 10.0.0.71:6379 52c617ce1f5e67ee2da39beb8ae99240914f6f6d</span><br><span class="line">&gt;&gt;&gt; Removing node 52c617ce1f5e67ee2da39beb8ae99240914f6f6d from cluster 10.0.0.71:6379</span><br><span class="line">&gt;&gt;&gt; Sending CLUSTER FORGET messages to the cluster...</span><br><span class="line">&gt;&gt;&gt; SHUTDOWN the node.</span><br></pre></td></tr></table></figure></li>
 </ul>
 <h5 id="导入现有数据至集群"><a href="#导入现有数据至集群" class="headerlink" title="导入现有数据至集群"></a>导入现有数据至集群</h5><p>在任意集群节点上执行：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--cluster</span> <span class="token function">import</span> <span class="token operator">&lt;</span>任意集群节点<span class="token operator">></span>:6379 --cluster-from <span class="token operator">&lt;</span>外部Redis<span class="token operator">></span>:6379 --cluster-copy --cluster-replace</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster import &lt;任意集群节点&gt;:6379 --cluster-from &lt;外部Redis&gt;:6379 --cluster-copy --cluster-replace</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>–cluster-replace：当导入的数据和已有的数据有重复的 key，–cluster-replace 表示替换为导入的数据</li>
@@ -1055,13 +600,13 @@ redis-cli <span class="token parameter variable">--cluster</span> reshard <span 
 <li>内存相关配置不一致</li>
 </ul>
 <p>获取指定槽位中对应 key 值个数</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli cluster countkeysinslot <span class="token punctuation">&#123;</span>slot的值<span class="token punctuation">&#125;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli cluster countkeysinslot &#123;slot的值&#125;</span><br></pre></td></tr></table></figure>
 
 <p>执行自动的槽位重新平衡分布，但会影响客户端的访问，慎用</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--cluster</span> rebalance <span class="token operator">&lt;</span>任意集群节点<span class="token operator">></span>:6379</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster rebalance &lt;任意集群节点&gt;:6379</span><br></pre></td></tr></table></figure>
 
 <p>获取 bigkey，建议在 slave 节点运行</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--bigkeys</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --bigkeys</span><br></pre></td></tr></table></figure>
 
 <h5 id="解散集群"><a href="#解散集群" class="headerlink" title="解散集群"></a>解散集群</h5><p><code>systemctl stop redis.service</code>关闭所有的 redis 服务，然后删除 nodes-6379.conf 文件，修改 redis.conf：<code>cluster-enabled no</code></p>
 <h4 id="redis-cluster-的局限性"><a href="#redis-cluster-的局限性" class="headerlink" title="redis cluster 的局限性"></a>redis cluster 的局限性</h4><ul>

@@ -277,171 +277,58 @@
 <li>客户端如果对 ZooKeepe 的一个数据节点注册 Watcher 监听，那么当该数据节点的内容或是其子节点列表发生变更时，ZooKeeper 服务器就会向订阅的客户端发送变更通知</li>
 <li>对在 ZooKeeper 上创建的临时节点，一旦客户端与服务器之间的会话失效，该临时节点也就被自动除</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash">Watcher（事件监听器）：Zookeeper中很重要的特性。Zookeeper允许用户在指定节点上注册一些Watcher，并且在一些特定事件触发的时候，ZooKeeper服务端会将事件通知到感兴趣的客户端上去，该机制是 Zookeeper实现分布式协调服务的重要特性</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Watcher（事件监听器）：Zookeeper中很重要的特性。Zookeeper允许用户在指定节点上注册一些Watcher，并且在一些特定事件触发的时候，ZooKeeper服务端会将事件通知到感兴趣的客户端上去，该机制是 Zookeeper实现分布式协调服务的重要特性</span><br></pre></td></tr></table></figure>
 
 <p><img data-src="//img.to2b.cn/blog/ljk/1613916728374.png"></p>
 <p>0、生产者启动<br>1、生产者注册至 zookeeper<br>2、消费者启动并订阅频道<br>3、zookeeper 通知消费者事件<br>4、消费者调用生产者<br>5、监控中心负责统计和监控服务状态</p>
 <h2 id="ZooKeeper-单机安装"><a href="#ZooKeeper-单机安装" class="headerlink" title="ZooKeeper 单机安装"></a>ZooKeeper 单机安装</h2><p>ZooKeeper 依赖 Java 环境，要求 JDK1.7 及以上</p>
 <ol>
 <li><p>配置 java 环境</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 ~<span class="token punctuation">]</span><span class="token variable">$java</span> <span class="token parameter variable">-version</span>
-<span class="token function">java</span> version <span class="token string">"1.8.0_271"</span>
-Java<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> SE Runtime Environment <span class="token punctuation">(</span>build <span class="token number">1.8</span>.0_271-b09<span class="token punctuation">)</span>
-Java HotSpot<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> <span class="token number">64</span>-Bit Server VM <span class="token punctuation">(</span>build <span class="token number">25.271</span>-b09, mixed mode<span class="token punctuation">)</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 ~]<span class="variable">$java</span> -version</span><br><span class="line">java version <span class="string">&quot;1.8.0_271&quot;</span></span><br><span class="line">Java(TM) SE Runtime Environment (build 1.8.0_271-b09)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 25.271-b09, mixed mode)</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>部署 ZooKeeper<br>官网下载地址：<a target="_blank" rel="noopener" href="https://archive.apache.org/dist/zookeeper/">https://archive.apache.org/dist/zookeeper/</a><br>注意，要下载带 bin 的包，不带 bin 的只是源码包，不包含必要的 jar 包</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1613922190627.png"></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$tar</span> zxf apache-zookeeper-3.5.9-bin.tar.gz
-<span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$mv</span> apache-zookeeper-3.5.9-bin
-<span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$mv</span> apache-zookeeper-3.5.9-bin /usr/local/zookeeper
-<span class="token punctuation">[</span>root@zk1 src<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/conf/
-<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$cp</span> zoo_sample.cfg zoo.cfg
-<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$grep</span> ^<span class="token punctuation">[</span>a-Z<span class="token punctuation">]</span> ./zoo.cfg
-<span class="token assign-left variable">tickTime</span><span class="token operator">=</span><span class="token number">2000</span>
-<span class="token assign-left variable">initLimit</span><span class="token operator">=</span><span class="token number">10</span>
-<span class="token assign-left variable">syncLimit</span><span class="token operator">=</span><span class="token number">5</span>
-<span class="token assign-left variable">dataDir</span><span class="token operator">=</span>/tmp/zookeeper
-<span class="token assign-left variable">clientPort</span><span class="token operator">=</span><span class="token number">2181</span>
-<span class="token assign-left variable">admin.serverPort</span><span class="token operator">=</span><span class="token number">8180</span>		<span class="token comment"># AdminServer监听的端口，默认8080，因为tomcat默认端口也是8080，为了避免冲突，这里修改为8180</span></code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 src]<span class="variable">$tar</span> zxf apache-zookeeper-3.5.9-bin.tar.gz</span><br><span class="line">[root@zk1 src]<span class="variable">$mv</span> apache-zookeeper-3.5.9-bin</span><br><span class="line">[root@zk1 src]<span class="variable">$mv</span> apache-zookeeper-3.5.9-bin /usr/local/zookeeper</span><br><span class="line">[root@zk1 src]<span class="variable">$cd</span> /usr/local/zookeeper/conf/</span><br><span class="line">[root@zk1 conf]<span class="variable">$cp</span> zoo_sample.cfg zoo.cfg</span><br><span class="line">[root@zk1 conf]<span class="variable">$grep</span> ^[a-Z] ./zoo.cfg</span><br><span class="line">tickTime=2000</span><br><span class="line">initLimit=10</span><br><span class="line">syncLimit=5</span><br><span class="line">dataDir=/tmp/zookeeper</span><br><span class="line">clientPort=2181</span><br><span class="line">admin.serverPort=8180		<span class="comment"># AdminServer监听的端口，默认8080，因为tomcat默认端口也是8080，为了避免冲突，这里修改为8180</span></span><br></pre></td></tr></table></figure></li>
 </ol>
-<pre class="language-none"><code class="language-none">
-   关于AdminServer：https:&#x2F;&#x2F;zookeeper.apache.org&#x2F;doc&#x2F;r3.5.0-alpha&#x2F;zookeeperAdmin.html#sc_adminserver_config
-
-   ![](&#x2F;&#x2F;img.to2b.cn&#x2F;blog&#x2F;ljk&#x2F;1614092973758.png)
-
-3. 启动 ZooKeeper
-
-   &#96;&#96;&#96;bash
-   # zkServer.sh 	用于启动、重启、停止 ZooKeeper
-   [root@zk1 bin]$pwd
-   &#x2F;usr&#x2F;local&#x2F;zookeeper&#x2F;bin
-   [root@zk1 bin]$.&#x2F;zkServer.sh start
-   ZooKeeper JMX enabled by default
-   Using config: &#x2F;usr&#x2F;local&#x2F;zookeeper&#x2F;bin&#x2F;..&#x2F;conf&#x2F;zoo.cfg
-   Starting zookeeper ... STARTED</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">   关于AdminServer：https://zookeeper.apache.org/doc/r3.5.0-alpha/zookeeperAdmin.html#sc_adminserver_config</span><br><span class="line"></span><br><span class="line">   ![](//img.to2b.cn/blog/ljk/1614092973758.png)</span><br><span class="line"></span><br><span class="line">3. 启动 ZooKeeper</span><br><span class="line"></span><br><span class="line">   ```bash</span><br><span class="line">   # zkServer.sh 	用于启动、重启、停止 ZooKeeper</span><br><span class="line">   [root@zk1 bin]$pwd</span><br><span class="line">   /usr/local/zookeeper/bin</span><br><span class="line">   [root@zk1 bin]$./zkServer.sh start</span><br><span class="line">   ZooKeeper JMX enabled by default</span><br><span class="line">   Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">   Starting zookeeper ... STARTED</span><br></pre></td></tr></table></figure>
 
 <ol start="4">
 <li><p>验证 Zookeeper 状态</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkServer.sh status
-ZooKeeper JMX enabled by default
-Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
-Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
-Mode: standalone</code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 bin]$./zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Client port found: 2181. Client address: localhost. Client SSL: <span class="literal">false</span>.</span><br><span class="line">Mode: standalone</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h2 id="ZooKeeper-集群简介"><a href="#ZooKeeper-集群简介" class="headerlink" title="ZooKeeper 集群简介"></a>ZooKeeper 集群简介</h2><p>集群架构：</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1613922779811.png"></p>
 <p>集群角色：</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1613922800778.png"></p>
 <h2 id="Zookeeper-集群部署"><a href="#Zookeeper-集群部署" class="headerlink" title="Zookeeper 集群部署"></a>Zookeeper 集群部署</h2><p>整个集群中只要有超过集群数量一半的 zookeeper 工作只正常的，那么整个集群对外就是可用的</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">zk1.ljk.cn:10.0.1.101
-zk2.ljk.cn:10.0.1.102
-zk3.ljk.cn:10.0.1.103</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zk1.ljk.cn:10.0.1.101</span><br><span class="line">zk2.ljk.cn:10.0.1.102</span><br><span class="line">zk3.ljk.cn:10.0.1.103</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li><p>各个节点安装 zookeeper，参考上面单机部署，但是先不要启动</p>
 </li>
 <li><p>各个节点创建数据目录</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/
-<span class="token punctuation">[</span>root@zk1 zookeeper<span class="token punctuation">]</span><span class="token variable">$mkdir</span> data
-
-<span class="token punctuation">[</span>root@zk2 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/
-<span class="token punctuation">[</span>root@zk2 zookeeper<span class="token punctuation">]</span><span class="token variable">$mkdir</span> data
-
-<span class="token punctuation">[</span>root@zk3 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /usr/local/zookeeper/
-<span class="token punctuation">[</span>root@zk3 zookeeper<span class="token punctuation">]</span><span class="token variable">$mkdir</span> data</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 ~]<span class="variable">$cd</span> /usr/local/zookeeper/</span><br><span class="line">[root@zk1 zookeeper]<span class="variable">$mkdir</span> data</span><br><span class="line"></span><br><span class="line">[root@zk2 ~]<span class="variable">$cd</span> /usr/local/zookeeper/</span><br><span class="line">[root@zk2 zookeeper]<span class="variable">$mkdir</span> data</span><br><span class="line"></span><br><span class="line">[root@zk3 ~]<span class="variable">$cd</span> /usr/local/zookeeper/</span><br><span class="line">[root@zk3 zookeeper]<span class="variable">$mkdir</span> data</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>各个节点配置文件</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$grep</span> ^<span class="token punctuation">[</span>a-Z<span class="token punctuation">]</span> ./zoo.cfg
-<span class="token assign-left variable">tickTime</span><span class="token operator">=</span><span class="token number">2000</span>                     <span class="token comment"># 心跳检测周期，单位为毫秒</span>
-<span class="token assign-left variable">initLimit</span><span class="token operator">=</span><span class="token number">10</span>                      <span class="token comment"># leader与follower初始连接心跳次数，即多少个2000毫秒</span>
-<span class="token assign-left variable">syncLimit</span><span class="token operator">=</span><span class="token number">5</span>                       <span class="token comment"># leader与follower连接完成之后，后期检测发送和应答的心跳次数，即该follower在5*2000毫秒内不能与leader进行通信，那么此follower将被视为不可用</span>
-<span class="token assign-left variable">dataDir</span><span class="token operator">=</span>/usr/local/zookeeper/data <span class="token comment"># 自定义的zookeeper保存数据的目录</span>
-<span class="token assign-left variable">clientPort</span><span class="token operator">=</span><span class="token number">2181</span>                   <span class="token comment"># 客户端连接Zookeeper服务器的端口，Zookeeper会监听这个端口，接受客户端的访问请求</span>
-<span class="token assign-left variable">maxClientCnxns</span><span class="token operator">=</span><span class="token number">128</span>                <span class="token comment"># 单个客户端IP可以和zookeeper保持的连接数</span>
-<span class="token assign-left variable">autopurge.snapRetainCount</span><span class="token operator">=</span><span class="token number">3</span>       <span class="token comment"># 保存快照的数量，启用后ZooKeeper只保存最新的几个快照，其余的会自动清除，最新快照和相应的事务日志分别保留在dataDir和dataLogDir中，默认值为 3。最小值为 3</span>
-<span class="token assign-left variable">autopurge.purgeInterval</span><span class="token operator">=</span><span class="token number">1</span>         <span class="token comment"># 自动清理日志和快照文件的频率，单位小时，默认0，不开启自动清理</span>
-<span class="token assign-left variable">server.1</span><span class="token operator">=</span><span class="token number">10.0</span>.1.101:2888:3888     <span class="token comment"># server.服务器编号=服务器IP:LF数据同步端口:LF选举端口</span>
-<span class="token assign-left variable">server.2</span><span class="token operator">=</span><span class="token number">10.0</span>.1.102:2888:3888     <span class="token comment"># hostname也可以，只要dns能解析到就行</span>
-<span class="token assign-left variable">server.3</span><span class="token operator">=</span><span class="token number">10.0</span>.1.103:2888:3888
-
-<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$scp</span> ./zoo.cfg <span class="token number">10.0</span>.1.102:/usr/local/zookeeper/conf
-<span class="token punctuation">[</span>root@zk1 conf<span class="token punctuation">]</span><span class="token variable">$scp</span> ./zoo.cfg <span class="token number">10.0</span>.1.103:/usr/local/zookeeper/conf</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 conf]<span class="variable">$grep</span> ^[a-Z] ./zoo.cfg</span><br><span class="line">tickTime=2000                     <span class="comment"># 心跳检测周期，单位为毫秒</span></span><br><span class="line">initLimit=10                      <span class="comment"># leader与follower初始连接心跳次数，即多少个2000毫秒</span></span><br><span class="line">syncLimit=5                       <span class="comment"># leader与follower连接完成之后，后期检测发送和应答的心跳次数，即该follower在5*2000毫秒内不能与leader进行通信，那么此follower将被视为不可用</span></span><br><span class="line">dataDir=/usr/local/zookeeper/data <span class="comment"># 自定义的zookeeper保存数据的目录</span></span><br><span class="line">clientPort=2181                   <span class="comment"># 客户端连接Zookeeper服务器的端口，Zookeeper会监听这个端口，接受客户端的访问请求</span></span><br><span class="line">maxClientCnxns=128                <span class="comment"># 单个客户端IP可以和zookeeper保持的连接数</span></span><br><span class="line">autopurge.snapRetainCount=3       <span class="comment"># 保存快照的数量，启用后ZooKeeper只保存最新的几个快照，其余的会自动清除，最新快照和相应的事务日志分别保留在dataDir和dataLogDir中，默认值为 3。最小值为 3</span></span><br><span class="line">autopurge.purgeInterval=1         <span class="comment"># 自动清理日志和快照文件的频率，单位小时，默认0，不开启自动清理</span></span><br><span class="line">server.1=10.0.1.101:2888:3888     <span class="comment"># server.服务器编号=服务器IP:LF数据同步端口:LF选举端口</span></span><br><span class="line">server.2=10.0.1.102:2888:3888     <span class="comment"># hostname也可以，只要dns能解析到就行</span></span><br><span class="line">server.3=10.0.1.103:2888:3888</span><br><span class="line"></span><br><span class="line">[root@zk1 conf]<span class="variable">$scp</span> ./zoo.cfg 10.0.1.102:/usr/local/zookeeper/conf</span><br><span class="line">[root@zk1 conf]<span class="variable">$scp</span> ./zoo.cfg 10.0.1.103:/usr/local/zookeeper/conf</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>集群 id</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token number">1</span> <span class="token operator">></span> myid
-
-<span class="token punctuation">[</span>root@zk2 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token number">2</span> <span class="token operator">></span> myid
-
-<span class="token punctuation">[</span>root@zk3 data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token number">3</span> <span class="token operator">></span> myid</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 data]<span class="variable">$echo</span> 1 &gt; myid</span><br><span class="line"></span><br><span class="line">[root@zk2 data]<span class="variable">$echo</span> 2 &gt; myid</span><br><span class="line"></span><br><span class="line">[root@zk3 data]<span class="variable">$echo</span> 3 &gt; myid</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>启动 zookeeper</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkServer.sh start
-
-<span class="token punctuation">[</span>root@zk2 bin<span class="token punctuation">]</span>$./zkServer.sh start
-
-<span class="token punctuation">[</span>root@zk3 bin<span class="token punctuation">]</span>$./zkServer.sh start</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 bin]$./zkServer.sh start</span><br><span class="line"></span><br><span class="line">[root@zk2 bin]$./zkServer.sh start</span><br><span class="line"></span><br><span class="line">[root@zk3 bin]$./zkServer.sh start</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>验证 Zookeeper 状态</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkServer.sh status
-ZooKeeper JMX enabled by default
-Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
-Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
-Mode: follower		<span class="token comment"># follower</span>
-
-<span class="token punctuation">[</span>root@zk2 bin<span class="token punctuation">]</span>$./zkServer.sh status
-ZooKeeper JMX enabled by default
-Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
-Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
-Mode: follower		<span class="token comment"># follower</span>
-
-<span class="token punctuation">[</span>root@zk3 bin<span class="token punctuation">]</span>$./zkServer.sh status
-ZooKeeper JMX enabled by default
-Using config: /usr/local/zookeeper/bin/<span class="token punctuation">..</span>/conf/zoo.cfg
-Client port found: <span class="token number">2181</span>. Client address: localhost. Client SSL: false.
-Mode: leader		<span class="token comment"># leader</span></code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 bin]$./zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Client port found: 2181. Client address: localhost. Client SSL: <span class="literal">false</span>.</span><br><span class="line">Mode: follower		<span class="comment"># follower</span></span><br><span class="line"></span><br><span class="line">[root@zk2 bin]$./zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Client port found: 2181. Client address: localhost. Client SSL: <span class="literal">false</span>.</span><br><span class="line">Mode: follower		<span class="comment"># follower</span></span><br><span class="line"></span><br><span class="line">[root@zk3 bin]$./zkServer.sh status</span><br><span class="line">ZooKeeper JMX enabled by default</span><br><span class="line">Using config: /usr/local/zookeeper/bin/../conf/zoo.cfg</span><br><span class="line">Client port found: 2181. Client address: localhost. Client SSL: <span class="literal">false</span>.</span><br><span class="line">Mode: leader		<span class="comment"># leader</span></span><br></pre></td></tr></table></figure></li>
 </ol>
 <h3 id="zookeeper-集群选举过程"><a href="#zookeeper-集群选举过程" class="headerlink" title="zookeeper 集群选举过程"></a>zookeeper 集群选举过程</h3><p>节点角色状态：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">LOOKING   <span class="token comment"># 寻找 Leader 状态，处于该状态需要进入选举流程</span>
-LEADING   <span class="token comment"># 领导者状态，处于该状态的节点说明是角色已经是 Leader</span>
-FOLLOWING <span class="token comment"># 跟随者状态，表示 Leader 已经选举出来，当前节点角色是 follower</span>
-OBSERVER  <span class="token comment"># 观察者状态，表明当前节点角色是 observer</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LOOKING   <span class="comment"># 寻找 Leader 状态，处于该状态需要进入选举流程</span></span><br><span class="line">LEADING   <span class="comment"># 领导者状态，处于该状态的节点说明是角色已经是 Leader</span></span><br><span class="line">FOLLOWING <span class="comment"># 跟随者状态，表示 Leader 已经选举出来，当前节点角色是 follower</span></span><br><span class="line">OBSERVER  <span class="comment"># 观察者状态，表明当前节点角色是 observer</span></span><br></pre></td></tr></table></figure>
 
 <p>选举 ID：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">ZXID	<span class="token comment"># zookeeper transaction id，每个改变Zookeeper状态的操作都会形成一个对应的zxid</span>
-myid	<span class="token comment"># 服务器的唯一标识(SID)，通过配置myid文件指定，集群中唯一</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZXID	<span class="comment"># zookeeper transaction id，每个改变Zookeeper状态的操作都会形成一个对应的zxid</span></span><br><span class="line">myid	<span class="comment"># 服务器的唯一标识(SID)，通过配置myid文件指定，集群中唯一</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="zookeeper-数据增删改查"><a href="#zookeeper-数据增删改查" class="headerlink" title="zookeeper 数据增删改查"></a>zookeeper 数据增删改查</h2><p>任意一台 zookeeper 节点进行以下操作：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@zk1 bin<span class="token punctuation">]</span>$./zkCli.sh <span class="token parameter variable">-server</span> <span class="token number">10.0</span>.1.102:2181
-<span class="token punctuation">..</span>.
-Welcome to ZooKeeper<span class="token operator">!</span>
-JLine support is enabled
-<span class="token punctuation">[</span>zk: <span class="token number">10.0</span>.1.102:2181<span class="token punctuation">(</span>CONNECTING<span class="token punctuation">)</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token builtin class-name">help</span>
-ZooKeeper <span class="token parameter variable">-server</span> host:port cmd args
-        addauth scheme auth
-        close
-        config <span class="token punctuation">[</span>-c<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> <span class="token punctuation">[</span>-s<span class="token punctuation">]</span>
-        connect host:port
-        create <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-e<span class="token punctuation">]</span> <span class="token punctuation">[</span>-c<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t ttl<span class="token punctuation">]</span> path <span class="token punctuation">[</span>data<span class="token punctuation">]</span> <span class="token punctuation">[</span>acl<span class="token punctuation">]</span>
-        delete <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> path
-        deleteall path
-        delquota <span class="token punctuation">[</span>-n<span class="token operator">|</span>-b<span class="token punctuation">]</span> path
-        get <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> path
-        getAcl <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> path
-        <span class="token function">history</span>
-        listquota path
-        <span class="token function">ls</span> <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> <span class="token punctuation">[</span>-R<span class="token punctuation">]</span> path
-        ls2 path <span class="token punctuation">[</span>watch<span class="token punctuation">]</span>
-        printwatches on<span class="token operator">|</span>off
-        quit
-        reconfig <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">[</span>-file path<span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token punctuation">[</span>-members <span class="token assign-left variable">serverID</span><span class="token operator">=</span>host:port1:port2<span class="token punctuation">;</span>port3<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span>*<span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token punctuation">[</span>-add <span class="token assign-left variable">serverId</span><span class="token operator">=</span>host:port1:port2<span class="token punctuation">;</span>port3<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span class="token punctuation">]</span>* <span class="token punctuation">[</span>-remove serverId<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span>*<span class="token punctuation">]</span>
-        redo cmdno
-        removewatches path <span class="token punctuation">[</span>-c<span class="token operator">|</span>-d<span class="token operator">|</span>-a<span class="token punctuation">]</span> <span class="token punctuation">[</span>-l<span class="token punctuation">]</span>
-        rmr path
-        <span class="token builtin class-name">set</span> <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> path data
-        setAcl <span class="token punctuation">[</span>-s<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v version<span class="token punctuation">]</span> <span class="token punctuation">[</span>-R<span class="token punctuation">]</span> path acl
-        setquota -n<span class="token operator">|</span>-b val path
-        <span class="token function">stat</span> <span class="token punctuation">[</span>-w<span class="token punctuation">]</span> path
-        <span class="token function">sync</span> path</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">[root@zk1 bin]$./zkCli.sh -server 10.0.1.102:2181</span><br><span class="line">...</span><br><span class="line">Welcome to ZooKeeper!</span><br><span class="line">JLine support is enabled</span><br><span class="line">[zk: 10.0.1.102:2181(CONNECTING) 0] <span class="built_in">help</span></span><br><span class="line">ZooKeeper -server host:port cmd args</span><br><span class="line">        addauth scheme auth</span><br><span class="line">        close</span><br><span class="line">        config [-c] [-w] [-s]</span><br><span class="line">        connect host:port</span><br><span class="line">        create [-s] [-e] [-c] [-t ttl] path [data] [acl]</span><br><span class="line">        delete [-v version] path</span><br><span class="line">        deleteall path</span><br><span class="line">        delquota [-n|-b] path</span><br><span class="line">        get [-s] [-w] path</span><br><span class="line">        getAcl [-s] path</span><br><span class="line">        <span class="built_in">history</span></span><br><span class="line">        listquota path</span><br><span class="line">        <span class="built_in">ls</span> [-s] [-w] [-R] path</span><br><span class="line">        ls2 path [watch]</span><br><span class="line">        printwatches on|off</span><br><span class="line">        quit</span><br><span class="line">        reconfig [-s] [-v version] [[-file path] | [-members serverID=host:port1:port2;port3[,...]*]] | [-add serverId=host:port1:port2;port3[,...]]* [-remove serverId[,...]*]</span><br><span class="line">        redo cmdno</span><br><span class="line">        removewatches path [-c|-d|-a] [-l]</span><br><span class="line">        rmr path</span><br><span class="line">        <span class="built_in">set</span> [-s] [-v version] path data</span><br><span class="line">        setAcl [-s] [-v version] [-R] path acl</span><br><span class="line">        setquota -n|-b val path</span><br><span class="line">        <span class="built_in">stat</span> [-w] path</span><br><span class="line">        <span class="built_in">sync</span> path</span><br></pre></td></tr></table></figure>
 
 <h2 id="zookeeper-客户端-ZooInspector"><a href="#zookeeper-客户端-ZooInspector" class="headerlink" title="zookeeper 客户端 ZooInspector"></a>zookeeper 客户端 ZooInspector</h2><p>Linux：<a target="_blank" rel="noopener" href="https://github.com/zzhang5/zooinspector">https://github.com/zzhang5/zooinspector</a><br>Windows：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/weiyiming007/p/11951591.html">https://www.cnblogs.com/weiyiming007/p/11951591.html</a></p>
 <ol>

@@ -18,12 +18,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="实验目的：搭建 DNS 转发（缓存）服务器 环境要求：需要四台主机 DNS只缓存服务器：10.0.0.79 DNS主服务器:10.0.0.175 web服务器：10.0.0.8 DNS客户端：10.0.0.67  逻辑：客户端 nameserver 设置为 DNS 缓存服务器的 ip，NDS 缓存服务器负责将 NDS 请求转发至 DNS 主服务器，并将返回结果缓存 实现步骤1. 实现转发（只缓存）">
+    <meta name="description" content="实验目的：搭建 DNS 转发（缓存）服务器 环境要求：需要四台主机 1234DNS只缓存服务器：10.0.0.79DNS主服务器:10.0.0.175web服务器：10.0.0.8DNS客户端：10.0.0.67  逻辑：客户端 nameserver 设置为 DNS 缓存服务器的 ip，NDS 缓存服务器负责将 NDS 请求转发至 DNS 主服务器，并将返回结果缓存 实现步骤1. 实现转发（只缓存">
 <meta property="og:type" content="article">
 <meta property="og:title" content="实验4：DNS forward（缓存）服务器">
 <meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/DNS/%E5%AE%9E%E9%AA%8C4%EF%BC%9ADNS%20forward%EF%BC%88%E7%BC%93%E5%AD%98%EF%BC%89%E6%9C%8D%E5%8A%A1%E5%99%A8/index.html">
 <meta property="og:site_name" content="LJKのBlog">
-<meta property="og:description" content="实验目的：搭建 DNS 转发（缓存）服务器 环境要求：需要四台主机 DNS只缓存服务器：10.0.0.79 DNS主服务器:10.0.0.175 web服务器：10.0.0.8 DNS客户端：10.0.0.67  逻辑：客户端 nameserver 设置为 DNS 缓存服务器的 ip，NDS 缓存服务器负责将 NDS 请求转发至 DNS 主服务器，并将返回结果缓存 实现步骤1. 实现转发（只缓存）">
+<meta property="og:description" content="实验目的：搭建 DNS 转发（缓存）服务器 环境要求：需要四台主机 1234DNS只缓存服务器：10.0.0.79DNS主服务器:10.0.0.175web服务器：10.0.0.8DNS客户端：10.0.0.67  逻辑：客户端 nameserver 设置为 DNS 缓存服务器的 ip，NDS 缓存服务器负责将 NDS 请求转发至 DNS 主服务器，并将返回结果缓存 实现步骤1. 实现转发（只缓存">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-02-04T07:25:53.000Z">
 <meta property="article:modified_time" content="2023-05-29T08:58:05.486Z">
@@ -260,64 +260,14 @@
     
     <div class="post-body" itemprop="articleBody"><p>实验目的：搭建 DNS 转发（缓存）服务器</p>
 <p>环境要求：需要四台主机</p>
-<pre class="language-none"><code class="language-none">DNS只缓存服务器：10.0.0.79
-DNS主服务器:10.0.0.175
-web服务器：10.0.0.8
-DNS客户端：10.0.0.67</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DNS只缓存服务器：10.0.0.79</span><br><span class="line">DNS主服务器:10.0.0.175</span><br><span class="line">web服务器：10.0.0.8</span><br><span class="line">DNS客户端：10.0.0.67</span><br></pre></td></tr></table></figure>
 
 <p>逻辑：客户端 nameserver 设置为 DNS 缓存服务器的 ip，NDS 缓存服务器负责将 NDS 请求转发至 DNS 主服务器，并将返回结果缓存</p>
-<h2 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h2><h3 id="1-实现转发（只缓存）DNS-服务器"><a href="#1-实现转发（只缓存）DNS-服务器" class="headerlink" title="1. 实现转发（只缓存）DNS 服务器"></a>1. 实现转发（只缓存）DNS 服务器</h3><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> <span class="token builtin class-name">bind</span> <span class="token parameter variable">-y</span>
+<h2 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h2><h3 id="1-实现转发（只缓存）DNS-服务器"><a href="#1-实现转发（只缓存）DNS-服务器" class="headerlink" title="1. 实现转发（只缓存）DNS 服务器"></a>1. 实现转发（只缓存）DNS 服务器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">yum install <span class="built_in">bind</span> -y</span><br><span class="line"></span><br><span class="line">vim /etc/named.conf</span><br><span class="line"><span class="comment">#注释掉两行</span></span><br><span class="line">// listen-on port 53 &#123; 127.0.0.1; &#125;;</span><br><span class="line">// allow-query &#123; localhost; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 全局转发</span></span><br><span class="line">forward first;</span><br><span class="line">forwarders &#123; 10.0.0.175;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">#关闭dnsec功能</span></span><br><span class="line">dnssec-enable no;</span><br><span class="line">dnssec-validation no;</span><br><span class="line"></span><br><span class="line">systemctl start named <span class="comment">#第一次启动服务</span></span><br><span class="line">rndc reload <span class="comment">#不是第一次启动服务</span></span><br></pre></td></tr></table></figure>
 
-<span class="token function">vim</span> /etc/named.conf
-<span class="token comment">#注释掉两行</span>
-// listen-on port <span class="token number">53</span> <span class="token punctuation">&#123;</span> <span class="token number">127.0</span>.0.1<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-// allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<h3 id="2-实现主-DNS-服务器"><a href="#2-实现主-DNS-服务器" class="headerlink" title="2. 实现主 DNS 服务器"></a>2. 实现主 DNS 服务器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">yum install <span class="built_in">bind</span> -y</span><br><span class="line">vim /etc/named.conf</span><br><span class="line"><span class="comment"># 注释掉两行</span></span><br><span class="line">// listen-on port 53 &#123; 127.0.0.1; &#125;;</span><br><span class="line">// allow-query &#123; localhost; &#125;;</span><br><span class="line"></span><br><span class="line">vim /etc/named.rfc1912.zones</span><br><span class="line"><span class="comment"># 设置域</span></span><br><span class="line">zone <span class="string">&quot;magedu.local&quot;</span> &#123;</span><br><span class="line">    <span class="built_in">type</span> master;</span><br><span class="line">    file <span class="string">&quot;magedu.local.zone&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">vim /var/named/magedu.local.zone</span><br><span class="line"><span class="variable">$TTL</span> 1D</span><br><span class="line">@       IN      SOA     master  admin.magedu.org. (</span><br><span class="line">                                                        0 ; serial</span><br><span class="line">                                                        1D ; refresh</span><br><span class="line">                                                        1H ; retry</span><br><span class="line">                                                        1W ; expire</span><br><span class="line">                                                        3H ) ; minimum</span><br><span class="line">                NS      master</span><br><span class="line">master          A       10.0.0.175</span><br><span class="line">www             A       10.0.0.8</span><br></pre></td></tr></table></figure>
 
-<span class="token comment"># 全局转发</span>
-forward first<span class="token punctuation">;</span>
-forwarders <span class="token punctuation">&#123;</span> <span class="token number">10.0</span>.0.175<span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-
-<span class="token comment">#关闭dnsec功能</span>
-dnssec-enable no<span class="token punctuation">;</span>
-dnssec-validation no<span class="token punctuation">;</span>
-
-systemctl start named <span class="token comment">#第一次启动服务</span>
-rndc reload <span class="token comment">#不是第一次启动服务</span></code></pre>
-
-<h3 id="2-实现主-DNS-服务器"><a href="#2-实现主-DNS-服务器" class="headerlink" title="2. 实现主 DNS 服务器"></a>2. 实现主 DNS 服务器</h3><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> <span class="token builtin class-name">bind</span> <span class="token parameter variable">-y</span>
-<span class="token function">vim</span> /etc/named.conf
-<span class="token comment"># 注释掉两行</span>
-// listen-on port <span class="token number">53</span> <span class="token punctuation">&#123;</span> <span class="token number">127.0</span>.0.1<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-// allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-
-<span class="token function">vim</span> /etc/named.rfc1912.zones
-<span class="token comment"># 设置域</span>
-zone <span class="token string">"magedu.local"</span> <span class="token punctuation">&#123;</span>
-    <span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
-    <span class="token function">file</span> <span class="token string">"magedu.local.zone"</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-
-<span class="token function">vim</span> /var/named/magedu.local.zone
-<span class="token variable">$TTL</span> 1D
-@       IN      SOA     master  admin.magedu.org. <span class="token punctuation">(</span>
-                                                        <span class="token number">0</span> <span class="token punctuation">;</span> serial
-                                                        1D <span class="token punctuation">;</span> refresh
-                                                        1H <span class="token punctuation">;</span> retry
-                                                        1W <span class="token punctuation">;</span> expire
-                                                        3H <span class="token punctuation">)</span> <span class="token punctuation">;</span> minimum
-                NS      master
-master          A       <span class="token number">10.0</span>.0.175
-www             A       <span class="token number">10.0</span>.0.8</code></pre>
-
-<h3 id="3-web-服务器配置（参看前面案例，略）"><a href="#3-web-服务器配置（参看前面案例，略）" class="headerlink" title="3. web 服务器配置（参看前面案例，略）"></a>3. web 服务器配置（参看前面案例，略）</h3><h3 id="4-在客户端测试"><a href="#4-在客户端测试" class="headerlink" title="4. 在客户端测试"></a>4. 在客户端测试</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 修改dns服务器</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$cat</span> /etc/resolv.conf
-<span class="token comment"># Generated by NetworkManager</span>
-search magedu.org
-nameserver <span class="token number">10.0</span>.0.79
-
-<span class="token comment"># 测试</span>
-<span class="token function">dig</span> www.magedu.local
-<span class="token function">curl</span> www.magedu.local</code></pre>
+<h3 id="3-web-服务器配置（参看前面案例，略）"><a href="#3-web-服务器配置（参看前面案例，略）" class="headerlink" title="3. web 服务器配置（参看前面案例，略）"></a>3. web 服务器配置（参看前面案例，略）</h3><h3 id="4-在客户端测试"><a href="#4-在客户端测试" class="headerlink" title="4. 在客户端测试"></a>4. 在客户端测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改dns服务器</span></span><br><span class="line">[root@centos7 ~]<span class="variable">$cat</span> /etc/resolv.conf</span><br><span class="line"><span class="comment"># Generated by NetworkManager</span></span><br><span class="line">search magedu.org</span><br><span class="line">nameserver 10.0.0.79</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试</span></span><br><span class="line">dig www.magedu.local</span><br><span class="line">curl www.magedu.local</span><br></pre></td></tr></table></figure>
 
     </div>
 

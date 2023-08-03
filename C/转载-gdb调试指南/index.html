@@ -268,314 +268,169 @@
 <h2 id="哪类程序可被调试"><a href="#哪类程序可被调试" class="headerlink" title="哪类程序可被调试"></a>哪类程序可被调试</h2><p>对于 C 程序来说，需要在编译时加上-g 参数，保留调试信息，否则不能使用 GDB 进行调试。</p>
 <p>但如果不是自己编译的程序，并不知道是否带有-g 参数，如何判断一个文件是否带有调试信息呢？</p>
 <h4 id="gdb-文件"><a href="#gdb-文件" class="headerlink" title="gdb 文件"></a>gdb 文件</h4><p>例如：</p>
-<pre class="language-none"><code class="language-none">$ gdb helloworld
-Reading symbols from helloWorld...(no debugging symbols found)...done.</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gdb helloworld</span><br><span class="line">Reading symbols from helloWorld...(no debugging symbols found)...done.</span><br></pre></td></tr></table></figure>
 
 <p>如果没有调试信息，会提示 no debugging symbols found。<br>如果是下面的提示：</p>
-<pre class="language-none"><code class="language-none">Reading symbols from helloWorld...done.</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Reading symbols from helloWorld...done.</span><br></pre></td></tr></table></figure>
 
 <p>则可以进行调试。</p>
 <h4 id="readelf-查看段信息"><a href="#readelf-查看段信息" class="headerlink" title="readelf 查看段信息"></a>readelf 查看段信息</h4><p>例如：</p>
-<pre class="language-none"><code class="language-none">$ readelf -S helloWorld|grep debug
-  [28] .debug_aranges    PROGBITS         0000000000000000  0000106d
-  [29] .debug_info       PROGBITS         0000000000000000  0000109d
-  [30] .debug_abbrev     PROGBITS         0000000000000000  0000115b
-  [31] .debug_line       PROGBITS         0000000000000000  000011b9
-  [32] .debug_str        PROGBITS         0000000000000000  000011fc</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ readelf -S helloWorld|grep debug</span><br><span class="line">  [28] .debug_aranges    PROGBITS         0000000000000000  0000106d</span><br><span class="line">  [29] .debug_info       PROGBITS         0000000000000000  0000109d</span><br><span class="line">  [30] .debug_abbrev     PROGBITS         0000000000000000  0000115b</span><br><span class="line">  [31] .debug_line       PROGBITS         0000000000000000  000011b9</span><br><span class="line">  [32] .debug_str        PROGBITS         0000000000000000  000011fc</span><br></pre></td></tr></table></figure>
 
 <p>helloWorld 为文件名，如果没有任何 debug 信息，则不能被调试。</p>
 <h4 id="file-查看-strip-状况"><a href="#file-查看-strip-状况" class="headerlink" title="file 查看 strip 状况"></a>file 查看 strip 状况</h4><p>下面的情况也是不可调试的：</p>
-<pre class="language-none"><code class="language-none">file helloWorld
-helloWorld: (省略前面内容) stripped</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">file helloWorld</span><br><span class="line">helloWorld: (省略前面内容) stripped</span><br></pre></td></tr></table></figure>
 
 <p>如果最后是 stripped，则说明该文件的符号表信息和调试信息已被去除，不能使用 gdb 调试。但是 not stripped 的情况并不能说明能够被调试。</p>
 <h2 id="调试方式运行程序"><a href="#调试方式运行程序" class="headerlink" title="调试方式运行程序"></a>调试方式运行程序</h2><p>程序还未启动时，可有多种方式启动调试。</p>
 <h4 id="调试启动无参程序"><a href="#调试启动无参程序" class="headerlink" title="调试启动无参程序"></a>调试启动无参程序</h4><p>例如：</p>
-<pre class="language-none"><code class="language-none">$ gdb helloWorld
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gdb helloWorld</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>输入 run 命令，即可运行程序</p>
 <h4 id="调试启动带参程序"><a href="#调试启动带参程序" class="headerlink" title="调试启动带参程序"></a>调试启动带参程序</h4><p>假设有以下程序，启动时需要带参数：</p>
-<pre class="language-none"><code class="language-none">#include&lt;stdio.h&gt;
-int main(int argc,char *argv[])
-&#123;
-    if(1 &gt;&#x3D; argc)
-    &#123;
-        printf(&quot;usage:hello name\n&quot;);
-        return 0;
-    &#125;
-    printf(&quot;Hello World %s!\n&quot;,argv[1]);
-    return 0 ;
-&#125;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">int main(int argc,char *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    if(1 &gt;= argc)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;usage:hello name\n&quot;);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    printf(&quot;Hello World %s!\n&quot;,argv[1]);</span><br><span class="line">    return 0 ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>编译：</p>
-<pre class="language-none"><code class="language-none">gcc -g -o hello hello.c</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -g -o hello hello.c</span><br></pre></td></tr></table></figure>
 
 <p>这种情况如何启动调试呢？需要设置参数：</p>
-<pre class="language-none"><code class="language-none">$ gdb hello
-(gdb)run 编程珠玑
-Starting program: &#x2F;home&#x2F;shouwang&#x2F;workspaces&#x2F;c&#x2F;hello 编程珠玑
-Hello World 编程珠玑!
-[Inferior 1 (process 20084) exited normally]
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ gdb hello</span><br><span class="line">(gdb)run 编程珠玑</span><br><span class="line">Starting program: /home/shouwang/workspaces/c/hello 编程珠玑</span><br><span class="line">Hello World 编程珠玑!</span><br><span class="line">[Inferior 1 (process 20084) exited normally]</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>只需要 run 的时候带上参数即可。<br>或者使用 set args，然后在用 run 启动：</p>
-<pre class="language-none"><code class="language-none">gdb hello
-(gdb) set args 编程珠玑
-(gdb) run
-Starting program: &#x2F;home&#x2F;hyb&#x2F;workspaces&#x2F;c&#x2F;hello 编程珠玑
-Hello World 编程珠玑!
-[Inferior 1 (process 20201) exited normally]
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gdb hello</span><br><span class="line">(gdb) set args 编程珠玑</span><br><span class="line">(gdb) run</span><br><span class="line">Starting program: /home/hyb/workspaces/c/hello 编程珠玑</span><br><span class="line">Hello World 编程珠玑!</span><br><span class="line">[Inferior 1 (process 20201) exited normally]</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <h4 id="调试-core-文件"><a href="#调试-core-文件" class="headerlink" title="调试 core 文件"></a>调试 core 文件</h4><p>当程序 core dump 时，可能会产生 core 文件，它能够很大程序帮助我们定位问题。但前提是系统没有限制 core 文件的产生。可以使用命令 limit -c 查看：</p>
-<pre class="language-none"><code class="language-none">$ ulimit -c
-0</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ulimit -c</span><br><span class="line">0</span><br></pre></td></tr></table></figure>
 
 <p>如果结果是 0，那么恭喜你，即便程序 core dump 了也不会有 core 文件留下。我们需要让 core 文件能够产生：</p>
-<pre class="language-none"><code class="language-none">ulimit -c unlimied  #表示不限制core文件大小
-ulimit -c 10        #设置最大大小，单位为块，一块默认为512字节</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ulimit -c unlimied  #表示不限制core文件大小</span><br><span class="line">ulimit -c 10        #设置最大大小，单位为块，一块默认为512字节</span><br></pre></td></tr></table></figure>
 
 <p>上面两种方式可选其一。第一种无限制，第二种指定最大产生的大小。<br>调试 core 文件也很简单：</p>
-<pre class="language-none"><code class="language-none">gdb 程序文件名 core文件名</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb 程序文件名 core文件名</span><br></pre></td></tr></table></figure>
 
 <p>具体可参看《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2018/09/26/61877.html">linux 常用命令-开发调试篇</a>》gdb 部分。</p>
 <h2 id="调试已运行程序"><a href="#调试已运行程序" class="headerlink" title="调试已运行程序"></a>调试已运行程序</h2><p>如果程序已经运行了怎么办呢？<br>首先使用 ps 命令找到进程 id：</p>
-<pre class="language-none"><code class="language-none">ps -ef|grep 进程名</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef|grep 进程名</span><br></pre></td></tr></table></figure>
 
 <h4 id="attach-方式"><a href="#attach-方式" class="headerlink" title="attach 方式"></a>attach 方式</h4><p>假设获取到进程 id 为 20829，则可用下面的方式调试进程：</p>
-<pre class="language-none"><code class="language-none">$ gdb
-(gdb) attach 20829</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gdb</span><br><span class="line">(gdb) attach 20829</span><br></pre></td></tr></table></figure>
 
 <p>接下来就可以继续你的调试啦。</p>
 <p>可能会有下面的错误提示：</p>
-<pre class="language-none"><code class="language-none">Could not attach to process.  If your uid matches the uid of the target
-process, check the setting of &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;yama&#x2F;ptrace_scope, or try
-again as the root user.  For more details, see &#x2F;etc&#x2F;sysctl.d&#x2F;10-ptrace.conf
-ptrace: Operation not permitted.</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Could not attach to process.  If your uid matches the uid of the target</span><br><span class="line">process, check the setting of /proc/sys/kernel/yama/ptrace_scope, or try</span><br><span class="line">again as the root user.  For more details, see /etc/sysctl.d/10-ptrace.conf</span><br><span class="line">ptrace: Operation not permitted.</span><br></pre></td></tr></table></figure>
 
 <p>解决方法，切换到 root 用户：<br>将&#x2F;etc&#x2F;sysctl.d&#x2F;10-ptrace.conf 中的</p>
-<pre class="language-none"><code class="language-none">kernel.yama.ptrace_scope &#x3D; 1</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel.yama.ptrace_scope = 1</span><br></pre></td></tr></table></figure>
 
 <p>修改为</p>
-<pre class="language-none"><code class="language-none">kernel.yama.ptrace_scope &#x3D; 0</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel.yama.ptrace_scope = 0</span><br></pre></td></tr></table></figure>
 
 <h4 id="直接调试相关-id-进程"><a href="#直接调试相关-id-进程" class="headerlink" title="直接调试相关 id 进程"></a>直接调试相关 id 进程</h4><p>还可以是用这样的方式 gdb program pid，例如:</p>
-<pre class="language-none"><code class="language-none">gdb hello 20829</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb hello 20829</span><br></pre></td></tr></table></figure>
 
 <p>或者：</p>
-<pre class="language-none"><code class="language-none">gdb hello --pid 20829</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb hello --pid 20829</span><br></pre></td></tr></table></figure>
 
 <h4 id="已运行程序没有调试信息"><a href="#已运行程序没有调试信息" class="headerlink" title="已运行程序没有调试信息"></a>已运行程序没有调试信息</h4><p>为了节省磁盘空间，已经运行的程序通常没有调试信息。但如果又不能停止当前程序重新启动调试，那怎么办呢？还有办法，那就是同样的代码，再编译出一个带调试信息的版本。然后使用和前面提到的方式操作。对于 attach 方式，在 attach 之前，使用 file 命令即可：</p>
-<pre class="language-none"><code class="language-none">$ gdb
-(gdb) file hello
-Reading symbols from hello...done.
-(gdb)attach 20829</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ gdb</span><br><span class="line">(gdb) file hello</span><br><span class="line">Reading symbols from hello...done.</span><br><span class="line">(gdb)attach 20829</span><br></pre></td></tr></table></figure>
 
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文主要介绍了两种类型的 GDB 启动调试方式，分别是调试未运行的程序和已经运行的程序。对于什么样的程序能够进行调试也进行了简单说明。</p>
 <h1 id="断点设置"><a href="#断点设置" class="headerlink" title="断点设置"></a>断点设置</h1><h2 id="前言-1"><a href="#前言-1" class="headerlink" title="前言"></a>前言</h2><p>上篇《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2019/01/08/62137.html">GDB 调试指南-启动调试</a>》我们讲到了 GDB 启动调试的多种方式，分别应用于多种场景。今天我们来介绍一下断点设置的多种方式。</p>
 <h2 id="为何要设置断点"><a href="#为何要设置断点" class="headerlink" title="为何要设置断点"></a>为何要设置断点</h2><p>在介绍之前，我们首先需要了解，为什么需要设置断点。我们在指定位置设置断点之后，程序运行到该位置将会“暂停”，这个时候我们就可以对程序进行更多的操作，比如查看变量内容，堆栈情况等等，以帮助我们调试程序。</p>
 <h2 id="查看已设置的断点"><a href="#查看已设置的断点" class="headerlink" title="查看已设置的断点"></a>查看已设置的断点</h2><p>在学习断点设置之前，我们可以使用 info breakpoints 查看已设置断点：</p>
-<pre class="language-none"><code class="language-none">info breakpoints
-Num     Type           Disp Enb Address            What
-1       breakpoint     keep y   0x00000000004005fc in printNum2 at test.c:17
-    breakpoint already hit 1 time
-2       hw watchpoint  keep y                      a
-    breakpoint already hit 1 time
-    ignore next 3 hits</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">info breakpoints</span><br><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">1       breakpoint     keep y   0x00000000004005fc in printNum2 at test.c:17</span><br><span class="line">    breakpoint already hit 1 time</span><br><span class="line">2       hw watchpoint  keep y                      a</span><br><span class="line">    breakpoint already hit 1 time</span><br><span class="line">    ignore next 3 hits</span><br></pre></td></tr></table></figure>
 
 <p>它将会列出所有已设置的断点，每一个断点都有一个标号，用来代表这个断点。例如，第 2 个断点设置是一个观察点，并且会忽略三次。</p>
 <h2 id="断点设置-1"><a href="#断点设置-1" class="headerlink" title="断点设置"></a>断点设置</h2><p>断点设置有多种方式，分别应用于不同的场景。借助示例程序进行一一介绍：</p>
-<pre class="language-none"><code class="language-none">&#x2F;&#x2F;test.c
-#include&lt;stdio.h&gt;
-void printNum(int a)
-&#123;
-    printf(&quot;printNum\n&quot;);
-    while(a &gt; 0)
-    &#123;
-        printf(&quot;%d\n&quot;,a);
-        a--;
-    &#125;
-&#125;
-void printNum2(int a,int num)
-&#123;
-    printf(&quot;printNum\n&quot;);
-    while(a &gt; num &amp;&amp; a&gt;0)
-    &#123;
-        printf(&quot;%d\n&quot;,a);
-        a--;
-    &#125;
-&#125;
-int div(int a,int b)
-&#123;
-    printf(&quot;a&#x3D;%d,b&#x3D;%d\n&quot;,a,b);
-    int temp &#x3D; a&#x2F;b;
-    return temp;
-&#125;
-int main(int argc,char *argv[])
-&#123;
-    printNum2(12,5);
-    printNum(10);
-    div(10,0);
-    return 0;
-&#125;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">//test.c</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">void printNum(int a)</span><br><span class="line">&#123;</span><br><span class="line">    printf(&quot;printNum\n&quot;);</span><br><span class="line">    while(a &gt; 0)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;%d\n&quot;,a);</span><br><span class="line">        a--;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">void printNum2(int a,int num)</span><br><span class="line">&#123;</span><br><span class="line">    printf(&quot;printNum\n&quot;);</span><br><span class="line">    while(a &gt; num &amp;&amp; a&gt;0)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;%d\n&quot;,a);</span><br><span class="line">        a--;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">int div(int a,int b)</span><br><span class="line">&#123;</span><br><span class="line">    printf(&quot;a=%d,b=%d\n&quot;,a,b);</span><br><span class="line">    int temp = a/b;</span><br><span class="line">    return temp;</span><br><span class="line">&#125;</span><br><span class="line">int main(int argc,char *argv[])</span><br><span class="line">&#123;</span><br><span class="line">    printNum2(12,5);</span><br><span class="line">    printNum(10);</span><br><span class="line">    div(10,0);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>编译：</p>
-<pre class="language-none"><code class="language-none">gcc -g -o test test.c</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -g -o test test.c</span><br></pre></td></tr></table></figure>
 
 <p>注意，编译时需要带上-g 参数，具体原因参见《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2019/01/08/62137.html">GDB 调试指南-启动调试</a>》。</p>
-<h4 id="根据行号设置断点"><a href="#根据行号设置断点" class="headerlink" title="根据行号设置断点"></a>根据行号设置断点</h4><pre class="language-none"><code class="language-none">b 9  #break 可简写为b</code></pre>
+<h4 id="根据行号设置断点"><a href="#根据行号设置断点" class="headerlink" title="根据行号设置断点"></a>根据行号设置断点</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b 9  #break 可简写为b</span><br></pre></td></tr></table></figure>
 
 <p>或者</p>
-<pre class="language-none"><code class="language-none">b test.c:9</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b test.c:9</span><br></pre></td></tr></table></figure>
 
 <p>程序运行到第 9 行的时候会断住。</p>
 <h4 id="根据函数名设置断点"><a href="#根据函数名设置断点" class="headerlink" title="根据函数名设置断点"></a>根据函数名设置断点</h4><p>同样可以将断点设置在函数处：</p>
-<pre class="language-none"><code class="language-none">b printNum</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b printNum</span><br></pre></td></tr></table></figure>
 
 <p>程序在调用到 printNum 函数的时候会断住。</p>
 <h4 id="根据条件设置断点"><a href="#根据条件设置断点" class="headerlink" title="根据条件设置断点"></a>根据条件设置断点</h4><p>假设程序某处发生崩溃，而崩溃的原因怀疑是某个地方出现了非期望的值，那么你就可以在这里断点观察，当出现该非法值时，程序断住。这个时候我们可以借助 gdb 来设置条件断点，例如：</p>
-<pre class="language-none"><code class="language-none">break test.c:23 if b&#x3D;&#x3D;0</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">break test.c:23 if b==0</span><br></pre></td></tr></table></figure>
 
 <p>当在 b 等于 0 时，程序将会在第 23 行断住。<br>它和 condition 有着类似的作用，假设上面的断点号为 1，那么：</p>
-<pre class="language-none"><code class="language-none">condition 1 b&#x3D;&#x3D;0</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">condition 1 b==0</span><br></pre></td></tr></table></figure>
 
 <p>会使得 b 等于 0 时，产生断点 1。而实际上可以很方便地用来改变断点产生的条件，例如，之前设置 b&#x3D;&#x3D;0 时产生该断点，那么使用 condition 可以修改断点产生的条件。</p>
 <h4 id="根据规则设置断点"><a href="#根据规则设置断点" class="headerlink" title="根据规则设置断点"></a>根据规则设置断点</h4><p>例如需要对所有调用 printNum 函数都设置断点，可以使用下面的方式：</p>
-<pre class="language-none"><code class="language-none">rbreak printNum*</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rbreak printNum*</span><br></pre></td></tr></table></figure>
 
 <p>所有以 printNum 开头的函数都设置了断点。而下面是对所有函数设置断点：</p>
-<pre class="language-none"><code class="language-none">#用法：rbreak file:regex
-rbreak .
-rbreak test.c:. #对test.c中的所有函数设置断点
-rbreak test.c:^print #对以print开头的函数设置断点</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#用法：rbreak file:regex</span><br><span class="line">rbreak .</span><br><span class="line">rbreak test.c:. #对test.c中的所有函数设置断点</span><br><span class="line">rbreak test.c:^print #对以print开头的函数设置断点</span><br></pre></td></tr></table></figure>
 
 <h4 id="设置临时断点"><a href="#设置临时断点" class="headerlink" title="设置临时断点"></a>设置临时断点</h4><p>假设某处的断点只想生效一次，那么可以设置临时断点，这样断点后面就不复存在了：</p>
-<pre class="language-none"><code class="language-none">tbreak test.c:l0  #在第10行设置临时断点</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tbreak test.c:l0  #在第10行设置临时断点</span><br></pre></td></tr></table></figure>
 
 <h4 id="跳过多次设置断点"><a href="#跳过多次设置断点" class="headerlink" title="跳过多次设置断点"></a>跳过多次设置断点</h4><p>假如有某个地方，我们知道可能出错，但是前面 30 次都没有问题，虽然在该处设置了断点，但是想跳过前面 30 次，可以使用下面的方式：</p>
-<pre class="language-none"><code class="language-none">ignore 1 30</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ignore 1 30</span><br></pre></td></tr></table></figure>
 
 <p>其中，1 是你要忽略的断点号，可以通过前面的方式查找到，30 是需要跳过的次数。这样设置之后，会跳过前面 30 次。再次通过 info breakpoints 可以看到：</p>
-<pre class="language-none"><code class="language-none">Num     Type           Disp Enb Address            What
-1       breakpoint     keep y   0x00000000004005e8 in printNum2 at test.c:16
-    ignore next 30 hits</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">1       breakpoint     keep y   0x00000000004005e8 in printNum2 at test.c:16</span><br><span class="line">    ignore next 30 hits</span><br></pre></td></tr></table></figure>
 
 <h4 id="根据表达式值变化产生断点"><a href="#根据表达式值变化产生断点" class="headerlink" title="根据表达式值变化产生断点"></a>根据表达式值变化产生断点</h4><p>有时候我们需要观察某个值或表达式，知道它什么时候发生变化了，这个时候我们可以借助 watch 命令。例如：</p>
-<pre class="language-none"><code class="language-none">watch a</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch a</span><br></pre></td></tr></table></figure>
 
 <p>这个时候，让程序继续运行，如果 a 的值发生变化，则会打印相关内容，如：</p>
-<pre class="language-none"><code class="language-none">Hardware watchpoint 2: a
-Old value &#x3D; 12
-New value &#x3D; 11</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Hardware watchpoint 2: a</span><br><span class="line">Old value = 12</span><br><span class="line">New value = 11</span><br></pre></td></tr></table></figure>
 
 <p>但是这里要特别注意的是，程序必须运行起来，否则会出现：</p>
-<pre class="language-none"><code class="language-none">No symbol &quot;a&quot; in current context.</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">No symbol &quot;a&quot; in current context.</span><br></pre></td></tr></table></figure>
 
 <p>因为程序没有运行，当前上下文也就没有相关变量信息。</p>
 <p>rwatch 和 awatch 同样可以设置观察点前者是当变量值被读时断住，后者是被读或者被改写时断住。</p>
 <h2 id="禁用或启动断点"><a href="#禁用或启动断点" class="headerlink" title="禁用或启动断点"></a>禁用或启动断点</h2><p>有些断点暂时不想使用，但又不想删除，可以暂时禁用或启用。例如：</p>
-<pre class="language-none"><code class="language-none">disable  #禁用所有断点
-disable bnum #禁用标号为bnum的断点
-enable  #启用所有断点
-enable bnum #启用标号为bnum的断点
-enable delete bnum  #启动标号为bnum的断点，并且在此之后删除该断点</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">disable  #禁用所有断点</span><br><span class="line">disable bnum #禁用标号为bnum的断点</span><br><span class="line">enable  #启用所有断点</span><br><span class="line">enable bnum #启用标号为bnum的断点</span><br><span class="line">enable delete bnum  #启动标号为bnum的断点，并且在此之后删除该断点</span><br></pre></td></tr></table></figure>
 
 <h2 id="断点清除"><a href="#断点清除" class="headerlink" title="断点清除"></a>断点清除</h2><p>断点清除主要用到 clear 和 delete 命令。常见使用如下：</p>
-<pre class="language-none"><code class="language-none">clear   #删除当前行所有breakpoints
-clear function  #删除函数名为function处的断点
-clear filename:function #删除文件filename中函数function处的断点
-clear lineNum #删除行号为lineNum处的断点
-clear f:lename：lineNum #删除文件filename中行号为lineNum处的断点
-delete  #删除所有breakpoints,watchpoints和catchpoints
-delete bnum #删除断点号为bnum的断点</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">clear   #删除当前行所有breakpoints</span><br><span class="line">clear function  #删除函数名为function处的断点</span><br><span class="line">clear filename:function #删除文件filename中函数function处的断点</span><br><span class="line">clear lineNum #删除行号为lineNum处的断点</span><br><span class="line">clear f:lename：lineNum #删除文件filename中行号为lineNum处的断点</span><br><span class="line">delete  #删除所有breakpoints,watchpoints和catchpoints</span><br><span class="line">delete bnum #删除断点号为bnum的断点</span><br></pre></td></tr></table></figure>
 
 <h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了常见的断点设置方法，断点设置之后，可以便于我们后期观察变量，堆栈等信息，为进一步的定位与调试做准备。</p>
 <h1 id="变量查看"><a href="#变量查看" class="headerlink" title="变量查看"></a>变量查看</h1><h2 id="前言-2"><a href="#前言-2" class="headerlink" title="前言"></a>前言</h2><p>在启动调试以及设置断点之后，就到了我们非常关键的一步-查看变量。GDB 调试最大的目的之一就是走查代码，查看运行结果是否符合预期。既然如此，我们就不得不了解一些查看各种类型变量的方法，以帮助我们进一步定位问题。</p>
 <h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>在查看变量之前，需要先启动调试并设置断点，该部分内容可参考《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2019/01/08/62137.html">GDB 调试指南－启动调试</a>》和《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2019/02/24/44483.html">GDB 调试指南－断点设置</a>》。后面的内容都基于在某个位置已经断住。</p>
 <p>本文辅助说明程序如下:<br>testGdb.c</p>
-<pre class="language-none"><code class="language-none">&#x2F;&#x2F;testGdb.c
-#include&lt;stdio.h&gt;
-#include&lt;stdlib.h&gt;
-#include&quot;testGdb.h&quot;
-int main(void)
-&#123;
-    int a &#x3D; 10; &#x2F;&#x2F;整型
-    int b[] &#x3D; &#123;1,2,3,5&#125;;  &#x2F;&#x2F;数组
-    char c[] &#x3D; &quot;hello,shouwang&quot;;&#x2F;&#x2F;字符数组
-    &#x2F;*申请内存，失败时退出*&#x2F;
-    int *d &#x3D; (int*)malloc(a*sizeof(int));
-    if(NULL &#x3D;&#x3D; d)
-    &#123;
-        printf(&quot;malloc error\n&quot;);
-        return -1;
-    &#125;
-    &#x2F;*赋值*&#x2F;
-    for(int i&#x3D;0; i &lt; 10;i++)
-    &#123;
-        d[i] &#x3D; i;
-    &#125;
-    free(d);
-    d &#x3D; NULL;
-    float e &#x3D; 8.5f;
-    return 0;
-&#125;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">//testGdb.c</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;stdlib.h&gt;</span><br><span class="line">#include&quot;testGdb.h&quot;</span><br><span class="line">int main(void)</span><br><span class="line">&#123;</span><br><span class="line">    int a = 10; //整型</span><br><span class="line">    int b[] = &#123;1,2,3,5&#125;;  //数组</span><br><span class="line">    char c[] = &quot;hello,shouwang&quot;;//字符数组</span><br><span class="line">    /*申请内存，失败时退出*/</span><br><span class="line">    int *d = (int*)malloc(a*sizeof(int));</span><br><span class="line">    if(NULL == d)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;malloc error\n&quot;);</span><br><span class="line">        return -1;</span><br><span class="line">    &#125;</span><br><span class="line">    /*赋值*/</span><br><span class="line">    for(int i=0; i &lt; 10;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        d[i] = i;</span><br><span class="line">    &#125;</span><br><span class="line">    free(d);</span><br><span class="line">    d = NULL;</span><br><span class="line">    float e = 8.5f;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>testGdb.h</p>
-<pre class="language-none"><code class="language-none">int a &#x3D; 11;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int a = 11;</span><br></pre></td></tr></table></figure>
 
 <p>编译：</p>
-<pre class="language-none"><code class="language-none">$ gcc -g -o testGdb testGdb.o</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gcc -g -o testGdb testGdb.o</span><br></pre></td></tr></table></figure>
 
 <h2 id="普通变量查看"><a href="#普通变量查看" class="headerlink" title="普通变量查看"></a>普通变量查看</h2><h4 id="打印基本类型变量，数组，字符数组"><a href="#打印基本类型变量，数组，字符数组" class="headerlink" title="打印基本类型变量，数组，字符数组"></a>打印基本类型变量，数组，字符数组</h4><p>最常见的使用便是使用 print（可简写为 p）打印变量内容。<br>例如，打印基本类型，数组，字符数组等直接使用 p 变量名即可：</p>
-<pre class="language-none"><code class="language-none">(gdb) p a
-$1 &#x3D; 10
-(gdb) p b
-$2 &#x3D; &#123;1, 2, 3, 5&#125;
-(gdb) p c
-$3 &#x3D; &quot;hello,shouwang&quot;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p a</span><br><span class="line">$1 = 10</span><br><span class="line">(gdb) p b</span><br><span class="line">$2 = &#123;1, 2, 3, 5&#125;</span><br><span class="line">(gdb) p c</span><br><span class="line">$3 = &quot;hello,shouwang&quot;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>当然有时候，多个函数或者多个文件会有同一个变量名，这个时候可以在前面加上函数名或者文件名来区分：</p>
-<pre class="language-none"><code class="language-none">(gdb) p &#39;testGdb.h&#39;::a
-$1 &#x3D; 11
-(gdb) p &#39;main&#39;::b
-$2 &#x3D; &#123;1, 2, 3, 5&#125;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p &#x27;testGdb.h&#x27;::a</span><br><span class="line">$1 = 11</span><br><span class="line">(gdb) p &#x27;main&#x27;::b</span><br><span class="line">$2 = &#123;1, 2, 3, 5&#125;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>这里所打印的 a 值是我们定义在 testGdb.h 文件里的，而 b 值是 main 函数中的 b。</p>
 <h4 id="打印指针指向内容"><a href="#打印指针指向内容" class="headerlink" title="打印指针指向内容"></a>打印指针指向内容</h4><p>如果还是使用上面的方式打印指针指向的内容，那么打印出来的只是指针地址而已，例如：</p>
-<pre class="language-none"><code class="language-none">(gdb) p d
-$1 &#x3D; (int *) 0x602010
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p d</span><br><span class="line">$1 = (int *) 0x602010</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>而如果想要打印指针指向的内容，需要解引用：</p>
-<pre class="language-none"><code class="language-none">(gdb) p *d
-$2 &#x3D; 0
-(gdb) p *d@10
-$3 &#x3D; &#123;0, 1, 2, 3, 4, 5, 6, 7, 8, 9&#125;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p *d</span><br><span class="line">$2 = 0</span><br><span class="line">(gdb) p *d@10</span><br><span class="line">$3 = &#123;0, 1, 2, 3, 4, 5, 6, 7, 8, 9&#125;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>从上面可以看到，仅仅使用*只能打印第一个值，如果要打印多个值，后面跟上@并加上要打印的长度。<br>或者@后面跟上变量值：</p>
-<pre class="language-none"><code class="language-none">(gdb) p *d@a
-$2 &#x3D; &#123;0, 1, 2, 3, 4, 5, 6, 7, 8, 9&#125;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p *d@a</span><br><span class="line">$2 = &#123;0, 1, 2, 3, 4, 5, 6, 7, 8, 9&#125;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>由于 a 的值为 10，并且是作为整型指针数据长度，因此后面可以直接跟着 a，也可以打印出所有内容。</p>
 <p>另外值得一提的是，$可表示上一个变量，而假设此时有一个链表 linkNode，它有 next 成员代表下一个节点，则可使用下面方式不断打印链表内容：</p>
-<pre class="language-none"><code class="language-none">(gdb) p *linkNode
-(这里显示linkNode节点内容)
-(gdb) p *$.next
-(这里显示linkNode节点下一个节点的内容)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p *linkNode</span><br><span class="line">(这里显示linkNode节点内容)</span><br><span class="line">(gdb) p *$.next</span><br><span class="line">(这里显示linkNode节点下一个节点的内容)</span><br></pre></td></tr></table></figure>
 
 <p>如果想要查看前面数组的内容，你可以将下标一个一个累加，还可以定义一个类似 UNIX 环境变量，例如：</p>
-<pre class="language-none"><code class="language-none">(gdb) set $index&#x3D;0
-(gdb) p b[$index++]
-$11 &#x3D; 1
-(gdb) p b[$index++]
-$12 &#x3D; 2
-(gdb) p b[$index++]
-$13 &#x3D; 3</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(gdb) set $index=0</span><br><span class="line">(gdb) p b[$index++]</span><br><span class="line">$11 = 1</span><br><span class="line">(gdb) p b[$index++]</span><br><span class="line">$12 = 2</span><br><span class="line">(gdb) p b[$index++]</span><br><span class="line">$13 = 3</span><br></pre></td></tr></table></figure>
 
 <p>这样就不需要每次修改下标去打印啦。</p>
 <h2 id="按照特定格式打印变量"><a href="#按照特定格式打印变量" class="headerlink" title="按照特定格式打印变量"></a>按照特定格式打印变量</h2><p>对于简单的数据，print 默认的打印方式已经足够了，它会根据变量类型的格式打印出来，但是有时候这还不够，我们需要更多的格式控制。常见格式控制字符如下：</p>
@@ -590,25 +445,17 @@ $13 &#x3D; 3</code></pre>
 <li>f 按浮点数格式显示变量。</li>
 </ul>
 <p>还是以辅助程序来说明，正常方式打印字符数组 c：</p>
-<pre class="language-none"><code class="language-none">(gdb) p c
-$18 &#x3D; &quot;hello,shouwang&quot;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p c</span><br><span class="line">$18 = &quot;hello,shouwang&quot;</span><br></pre></td></tr></table></figure>
 
 <p>但是如果我们要查看它的十六进制格式打印呢？</p>
-<pre class="language-none"><code class="language-none">(gdb) p&#x2F;x c
-$19 &#x3D; &#123;0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x73, 0x68, 0x6f, 0x75, 0x77, 0x61,
-  0x6e, 0x67, 0x0&#125;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p/x c</span><br><span class="line">$19 = &#123;0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x73, 0x68, 0x6f, 0x75, 0x77, 0x61,</span><br><span class="line">  0x6e, 0x67, 0x0&#125;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>但是如果我们想用这种方式查看浮点数的二进制格式是怎样的是不行的，因为直接打印它首先会被转换成整型，因此最终会得到 8：</p>
-<pre class="language-none"><code class="language-none">(gdb) p e
-$1 &#x3D; 8.5
-(gdb) p&#x2F;t e
-$2 &#x3D; 1000
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p e</span><br><span class="line">$1 = 8.5</span><br><span class="line">(gdb) p/t e</span><br><span class="line">$2 = 1000</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>那么就需要另外一种查看方式了。</p>
 <h2 id="查看内存内容"><a href="#查看内存内容" class="headerlink" title="查看内存内容"></a>查看内存内容</h2><p>examine(简写为 x)可以用来查看内存地址中的值。语法如下：</p>
-<pre class="language-none"><code class="language-none">x&#x2F;[n][f][u] addr</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x/[n][f][u] addr</span><br></pre></td></tr></table></figure>
 
 <p>其中：</p>
 <ul>
@@ -625,211 +472,61 @@ $2 &#x3D; 1000
 <li>g 八字节</li>
 </ul>
 <p>我们通过一个实例来看，假如我们要把 float 变量 e 按照二进制方式打印，并且打印单位是一字节：</p>
-<pre class="language-none"><code class="language-none">(gdb) x&#x2F;4tb &amp;e
-0x7fffffffdbd4:    00000000    00000000    00001000    01000001
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) x/4tb &amp;e</span><br><span class="line">0x7fffffffdbd4:    00000000    00000000    00001000    01000001</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，变量 e 的四个字节都以二进制的方式打印出来了。</p>
 <h2 id="自动显示变量内容"><a href="#自动显示变量内容" class="headerlink" title="自动显示变量内容"></a>自动显示变量内容</h2><p>假设我们希望程序断住时，就显示某个变量的值，可以使用 display 命令。</p>
-<pre class="language-none"><code class="language-none">(gdb) display e
-1: e &#x3D; 8.5</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) display e</span><br><span class="line">1: e = 8.5</span><br></pre></td></tr></table></figure>
 
 <p>那么每次程序断住时，就会打印 e 的值。要查看哪些变量被设置了 display，可以使用：</p>
-<pre class="language-none"><code class="language-none">(gdb)info display
-Auto-display expressions now in effect:
-Num Enb Expression
-1:   y  b
-2:   y  e</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb)info display</span><br><span class="line">Auto-display expressions now in effect:</span><br><span class="line">Num Enb Expression</span><br><span class="line">1:   y  b</span><br><span class="line">2:   y  e</span><br></pre></td></tr></table></figure>
 
 <p>如果想要清除可以使用</p>
-<pre class="language-none"><code class="language-none">delete display num #num为前面变量前的编号,不带num时清除所有。</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delete display num #num为前面变量前的编号,不带num时清除所有。</span><br></pre></td></tr></table></figure>
 
 <p>或者去使能：</p>
-<pre class="language-none"><code class="language-none">disable display num  #num为前面变量前的编号，不带num时去使能所有</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">disable display num  #num为前面变量前的编号，不带num时去使能所有</span><br></pre></td></tr></table></figure>
 
-<h2 id="查看寄存器内容"><a href="#查看寄存器内容" class="headerlink" title="查看寄存器内容"></a>查看寄存器内容</h2><pre class="language-none"><code class="language-none">(gdb)info registers
-rax            0x0    0
-rbx            0x0    0
-rcx            0x7ffff7dd1b00    140737351850752
-rdx            0x0    0
-rsi            0x7ffff7dd1b30    140737351850800
-rdi            0xffffffff    4294967295
-rbp            0x7fffffffdc10    0x7fffffffdc10
-(内容过多未显示完全)</code></pre>
+<h2 id="查看寄存器内容"><a href="#查看寄存器内容" class="headerlink" title="查看寄存器内容"></a>查看寄存器内容</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(gdb)info registers</span><br><span class="line">rax            0x0    0</span><br><span class="line">rbx            0x0    0</span><br><span class="line">rcx            0x7ffff7dd1b00    140737351850752</span><br><span class="line">rdx            0x0    0</span><br><span class="line">rsi            0x7ffff7dd1b30    140737351850800</span><br><span class="line">rdi            0xffffffff    4294967295</span><br><span class="line">rbp            0x7fffffffdc10    0x7fffffffdc10</span><br><span class="line">(内容过多未显示完全)</span><br></pre></td></tr></table></figure>
 
 <h2 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h2><p>通过不同方式查看变量值或者内存值能够极大的帮助我们判断程序的运行是否符合我们的预期，如果发现观察的值不是我们预期的时候，就需要检查我们的代码了。</p>
 <h1 id="单步调试"><a href="#单步调试" class="headerlink" title="单步调试"></a>单步调试</h1><h2 id="前言-3"><a href="#前言-3" class="headerlink" title="前言"></a>前言</h2><p>前面通过《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2019/01/08/62137.html">启动调试</a>》，《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2019/02/24/44483.html">断点设置</a>》，《<a target="_blank" rel="noopener" href="https://www.yanbinghu.com/2019/03/10/50132.html">变量查看</a>》,我们已经了解了 GDB 基本的启动，设置断点，查看变量等，如果这些内容你还不知道，建议先回顾一下前面的内容。在启动调试设置断点观察之后，没有我们想要的信息怎么办呢？这个时候，就需要单步执行或者跳过当前断点继续执行等等。而本文所说的单步调试并非仅仅指单步执行，而是指在你的控制之下，按要求执行语句。</p>
 <h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>老规矩，先准备一个示例程序如下：</p>
-<pre class="language-none"><code class="language-none">&#x2F;*gdbStep.c*&#x2F;
-#include&lt;stdio.h&gt;
-&#x2F;*计算简单乘法,这里没有考虑溢出*&#x2F;
-int add(int a, int b)
-&#123;
-    int c &#x3D; a + b;
-    return c;
-&#125;
-&#x2F;*打印从0到num-1的数*&#x2F;
-int count(int num)
-&#123;
-    int i &#x3D; 0;
-    if(0 &gt; num)
-        return 0;
-    while(i &lt; num)
-    &#123;
-        printf(&quot;%d\n&quot;,i);
-        i++;
-    &#125;
-    return i;
-&#125;
-int main(void)
-&#123;
-    int a &#x3D; 3;
-    int b &#x3D; 7;
-    printf(&quot;it will calc a + b\n&quot;);
-    int c &#x3D; add(a,b);
-    printf(&quot;%d + %d &#x3D; %d\n&quot;,a,b,c);
-    count(c);
-    return 0;
-&#125;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">/*gdbStep.c*/</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">/*计算简单乘法,这里没有考虑溢出*/</span><br><span class="line">int add(int a, int b)</span><br><span class="line">&#123;</span><br><span class="line">    int c = a + b;</span><br><span class="line">    return c;</span><br><span class="line">&#125;</span><br><span class="line">/*打印从0到num-1的数*/</span><br><span class="line">int count(int num)</span><br><span class="line">&#123;</span><br><span class="line">    int i = 0;</span><br><span class="line">    if(0 &gt; num)</span><br><span class="line">        return 0;</span><br><span class="line">    while(i &lt; num)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;%d\n&quot;,i);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    return i;</span><br><span class="line">&#125;</span><br><span class="line">int main(void)</span><br><span class="line">&#123;</span><br><span class="line">    int a = 3;</span><br><span class="line">    int b = 7;</span><br><span class="line">    printf(&quot;it will calc a + b\n&quot;);</span><br><span class="line">    int c = add(a,b);</span><br><span class="line">    printf(&quot;%d + %d = %d\n&quot;,a,b,c);</span><br><span class="line">    count(c);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>编译：</p>
-<pre class="language-none"><code class="language-none">gcc -g -o gdbStep gdbStep.c</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -g -o gdbStep gdbStep.c</span><br></pre></td></tr></table></figure>
 
 <p>程序的功能比较简单，这里不多做解释。</p>
 <p>特别简单说明一条命令，list（可简写为 l），它可以将源码列出来，例如：</p>
-<pre class="language-none"><code class="language-none">(gdb) list
-1    #include&lt;stdio.h&gt;
-2
-3    &#x2F;*计算简单乘法,这里没有考虑溢出*&#x2F;
-4    int add(int a, int b)
-5    &#123;
-6        int c &#x3D; a * b;
-7        return c;
-8    &#125;
-9    int main(void)
-10    &#123;
-(gdb) l
-11        int a &#x3D; 13;
-12        int b &#x3D; 57;
-13        printf(&quot;it will calc a * b\n&quot;);
-14        int c &#x3D; add(a,b);
-15        printf(&quot;%d*%d &#x3D; %d\n&quot;,a,b,c);
-16        return 0;
-17    &#125;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">(gdb) list</span><br><span class="line">1    #include&lt;stdio.h&gt;</span><br><span class="line">2</span><br><span class="line">3    /*计算简单乘法,这里没有考虑溢出*/</span><br><span class="line">4    int add(int a, int b)</span><br><span class="line">5    &#123;</span><br><span class="line">6        int c = a * b;</span><br><span class="line">7        return c;</span><br><span class="line">8    &#125;</span><br><span class="line">9    int main(void)</span><br><span class="line">10    &#123;</span><br><span class="line">(gdb) l</span><br><span class="line">11        int a = 13;</span><br><span class="line">12        int b = 57;</span><br><span class="line">13        printf(&quot;it will calc a * b\n&quot;);</span><br><span class="line">14        int c = add(a,b);</span><br><span class="line">15        printf(&quot;%d*%d = %d\n&quot;,a,b,c);</span><br><span class="line">16        return 0;</span><br><span class="line">17    &#125;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <h2 id="单步执行-next"><a href="#单步执行-next" class="headerlink" title="单步执行-next"></a>单步执行-next</h2><p>next 命令（可简写为 n）用于在程序断住后，继续执行下一条语句，假设已经启动调试，并在第 12 行停住，如果要继续执行，则使用 n 执行下一条语句，如果后面跟上数字 num，则表示执行该命令 num 次，就达到继续执行 n 行的效果了：</p>
-<pre class="language-none"><code class="language-none">$ gdb gdbStep   #启动调试
-(gdb)b 25       #将断点设置在12行
-(gdb)run        #运行程序
-Breakpoint 1, main () at gdbStep.c:25
-25        int b &#x3D; 7;
-(gdb) n     #单步执行
-26        printf(&quot;it will calc a + b\n&quot;);
-(gdb) n 2   #执行两次
-it will calc a + b
-28        printf(&quot;%d + %d &#x3D; %d\n&quot;,a,b,c);
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ gdb gdbStep   #启动调试</span><br><span class="line">(gdb)b 25       #将断点设置在12行</span><br><span class="line">(gdb)run        #运行程序</span><br><span class="line">Breakpoint 1, main () at gdbStep.c:25</span><br><span class="line">25        int b = 7;</span><br><span class="line">(gdb) n     #单步执行</span><br><span class="line">26        printf(&quot;it will calc a + b\n&quot;);</span><br><span class="line">(gdb) n 2   #执行两次</span><br><span class="line">it will calc a + b</span><br><span class="line">28        printf(&quot;%d + %d = %d\n&quot;,a,b,c);</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>从上面的执行结果可以看到，我们在 25 行处断住，执行 n 之后，运行到 26 行，运行 n 2 之后，运行到 28 行，但是有没有发现一个问题，为什么不会进入到 add 函数内部呢？那就需要用到另外一个命令啦。</p>
 <h2 id="单步进入-step"><a href="#单步进入-step" class="headerlink" title="单步进入-step"></a>单步进入-step</h2><p>对于上面的情况，如果我们想跟踪 add 函数内部的情况，可以使用 step 命令（可简写为 s），它可以单步跟踪到函数内部，但前提是该函数有调试信息并且有源码信息。</p>
-<pre class="language-none"><code class="language-none">$ gdb gdbStep    #启动调试
-(gdb) b 25       #在12行设置断点
-Breakpoint 1 at 0x4005d3: file gdbStep.c, line 25.
-(gdb) run        #运行程序
-Breakpoint 1, main () at gdbStep.c:25
-25        int b &#x3D; 7;
-(gdb) s
-26        printf(&quot;it will calc a + b\n&quot;);
-(gdb) s     #单步进入，但是并没有该函数的源文件信息
-_IO_puts (str&#x3D;0x4006b8 &quot;it will calc a + b&quot;) at ioputs.c:33
-33    ioputs.c: No such file or directory.
-(gdb) finish    #继续完成该函数调用
-Run till exit from #0  _IO_puts (str&#x3D;0x4006b8 &quot;it will calc a + b&quot;)
-    at ioputs.c:33
-it will calc a + b
-main () at gdbStep.c:27
-27        int c &#x3D; add(a,b);
-Value returned is $1 &#x3D; 19
-(gdb) s        #单步进入，现在已经进入到了add函数内部
-add (a&#x3D;13, b&#x3D;57) at gdbStep.c:6
-6        int c &#x3D; a + b;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">$ gdb gdbStep    #启动调试</span><br><span class="line">(gdb) b 25       #在12行设置断点</span><br><span class="line">Breakpoint 1 at 0x4005d3: file gdbStep.c, line 25.</span><br><span class="line">(gdb) run        #运行程序</span><br><span class="line">Breakpoint 1, main () at gdbStep.c:25</span><br><span class="line">25        int b = 7;</span><br><span class="line">(gdb) s</span><br><span class="line">26        printf(&quot;it will calc a + b\n&quot;);</span><br><span class="line">(gdb) s     #单步进入，但是并没有该函数的源文件信息</span><br><span class="line">_IO_puts (str=0x4006b8 &quot;it will calc a + b&quot;) at ioputs.c:33</span><br><span class="line">33    ioputs.c: No such file or directory.</span><br><span class="line">(gdb) finish    #继续完成该函数调用</span><br><span class="line">Run till exit from #0  _IO_puts (str=0x4006b8 &quot;it will calc a + b&quot;)</span><br><span class="line">    at ioputs.c:33</span><br><span class="line">it will calc a + b</span><br><span class="line">main () at gdbStep.c:27</span><br><span class="line">27        int c = add(a,b);</span><br><span class="line">Value returned is $1 = 19</span><br><span class="line">(gdb) s        #单步进入，现在已经进入到了add函数内部</span><br><span class="line">add (a=13, b=57) at gdbStep.c:6</span><br><span class="line">6        int c = a + b;</span><br></pre></td></tr></table></figure>
 
 <p>从上面的过程可以看到，s 命令会尝试进入函数，但是如果没有该函数源码，需要跳过该函数执行，可使用 finish 命令，继续后面的执行。如果没有函数调用，s 的作用与 n 的作用并无差别，仅仅是继续执行下一行。它后面也可以跟数字，表明要执行的次数。</p>
 <p>当然它还有一个选项，用来设置当遇到没有调试信息的函数，s 命令是否跳过该函数，而执行后面的。默认情况下，它是会跳过的，即 step-mode 值是 off：</p>
-<pre class="language-none"><code class="language-none">(gdb) show step-mode
-Mode of the step operation is off.
-(gdb) set step-mode on
-(gdb) set step-mode off</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) show step-mode</span><br><span class="line">Mode of the step operation is off.</span><br><span class="line">(gdb) set step-mode on</span><br><span class="line">(gdb) set step-mode off</span><br></pre></td></tr></table></figure>
 
 <p>还有一个与 step 相关的命令是 stepi（可简写为 si），它与 step 不同的是，每次执行一条机器指令：</p>
-<pre class="language-none"><code class="language-none">(gdb) si
-0x0000000000400573    6        int c &#x3D; a + b;
-(gdb) display&#x2F;i $pc
-1: x&#x2F;i $pc
-&#x3D;&gt; 0x400573 &lt;add+13&gt;:    mov    -0x18(%rbp),%eax
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(gdb) si</span><br><span class="line">0x0000000000400573    6        int c = a + b;</span><br><span class="line">(gdb) display/i $pc</span><br><span class="line">1: x/i $pc</span><br><span class="line">=&gt; 0x400573 &lt;add+13&gt;:    mov    -0x18(%rbp),%eax</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <h2 id="继续执行到下一个断点-continue"><a href="#继续执行到下一个断点-continue" class="headerlink" title="继续执行到下一个断点-continue"></a>继续执行到下一个断点-continue</h2><p>我们可能打了多处断点，或者断点打在循环内，这个时候，想跳过这个断点，甚至跳过多次断点继续执行该怎么做呢？可以使用 continue 命令（可简写为 c）或者 fg，它会继续执行程序，直到再次遇到断点处：</p>
-<pre class="language-none"><code class="language-none">$ gdb gdbStep
-(gdb)b 18    #在count函数循环内打断点
-(gdb)run
-Breakpoint 1, count (num&#x3D;10) at gdbStep.c:18
-18            i++;
-(gdb) c      #继续运行，直到下一次断住
-Continuing.
-1
-
-Breakpoint 1, count (num&#x3D;10) at gdbStep.c:18
-18            i++;
-(gdb) fg     #继续运行，直到下一次断住
-Continuing.
-2
-
-Breakpoint 1, count (num&#x3D;10) at gdbStep.c:18
-18            i++;
-(gdb) c 3    #跳过三次
-Will ignore next 2 crossings of breakpoint 1.  Continuing.
-3
-4
-5
-
-Breakpoint 1, count (num&#x3D;10) at gdbStep.c:18
-18            i++;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ gdb gdbStep</span><br><span class="line">(gdb)b 18    #在count函数循环内打断点</span><br><span class="line">(gdb)run</span><br><span class="line">Breakpoint 1, count (num=10) at gdbStep.c:18</span><br><span class="line">18            i++;</span><br><span class="line">(gdb) c      #继续运行，直到下一次断住</span><br><span class="line">Continuing.</span><br><span class="line">1</span><br><span class="line"></span><br><span class="line">Breakpoint 1, count (num=10) at gdbStep.c:18</span><br><span class="line">18            i++;</span><br><span class="line">(gdb) fg     #继续运行，直到下一次断住</span><br><span class="line">Continuing.</span><br><span class="line">2</span><br><span class="line"></span><br><span class="line">Breakpoint 1, count (num=10) at gdbStep.c:18</span><br><span class="line">18            i++;</span><br><span class="line">(gdb) c 3    #跳过三次</span><br><span class="line">Will ignore next 2 crossings of breakpoint 1.  Continuing.</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line"></span><br><span class="line">Breakpoint 1, count (num=10) at gdbStep.c:18</span><br><span class="line">18            i++;</span><br></pre></td></tr></table></figure>
 
 <h2 id="继续运行到指定位置-until"><a href="#继续运行到指定位置-until" class="headerlink" title="继续运行到指定位置-until"></a>继续运行到指定位置-until</h2><p>假如我们在 25 行停住了，现在想要运行到 29 行停住，就可以使用 until 命令（可简写为 u）：</p>
-<pre class="language-none"><code class="language-none">$ gdb gdbStep
-(gdb)b 25
-(gdb)run
-(gdb) u 29
-it will calc a + b
-3 + 7 &#x3D; 10
-main () at gdbStep.c:29
-29        count(c);
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ gdb gdbStep</span><br><span class="line">(gdb)b 25</span><br><span class="line">(gdb)run</span><br><span class="line">(gdb) u 29</span><br><span class="line">it will calc a + b</span><br><span class="line">3 + 7 = 10</span><br><span class="line">main () at gdbStep.c:29</span><br><span class="line">29        count(c);</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，在执行 u 29 之后，它在 29 行停住了。它利用的是临时断点。</p>
 <h2 id="跳过执行—skip"><a href="#跳过执行—skip" class="headerlink" title="跳过执行—skip"></a>跳过执行—skip</h2><p>skip 可以在 step 时跳过一些不想关注的函数或者某个文件的代码:</p>
-<pre class="language-c" data-language="c"><code class="language-c">$ gdb <span class="token function">gdbStep</span>
-<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> b <span class="token number">27</span>
-Breakpoint <span class="token number">1</span> at <span class="token number">0x4005e4</span><span class="token operator">:</span> file gdbStep<span class="token punctuation">.</span>c<span class="token punctuation">,</span> line <span class="token number">27.</span>
-<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> skip function add    #step时跳过add函数
-Function add will be skipped when stepping<span class="token punctuation">.</span>
-<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> info skip   #查看step情况
-Num     Type           Enb What
-<span class="token number">1</span>       function       y   <span class="token function">add</span>
-<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> run
-Starting program<span class="token operator">:</span> <span class="token operator">/</span>home<span class="token operator">/</span>hyb<span class="token operator">/</span>workspaces<span class="token operator">/</span>gdb<span class="token operator">/</span>gdbStep
-it will calc a <span class="token operator">+</span> b
-
-Breakpoint <span class="token number">1</span><span class="token punctuation">,</span> <span class="token function">main</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> at gdbStep<span class="token punctuation">.</span>c<span class="token operator">:</span><span class="token number">27</span>
-<span class="token number">27</span>        <span class="token keyword">int</span> c <span class="token operator">=</span> <span class="token function">add</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span> s
-<span class="token number">28</span>        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d + %d = %d\n"</span><span class="token punctuation">,</span>a<span class="token punctuation">,</span>b<span class="token punctuation">,</span>c<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">(</span>gdb<span class="token punctuation">)</span></code></pre>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ gdb <span class="title function_">gdbStep</span></span><br><span class="line"><span class="params">(gdb)</span> b 27</span><br><span class="line">Breakpoint 1 at 0x4005e4: file gdbStep.c, line 27.</span><br><span class="line"><span class="params">(gdb)</span> skip function add    <span class="meta">#step时跳过add函数</span></span><br><span class="line">Function add will be skipped when stepping.</span><br><span class="line"><span class="params">(gdb)</span> info skip   #查看step情况</span><br><span class="line">Num     Type           Enb What</span><br><span class="line">1       function       y   <span class="title function_">add</span></span><br><span class="line"><span class="params">(gdb)</span> run</span><br><span class="line">Starting program: /home/hyb/workspaces/gdb/gdbStep</span><br><span class="line">it will calc a + b</span><br><span class="line"></span><br><span class="line">Breakpoint 1, <span class="title function_">main</span> <span class="params">()</span> at gdbStep.c:27</span><br><span class="line">27        <span class="type">int</span> c = add(a,b);</span><br><span class="line">(gdb) s</span><br><span class="line"><span class="number">28</span>        <span class="built_in">printf</span>(<span class="string">&quot;%d + %d = %d\n&quot;</span>,a,b,c);</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，再使用 skip 之后，使用 step 将不会进入 add 函数。<br>step 也后面也可以跟文件：</p>
-<pre class="language-c" data-language="c"><code class="language-c"><span class="token punctuation">(</span>gdb<span class="token punctuation">)</span>skip file gdbStep<span class="token punctuation">.</span>c</code></pre>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb)skip file gdbStep.c</span><br></pre></td></tr></table></figure>
 
 <p>这样 gdbStep.c 中的函数都不会进入。</p>
 <p>其他相关命令：</p>
@@ -842,243 +539,86 @@ Breakpoint <span class="token number">1</span><span class="token punctuation">,<
 <h2 id="总结-3"><a href="#总结-3" class="headerlink" title="总结"></a>总结</h2><p>本文主要介绍了一些简单情况的单步调试方法或常见命令使用，但这些已经够用了，毕竟大部分程序的执行或停止都在我们的掌控之中了。</p>
 <h1 id="源码查看"><a href="#源码查看" class="headerlink" title="源码查看"></a>源码查看</h1><h2 id="前言-4"><a href="#前言-4" class="headerlink" title="前言"></a>前言</h2><p>我们在调试过程中难免要对照源码进行查看，如果已经开始了调试，而查看源码或者编辑源码却要另外打开一个窗口，那未免显得太麻烦。文本将会介绍如何在 GDB 调试模式下<strong>查看源码或对源码进行编辑</strong>。</p>
 <h2 id="准备工作-1"><a href="#准备工作-1" class="headerlink" title="准备工作"></a>准备工作</h2><p>为了说明后面的内容，我们先准备一些源码，分别是 main.c：</p>
-<pre class="language-none"><code class="language-none">&#x2F;&#x2F;main.c
-#include&lt;stdio.h&gt;
-#include&quot;test.h&quot;
-int main(void)
-&#123;
-    printf(&quot;it will print from 5 to 1\n&quot;);
-    printNum(5);
-    printf(&quot;print end\n&quot;);
-
-    printf(&quot;it will print 1 to 5\n&quot;);
-    printNum1(5);
-    printf(&quot;print end\n&quot;);
-    return 0;
-&#125;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//main.c</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&quot;test.h&quot;</span><br><span class="line">int main(void)</span><br><span class="line">&#123;</span><br><span class="line">    printf(&quot;it will print from 5 to 1\n&quot;);</span><br><span class="line">    printNum(5);</span><br><span class="line">    printf(&quot;print end\n&quot;);</span><br><span class="line"></span><br><span class="line">    printf(&quot;it will print 1 to 5\n&quot;);</span><br><span class="line">    printNum1(5);</span><br><span class="line">    printf(&quot;print end\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>头文件 test.h：</p>
-<pre class="language-none"><code class="language-none">#ifndef _TEST_H
-#define _TEST_H
-#include&lt;stdio.h&gt;
-void printNum(int n);
-void printNum1(int n);
-#endif</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#ifndef _TEST_H</span><br><span class="line">#define _TEST_H</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">void printNum(int n);</span><br><span class="line">void printNum1(int n);</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure>
 
 <p>以及 test.c:</p>
-<pre class="language-none"><code class="language-none">#include&quot;test.h&quot;
-void printNum(int n)
-&#123;
-    if( n &lt; 0)
-        return;
-    while(n &gt; 0)
-    &#123;
-        printf(&quot;%d\n&quot;,n);
-        n--;
-    &#125;
-&#125;
-
-void printNum1(int n)
-&#123;
-    if( n &lt; 0)
-        return;
-    int i &#x3D; 1;
-    while(i &lt;&#x3D; n)
-    &#123;
-        printf(&quot;%d\n&quot;,i);
-        i++;
-    &#125;
-&#125;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">#include&quot;test.h&quot;</span><br><span class="line">void printNum(int n)</span><br><span class="line">&#123;</span><br><span class="line">    if( n &lt; 0)</span><br><span class="line">        return;</span><br><span class="line">    while(n &gt; 0)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;%d\n&quot;,n);</span><br><span class="line">        n--;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void printNum1(int n)</span><br><span class="line">&#123;</span><br><span class="line">    if( n &lt; 0)</span><br><span class="line">        return;</span><br><span class="line">    int i = 1;</span><br><span class="line">    while(i &lt;= n)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;%d\n&quot;,i);</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>编译运行：</p>
-<pre class="language-none"><code class="language-none">$ gcc -g  -o main  main.c test.c
-$ chmod +x main
-$ .&#x2F;main
-it will print from 5 to 1
-5
-4
-3
-2
-1
-print end
-it will print 1 to 5
-1
-2
-3
-4
-5
-print end</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ gcc -g  -o main  main.c test.c</span><br><span class="line">$ chmod +x main</span><br><span class="line">$ ./main</span><br><span class="line">it will print from 5 to 1</span><br><span class="line">5</span><br><span class="line">4</span><br><span class="line">3</span><br><span class="line">2</span><br><span class="line">1</span><br><span class="line">print end</span><br><span class="line">it will print 1 to 5</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">print end</span><br></pre></td></tr></table></figure>
 
 <p>程序功能比较简单，用来打印 5 到 1 的数以及 1 到 5 的数，这里也就不多做解释。</p>
 <h2 id="列出源码"><a href="#列出源码" class="headerlink" title="列出源码"></a>列出源码</h2><p>首先要介绍的就是 list 命令（可简写为 l），它用来打印源码。</p>
 <h4 id="直接打印源码"><a href="#直接打印源码" class="headerlink" title="直接打印源码"></a>直接打印源码</h4><p>例如：</p>
-<pre class="language-none"><code class="language-none">$ gdb main
-(gdb) l
-1    &#x2F;&#x2F;main.c
-2    #include&lt;stdio.h&gt;
-3    #include&quot;test.h&quot;
-4    int main(void)
-5    &#123;
-6        printf(&quot;it will print from 5 to 1\n&quot;);
-7        printNum(5);
-8        printf(&quot;print end\n&quot;);
-9
-10        printf(&quot;it will print 1 to 5\n&quot;);
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ gdb main</span><br><span class="line">(gdb) l</span><br><span class="line">1    //main.c</span><br><span class="line">2    #include&lt;stdio.h&gt;</span><br><span class="line">3    #include&quot;test.h&quot;</span><br><span class="line">4    int main(void)</span><br><span class="line">5    &#123;</span><br><span class="line">6        printf(&quot;it will print from 5 to 1\n&quot;);</span><br><span class="line">7        printNum(5);</span><br><span class="line">8        printf(&quot;print end\n&quot;);</span><br><span class="line">9</span><br><span class="line">10        printf(&quot;it will print 1 to 5\n&quot;);</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>直接输入 l 可从第一行开始显示源码，继续输入 l，可列出后面的源码。后面也可以跟上+或者-，分别表示要列出上一次列出源码的后面部分或者前面部分。</p>
 <h4 id="列出指定行附近源码"><a href="#列出指定行附近源码" class="headerlink" title="列出指定行附近源码"></a>列出指定行附近源码</h4><p>l 后面可以跟行号，表明要列出附近的源码：</p>
-<pre class="language-none"><code class="language-none">(gdb) l 9
-4    int main(void)
-5    &#123;
-6        printf(&quot;it will print from 5 to 1\n&quot;);
-7        printNum(5);
-8        printf(&quot;print end\n&quot;);
-9
-10        printf(&quot;it will print 1 to 5\n&quot;);
-11        printNum1(5);
-12        printf(&quot;print end\n&quot;);
-13        return 0;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">(gdb) l 9</span><br><span class="line">4    int main(void)</span><br><span class="line">5    &#123;</span><br><span class="line">6        printf(&quot;it will print from 5 to 1\n&quot;);</span><br><span class="line">7        printNum(5);</span><br><span class="line">8        printf(&quot;print end\n&quot;);</span><br><span class="line">9</span><br><span class="line">10        printf(&quot;it will print 1 to 5\n&quot;);</span><br><span class="line">11        printNum1(5);</span><br><span class="line">12        printf(&quot;print end\n&quot;);</span><br><span class="line">13        return 0;</span><br></pre></td></tr></table></figure>
 
 <p>在这里，l 后面跟上 9，表明要列出第 9 行附近的源码。</p>
 <h4 id="列出指定函数附近的源码"><a href="#列出指定函数附近的源码" class="headerlink" title="列出指定函数附近的源码"></a>列出指定函数附近的源码</h4><p>这个很容易理解，而使用也很简单，l 后面跟函数名即可，例如：</p>
-<pre class="language-none"><code class="language-none">(gdb) l printNum
-1    #include&quot;test.h&quot;
-2    void printNum(int n)
-3    &#123;
-4        if( n &lt; 0)
-5            return;
-6        while(n &gt; 0)
-7        &#123;
-8            printf(&quot;%d\n&quot;,n);
-9            n--;
-10        &#125;</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">(gdb) l printNum</span><br><span class="line">1    #include&quot;test.h&quot;</span><br><span class="line">2    void printNum(int n)</span><br><span class="line">3    &#123;</span><br><span class="line">4        if( n &lt; 0)</span><br><span class="line">5            return;</span><br><span class="line">6        while(n &gt; 0)</span><br><span class="line">7        &#123;</span><br><span class="line">8            printf(&quot;%d\n&quot;,n);</span><br><span class="line">9            n--;</span><br><span class="line">10        &#125;</span><br></pre></td></tr></table></figure>
 
 <p>在这里，l 后面跟上函数名 printNum，它便列出了 printNum 函数附近的源码。</p>
 <h4 id="设置源码一次列出行数"><a href="#设置源码一次列出行数" class="headerlink" title="设置源码一次列出行数"></a>设置源码一次列出行数</h4><p>不知道你有没有发现，在列出函数源码的时候，它并没有列全，因为 l 每次只显示 10 行，那么有没有方法每次列出更多呢？<br>我们可以通过 listsize 属性来设置，例如设置每次列出 20 行：</p>
-<pre class="language-none"><code class="language-none">(gdb) set listsize 20
-(gdb) show listsize
-Number of source lines gdb will list by default is 20.</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) set listsize 20</span><br><span class="line">(gdb) show listsize</span><br><span class="line">Number of source lines gdb will list by default is 20.</span><br></pre></td></tr></table></figure>
 
 <p>这样每次就会列出 20 行，当然也可以设置为 0 或者 unlimited，这样设置之后，列出就没有限制了，但源码如果较长，查看将会不便。</p>
 <h4 id="列出指定行之间的源码"><a href="#列出指定行之间的源码" class="headerlink" title="列出指定行之间的源码"></a>列出指定行之间的源码</h4><p>list first,last<br>例如，要列出 3 到 15 行之间的源码：</p>
-<pre class="language-none"><code class="language-none">(gdb) l 3,15
-3    &#123;
-4        if( n &lt; 0)
-5            return;
-6        while(n &gt; 0)
-7        &#123;
-8            printf(&quot;%d\n&quot;,n);
-9            n--;
-10        &#125;
-11    &#125;
-12
-13    void printNum1(int n)
-14    &#123;
-15        if( n &lt; 0)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">(gdb) l 3,15</span><br><span class="line">3    &#123;</span><br><span class="line">4        if( n &lt; 0)</span><br><span class="line">5            return;</span><br><span class="line">6        while(n &gt; 0)</span><br><span class="line">7        &#123;</span><br><span class="line">8            printf(&quot;%d\n&quot;,n);</span><br><span class="line">9            n--;</span><br><span class="line">10        &#125;</span><br><span class="line">11    &#125;</span><br><span class="line">12</span><br><span class="line">13    void printNum1(int n)</span><br><span class="line">14    &#123;</span><br><span class="line">15        if( n &lt; 0)</span><br></pre></td></tr></table></figure>
 
 <p>启始行和结束行号之间用逗号隔开。两者之一也可以省略，例如：</p>
-<pre class="language-none"><code class="language-none">(gdb) list 3,
-3    &#123;
-4        if( n &lt; 0)
-5            return;
-6        while(n &gt; 0)
-7        &#123;
-8            printf(&quot;%d\n&quot;,n);
-9            n--;
-10        &#125;
-11    &#125;
-12</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">(gdb) list 3,</span><br><span class="line">3    &#123;</span><br><span class="line">4        if( n &lt; 0)</span><br><span class="line">5            return;</span><br><span class="line">6        while(n &gt; 0)</span><br><span class="line">7        &#123;</span><br><span class="line">8            printf(&quot;%d\n&quot;,n);</span><br><span class="line">9            n--;</span><br><span class="line">10        &#125;</span><br><span class="line">11    &#125;</span><br><span class="line">12</span><br></pre></td></tr></table></figure>
 
 <p>省略结束行的时候，它列出从开始行开始，到指定大小行结束，而省略开始行的时候，到结束行结束，列出设置的大小行，例如默认设置为 10 行，则到结束行为止，总共列出 10 行。前面我们也介绍了修改和查看默认列出源码行数的方法。</p>
 <h4 id="列出指定文件的源码"><a href="#列出指定文件的源码" class="headerlink" title="列出指定文件的源码"></a>列出指定文件的源码</h4><p>前面执行 l 命令时，默认列出 main.c 的源码，如果想要看指定文件的源码呢？可以</p>
-<pre class="language-none"><code class="language-none">l location</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">l location</span><br></pre></td></tr></table></figure>
 
 <p>其中 location 可以是<strong>文件名加行号或函数名</strong>，因此可以使用：</p>
-<pre class="language-none"><code class="language-none">(gdb) l test.c:1
-1    #include&quot;test.h&quot;
-2    void printNum(int n)
-3    &#123;
-4        if( n &lt; 0)
-5            return;
-6        while(n &gt; 0)
-7        &#123;
-8            printf(&quot;%d\n&quot;,n);
-9            n--;
-10        &#125;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">(gdb) l test.c:1</span><br><span class="line">1    #include&quot;test.h&quot;</span><br><span class="line">2    void printNum(int n)</span><br><span class="line">3    &#123;</span><br><span class="line">4        if( n &lt; 0)</span><br><span class="line">5            return;</span><br><span class="line">6        while(n &gt; 0)</span><br><span class="line">7        &#123;</span><br><span class="line">8            printf(&quot;%d\n&quot;,n);</span><br><span class="line">9            n--;</span><br><span class="line">10        &#125;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>来查看指定文件指定行，或者指定文件指定函数：</p>
-<pre class="language-none"><code class="language-none">(gdb) l test.c:printNum1
-9            n--;
-10        &#125;
-11    &#125;
-12
-13    void printNum1(int n)
-14    &#123;
-15        if( n &lt; 0)
-16            return;
-17        int i &#x3D; 1;
-18        while(i &lt;&#x3D; n)
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">(gdb) l test.c:printNum1</span><br><span class="line">9            n--;</span><br><span class="line">10        &#125;</span><br><span class="line">11    &#125;</span><br><span class="line">12</span><br><span class="line">13    void printNum1(int n)</span><br><span class="line">14    &#123;</span><br><span class="line">15        if( n &lt; 0)</span><br><span class="line">16            return;</span><br><span class="line">17        int i = 1;</span><br><span class="line">18        while(i &lt;= n)</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>或者指定文件指定行之间：</p>
-<pre class="language-none"><code class="language-none">(gdb) l test.c:1,test.c:3
-1    #include&quot;test.h&quot;
-2    void printNum(int n)
-3    &#123;
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) l test.c:1,test.c:3</span><br><span class="line">1    #include&quot;test.h&quot;</span><br><span class="line">2    void printNum(int n)</span><br><span class="line">3    &#123;</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <h2 id="指定源码路径"><a href="#指定源码路径" class="headerlink" title="指定源码路径"></a>指定源码路径</h2><p>在查看源码之前，首先要确保我们的程序能够关联到源码，一般来说，我们在自己的机器上加上-g 参数编译完之后，使用 gdb 都能查看到源码，但是如果出现下面的情况呢？</p>
 <h4 id="源码被移走"><a href="#源码被移走" class="headerlink" title="源码被移走"></a>源码被移走</h4><p>例如，我现在将 main.c 移动到当前的 temp 目录下，再执行 l 命令：</p>
-<pre class="language-none"><code class="language-none">(gdb) l
-1    main.c: No such file or directory.
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) l</span><br><span class="line">1    main.c: No such file or directory.</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>它就会提示找不到源码文件了，那么怎么办呢？<br>我们可以使用 dir 命名指定源码路径，例如：</p>
-<pre class="language-none"><code class="language-none">(gdb) dir .&#x2F;temp
-Source directories searched: &#x2F;home&#x2F;hyb&#x2F;workspaces&#x2F;gdb&#x2F;sourceCode&#x2F;.&#x2F;temp:$cdir:$cwd</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) dir ./temp</span><br><span class="line">Source directories searched: /home/hyb/workspaces/gdb/sourceCode/./temp:$cdir:$cwd</span><br></pre></td></tr></table></figure>
 
 <p>这个时候它就能找到源码路径了。我这里使用的是相对路径，保险起见，你也可以使用绝对路径。</p>
 <h4 id="更换源码目录"><a href="#更换源码目录" class="headerlink" title="更换源码目录"></a>更换源码目录</h4><p>例如，你编译好的程序文件，放到了另外一台机器上进行调试，或者你的源码文件全都移动到了另外一个目录，怎么办呢？当然你还可以使用前面的方法添加源码搜索路径，也可以使用 set substitute-path from to 将原来的路径替换为新的路径，那么我们如何知道原来的源码路径是什么呢？借助 readelf 命令可以知道：</p>
-<pre class="language-none"><code class="language-none">$ readelf main -p .debug_str
-  [     0]  long unsigned int
-  [    12]  short int
-  [    1c]  &#x2F;home&#x2F;hyb&#x2F;workspaces&#x2F;gdb&#x2F;sourceCode
-  [    40]  main.c
-（显示部分内容）</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ readelf main -p .debug_str</span><br><span class="line">  [     0]  long unsigned int</span><br><span class="line">  [    12]  short int</span><br><span class="line">  [    1c]  /home/hyb/workspaces/gdb/sourceCode</span><br><span class="line">  [    40]  main.c</span><br><span class="line">（显示部分内容）</span><br></pre></td></tr></table></figure>
 
 <p>main 为你将要调试的程序名，这里我们可以看到原来的路径，那么我们现在替换掉它：</p>
-<pre class="language-none"><code class="language-none">(gdb) set substitute-path &#x2F;home&#x2F;hyb&#x2F;workspaces&#x2F;gdb&#x2F;sourceCode &#x2F;home&#x2F;hyb&#x2F;workspaces&#x2F;gdb&#x2F;sourceCode&#x2F;temp
-(gdb) show substitute-path
-List of all source path substitution rules:
-  &#96;&#x2F;home&#x2F;hyb&#x2F;workspaces&#x2F;gdb&#x2F;sourceCode&#39; -&gt; &#96;&#x2F;home&#x2F;hyb&#x2F;workspaces&#x2F;gdb&#x2F;sourceCode&#x2F;temp&#39;.
-(gdb)</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(gdb) set substitute-path /home/hyb/workspaces/gdb/sourceCode /home/hyb/workspaces/gdb/sourceCode/temp</span><br><span class="line">(gdb) show substitute-path</span><br><span class="line">List of all source path substitution rules:</span><br><span class="line">  `/home/hyb/workspaces/gdb/sourceCode&#x27; -&gt; `/home/hyb/workspaces/gdb/sourceCode/temp&#x27;.</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
 
 <p>设置完成后，可以通过 show substitute-path 来查看设置结果。这样它也能在正确的路径查找源码啦。</p>
 <p>需要注意的是，这里<strong>对路径做了字符串替换</strong>，那么如果你有多个路径，可以做多个替换。甚至可以对指定文件路径进行替换。</p>
 <p>最后你也可以通过 unset substitute-path [path]取消替换。</p>
 <h2 id="编辑源码"><a href="#编辑源码" class="headerlink" title="编辑源码"></a>编辑源码</h2><p>为了避免已经启动了调试之后，需要编辑源码，又不想退出，可以直接在 gdb 模式下编辑源码，它默认使用的编辑器是&#x2F;bin&#x2F;ex，但是你的机器上可能没有这个编辑器，或者你想使用自己熟悉的编辑器，那么可以通过下面的方式进行设置：</p>
-<pre class="language-none"><code class="language-none">$ EDITOR&#x3D;&#x2F;usr&#x2F;bin&#x2F;vim
-$ export EDITOR</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ EDITOR=/usr/bin/vim</span><br><span class="line">$ export EDITOR</span><br></pre></td></tr></table></figure>
 
 <p>&#x2F;usr&#x2F;bin&#x2F;vim 可以替换为你熟悉的编辑器的路径，如果你不知道你的编辑器在什么位置，可借助 whereis 命令或者 witch 命令查看：</p>
-<pre class="language-none"><code class="language-none">$ whereis vim
-vim: &#x2F;usr&#x2F;bin&#x2F;vim &#x2F;usr&#x2F;bin&#x2F;vim.tiny &#x2F;usr&#x2F;bin&#x2F;vim.basic &#x2F;usr&#x2F;bin&#x2F;vim.gnome &#x2F;etc&#x2F;vim &#x2F;usr&#x2F;share&#x2F;vim &#x2F;usr&#x2F;share&#x2F;man&#x2F;man1&#x2F;vim.1.gz
-$ which vim
-&#x2F;usr&#x2F;bin&#x2F;vim</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ whereis vim</span><br><span class="line">vim: /usr/bin/vim /usr/bin/vim.tiny /usr/bin/vim.basic /usr/bin/vim.gnome /etc/vim /usr/share/vim /usr/share/man/man1/vim.1.gz</span><br><span class="line">$ which vim</span><br><span class="line">/usr/bin/vim</span><br></pre></td></tr></table></figure>
 
 <p>设置之后，就可以在 gdb 调试模式下进行编辑源码了，使用命令 edit location，例如：</p>
-<pre class="language-none"><code class="language-none">(gdb)edit 3  #编辑第三行
-(gdb)edit printNum #编辑printNum函数
-(gdb)edit test.c:5 #编辑test.c第五行</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb)edit 3  #编辑第三行</span><br><span class="line">(gdb)edit printNum #编辑printNum函数</span><br><span class="line">(gdb)edit test.c:5 #编辑test.c第五行</span><br></pre></td></tr></table></figure>
 
 <p>可自行尝试，这里的 location 和前面介绍的一样，可以跟指定文件的特定行或指定文件的指定函数。<br>编辑完保存后，别忘了重新编译程序：</p>
-<pre class="language-none"><code class="language-none">(gdb)shell gcc -g -o main main.c test.c</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb)shell gcc -g -o main main.c test.c</span><br></pre></td></tr></table></figure>
 
 <p>这里要注意，为了在 gdb 调试模式下执行 shell 命令，需要在命令之前加上 shell，表明这是一条 shell 命令。这样就能在不用退出 GDB 调试模式的情况下编译程序了。</p>
 <h2 id="另外一种模式"><a href="#另外一种模式" class="headerlink" title="另外一种模式"></a>另外一种模式</h2><p>启动时，带上 tui(Text User Interface)参数，会有意想不到的效果，它会将调试在多个文本窗口呈现：</p>
-<pre class="language-none"><code class="language-none">gdb main -tui</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb main -tui</span><br></pre></td></tr></table></figure>
 
 <p><a target="_blank" rel="noopener" href="https://github.com/yanbinghu/BlogImages/raw/master/articles/GDB%E8%B0%83%E8%AF%95%E6%8C%87%E5%8D%97-%E6%BA%90%E7%A0%81%E6%9F%A5%E7%9C%8B/gdb-tui.png"><img data-src="//img.to2b.cn/blog/lujinkai/1656387574358.png"></a></p>
 <p>但是本文不作介绍，有兴趣的可以探索一下。</p>

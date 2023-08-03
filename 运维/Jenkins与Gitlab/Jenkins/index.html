@@ -297,57 +297,29 @@
 <p>Jenkins 是开源 CI&amp;CD 软件领导者， 提供超过 1000 个插件来支持构建、部署、自动化， 满足任何项目的需要。</p>
 <h2 id="部署-jenkins"><a href="#部署-jenkins" class="headerlink" title="部署 jenkins"></a>部署 jenkins</h2><p>Jenkins 支持各种运行方式，可通过系统包、Docker 或者通过一个独立的 Java 程序</p>
 <h3 id="安装-JDK"><a href="#安装-JDK" class="headerlink" title="安装 JDK"></a>安装 JDK</h3><p>Jenkins 基于 JAVA 实现，安装 Jenkins 前需要先安装 JDK</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@jenkins ~<span class="token punctuation">]</span><span class="token variable">$java</span> <span class="token parameter variable">-version</span>
-<span class="token function">java</span> version <span class="token string">"1.8.0_271"</span>
-Java<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> SE Runtime Environment <span class="token punctuation">(</span>build <span class="token number">1.8</span>.0_271-b09<span class="token punctuation">)</span>
-Java HotSpot<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> <span class="token number">64</span>-Bit Server VM <span class="token punctuation">(</span>build <span class="token number">25.271</span>-b09, mixed mode<span class="token punctuation">)</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@jenkins ~]<span class="variable">$java</span> -version</span><br><span class="line">java version <span class="string">&quot;1.8.0_271&quot;</span></span><br><span class="line">Java(TM) SE Runtime Environment (build 1.8.0_271-b09)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 25.271-b09, mixed mode)</span><br></pre></td></tr></table></figure>
 
-<h3 id="安装-jenkins"><a href="#安装-jenkins" class="headerlink" title="安装 jenkins"></a>安装 jenkins</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$wget</span> https://mirrors.tuna.tsinghua.edu.cn/jenkins/debian-stable/jenkins_2.263.4_all.deb	<span class="token comment"># 清华源下载dep包</span>
-<span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$apt</span> <span class="token function">install</span> daemon	<span class="token comment"># 依赖的包，如果没有，会报错，所以提前装上</span>
-<span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$ln</span> <span class="token parameter variable">-s</span> /usr/local/jdk/bin/java /usr/bin/java <span class="token comment"># Jenkins只会在/bin:/usr/bin:/sbin:/usr/sbin找java，所以设置$PATH不好使，得做个软连接</span>
-
-<span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$dpkg</span> <span class="token parameter variable">-i</span> jenkins_2.263.4_all.deb	<span class="token comment"># 安装</span></code></pre>
+<h3 id="安装-jenkins"><a href="#安装-jenkins" class="headerlink" title="安装 jenkins"></a>安装 jenkins</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$wget</span> https://mirrors.tuna.tsinghua.edu.cn/jenkins/debian-stable/jenkins_2.263.4_all.deb	<span class="comment"># 清华源下载dep包</span></span><br><span class="line">[root@jenkins src]<span class="variable">$apt</span> install daemon	<span class="comment"># 依赖的包，如果没有，会报错，所以提前装上</span></span><br><span class="line">[root@jenkins src]<span class="variable">$ln</span> -s /usr/local/jdk/bin/java /usr/bin/java <span class="comment"># Jenkins只会在/bin:/usr/bin:/sbin:/usr/sbin找java，所以设置$PATH不好使，得做个软连接</span></span><br><span class="line"></span><br><span class="line">[root@jenkins src]<span class="variable">$dpkg</span> -i jenkins_2.263.4_all.deb	<span class="comment"># 安装</span></span><br></pre></td></tr></table></figure>
 
 <p>主要文件：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">/etc/default/jenkins
-/etc/init.d/jenkins
-/etc/logrotate.d/jenkins
-/usr/share/jenkins/jenkins.war	<span class="token comment"># 实际上就是启动这个war包</span>
-/var/cache/jenkins/
-/var/lib/jenkins/
-/var/log/jenkins/</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/etc/default/jenkins</span><br><span class="line">/etc/init.d/jenkins</span><br><span class="line">/etc/logrotate.d/jenkins</span><br><span class="line">/usr/share/jenkins/jenkins.war	<span class="comment"># 实际上就是启动这个war包</span></span><br><span class="line">/var/cache/jenkins/</span><br><span class="line">/var/lib/jenkins/</span><br><span class="line">/var/log/jenkins/</span><br></pre></td></tr></table></figure>
 
 <h3 id="修改-jenkins-服务的用户"><a href="#修改-jenkins-服务的用户" class="headerlink" title="修改 jenkins 服务的用户"></a>修改 jenkins 服务的用户</h3><p>默认 jenkins 服务使用 jenkins 帐号启动，将文件复制到生产服务器可能会遇到权限问题，需要先 su 到对应的用户，这里学习环境为了方便，修改为 root 用户，注意：工作中还是使用 jenkins 普通用户</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/default/jenkins
-<span class="token comment">#JENKINS_USER=$NAME</span>
-<span class="token comment">#JENKINS_GROUP=$GROUP</span>
-<span class="token assign-left variable">JENKINS_USER</span><span class="token operator">=</span>root		<span class="token comment"># 直接修改为root，不要修改$NAME变量</span>
-<span class="token assign-left variable">JENKINS_GROUP</span><span class="token operator">=</span>root</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@jenkins src]<span class="variable">$vim</span> /etc/default/jenkins</span><br><span class="line"><span class="comment">#JENKINS_USER=$NAME</span></span><br><span class="line"><span class="comment">#JENKINS_GROUP=$GROUP</span></span><br><span class="line">JENKINS_USER=root		<span class="comment"># 直接修改为root，不要修改$NAME变量</span></span><br><span class="line">JENKINS_GROUP=root</span><br></pre></td></tr></table></figure>
 
 <h3 id="访问-jenkins-页面"><a href="#访问-jenkins-页面" class="headerlink" title="访问 jenkins 页面"></a>访问 jenkins 页面</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614401256959.png"></p>
 <h3 id="创建管理员用户"><a href="#创建管理员用户" class="headerlink" title="创建管理员用户"></a>创建管理员用户</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614419504909.png"></p>
 <p>先创建用户，然后使用刚创建的用户登录</p>
 <h3 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h3><p>Jenkins 是完全插件化的服务，我们想实现什么功能，不是改配置文件，而是下载插件</p>
 <p>修改更新源为国内清华源：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$cat</span> /var/lib/jenkins/hudson.model.UpdateCenter.xml
-<span class="token operator">&lt;</span>?xml <span class="token assign-left variable">version</span><span class="token operator">=</span><span class="token string">'1.1'</span> <span class="token assign-left variable">encoding</span><span class="token operator">=</span><span class="token string">'UTF-8'</span>?<span class="token operator">></span>
-<span class="token operator">&lt;</span>sites<span class="token operator">></span>
-  <span class="token operator">&lt;</span>site<span class="token operator">></span>
-    <span class="token operator">&lt;</span>id<span class="token operator">></span>default<span class="token operator">&lt;</span>/id<span class="token operator">></span>
-    <span class="token operator">&lt;</span>url<span class="token operator">></span>https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json<span class="token operator">&lt;</span>/url<span class="token operator">></span>
-  <span class="token operator">&lt;</span>/site<span class="token operator">></span>
-<span class="token operator">&lt;</span>/sites<span class="token operator">></span>
-<span class="token punctuation">[</span>root@jenkins src<span class="token punctuation">]</span><span class="token variable">$systemctl</span> restart jenkins.service</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@jenkins src]<span class="variable">$cat</span> /var/lib/jenkins/hudson.model.UpdateCenter.xml</span><br><span class="line">&lt;?xml version=<span class="string">&#x27;1.1&#x27;</span> encoding=<span class="string">&#x27;UTF-8&#x27;</span>?&gt;</span><br><span class="line">&lt;sites&gt;</span><br><span class="line">  &lt;site&gt;</span><br><span class="line">    &lt;<span class="built_in">id</span>&gt;default&lt;/id&gt;</span><br><span class="line">    &lt;url&gt;https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json&lt;/url&gt;</span><br><span class="line">  &lt;/site&gt;</span><br><span class="line">&lt;/sites&gt;</span><br><span class="line">[root@jenkins src]<span class="variable">$systemctl</span> restart jenkins.service</span><br></pre></td></tr></table></figure>
 
 <p>有以下几种安装插件的方式：</p>
 <ul>
 <li><p>在线安装：官网，也是默认的方式，比较慢</p>
 </li>
 <li><p>在线安装：清华大学镜像源，sed 或者编辑器把 update-center.json 中的 Jenkins 网址替换为清华源</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将：</span>
-https://updates.jenkins.io/download/plugins/warnings/5.0.1/warnings.hpi
-<span class="token comment"># 替换为：</span>
-https://mirrors-i.tuna.tsinghua.edu.cn/jenkins/plugins/warnings/5.0.1/warnings.hpi</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将：</span></span><br><span class="line">https://updates.jenkins.io/download/plugins/warnings/5.0.1/warnings.hpi</span><br><span class="line"><span class="comment"># 替换为：</span></span><br><span class="line">https://mirrors-i.tuna.tsinghua.edu.cn/jenkins/plugins/warnings/5.0.1/warnings.hpi</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>离线安装：手动下载插件，然后放到 <code>/var/lib/jenkins/plugins/</code>，重启 Jenkins 即可</p>
 </li>
@@ -410,16 +382,7 @@ https://mirrors-i.tuna.tsinghua.edu.cn/jenkins/plugins/warnings/5.0.1/warnings.h
 <p><img data-src="//img.to2b.cn/blog/ljk/1614486289558.png"></p>
 <h2 id="jenkins-分布式"><a href="#jenkins-分布式" class="headerlink" title="jenkins 分布式"></a>jenkins 分布式</h2><p>在众多 Job 的场景下，单台 jenkins master 同时执行代码 clone、编译、打包及构建，其性能可能会出现瓶颈从而会影响代码部署效率，影响 jenkins 官方提供了 jenkins 分布式构建，将众多 job 分散运行到不同的 jenkins slave 节点，大幅提高并行 job 的处理能力</p>
 <h3 id="配置-slave-节点环境"><a href="#配置-slave-节点环境" class="headerlink" title="配置 slave 节点环境"></a>配置 slave 节点环境</h3><p>slave 节点需要配置与 master 一样的基础运行环境，另外也要创建与 master 相同的数据目录，因为脚本中调用的路径只有相对于 master 的一个路径，此路径在 master 与各 node 节点必须保持一致</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 配置java环境</span>
-<span class="token punctuation">[</span>root@jenkins-slave1 ~<span class="token punctuation">]</span><span class="token variable">$java</span> <span class="token parameter variable">-version</span>
-<span class="token function">java</span> version <span class="token string">"1.8.0_271"</span>
-Java<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> SE Runtime Environment <span class="token punctuation">(</span>build <span class="token number">1.8</span>.0_271-b09<span class="token punctuation">)</span>
-Java HotSpot<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> <span class="token number">64</span>-Bit Server VM <span class="token punctuation">(</span>build <span class="token number">25.271</span>-b09, mixed mode<span class="token punctuation">)</span>
-
-<span class="token punctuation">[</span>root@jenkins-slave1 ~<span class="token punctuation">]</span><span class="token variable">$ln</span> <span class="token parameter variable">-s</span> /usr/local/jdk/bin/java /usr/bin/java
-
-<span class="token comment"># 创建数据目录</span>
-<span class="token punctuation">[</span>root@jenkins-slave1 ~<span class="token punctuation">]</span><span class="token variable">$mkdir</span> <span class="token parameter variable">-p</span> /var/lib/jenkins</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置java环境</span></span><br><span class="line">[root@jenkins-slave1 ~]<span class="variable">$java</span> -version</span><br><span class="line">java version <span class="string">&quot;1.8.0_271&quot;</span></span><br><span class="line">Java(TM) SE Runtime Environment (build 1.8.0_271-b09)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 25.271-b09, mixed mode)</span><br><span class="line"></span><br><span class="line">[root@jenkins-slave1 ~]<span class="variable">$ln</span> -s /usr/local/jdk/bin/java /usr/bin/java</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建数据目录</span></span><br><span class="line">[root@jenkins-slave1 ~]<span class="variable">$mkdir</span> -p /var/lib/jenkins</span><br></pre></td></tr></table></figure>
 
 <h3 id="添加-slave-节点"><a href="#添加-slave-节点" class="headerlink" title="添加 slave 节点"></a>添加 slave 节点</h3><p><img data-src="//img.to2b.cn/blog/ljk/1614491840961.png"></p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1614491886001.png"></p>
@@ -443,28 +406,7 @@ Java HotSpot<span class="token punctuation">(</span>TM<span class="token punctua
 <p>声明式和脚本化的流水线从根本上是不同的。 <strong>声明式流水线的是 Jenkins 流水线更近的特性</strong>。</p>
 <h4 id="声明式流水线基础"><a href="#声明式流水线基础" class="headerlink" title="声明式流水线基础"></a>声明式流水线基础</h4><p>在声明式流水线语法中, <code>pipeline</code> 块定义了整个流水线中完成的所有的工作。</p>
 <p>示例：</p>
-<pre class="language-groovy" data-language="groovy"><code class="language-groovy">Jenkinsfile <span class="token punctuation">(</span>Declarative Pipeline<span class="token punctuation">)</span>
-pipeline <span class="token punctuation">&#123;</span>
-    agent any
-    stages <span class="token punctuation">&#123;</span>
-        <span class="token function">stage</span><span class="token punctuation">(</span><span class="token string">'Build'</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-            steps <span class="token punctuation">&#123;</span>
-                sh <span class="token string">'make'</span>
-            <span class="token punctuation">&#125;</span>
-        <span class="token punctuation">&#125;</span>
-        <span class="token function">stage</span><span class="token punctuation">(</span><span class="token string">'Test'</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
-            steps <span class="token punctuation">&#123;</span>
-                sh <span class="token string">'make check'</span>
-                junit <span class="token string">'reports/**/*.xml'</span>
-            <span class="token punctuation">&#125;</span>
-        <span class="token punctuation">&#125;</span>
-        <span class="token function">stage</span><span class="token punctuation">(</span><span class="token string">'Deploy'</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-            steps <span class="token punctuation">&#123;</span>
-                sh <span class="token string">'make publish'</span>
-            <span class="token punctuation">&#125;</span>
-        <span class="token punctuation">&#125;</span>
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span></code></pre>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Jenkinsfile (Declarative Pipeline)</span><br><span class="line">pipeline &#123;</span><br><span class="line">    agent any</span><br><span class="line">    stages &#123;</span><br><span class="line">        stage(<span class="string">&#x27;Build&#x27;</span>) &#123;</span><br><span class="line">            steps &#123;</span><br><span class="line">                sh <span class="string">&#x27;make&#x27;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        stage(<span class="string">&#x27;Test&#x27;</span>)&#123;</span><br><span class="line">            steps &#123;</span><br><span class="line">                sh <span class="string">&#x27;make check&#x27;</span></span><br><span class="line">                junit <span class="string">&#x27;reports/**/*.xml&#x27;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        stage(<span class="string">&#x27;Deploy&#x27;</span>) &#123;</span><br><span class="line">            steps &#123;</span><br><span class="line">                sh <span class="string">&#x27;make publish&#x27;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>pipeline 是声明式流水线的一种特定语法，他定义了包含执行整个流水线的所有内容和指令的 “block” 。</li>
@@ -478,20 +420,7 @@ pipeline <span class="token punctuation">&#123;</span>
 <h4 id="脚本化流水线基础"><a href="#脚本化流水线基础" class="headerlink" title="脚本化流水线基础"></a>脚本化流水线基础</h4><p>…</p>
 <h3 id="pipline-语法"><a href="#pipline-语法" class="headerlink" title="pipline 语法"></a>pipline 语法</h3><p>官方文档：<a target="_blank" rel="noopener" href="https://www.jenkins.io/zh/doc/book/pipeline/syntax/">https://www.jenkins.io/zh/doc/book/pipeline/syntax/</a></p>
 <h3 id="pipline-job"><a href="#pipline-job" class="headerlink" title="pipline job"></a>pipline job</h3><h4 id="创建-pipline-job"><a href="#创建-pipline-job" class="headerlink" title="创建 pipline job"></a>创建 pipline job</h4><p><img data-src="//img.to2b.cn/blog/ljk/1614528712085.png"></p>
-<h4 id="测试简单-pipline-job-运行"><a href="#测试简单-pipline-job-运行" class="headerlink" title="测试简单 pipline job 运行"></a>测试简单 pipline job 运行</h4><pre class="language-groovy" data-language="groovy"><code class="language-groovy">node <span class="token punctuation">&#123;</span>
-    <span class="token function">stage</span><span class="token punctuation">(</span><span class="token string">'clone 代码'</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        echo <span class="token string">'代码 clone'</span>
-    <span class="token punctuation">&#125;</span>
-    <span class="token function">stage</span><span class="token punctuation">(</span><span class="token string">'代码构建'</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        echo <span class="token string">'代码构建'</span>
-    <span class="token punctuation">&#125;</span>
-    <span class="token function">stage</span><span class="token punctuation">(</span><span class="token string">'代码测试'</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        echo <span class="token string">'代码测试'</span>
-    <span class="token punctuation">&#125;</span>
-    <span class="token function">stage</span><span class="token punctuation">(</span><span class="token string">'代码部署'</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        echo <span class="token string">'代码部署'</span>
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span></code></pre>
+<h4 id="测试简单-pipline-job-运行"><a href="#测试简单-pipline-job-运行" class="headerlink" title="测试简单 pipline job 运行"></a>测试简单 pipline job 运行</h4><figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">node &#123;</span><br><span class="line">    stage(<span class="string">&#x27;clone 代码&#x27;</span>) &#123;</span><br><span class="line">        echo <span class="string">&#x27;代码 clone&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">    stage(<span class="string">&#x27;代码构建&#x27;</span>) &#123;</span><br><span class="line">        echo <span class="string">&#x27;代码构建&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">    stage(<span class="string">&#x27;代码测试&#x27;</span>) &#123;</span><br><span class="line">        echo <span class="string">&#x27;代码测试&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">    stage(<span class="string">&#x27;代码部署&#x27;</span>) &#123;</span><br><span class="line">        echo <span class="string">&#x27;代码部署&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><img data-src="//img.to2b.cn/blog/ljk/1614530003079.png"></p>
 <p>立即构建，查看输出信息：</p>

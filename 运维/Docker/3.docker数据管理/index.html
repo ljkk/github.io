@@ -273,31 +273,12 @@
 <li>依赖宿主机目录，宿主机出问题，依赖的容器就会受影响，当宿主机较多时，不方便统一管理</li>
 <li>镜像中的挂载点中包含数据，则在容器初始化时会将数据拷贝到数据卷（匿名和命名）中</li>
 </ul>
-<h3 id="数据卷的使用"><a href="#数据卷的使用" class="headerlink" title="数据卷的使用"></a>数据卷的使用</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container run <span class="token parameter variable">-v</span> <span class="token punctuation">[</span>host-src:<span class="token punctuation">]</span>container-dest<span class="token punctuation">[</span>:<span class="token operator">&lt;</span>options<span class="token operator">></span><span class="token punctuation">]</span>
+<h3 id="数据卷的使用"><a href="#数据卷的使用" class="headerlink" title="数据卷的使用"></a>数据卷的使用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker container run -v [host-src:]container-dest[:&lt;options&gt;]</span><br><span class="line"></span><br><span class="line">options：</span><br><span class="line">ro：容器内对此数据卷只读，代码等文件适合设置为只读</span><br><span class="line">rw：容器内对此数据卷读写，默认</span><br></pre></td></tr></table></figure>
 
-options：
-ro：容器内对此数据卷只读，代码等文件适合设置为只读
-rw：容器内对此数据卷读写，默认</code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将宿主机目录挂载容器目录,两个目录都可自动创建</span>
-<span class="token parameter variable">-v</span> <span class="token operator">&lt;</span>宿主机绝对路径的目录或文件<span class="token operator">></span>:<span class="token operator">&lt;</span>容器目录或文件<span class="token operator">></span><span class="token punctuation">[</span>:ro<span class="token punctuation">]</span>
-
-<span class="token comment"># 匿名卷，宿主机自动生成/var/lib/docker/volumes/&lt;卷ID>/_data目录，并挂载至容器指定路径</span>
-<span class="token parameter variable">-v</span> <span class="token operator">&lt;</span>容器内路径<span class="token operator">></span>
-
-<span class="token comment"># 命名卷，宿主机自动生成/var/lib/docker/volumes/&lt;卷名>/_data目录，并挂载至容器指定路径</span>
-<span class="token parameter variable">-v</span> <span class="token operator">&lt;</span>卷名<span class="token operator">></span>:<span class="token operator">&lt;</span>容器目录路径<span class="token operator">></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将宿主机目录挂载容器目录,两个目录都可自动创建</span></span><br><span class="line">-v &lt;宿主机绝对路径的目录或文件&gt;:&lt;容器目录或文件&gt;[:ro]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 匿名卷，宿主机自动生成/var/lib/docker/volumes/&lt;卷ID&gt;/_data目录，并挂载至容器指定路径</span></span><br><span class="line">-v &lt;容器内路径&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 命名卷，宿主机自动生成/var/lib/docker/volumes/&lt;卷名&gt;/_data目录，并挂载至容器指定路径</span></span><br><span class="line">-v &lt;卷名&gt;:&lt;容器目录路径&gt;</span><br></pre></td></tr></table></figure>
 
 <p><strong>管理卷命令：</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker volume --help</span>
-Usage:    <span class="token function">docker</span> volume COMMAND
-
-Commands:
-  create      Create a volume
-  inspect     Display detailed information on one or <span class="token function">more</span> volumes
-  <span class="token function">ls</span>          List volumes
-  prune       Remove all unused <span class="token builtin class-name">local</span> volumes
-  <span class="token function">rm</span>          Remove one or <span class="token function">more</span> volumes</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker volume --help</span></span><br><span class="line">Usage:    docker volume COMMAND</span><br><span class="line"></span><br><span class="line">Commands:</span><br><span class="line">  create      Create a volume</span><br><span class="line">  inspect     Display detailed information on one or more volumes</span><br><span class="line">  <span class="built_in">ls</span>          List volumes</span><br><span class="line">  prune       Remove all unused <span class="built_in">local</span> volumes</span><br><span class="line">  <span class="built_in">rm</span>          Remove one or more volumes</span><br></pre></td></tr></table></figure>
 
 <p><strong>关于匿名卷和命名卷：</strong></p>
 <p>命名卷，因为有名字可以指定，在用过一次后,以后挂载容器的时候还可以使用，所以一般需要保存的数据使用命名卷保存。</p>
@@ -305,24 +286,13 @@ Commands:
 <p>Dockerfile 中指定 VOLUME 为匿名数据卷，其目的只是为了将某个路径确定为卷。</p>
 <p>数据卷默认可能会保存于 &#x2F;var&#x2F;lib&#x2F;docker&#x2F;volumes，不过一般不需要、也不应该访问这个位置。</p>
 <p>按照最佳实践的要求，不应该在容器存储层内进行数据写入操作，所有写入应该使用卷。</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看数据卷的挂载关系</span>
-<span class="token function">docker</span> inspect <span class="token parameter variable">--format</span><span class="token operator">=</span><span class="token string">"&#123;&#123;.Mounts&#125;&#125;"</span> <span class="token operator">&lt;</span>容器ID<span class="token operator">></span>
-<span class="token comment"># 删除所有数据卷</span>
-<span class="token function">docker</span> volume <span class="token function">rm</span> <span class="token variable"><span class="token variable">`</span><span class="token function">docker</span> volume <span class="token function">ls</span> <span class="token parameter variable">-q</span><span class="token variable">`</span></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看数据卷的挂载关系</span></span><br><span class="line">docker inspect --format=<span class="string">&quot;&#123;&#123;.Mounts&#125;&#125;&quot;</span> &lt;容器ID&gt;</span><br><span class="line"><span class="comment"># 删除所有数据卷</span></span><br><span class="line">docker volume <span class="built_in">rm</span> `docker volume <span class="built_in">ls</span> -q`</span><br></pre></td></tr></table></figure>
 
 <h3 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h3><p>MySQL 使用数据卷：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
-<span class="token parameter variable">--name</span> mysql <span class="token punctuation">\</span>
-<span class="token parameter variable">-p</span> <span class="token number">3306</span>:3306 <span class="token punctuation">\</span>
-<span class="token parameter variable">-v</span> /data/mysql/:/var/lib/mysql <span class="token punctuation">\</span>
-<span class="token parameter variable">-e</span> <span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span><span class="token number">123456</span> mysql:5.7.30</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">--name mysql \</span><br><span class="line">-p 3306:3306 \</span><br><span class="line">-v /data/mysql/:/var/lib/mysql \</span><br><span class="line">-e MYSQL_ROOT_PASSWORD=123456 mysql:5.7.30</span><br></pre></td></tr></table></figure>
 
 <p>文件数据卷：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
-<span class="token parameter variable">-v</span> /data/bin/catalina.sh:/apps/tomcat/bin/catalina.sh:ro <span class="token punctuation">\</span>
-<span class="token parameter variable">-v</span> /data/testapp:/data/tomcat/webapps/testapp <span class="token punctuation">\</span>
-<span class="token parameter variable">-v</span> /data/logs:/apps/tomcat/logs <span class="token punctuation">\</span>
-<span class="token parameter variable">-p</span> <span class="token number">8080</span>:8080 tomcat-web:app1</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">-v /data/bin/catalina.sh:/apps/tomcat/bin/catalina.sh:ro \</span><br><span class="line">-v /data/testapp:/data/tomcat/webapps/testapp \</span><br><span class="line">-v /data/logs:/apps/tomcat/logs \</span><br><span class="line">-p 8080:8080 tomcat-web:app1</span><br></pre></td></tr></table></figure>
 
     </div>
 

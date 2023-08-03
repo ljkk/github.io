@@ -265,70 +265,29 @@
     
     <div class="post-body" itemprop="articleBody"><p>sed：stream editor 流编辑器，对标准输出或文件逐行进行处理</p>
 <p>sed 是从文件或管道中读取一行，处理一行，输出一行;再读取一行，再处理一行，再输出一行，直到最后一行。每当处理一行时，把当前处理的行存储在临时缓冲区中，称为**模式空间(PatternSpace)**，接着用 sed 命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕。接着处理下一行，这样不断重复，直到文件末尾。一次处理一行的设计模式使得 sed 性能很高，sed 在读取大文件时不会出现卡顿的现象。如果使用 vi 命令打开几十 M 上百 M 的文件，明显会出现有卡顿的现象，这是因为 vi 命令打开文件是一次性将文件加载到内存，然后再打开。Sed 就避免了这种情况，一行一行的处理，打开速度非常快，执行速度也很快</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sed</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token string">'script;script;...'</span> <span class="token punctuation">[</span>input-file<span class="token punctuation">]</span><span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed [OPTION]... <span class="string">&#x27;script;script;...&#x27;</span> [input-file]...</span><br></pre></td></tr></table></figure>
 
-<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><h3 id="OPTION"><a href="#OPTION" class="headerlink" title="OPTION"></a>OPTION</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-n</span>         <span class="token comment"># 不输出模式空间内容到屏幕，即不自动打印，如果不加-n，会自动打印每一行</span>
-<span class="token parameter variable">-e</span>         <span class="token comment"># 当script有多个时，使用-e，多个script之间是或关系，$(-e 'script1' -e 'script2') 等同于 $('script1;script2')</span>
-<span class="token parameter variable">-f</span> <span class="token function">file</span>    <span class="token comment"># 从指定文件中读取script</span>
--r,-E      <span class="token comment"># 支持扩展正则表达式</span>
-<span class="token parameter variable">-i</span>         <span class="token comment"># 对文件直接进行修改，而不是输出到终端</span>
-<span class="token parameter variable">-i.bak</span>     <span class="token comment"># 先备份原文件再修改文件</span></code></pre>
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><h3 id="OPTION"><a href="#OPTION" class="headerlink" title="OPTION"></a>OPTION</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-n         <span class="comment"># 不输出模式空间内容到屏幕，即不自动打印，如果不加-n，会自动打印每一行</span></span><br><span class="line">-e         <span class="comment"># 当script有多个时，使用-e，多个script之间是或关系，$(-e &#x27;script1&#x27; -e &#x27;script2&#x27;) 等同于 $(&#x27;script1;script2&#x27;)</span></span><br><span class="line">-f file    <span class="comment"># 从指定文件中读取script</span></span><br><span class="line">-r,-E      <span class="comment"># 支持扩展正则表达式</span></span><br><span class="line">-i         <span class="comment"># 对文件直接进行修改，而不是输出到终端</span></span><br><span class="line">-i.bak     <span class="comment"># 先备份原文件再修改文件</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="script"><a href="#script" class="headerlink" title="script"></a>script</h3><p>script 是 <strong>地址</strong> 和 <strong>命令</strong> 的组合，地址用来定位，命令用来对定位的内容进行操作</p>
-<h4 id="地址"><a href="#地址" class="headerlink" title="地址"></a>地址</h4><pre class="language-none"><code class="language-none">不给地址：对全文进行处理
+<h4 id="地址"><a href="#地址" class="headerlink" title="地址"></a>地址</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">不给地址：对全文进行处理</span><br><span class="line"></span><br><span class="line">单地址：</span><br><span class="line">  n：n是阿拉伯数数字,指定行</span><br><span class="line">  $：最后一行</span><br><span class="line">  /pattern/：匹配到的每一行</span><br><span class="line"></span><br><span class="line">地址范围：</span><br><span class="line">  n，n：第n行到第n行 3,6 从第3行到第6行</span><br><span class="line">  n，+n：第n行开始，往后再匹配n行 3,+4 从第3行到第7行</span><br><span class="line">  /pattern1/，/pattern2/：从pattern1匹配到行，到pattern2匹配到的行，再往下继续，从pattern1匹配到行，到pattern2匹配到的行...</span><br><span class="line"></span><br><span class="line">步进：~</span><br><span class="line"></span><br><span class="line">  first\~step：匹配first行，然后步进为step向后继续匹配，例如 1\~2 就是匹配奇数行、2\~2就是匹配偶数行</span><br></pre></td></tr></table></figure>
 
-单地址：
-  n：n是阿拉伯数数字,指定行
-  $：最后一行
-  &#x2F;pattern&#x2F;：匹配到的每一行
-
-地址范围：
-  n，n：第n行到第n行 3,6 从第3行到第6行
-  n，+n：第n行开始，往后再匹配n行 3,+4 从第3行到第7行
-  &#x2F;pattern1&#x2F;，&#x2F;pattern2&#x2F;：从pattern1匹配到行，到pattern2匹配到的行，再往下继续，从pattern1匹配到行，到pattern2匹配到的行...
-
-步进：~
-
-  first\~step：匹配first行，然后步进为step向后继续匹配，例如 1\~2 就是匹配奇数行、2\~2就是匹配偶数行</code></pre>
-
-<h4 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h4><pre class="language-bash" data-language="bash"><code class="language-bash">p         <span class="token comment"># print 打印查询的行</span>
-Ip        <span class="token comment"># 忽略大小写输出</span>
-d         <span class="token comment"># 删除匹配到的行</span>
-a         <span class="token comment"># append，追加内容到下一行，支持使用\n实现多行追加； 如果要解析空格，需要用反斜杠\</span>
-i text    <span class="token comment"># insert，在行前面插入内容</span>
-c text    <span class="token comment"># change，替换行</span>
-w <span class="token function">file</span>    <span class="token comment"># 保存模式匹配的行到指定文件</span>
-r <span class="token function">file</span>    <span class="token comment"># 从file中读取内容，插入到匹配到的行的下一行</span>
-<span class="token operator">=</span>         <span class="token comment"># 打印匹配到行的行号</span>
-<span class="token operator">!</span> 命令     <span class="token comment"># 对没有匹配到的行进行处理，例如 !p 是打印未匹配到的行、！atext 是在未匹配到的行的下一行添加text</span>
-
-s/pattern/string/修饰符    <span class="token comment"># 查找替换</span>
-  修饰符:
-  g        <span class="token comment"># 一行里如果由多个匹配到的内容，全部替换。默认只替换第一个。</span>
-  p        <span class="token comment"># 打印替换成功的行</span>
-  w <span class="token function">file</span>   <span class="token comment"># 将成功替换的行保存至文件中</span>
-  I，i     <span class="token comment"># 忽略大小写</span></code></pre>
+<h4 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">p         <span class="comment"># print 打印查询的行</span></span><br><span class="line">Ip        <span class="comment"># 忽略大小写输出</span></span><br><span class="line">d         <span class="comment"># 删除匹配到的行</span></span><br><span class="line">a         <span class="comment"># append，追加内容到下一行，支持使用\n实现多行追加； 如果要解析空格，需要用反斜杠\</span></span><br><span class="line">i text    <span class="comment"># insert，在行前面插入内容</span></span><br><span class="line">c text    <span class="comment"># change，替换行</span></span><br><span class="line">w file    <span class="comment"># 保存模式匹配的行到指定文件</span></span><br><span class="line">r file    <span class="comment"># 从file中读取内容，插入到匹配到的行的下一行</span></span><br><span class="line">=         <span class="comment"># 打印匹配到行的行号</span></span><br><span class="line">! 命令     <span class="comment"># 对没有匹配到的行进行处理，例如 !p 是打印未匹配到的行、！atext 是在未匹配到的行的下一行添加text</span></span><br><span class="line"></span><br><span class="line">s/pattern/string/修饰符    <span class="comment"># 查找替换</span></span><br><span class="line">  修饰符:</span><br><span class="line">  g        <span class="comment"># 一行里如果由多个匹配到的内容，全部替换。默认只替换第一个。</span></span><br><span class="line">  p        <span class="comment"># 打印替换成功的行</span></span><br><span class="line">  w file   <span class="comment"># 将成功替换的行保存至文件中</span></span><br><span class="line">  I，i     <span class="comment"># 忽略大小写</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h3><p>1.将 php.ini-production 中的无关信息去掉</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sed</span> <span class="token parameter variable">-E</span> <span class="token string">'/^; /d;/^;+;$/d'</span> /usr/local/src/php-7.4.8/php.ini-production <span class="token operator">|</span> <span class="token function">uniq</span> <span class="token operator">></span> php.ini</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -E <span class="string">&#x27;/^; /d;/^;+;$/d&#x27;</span> /usr/local/src/php-7.4.8/php.ini-production | <span class="built_in">uniq</span> &gt; php.ini</span><br></pre></td></tr></table></figure>
 
 <p>2.获取分区利用率</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~$ <span class="token function">df</span> <span class="token operator">|</span> <span class="token function">sed</span> <span class="token parameter variable">-En</span> <span class="token string">'/^\/dev\/sd/s/.* ([0-9]+)%.*/\1/p'</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lujinkai@Z510:~$ <span class="built_in">df</span> | sed -En <span class="string">&#x27;/^\/dev\/sd/s/.* ([0-9]+)%.*/\1/p&#x27;</span></span><br></pre></td></tr></table></figure>
 
 <p>3.取基名和目录名</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用/作为分隔符，如果搜索条件中出现/需要转义，所以为了易读性，不建议使用搜索条件中出现的字符作为分割符</span>
-<span class="token builtin class-name">pwd</span> <span class="token operator">|</span><span class="token function">sed</span> <span class="token parameter variable">-r</span> <span class="token string">'s/(^\/.*\/)([^\/]+\/?)/\2/'</span>	<span class="token comment"># 取基名</span>
-<span class="token builtin class-name">pwd</span> <span class="token operator">|</span><span class="token function">sed</span> <span class="token parameter variable">-r</span> <span class="token string">'s@(^/.*/)([^/]+/?)@\2@'</span>	<span class="token comment"># 取目录</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用/作为分隔符，如果搜索条件中出现/需要转义，所以为了易读性，不建议使用搜索条件中出现的字符作为分割符</span></span><br><span class="line"><span class="built_in">pwd</span> |sed -r <span class="string">&#x27;s/(^\/.*\/)([^\/]+\/?)/\2/&#x27;</span>	<span class="comment"># 取基名</span></span><br><span class="line"><span class="built_in">pwd</span> |sed -r <span class="string">&#x27;s@(^/.*/)([^/]+/?)@\2@&#x27;</span>	<span class="comment"># 取目录</span></span><br></pre></td></tr></table></figure>
 
 <p>4.将非#开头的行加#</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~/data/test$ <span class="token function">sed</span> <span class="token parameter variable">-Ei</span> <span class="token string">'s/^[^#].*/# &amp;/'</span> a.log
-<span class="token comment"># 或</span>
-lujinkai@Z510:~/data/test$ <span class="token function">sed</span> <span class="token parameter variable">-Ei</span> <span class="token string">'s/(^[^#].*)/# \1/'</span> a.log
-<span class="token comment"># 或</span>
-lujinkai@Z510:~/data/test$ <span class="token function">sed</span> <span class="token parameter variable">-ri</span> <span class="token string">'/^#/!s/^/# /'</span> a.log</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">lujinkai@Z510:~/data/test$ sed -Ei <span class="string">&#x27;s/^[^#].*/# &amp;/&#x27;</span> a.log</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">lujinkai@Z510:~/data/test$ sed -Ei <span class="string">&#x27;s/(^[^#].*)/# \1/&#x27;</span> a.log</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">lujinkai@Z510:~/data/test$ sed -ri <span class="string">&#x27;/^#/!s/^/# /&#x27;</span> a.log</span><br></pre></td></tr></table></figure>
 
 <p>5.将#开头的行删除#</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">lujinkai@Z510:~/data/test$ <span class="token function">sed</span> <span class="token parameter variable">-ri</span> <span class="token string">'s/^#(.*)/\1/'</span> a.log</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lujinkai@Z510:~/data/test$ sed -ri <span class="string">&#x27;s/^#(.*)/\1/&#x27;</span> a.log</span><br></pre></td></tr></table></figure>
 
 <h2 id="高级用法"><a href="#高级用法" class="headerlink" title="高级用法"></a>高级用法</h2><p>略。。。</p>
 

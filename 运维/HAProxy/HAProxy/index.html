@@ -303,53 +303,17 @@
 <h3 id="HAProxy-安装"><a href="#HAProxy-安装" class="headerlink" title="HAProxy 安装"></a>HAProxy 安装</h3><p>yum 或者 apt 安装的版本较老，推荐编译安装</p>
 <p>HAProxy 支持基于 Lua 实现功能扩展</p>
 <p><strong>编译安装 Lua</strong>：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> http://www.lua.org/ftp/lua-5.4.2.tar.gz
-<span class="token function">mkdir</span> /usr/local/lua
-<span class="token function">tar</span> zxvf lua-5.4.2.tar.gz <span class="token parameter variable">-C</span> /usr/local/lua --strip-components <span class="token number">1</span>
-<span class="token builtin class-name">cd</span> /usr/local/lua
-<span class="token function">make</span> all <span class="token builtin class-name">test</span>
-./src/lua <span class="token parameter variable">-v</span>	<span class="token comment"># Lua 5.4.2  Copyright (C) 1994-2020 Lua.org, PUC-Rio</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget http://www.lua.org/ftp/lua-5.4.2.tar.gz</span><br><span class="line"><span class="built_in">mkdir</span> /usr/local/lua</span><br><span class="line">tar zxvf lua-5.4.2.tar.gz -C /usr/local/lua --strip-components 1</span><br><span class="line"><span class="built_in">cd</span> /usr/local/lua</span><br><span class="line">make all <span class="built_in">test</span></span><br><span class="line">./src/lua -v	<span class="comment"># Lua 5.4.2  Copyright (C) 1994-2020 Lua.org, PUC-Rio</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>编译安装 HAProxy</strong>：</p>
 <p><a target="_blank" rel="noopener" href="http://www.haproxy.org/">http://www.haproxy.org/</a> # 优先下载 LTS 版</p>
 <p><a target="_blank" rel="noopener" href="http://www.haproxy.org/download/">http://www.haproxy.org/download/</a></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> http://www.haproxy.org/download/2.2/src/haproxy-2.2.6.tar.gz
-yum <span class="token parameter variable">-y</span> <span class="token function">install</span> gcc openssl-devel pcre-devel systemd-devel
-<span class="token function">mkdir</span> /usr/local/haproxy
-<span class="token function">tar</span> zxvf haproxy-2.2.6.tar.gz
-<span class="token builtin class-name">cd</span> haproxy-2.2.6/
-<span class="token comment"># 参考INSTALL文件进行编译安装</span>
-<span class="token function">make</span> <span class="token assign-left variable">ARCH</span><span class="token operator">=</span>x86_64 <span class="token assign-left variable">TARGET</span><span class="token operator">=</span>linux-glibc <span class="token assign-left variable">USE_PCRE</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">USE_OPENSSL</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">USE_ZLIB</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">USE_SYSTEMD</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">USE_LUA</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">LUA_INC</span><span class="token operator">=</span>/usr/local/lua/src/ <span class="token assign-left variable">LUA_LIB</span><span class="token operator">=</span>/usr/local/lua/src/
-<span class="token function">make</span> <span class="token function">install</span> <span class="token assign-left variable">PREFIX</span><span class="token operator">=</span>/usr/local/haproxy
-<span class="token function">vim</span> /etc/profile	<span class="token comment"># export PATH=/usr/local/haproxy/sbin:$PATH</span>
-<span class="token builtin class-name">.</span> /etc/profile
-haproxy <span class="token parameter variable">-v</span>
-haproxy <span class="token parameter variable">-V</span>
-haproxy <span class="token parameter variable">-vv</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">wget http://www.haproxy.org/download/2.2/src/haproxy-2.2.6.tar.gz</span><br><span class="line">yum -y install gcc openssl-devel pcre-devel systemd-devel</span><br><span class="line"><span class="built_in">mkdir</span> /usr/local/haproxy</span><br><span class="line">tar zxvf haproxy-2.2.6.tar.gz</span><br><span class="line"><span class="built_in">cd</span> haproxy-2.2.6/</span><br><span class="line"><span class="comment"># 参考INSTALL文件进行编译安装</span></span><br><span class="line">make ARCH=x86_64 TARGET=linux-glibc USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 USE_SYSTEMD=1 USE_LUA=1 LUA_INC=/usr/local/lua/src/ LUA_LIB=/usr/local/lua/src/</span><br><span class="line">make install PREFIX=/usr/local/haproxy</span><br><span class="line">vim /etc/profile	<span class="comment"># export PATH=/usr/local/haproxy/sbin:$PATH</span></span><br><span class="line">. /etc/profile</span><br><span class="line">haproxy -v</span><br><span class="line">haproxy -V</span><br><span class="line">haproxy -vv</span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> <span class="token function">install</span> <span class="token function">make</span> gcc build-essential libssl-dev zlib1g-dev libpcre3 libpcre3-dev libsystemd-dev libreadline-dev <span class="token parameter variable">-y</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install make gcc build-essential libssl-dev zlib1g-dev libpcre3 libpcre3-dev libsystemd-dev libreadline-dev -y</span><br></pre></td></tr></table></figure>
 
 <h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>查看配置文件示例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$tree</span> /usr/local/src/haproxy-2.2.6/examples/
-/usr/local/src/haproxy-2.2.6/examples/
-├── acl-content-sw.cfg
-├── content-sw-sample.cfg
-├── errorfiles
-│   ├── <span class="token number">400</span>.http
-│   ├── <span class="token number">403</span>.http
-│   ├── <span class="token number">408</span>.http
-│   ├── <span class="token number">500</span>.http
-│   ├── <span class="token number">502</span>.http
-│   ├── <span class="token number">503</span>.http
-│   ├── <span class="token number">504</span>.http
-│   └── README
-├── haproxy.init
-├── option-http_proxy.cfg
-├── socks4.cfg
-├── transparent_proxy.cfg
-└── wurfl-example.cfg
-
-<span class="token number">1</span> directory, <span class="token number">15</span> files</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@c71 ~]<span class="variable">$tree</span> /usr/local/src/haproxy-2.2.6/examples/</span><br><span class="line">/usr/local/src/haproxy-2.2.6/examples/</span><br><span class="line">├── acl-content-sw.cfg</span><br><span class="line">├── content-sw-sample.cfg</span><br><span class="line">├── errorfiles</span><br><span class="line">│   ├── 400.http</span><br><span class="line">│   ├── 403.http</span><br><span class="line">│   ├── 408.http</span><br><span class="line">│   ├── 500.http</span><br><span class="line">│   ├── 502.http</span><br><span class="line">│   ├── 503.http</span><br><span class="line">│   ├── 504.http</span><br><span class="line">│   └── README</span><br><span class="line">├── haproxy.init</span><br><span class="line">├── option-http_proxy.cfg</span><br><span class="line">├── socks4.cfg</span><br><span class="line">├── transparent_proxy.cfg</span><br><span class="line">└── wurfl-example.cfg</span><br><span class="line"></span><br><span class="line">1 directory, 15 files</span><br></pre></td></tr></table></figure>
 
 <p>创建自定义的配置文件：</p>
 <p>HAProxy 的配置文件 haproxy.cfg 由两大部分组成，分别是 global 和 proxies 部分</p>
@@ -367,113 +331,27 @@ haproxy <span class="token parameter variable">-vv</span></code></pre>
 </li>
 </ul>
 <p>以下列举的是部分配置，官方文档：<a target="_blank" rel="noopener" href="http://cbonte.github.io/haproxy-dconv/2.2/configuration.html">http://cbonte.github.io/haproxy-dconv/2.2/configuration.html</a></p>
-<h4 id="global"><a href="#global" class="headerlink" title="global"></a>global</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$mkdir</span> /var/lib/haproxy
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$mkdir</span> /etc/haproxy
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /etc/haproxy/haproxy.cfg
-global
-    <span class="token function">chroot</span> /usr/local/haproxy	<span class="token comment"># 锁定运行目录</span>
-    stats socket /var/lib/haproxy/haproxy.sock mode <span class="token number">600</span> level admin		<span class="token comment"># socket文件</span>
-    <span class="token comment">#uid 99</span>
-    <span class="token comment">#gid 99</span>
-    user haproxy		<span class="token comment"># 运行haproxy的用户</span>
-    group haproxy		<span class="token comment"># 运行haproxy的用户组</span>
-    daemon
-    nbproc <span class="token number">1</span>			<span class="token comment"># 启的haproxy work 进程数，默认进程数是一个</span>
-    <span class="token comment"># nbthread 1		# 指定每个haproxy进程开启的线程数，默认为每个进程一个线程，和nbproc配置互斥</span>
-    <span class="token comment">#cpu-map 1 0		# 绑定haproxy worker 进程至指定CPU，将第1个work进程绑定至0号CPU</span>
-    <span class="token comment">#cpu-map 2 1		# 绑定haproxy worker 进程至指定CPU，将第2个work进程绑定至1号CPU</span>
-    <span class="token comment">#cpu-map 3 2</span>
-    <span class="token comment">#cpu-map 4 3</span>
-    maxconn <span class="token number">100000</span>		<span class="token comment"># 每个haproxy进程的最大并发连接数</span>
-   	<span class="token comment"># maxsslconn n		# 每个haproxy进程ssl最大连接数,用于haproxy配置了证书的场景下</span>
-   	<span class="token comment"># maxconnrate n		# 每个进程每秒创建的最大连接数量</span>
-   	<span class="token comment"># spread-checks n	# 后端server状态check随机提前或延迟百分比时间，建议2-5(20%-50%)之间，默认0</span>
-    pidfile /var/lib/haproxy/haproxy.pid	<span class="token comment"># 指定pid文件路径</span>
-    <span class="token comment"># log 127.0.0.1 local2 info	  # 全局的syslog服务器；日志服务器需要开启UDP协议，最多可以定义两个</span></code></pre>
+<h4 id="global"><a href="#global" class="headerlink" title="global"></a>global</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@c71 ~]<span class="variable">$mkdir</span> /var/lib/haproxy</span><br><span class="line">[root@c71 ~]<span class="variable">$mkdir</span> /etc/haproxy</span><br><span class="line">[root@c71 ~]<span class="variable">$vim</span> /etc/haproxy/haproxy.cfg</span><br><span class="line">global</span><br><span class="line">    <span class="built_in">chroot</span> /usr/local/haproxy	<span class="comment"># 锁定运行目录</span></span><br><span class="line">    stats socket /var/lib/haproxy/haproxy.sock mode 600 level admin		<span class="comment"># socket文件</span></span><br><span class="line">    <span class="comment">#uid 99</span></span><br><span class="line">    <span class="comment">#gid 99</span></span><br><span class="line">    user haproxy		<span class="comment"># 运行haproxy的用户</span></span><br><span class="line">    group haproxy		<span class="comment"># 运行haproxy的用户组</span></span><br><span class="line">    daemon</span><br><span class="line">    nbproc 1			<span class="comment"># 启的haproxy work 进程数，默认进程数是一个</span></span><br><span class="line">    <span class="comment"># nbthread 1		# 指定每个haproxy进程开启的线程数，默认为每个进程一个线程，和nbproc配置互斥</span></span><br><span class="line">    <span class="comment">#cpu-map 1 0		# 绑定haproxy worker 进程至指定CPU，将第1个work进程绑定至0号CPU</span></span><br><span class="line">    <span class="comment">#cpu-map 2 1		# 绑定haproxy worker 进程至指定CPU，将第2个work进程绑定至1号CPU</span></span><br><span class="line">    <span class="comment">#cpu-map 3 2</span></span><br><span class="line">    <span class="comment">#cpu-map 4 3</span></span><br><span class="line">    maxconn 100000		<span class="comment"># 每个haproxy进程的最大并发连接数</span></span><br><span class="line">   	<span class="comment"># maxsslconn n		# 每个haproxy进程ssl最大连接数,用于haproxy配置了证书的场景下</span></span><br><span class="line">   	<span class="comment"># maxconnrate n		# 每个进程每秒创建的最大连接数量</span></span><br><span class="line">   	<span class="comment"># spread-checks n	# 后端server状态check随机提前或延迟百分比时间，建议2-5(20%-50%)之间，默认0</span></span><br><span class="line">    pidfile /var/lib/haproxy/haproxy.pid	<span class="comment"># 指定pid文件路径</span></span><br><span class="line">    <span class="comment"># log 127.0.0.1 local2 info	  # 全局的syslog服务器；日志服务器需要开启UDP协议，最多可以定义两个</span></span><br></pre></td></tr></table></figure>
 
 <p>HAproxy 本身不记录客户端的访问日志，此外为减少服务器负载，一般生产中 HAProxy 不记录日志</p>
-<h4 id="defaults"><a href="#defaults" class="headerlink" title="defaults"></a>defaults</h4><pre class="language-bash" data-language="bash"><code class="language-bash">defaults
-    option redispatch		<span class="token comment"># 当server Id对应的服务器挂掉后，强制定向到其他健康的服务器，重新派发</span>
-    option abortonclose 	<span class="token comment"># 服务器负载很高时，自动结束当前队列处理比较久的连接，针对业务情况选择开启</span>
-    option http-keep-alive	<span class="token comment"># 开启与客户端的会话保持</span>
-    option forwardfor		<span class="token comment"># 透传客户端真实IP至后端web服务器</span>
-    maxconn <span class="token number">100000</span>
-    mode http				<span class="token comment"># http|tcp，设置默认工作类型,使用TCP服务器性能更好，减少压力</span>
-    <span class="token function">timeout</span> connect 120s <span class="token comment"># 客户端请求从haproxy到后端server最长连接等待时间(TCP连接之前)，默认单位ms</span>
-    <span class="token function">timeout</span> server 120s	<span class="token comment"># 客户端请求从haproxy到后端服务端的请求处理超时时长(TCP连接之后)，默认单位ms，如果超时，会出现502错误，此值建议设置较大些，访止502错误</span>
-    <span class="token function">timeout</span> client 120s	<span class="token comment"># 设置haproxy与客户端的最长非活动时间，默认单位ms，建议和timeoutserver相同</span>
-    <span class="token function">timeout</span>	check 5s	<span class="token comment"># 对后端服务器的默认检测超时时间</span>
-    default-server inter <span class="token number">1000</span> weight <span class="token number">3</span>	<span class="token comment"># 指定后端服务器的默认设置</span></code></pre>
+<h4 id="defaults"><a href="#defaults" class="headerlink" title="defaults"></a>defaults</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">defaults</span><br><span class="line">    option redispatch		<span class="comment"># 当server Id对应的服务器挂掉后，强制定向到其他健康的服务器，重新派发</span></span><br><span class="line">    option abortonclose 	<span class="comment"># 服务器负载很高时，自动结束当前队列处理比较久的连接，针对业务情况选择开启</span></span><br><span class="line">    option http-keep-alive	<span class="comment"># 开启与客户端的会话保持</span></span><br><span class="line">    option forwardfor		<span class="comment"># 透传客户端真实IP至后端web服务器</span></span><br><span class="line">    maxconn 100000</span><br><span class="line">    mode http				<span class="comment"># http|tcp，设置默认工作类型,使用TCP服务器性能更好，减少压力</span></span><br><span class="line">    <span class="built_in">timeout</span> connect 120s <span class="comment"># 客户端请求从haproxy到后端server最长连接等待时间(TCP连接之前)，默认单位ms</span></span><br><span class="line">    <span class="built_in">timeout</span> server 120s	<span class="comment"># 客户端请求从haproxy到后端服务端的请求处理超时时长(TCP连接之后)，默认单位ms，如果超时，会出现502错误，此值建议设置较大些，访止502错误</span></span><br><span class="line">    <span class="built_in">timeout</span> client 120s	<span class="comment"># 设置haproxy与客户端的最长非活动时间，默认单位ms，建议和timeoutserver相同</span></span><br><span class="line">    <span class="built_in">timeout</span>	check 5s	<span class="comment"># 对后端服务器的默认检测超时时间</span></span><br><span class="line">    default-server inter 1000 weight 3	<span class="comment"># 指定后端服务器的默认设置</span></span><br></pre></td></tr></table></figure>
 
 <p>default-server 指定后端服务器的默认配置，以下是主要配置项：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 对指定real server进行健康状态检查，默认不开启检查,只有check后面没有其它配置也可以启用检查功能</span>
-<span class="token comment"># 默认对相应的后端服务器IP和端口,利用TCP连接进行周期性健康性检查,注意必须指定端口才能实现健康性检查</span>
-check
-    addr <span class="token operator">&lt;</span>IP<span class="token operator">></span>		<span class="token comment"># 健康状态监测IP，可以是专门的数据网段，减少业务网络的流量</span>
-    port <span class="token operator">&lt;</span>num<span class="token operator">></span>		<span class="token comment"># 健康状态监测端口</span>
-    inter <span class="token operator">&lt;</span>num<span class="token operator">></span>		<span class="token comment"># 健康状态检查间隔时间，默认2000 ms</span>
-    fall <span class="token operator">&lt;</span>num<span class="token operator">></span>		<span class="token comment"># 后端服务器从线上转为线下的检查的连续失效次数，默认为3</span>
-    rise <span class="token operator">&lt;</span>num<span class="token operator">></span>		<span class="token comment"># 后端服务器从下线恢复上线的检查的连续有效次数，默认为2</span>
-<span class="token comment"># 动态修改权重，默认为1，最大值为256，0(状态为蓝色)表示不参与负载均衡，但仍接受持久连接</span>
-weight <span class="token operator">&lt;</span>weight<span class="token operator">></span>
-backup			<span class="token comment"># 将后端服务器标记为备份状态,只在所有非备份主机down机时提供服务，类似Sorry Server</span>
-disabled		<span class="token comment"># 将后端服务器标记为不可用状态，即维护状态，除了持久模式，将不再接受连接,状态为深黄色</span>
-redirect prefix http://www.baidu.com/	<span class="token comment"># 302重定向</span>
-redir http://www.baidu.com				<span class="token comment"># 同上，区别是最后不加"/"</span>
-maxconn <span class="token operator">&lt;</span>maxconn<span class="token operator">></span> 						<span class="token comment"># 当前后端server的最大并发连接数</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 对指定real server进行健康状态检查，默认不开启检查,只有check后面没有其它配置也可以启用检查功能</span></span><br><span class="line"><span class="comment"># 默认对相应的后端服务器IP和端口,利用TCP连接进行周期性健康性检查,注意必须指定端口才能实现健康性检查</span></span><br><span class="line">check</span><br><span class="line">    addr &lt;IP&gt;		<span class="comment"># 健康状态监测IP，可以是专门的数据网段，减少业务网络的流量</span></span><br><span class="line">    port &lt;num&gt;		<span class="comment"># 健康状态监测端口</span></span><br><span class="line">    inter &lt;num&gt;		<span class="comment"># 健康状态检查间隔时间，默认2000 ms</span></span><br><span class="line">    fall &lt;num&gt;		<span class="comment"># 后端服务器从线上转为线下的检查的连续失效次数，默认为3</span></span><br><span class="line">    rise &lt;num&gt;		<span class="comment"># 后端服务器从下线恢复上线的检查的连续有效次数，默认为2</span></span><br><span class="line"><span class="comment"># 动态修改权重，默认为1，最大值为256，0(状态为蓝色)表示不参与负载均衡，但仍接受持久连接</span></span><br><span class="line">weight &lt;weight&gt;</span><br><span class="line">backup			<span class="comment"># 将后端服务器标记为备份状态,只在所有非备份主机down机时提供服务，类似Sorry Server</span></span><br><span class="line">disabled		<span class="comment"># 将后端服务器标记为不可用状态，即维护状态，除了持久模式，将不再接受连接,状态为深黄色</span></span><br><span class="line">redirect prefix http://www.baidu.com/	<span class="comment"># 302重定向</span></span><br><span class="line">redir http://www.baidu.com				<span class="comment"># 同上，区别是最后不加&quot;/&quot;</span></span><br><span class="line">maxconn &lt;maxconn&gt; 						<span class="comment"># 当前后端server的最大并发连接数</span></span><br></pre></td></tr></table></figure>
 
 <p>注意：HAProxy server 的 weight 和 Nginx server 的 weight 表示的意义是一样的，和 Keepalived real_server 的 weight 表示的意义不一样</p>
-<h4 id="frontend"><a href="#frontend" class="headerlink" title="frontend"></a>frontend</h4><pre class="language-bash" data-language="bash"><code class="language-bash">frontend magedu_web_port	<span class="token comment"># 形式命名：业务-服务-端口号</span>
-    <span class="token comment"># 指定HAProxy的监听地址，可以是IPV4或IPV6，可以同时监听多个IP或端口，可同时用于listen字段中</span>
-    <span class="token comment"># bind [&lt;address>]:&lt;port_range> [, ...] [param*]，address省略则等于0.0.0.0</span>
-    <span class="token comment"># 注意：如果需要绑定在非本机的IP，例如vip，需要开启内核参数：net.ipv4.ip_nonlocal_bind=1</span>
-    <span class="token builtin class-name">bind</span> :80,:8080
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:10080,:8801-8810,10.0.0.17:9001-9010
-    mode http<span class="token operator">|</span>tcp 	<span class="token comment"># 指定负载协议类型</span>
-    use_backend <span class="token operator">&lt;</span>backend_name<span class="token operator">></span> 	<span class="token comment"># 调用的后端服务器组名称</span>
-    <span class="token comment"># 针对所有server配置,当前端服务器的连接数达到上限后的后援队列长度，注意：不支持backend</span>
-    backlog <span class="token operator">&lt;</span>backlog<span class="token operator">></span></code></pre>
+<h4 id="frontend"><a href="#frontend" class="headerlink" title="frontend"></a>frontend</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">frontend magedu_web_port	<span class="comment"># 形式命名：业务-服务-端口号</span></span><br><span class="line">    <span class="comment"># 指定HAProxy的监听地址，可以是IPV4或IPV6，可以同时监听多个IP或端口，可同时用于listen字段中</span></span><br><span class="line">    <span class="comment"># bind [&lt;address&gt;]:&lt;port_range&gt; [, ...] [param*]，address省略则等于0.0.0.0</span></span><br><span class="line">    <span class="comment"># 注意：如果需要绑定在非本机的IP，例如vip，需要开启内核参数：net.ipv4.ip_nonlocal_bind=1</span></span><br><span class="line">    <span class="built_in">bind</span> :80,:8080</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:10080,:8801-8810,10.0.0.17:9001-9010</span><br><span class="line">    mode http|tcp 	<span class="comment"># 指定负载协议类型</span></span><br><span class="line">    use_backend &lt;backend_name&gt; 	<span class="comment"># 调用的后端服务器组名称</span></span><br><span class="line">    <span class="comment"># 针对所有server配置,当前端服务器的连接数达到上限后的后援队列长度，注意：不支持backend</span></span><br><span class="line">    backlog &lt;backlog&gt;</span><br></pre></td></tr></table></figure>
 
-<h4 id="backend"><a href="#backend" class="headerlink" title="backend"></a>backend</h4><pre class="language-bash" data-language="bash"><code class="language-bash">backend magedu-test-http-nodes
-    mode tcp	<span class="token comment"># 指定负载协议类型,和对应的frontend必须一致</span>
-    default-server inter <span class="token number">1000</span> weight <span class="token number">6</span>
-    <span class="token comment"># server name address:port param*	为后端真实服务器指定一个内部名称，随便写一个即可</span>
-    server web1 <span class="token number">10.0</span>.0.27:80 check	<span class="token comment"># 定义后端real server,必须指定IP和端口</span>
-    server web1 <span class="token number">10.0</span>.0.17:80 weight <span class="token number">2</span> check addr <span class="token number">10.0</span>.0.117 port <span class="token number">8080</span></code></pre>
+<h4 id="backend"><a href="#backend" class="headerlink" title="backend"></a>backend</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">backend magedu-test-http-nodes</span><br><span class="line">    mode tcp	<span class="comment"># 指定负载协议类型,和对应的frontend必须一致</span></span><br><span class="line">    default-server inter 1000 weight 6</span><br><span class="line">    <span class="comment"># server name address:port param*	为后端真实服务器指定一个内部名称，随便写一个即可</span></span><br><span class="line">    server web1 10.0.0.27:80 check	<span class="comment"># 定义后端real server,必须指定IP和端口</span></span><br><span class="line">    server web1 10.0.0.17:80 weight 2 check addr 10.0.0.117 port 8080</span><br></pre></td></tr></table></figure>
 
-<h4 id="listen"><a href="#listen" class="headerlink" title="listen"></a>listen</h4><pre class="language-bash" data-language="bash"><code class="language-bash">listen web_port
-    mode http
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.71:80
-    log global	<span class="token comment"># 开启日志功能,默认不记录日志</span>
-    server web1 <span class="token number">127.0</span>.0.1:8080 check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span>
-
-listen stats	<span class="token comment"># stats相关：状态页配置项</span>
-    mode http
-    <span class="token builtin class-name">bind</span> <span class="token number">0.0</span>.0.0:9999
-    log global
-    stats <span class="token builtin class-name">enable</span>	<span class="token comment"># 于默认的参数启用stats page</span>
-    stats uri /haproxy-status	<span class="token comment"># 自定义stats page uri，默认值：/haproxy?stats</span>
-    stats auth admin:123456		<span class="token comment"># 认证时的账号和密码，可定义多个用户,每行指定一个用户</span></code></pre>
+<h4 id="listen"><a href="#listen" class="headerlink" title="listen"></a>listen</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">listen web_port</span><br><span class="line">    mode http</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.71:80</span><br><span class="line">    <span class="built_in">log</span> global	<span class="comment"># 开启日志功能,默认不记录日志</span></span><br><span class="line">    server web1 127.0.0.1:8080 check inter 3000 fall 2 rise 5</span><br><span class="line"></span><br><span class="line">listen stats	<span class="comment"># stats相关：状态页配置项</span></span><br><span class="line">    mode http</span><br><span class="line">    <span class="built_in">bind</span> 0.0.0.0:9999</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    stats <span class="built_in">enable</span>	<span class="comment"># 于默认的参数启用stats page</span></span><br><span class="line">    stats uri /haproxy-status	<span class="comment"># 自定义stats page uri，默认值：/haproxy?stats</span></span><br><span class="line">    stats auth admin:123456		<span class="comment"># 认证时的账号和密码，可定义多个用户,每行指定一个用户</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="使用子配置文件保存配置"><a href="#使用子配置文件保存配置" class="headerlink" title="使用子配置文件保存配置"></a>使用子配置文件保存配置</h4><p>按业务分类，将配置信息拆分，放在不同的子配置文件中，从而达到方便维护的目的</p>
 <p>注意：配置文件必须为 cfg 后缀非.开头</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> /etc/haproxy/conf.d/</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /etc/haproxy/conf.d/</span><br></pre></td></tr></table></figure>
 
 <p>因为没有类似<code>include</code>的指令引入子配置，所以要在启动命令上指定子配置文件</p>
-<h3 id="systemctl-启动文件"><a href="#systemctl-启动文件" class="headerlink" title="systemctl 启动文件"></a>systemctl 启动文件</h3><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$vim</span> /usr/lib/systemd/system/haproxy.service
-<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
-<span class="token assign-left variable">Description</span><span class="token operator">=</span>HAProxy Load Balancer
-<span class="token assign-left variable">After</span><span class="token operator">=</span>syslog.target network.target
-
-<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
-<span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>/usr/local/haproxy/sbin/haproxy <span class="token parameter variable">-f</span> /etc/haproxy/haproxy.cfg <span class="token parameter variable">-f</span> /etc/haproxy/conf.d/ <span class="token parameter variable">-c</span> <span class="token parameter variable">-q</span>
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/local/haproxy/sbin/haproxy <span class="token parameter variable">-Ws</span> <span class="token parameter variable">-f</span> /etc/haproxy/haproxy.cfg <span class="token parameter variable">-f</span> /etc/haproxy/conf.d/ <span class="token parameter variable">-p</span> /var/lib/haproxy/haproxy.pid
-<span class="token assign-left variable">ExecReload</span><span class="token operator">=</span>/bin/kill <span class="token parameter variable">-USR2</span> <span class="token variable">$MAINPID</span>
-
-<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
-<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
-
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$useradd</span> <span class="token parameter variable">-r</span> <span class="token parameter variable">-s</span> /sbin/nologin <span class="token parameter variable">-d</span> /var/lib/haproxy haproxy</code></pre>
+<h3 id="systemctl-启动文件"><a href="#systemctl-启动文件" class="headerlink" title="systemctl 启动文件"></a>systemctl 启动文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@c71 ~]<span class="variable">$vim</span> /usr/lib/systemd/system/haproxy.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=HAProxy Load Balancer</span><br><span class="line">After=syslog.target network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=/usr/local/haproxy/sbin/haproxy -f /etc/haproxy/haproxy.cfg -f /etc/haproxy/conf.d/ -c -q</span><br><span class="line">ExecStart=/usr/local/haproxy/sbin/haproxy -Ws -f /etc/haproxy/haproxy.cfg -f /etc/haproxy/conf.d/ -p /var/lib/haproxy/haproxy.pid</span><br><span class="line">ExecReload=/bin/kill -USR2 <span class="variable">$MAINPID</span></span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line">[root@c71 ~]<span class="variable">$useradd</span> -r -s /sbin/nologin -d /var/lib/haproxy haproxy</span><br></pre></td></tr></table></figure>
 
 <h2 id="HAProxy-调度算法"><a href="#HAProxy-调度算法" class="headerlink" title="HAProxy 调度算法"></a>HAProxy 调度算法</h2><p>官方文档：<a target="_blank" rel="noopener" href="http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#4-balance">http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#4-balance</a></p>
 <p>HAProxy 的调度算法分为静态和动态两种：</p>
@@ -482,13 +360,7 @@ listen stats	<span class="token comment"># stats相关：状态页配置项</spa
 <li>动态算法：基于后端服务器状态进行调度适当调整，优先调度至当前负载较低的服务器，且权重可以 haproxy 运行时动态调整无需重启</li>
 </ul>
 <h3 id="静态算法"><a href="#静态算法" class="headerlink" title="静态算法"></a>静态算法</h3><h4 id="static-rr"><a href="#static-rr" class="headerlink" title="static-rr"></a>static-rr</h4><p>基于权重的轮询调度，不支持运行时利用 socat 进行权重的动态调整（只支持 0 和 1）及后端服务器慢启动，其后端主机数量没有限制，相当于 LVS 中的 wrr</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">listen web_host
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80,:8801-8810,10.0.0.7:9001-9010
-    mode http
-    log global
-    balance static-rr
-    server web1 <span class="token number">10.0</span>.0.17:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span>
-    server web2 <span class="token number">10.0</span>.0.27:80 weight <span class="token number">2</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">listen web_host</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80,:8801-8810,10.0.0.7:9001-9010</span><br><span class="line">    mode http</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    balance static-rr</span><br><span class="line">    server web1 10.0.0.17:80 weight 1 check inter 3000 fall 2 rise 5</span><br><span class="line">    server web2 10.0.0.27:80 weight 2 check inter 3000 fall 2 rise 5</span><br></pre></td></tr></table></figure>
 
 <h4 id="first"><a href="#first" class="headerlink" title="first"></a>first</h4><p>根据服务器在列表中的位置，自上而下进行调度，但是其只会当第一台服务器的连接数达到上限，新请求才会分配给下一台服务，因此会忽略服务器的权重设置，此方式使用较少</p>
 <p>不支持用 socat 进行动态修改权重，可以设置 0 和 1</p>
@@ -496,31 +368,12 @@ listen stats	<span class="token comment"># stats相关：状态页配置项</spa
 <p>Socat 的主要特点就是在两个数据流之间建立通道，且支持众多协议和链接方式。如 IP、TCP、 UDP、IPv6、PIPE、EXEC、System、Open、Proxy、Openssl、Socket 等。</p>
 <p><strong>这里利用 socat 工具，对服务器动态权重和其它状态进行调整</strong></p>
 <p>socat stdio：对文件进行标准写入和标准读取</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看HAProxy帮助</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"help"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token comment"># 查看HAProxy信息</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"show info"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token comment"># 查看所有server的各种状态</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"show servers state"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token comment"># 查看指定server的weight</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"get weight magedu-test-80/web2"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token comment"># 修改指定server的weight，如果静态算法，如:static-rr，可以更改weight为0或1，但不支持动态更改为其它值</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"set weight magedu-test-80/web2 2"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token comment"># 将指定后端服务器禁用</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"disable server magedu-test-80/web2"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token comment"># 启用指定后端服务器</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"enable server magedu-test-80/web2"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token comment"># 将后端服务器软下线，即weight设为0</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"set weight magedu-test-80/web1 0"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看HAProxy帮助</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;help&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="comment"># 查看HAProxy信息</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;show info&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="comment"># 查看所有server的各种状态</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;show servers state&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="comment"># 查看指定server的weight</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;get weight magedu-test-80/web2&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="comment"># 修改指定server的weight，如果静态算法，如:static-rr，可以更改weight为0或1，但不支持动态更改为其它值</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;set weight magedu-test-80/web2 2&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="comment"># 将指定后端服务器禁用</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;disable server magedu-test-80/web2&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="comment"># 启用指定后端服务器</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;enable server magedu-test-80/web2&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="comment"># 将后端服务器软下线，即weight设为0</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;set weight magedu-test-80/web1 0&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br></pre></td></tr></table></figure>
 
 <p>一个进程就有一个 haproxy.socket 文件，以上的操作针对的都是单进程</p>
 <h4 id="roundrobin"><a href="#roundrobin" class="headerlink" title="roundrobin"></a>roundrobin</h4><p>基于权重的轮询动态调度算法，支持权重的运行时调整，不同于 lvs 中的 rr 轮训模式，HAProxy 中的 roundrobin 支持慢启动(新加的服务器会逐渐增加转发数)，其每个后端 backend 中最多支持 4095 个 real server，支持对 real server 权重动态调整，roundrobin 为默认调度算法，此算法使用广泛</p>
 <p>支持动态调整权重：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"get weight web_host/web1"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token number">1</span> <span class="token punctuation">(</span>initial <span class="token number">1</span><span class="token punctuation">)</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"set weight web_host/web1 3"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token builtin class-name">echo</span> <span class="token string">"get weight web_host/web1"</span> <span class="token operator">|</span> socat stdio /var/lib/haproxy/haproxy.sock
-<span class="token number">3</span> <span class="token punctuation">(</span>initial <span class="token number">1</span><span class="token punctuation">)</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;get weight web_host/web1&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">1 (initial 1)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;set weight web_host/web1 3&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;get weight web_host/web1&quot;</span> | socat stdio /var/lib/haproxy/haproxy.sock</span><br><span class="line">3 (initial 1)</span><br></pre></td></tr></table></figure>
 
 <h4 id="leastconn"><a href="#leastconn" class="headerlink" title="leastconn"></a>leastconn</h4><p>leastconn 加权的最少连接的动态，支持权重的运行时调整和慢启动，即根据当前连接最少的后端服务器而非权重进行优先调度(新客户端连接)，比较适合长连接的场景使用，比如：MySQL 等场景</p>
 <h4 id="random"><a href="#random" class="headerlink" title="random"></a>random</h4><p>1.9 版本增加，负载平衡算法，其基于随机数作为一致性 hash 的 key，随机负载平衡对于大型服务器场或经常添加或删除服务器非常有用，支持 weight 的动态调整，weight 较大的主机有更大概率获取新请求</p>
@@ -529,223 +382,71 @@ listen stats	<span class="token comment"># stats相关：状态页配置项</spa
 <p>这个算法一般是在不插入 Cookie 的 TCP 模式下使用，也可给拒绝会话 cookie 的客户提供最好的会话粘性，适用于 session 会话保持但不支持 cookie 和缓存的场景</p>
 <p>源地址有两种转发客户端请求到后端服务器的服务器选取计算方式：取模法、一致性 hash</p>
 <h5 id="map-base-取模法"><a href="#map-base-取模法" class="headerlink" title="map-base 取模法"></a>map-base 取模法</h5><p>对 source 地址进行 hash 计算，再基于服务器总权重的取模，最终结果决定将此请求转发至对应的后端服务器。此方法是静态的，即不支持在线调整权重，不支持慢启动，可实现对后端服务器均衡调度。缺点是当服务器的总权重发生变化时，即有服务器上线或下线，都会因总权重发生变化而导致调度结果整体改变，hash-type 指定的默认值为此算法</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">listen web_host
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80,:8801-8810,10.0.0.7:9001-9010
-    mode tcp
-    log global
-    balance <span class="token builtin class-name">source</span>
-    hash-type map-based		<span class="token comment"># 取模法</span>
-    server web1 <span class="token number">10.0</span>.0.17:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">3</span>
-    server web2 <span class="token number">10.0</span>.0.27:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">3</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen web_host</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80,:8801-8810,10.0.0.7:9001-9010</span><br><span class="line">    mode tcp</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    balance <span class="built_in">source</span></span><br><span class="line">    hash-type map-based		<span class="comment"># 取模法</span></span><br><span class="line">    server web1 10.0.0.17:80 weight 1 check inter 3000 fall 2 rise 3</span><br><span class="line">    server web2 10.0.0.27:80 weight 1 check inter 3000 fall 2 rise 3</span><br></pre></td></tr></table></figure>
 
 <h5 id="一致性-hash"><a href="#一致性-hash" class="headerlink" title="一致性 hash"></a>一致性 hash</h5><p>当服务器的总权重发生变化时，对调度结果影响是局部的，不会引起大的变动，hash（o）mod n ，该 hash 算法是动态的，支持使用 socat 等工具进行在线权重调整，支持慢启动</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">listen web_host
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80,:8801-8810,10.0.0.7:9001-9010
-    mode tcp
-    log global
-    balance <span class="token builtin class-name">source</span>
-    hash-type consistent	<span class="token comment"># 一致性hash</span>
-    server web1 <span class="token number">10.0</span>.0.17:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span>
-    server web2 <span class="token number">10.0</span>.0.27:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">listen web_host</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80,:8801-8810,10.0.0.7:9001-9010</span><br><span class="line">    mode tcp</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    balance <span class="built_in">source</span></span><br><span class="line">    hash-type consistent	<span class="comment"># 一致性hash</span></span><br><span class="line">    server web1 10.0.0.17:80 weight 1 check inter 3000 fall 2 rise 5</span><br><span class="line">    server web2 10.0.0.27:80 weight 1 check inter 3000 fall 2 rise 5</span><br></pre></td></tr></table></figure>
 
 <h4 id="uri"><a href="#uri" class="headerlink" title="uri"></a>uri</h4><p>基于对用户请求的 uri 的左半部分或整个 uri 做 hash，再将 hash 结果对总权重进行取模后，根据最终结果将请求转发到后端指定服务器，适用于后端是缓存服务器场景，默认是静态算法，也可以通过 hash-type 指定 map-based 和 consistent，来定义使用取模法还是一致性 hash</p>
 <p>注意：此算法基于应用层，所以只支持 mode http ，不支持 mode tcp</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">listen web_host
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80,:8801-8810,10.0.0.7:9001-9010
-    mode http
-    log global
-    balance uri
-    <span class="token comment"># hash-type map-based			# 取模法，默认，可省略</span>
-    hash-type consistent			<span class="token comment"># 一致性hash</span>
-    server web1 <span class="token number">10.0</span>.0.17:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span>
-    server web2 <span class="token number">10.0</span>.0.27:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">listen web_host</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80,:8801-8810,10.0.0.7:9001-9010</span><br><span class="line">    mode http</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    balance uri</span><br><span class="line">    <span class="comment"># hash-type map-based			# 取模法，默认，可省略</span></span><br><span class="line">    hash-type consistent			<span class="comment"># 一致性hash</span></span><br><span class="line">    server web1 10.0.0.17:80 weight 1 check inter 3000 fall 2 rise 5</span><br><span class="line">    server web2 10.0.0.27:80 weight 1 check inter 3000 fall 2 rise 5</span><br></pre></td></tr></table></figure>
 
 <h4 id="url-param"><a href="#url-param" class="headerlink" title="url_param"></a>url_param</h4><p>对用户请求的 url 中的 params 部分中的一个参数 key 对应的 value 值作 hash 计算，并由服务器总权重相除以后派发至某挑出的服务器；通常用于追踪用户，以确保来自同一个用户的请求始终发往同一个 real server，如果没有 key，将按 roundrobin 算法</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 假设：http://10.0.0.7/index.html?userid=&lt;NAME_ID>&amp;typeid=&lt;TYPE_ID></span>
-listen web_host
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80,:8801-8810,10.0.0.7:9001-9010
-    mode http
-    log global
-    balance url_param userid 	<span class="token comment"># 对userid的值取hash</span>
-    <span class="token comment"># hash-type map-based			# 取模法，默认，可省略</span>
-    hash-type consistent			<span class="token comment"># 一致性hash</span>
-    server web1 <span class="token number">10.0</span>.0.17:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span>
-    server web2 <span class="token number">10.0</span>.0.27:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设：http://10.0.0.7/index.html?userid=&lt;NAME_ID&gt;&amp;typeid=&lt;TYPE_ID&gt;</span></span><br><span class="line">listen web_host</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80,:8801-8810,10.0.0.7:9001-9010</span><br><span class="line">    mode http</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    balance url_param userid 	<span class="comment"># 对userid的值取hash</span></span><br><span class="line">    <span class="comment"># hash-type map-based			# 取模法，默认，可省略</span></span><br><span class="line">    hash-type consistent			<span class="comment"># 一致性hash</span></span><br><span class="line">    server web1 10.0.0.17:80 weight 1 check inter 3000 fall 2 rise 5</span><br><span class="line">    server web2 10.0.0.27:80 weight 1 check inter 3000 fall 2 rise 5</span><br></pre></td></tr></table></figure>
 
 <h4 id="hdr"><a href="#hdr" class="headerlink" title="hdr"></a>hdr</h4><p>针对用户每个 http 头部(header)请求中的指定信息做 hash，此处由 name 指定的 http 首部将会被取出并做 hash 计算，然后由服务器总权重取模以后派发至某挑出的服务器，如果无有效值，则会使用默认的轮询调度</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">listen web_host
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80,:8801-8810,10.0.0.7:9001-9010
-    mode http
-    log global
-    balance hdr<span class="token punctuation">(</span>User-Agent<span class="token punctuation">)</span>
-    <span class="token comment"># hash-type map-based			# 取模法，默认，可省略</span>
-    hash-type consistent			<span class="token comment"># 一致性hash</span>
-    server web1 <span class="token number">10.0</span>.0.17:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span>
-    server web2 <span class="token number">10.0</span>.0.27:80 weight <span class="token number">1</span> check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">listen web_host</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80,:8801-8810,10.0.0.7:9001-9010</span><br><span class="line">    mode http</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    balance hdr(User-Agent)</span><br><span class="line">    <span class="comment"># hash-type map-based			# 取模法，默认，可省略</span></span><br><span class="line">    hash-type consistent			<span class="comment"># 一致性hash</span></span><br><span class="line">    server web1 10.0.0.17:80 weight 1 check inter 3000 fall 2 rise 5</span><br><span class="line">    server web2 10.0.0.27:80 weight 1 check inter 3000 fall 2 rise 5</span><br></pre></td></tr></table></figure>
 
 <p>测试访问：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$curl</span> <span class="token parameter variable">-vA</span> <span class="token string">'firefox'</span> http://10.0.0.7/index.html
-<span class="token punctuation">[</span>root@c71 ~<span class="token punctuation">]</span><span class="token variable">$curl</span> <span class="token parameter variable">-vA</span> <span class="token string">'chrome'</span> http://10.0.0.7/index.html</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@c71 ~]<span class="variable">$curl</span> -vA <span class="string">&#x27;firefox&#x27;</span> http://10.0.0.7/index.html</span><br><span class="line">[root@c71 ~]<span class="variable">$curl</span> -vA <span class="string">&#x27;chrome&#x27;</span> http://10.0.0.7/index.html</span><br></pre></td></tr></table></figure>
 
-<h4 id="rdp-cookie"><a href="#rdp-cookie" class="headerlink" title="rdp-cookie"></a>rdp-cookie</h4><h3 id="各种算法使用场景"><a href="#各种算法使用场景" class="headerlink" title="各种算法使用场景"></a>各种算法使用场景</h3><pre class="language-none"><code class="language-none">first 							# 使用较少
-static-rr 						# 做了session共享的web集群
-roundrobin
-random
-leastconn 						# 数据库
-source 							# 基于客户端公网IP的会话保持
-Uri---------------&gt;http 		# 缓存服务器，CDN服务商，蓝汛、百度、阿里云、腾讯
-url_param---------&gt;http	 		# 可以实现session保持
-hdr 							# 基于客户端请求报文头部做下一步处理
-rdp-cookie 						# 基于Windows主机,很少使用</code></pre>
+<h4 id="rdp-cookie"><a href="#rdp-cookie" class="headerlink" title="rdp-cookie"></a>rdp-cookie</h4><h3 id="各种算法使用场景"><a href="#各种算法使用场景" class="headerlink" title="各种算法使用场景"></a>各种算法使用场景</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">first 							# 使用较少</span><br><span class="line">static-rr 						# 做了session共享的web集群</span><br><span class="line">roundrobin</span><br><span class="line">random</span><br><span class="line">leastconn 						# 数据库</span><br><span class="line">source 							# 基于客户端公网IP的会话保持</span><br><span class="line">Uri---------------&gt;http 		# 缓存服务器，CDN服务商，蓝汛、百度、阿里云、腾讯</span><br><span class="line">url_param---------&gt;http	 		# 可以实现session保持</span><br><span class="line">hdr 							# 基于客户端请求报文头部做下一步处理</span><br><span class="line">rdp-cookie 						# 基于Windows主机,很少使用</span><br></pre></td></tr></table></figure>
 
 <h2 id="高级功能及配置"><a href="#高级功能及配置" class="headerlink" title="高级功能及配置"></a>高级功能及配置</h2><h3 id="基于-cookie-的会话保持"><a href="#基于-cookie-的会话保持" class="headerlink" title="基于 cookie 的会话保持"></a>基于 cookie 的会话保持</h3><p>为当前 server 指定 cookie 值，实现基于 cookie 的会话黏性，相对于基于 source 地址 hash 调度算法对客户端的粒度更精准，但同时也加大了 haproxy 负载，目前此模式使用较少， 已经被 session 共享服务器代替</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 配置示例：</span>
-listen web_port
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80
-    balance roundrobin
-    mode http 			<span class="token comment"># 注意：不支持 tcp</span>
-    log global
-    cookie WEBSRV insert nocache indirect
-    server web1 <span class="token number">10.0</span>.0.17:80 check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span> cookie web1
-    server web2 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">3000</span> fall <span class="token number">2</span> rise <span class="token number">5</span> cookie web2</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置示例：</span></span><br><span class="line">listen web_port</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80</span><br><span class="line">    balance roundrobin</span><br><span class="line">    mode http 			<span class="comment"># 注意：不支持 tcp</span></span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    cookie WEBSRV insert nocache indirect</span><br><span class="line">    server web1 10.0.0.17:80 check inter 3000 fall 2 rise 5 cookie web1</span><br><span class="line">    server web2 10.0.0.27:80 check inter 3000 fall 2 rise 5 cookie web2</span><br></pre></td></tr></table></figure>
 
 <h3 id="HAProxy-状态页"><a href="#HAProxy-状态页" class="headerlink" title="HAProxy 状态页"></a>HAProxy 状态页</h3><p>通过 web 界面，显示当前 HAProxy 的运行状态</p>
 <p>状态页配置项：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">stats <span class="token builtin class-name">enable</span> 				<span class="token comment"># 基于默认的参数启用stats page</span>
-stats hide-version 			<span class="token comment"># 将状态页中haproxy版本隐藏</span>
-stats refresh <span class="token operator">&lt;</span>delay<span class="token operator">></span> 		<span class="token comment"># 设定自动刷新时间间隔，默认不自动刷新</span>
-stats uri <span class="token operator">&lt;</span>prefix<span class="token operator">></span> 			<span class="token comment"># 自定义stats page uri，默认值：/haproxy?stats</span>
-stats realm <span class="token operator">&lt;</span>realm<span class="token operator">></span> 		<span class="token comment"># 账户认证时的提示信息，示例：stats realm HAProxy\</span>
-Statistics
-stats auth <span class="token operator">&lt;</span>user<span class="token operator">></span>:<span class="token operator">&lt;</span>passwd<span class="token operator">></span> 	<span class="token comment"># 认证时的账号和密码，可定义多个用户,每行指定一个用户</span>
-stats admin <span class="token punctuation">&#123;</span> <span class="token keyword">if</span> <span class="token operator">|</span> unless <span class="token punctuation">&#125;</span> <span class="token operator">&lt;</span>cond<span class="token operator">></span> 	<span class="token comment"># 启用stats page中的管理功能</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">stats <span class="built_in">enable</span> 				<span class="comment"># 基于默认的参数启用stats page</span></span><br><span class="line">stats hide-version 			<span class="comment"># 将状态页中haproxy版本隐藏</span></span><br><span class="line">stats refresh &lt;delay&gt; 		<span class="comment"># 设定自动刷新时间间隔，默认不自动刷新</span></span><br><span class="line">stats uri &lt;prefix&gt; 			<span class="comment"># 自定义stats page uri，默认值：/haproxy?stats</span></span><br><span class="line">stats realm &lt;realm&gt; 		<span class="comment"># 账户认证时的提示信息，示例：stats realm HAProxy\</span></span><br><span class="line">Statistics</span><br><span class="line">stats auth &lt;user&gt;:&lt;passwd&gt; 	<span class="comment"># 认证时的账号和密码，可定义多个用户,每行指定一个用户</span></span><br><span class="line">stats admin &#123; <span class="keyword">if</span> | unless &#125; &lt;cond&gt; 	<span class="comment"># 启用stats page中的管理功能</span></span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启用状态页</span>
-listen stats
-    <span class="token builtin class-name">bind</span> :9999
-    stats <span class="token builtin class-name">enable</span>
-    <span class="token comment">#stats hide-version</span>
-    stats uri /haproxy-status			<span class="token comment"># 自定义stats page uri</span>
-    stats realm HAProxy<span class="token punctuation">\</span> Stats<span class="token punctuation">\</span> Page 	<span class="token comment"># 账户认证时的提示信息</span>
-    stats auth haadmin:123456	 		<span class="token comment"># 两个用户</span>
-    stats auth admin:123456
-    <span class="token comment">#stats refresh 30s</span>
-    stats admin <span class="token keyword">if</span> TRUE 				<span class="token comment"># 安全原因，不建议打开</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用状态页</span></span><br><span class="line">listen stats</span><br><span class="line">    <span class="built_in">bind</span> :9999</span><br><span class="line">    stats <span class="built_in">enable</span></span><br><span class="line">    <span class="comment">#stats hide-version</span></span><br><span class="line">    stats uri /haproxy-status			<span class="comment"># 自定义stats page uri</span></span><br><span class="line">    stats realm HAProxy\ Stats\ Page 	<span class="comment"># 账户认证时的提示信息</span></span><br><span class="line">    stats auth haadmin:123456	 		<span class="comment"># 两个用户</span></span><br><span class="line">    stats auth admin:123456</span><br><span class="line">    <span class="comment">#stats refresh 30s</span></span><br><span class="line">    stats admin <span class="keyword">if</span> TRUE 				<span class="comment"># 安全原因，不建议打开</span></span><br></pre></td></tr></table></figure>
 
 <p>backend server 信息：</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1609942911229.png"></p>
 <p>利用状态页实现 haproxy 服务器的健康性检查：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#curl -I http://haadmin:123456@10.0.0.7:9999/haproxy-status</span>
-HTTP/1.1 <span class="token number">200</span> OK
-cache-control: no-cache
-content-type: text/html
-
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#curl -I -u haadmin:123456 http://10.0.0.7:9999/haproxy-status</span>
-HTTP/1.1 <span class="token number">200</span> OK
-cache-control: no-cache
-content-type: text/html
-
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#echo $?</span>
-<span class="token number">0</span>
-
-<span class="token punctuation">[</span>root@haproxy ~<span class="token punctuation">]</span><span class="token comment">#systemctl stop haproxy</span>
-
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#curl -I http://haadmin:123456@10.0.0.7:9999/haproxy-status</span>
-curl: <span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">)</span> Failed to connect to <span class="token number">10.0</span>.0.7 port <span class="token number">9999</span>: Connection refused
-
-<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#echo $?</span>
-<span class="token number">7</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]<span class="comment">#curl -I http://haadmin:123456@10.0.0.7:9999/haproxy-status</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">cache-control: no-cache</span><br><span class="line">content-type: text/html</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]<span class="comment">#curl -I -u haadmin:123456 http://10.0.0.7:9999/haproxy-status</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">cache-control: no-cache</span><br><span class="line">content-type: text/html</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]<span class="comment">#echo $?</span></span><br><span class="line">0</span><br><span class="line"></span><br><span class="line">[root@haproxy ~]<span class="comment">#systemctl stop haproxy</span></span><br><span class="line"></span><br><span class="line">[root@centos8 ~]<span class="comment">#curl -I http://haadmin:123456@10.0.0.7:9999/haproxy-status</span></span><br><span class="line">curl: (7) Failed to connect to 10.0.0.7 port 9999: Connection refused</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]<span class="comment">#echo $?</span></span><br><span class="line">7</span><br></pre></td></tr></table></figure>
 
 <h3 id="IP-透传"><a href="#IP-透传" class="headerlink" title="IP 透传"></a>IP 透传</h3><p>web 服务器中需要记录客户端的真实 IP 地址，用于做访问统计、安全防护、行为分析、区域排行等场景</p>
 <h4 id="四层负载-和-七层代理"><a href="#四层负载-和-七层代理" class="headerlink" title="四层负载 和 七层代理"></a>四层负载 和 七层代理</h4><p><strong>四层负载：</strong></p>
 <p>四层负载均衡设备不参与建立链接（实际上还是建立的，haproxy 和 lvs 不同，haproxy 是伪四层负载均衡）</p>
 <p><strong>七层代理：</strong></p>
 <p>七层负载均衡设备起到了代理服务器的作用，七层代理需要和 Client 以及后端服务器分别建立连接</p>
-<h4 id="四层-IP-透传"><a href="#四层-IP-透传" class="headerlink" title="四层 IP 透传"></a>四层 IP 透传</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># haproxy 配置示例</span>
-listen web_http_nodes
-    <span class="token builtin class-name">bind</span> <span class="token number">172.16</span>.0.100:80
-    mode tcp	 			<span class="token comment"># 不支持http协议</span>
-    balance roundrobin
-    server web1 to2b.cn:80 send-proxy check inter <span class="token number">3000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>	<span class="token comment"># 添加send-proxy</span>
-
-<span class="token comment"># nginx配置：在访问日志中通过变量$proxy_protocol_addr 记录透传过来的客户端IP</span>
-http <span class="token punctuation">&#123;</span>
-    log_format main <span class="token string">'$remote_addr - $remote_user [$time_local] "$request" "$proxy_protocol_addr"'</span>
-    server <span class="token punctuation">&#123;</span>
-		listen <span class="token number">80</span> proxy_protocol<span class="token punctuation">;</span> <span class="token comment">#启用此项，将无法直接访问此网站，只能通过四层代理访问</span>
-		server_name to2b.cn<span class="token punctuation">;</span>
-    <span class="token punctuation">..</span>.</code></pre>
+<h4 id="四层-IP-透传"><a href="#四层-IP-透传" class="headerlink" title="四层 IP 透传"></a>四层 IP 透传</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># haproxy 配置示例</span></span><br><span class="line">listen web_http_nodes</span><br><span class="line">    <span class="built_in">bind</span> 172.16.0.100:80</span><br><span class="line">    mode tcp	 			<span class="comment"># 不支持http协议</span></span><br><span class="line">    balance roundrobin</span><br><span class="line">    server web1 to2b.cn:80 send-proxy check inter 3000 fall 3 rise 5	<span class="comment"># 添加send-proxy</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># nginx配置：在访问日志中通过变量$proxy_protocol_addr 记录透传过来的客户端IP</span></span><br><span class="line">http &#123;</span><br><span class="line">    log_format main <span class="string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &quot;$proxy_protocol_addr&quot;&#x27;</span></span><br><span class="line">    server &#123;</span><br><span class="line">		listen 80 proxy_protocol; <span class="comment">#启用此项，将无法直接访问此网站，只能通过四层代理访问</span></span><br><span class="line">		server_name to2b.cn;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
 
 <h4 id="七层-IP-透传"><a href="#七层-IP-透传" class="headerlink" title="七层 IP 透传"></a>七层 IP 透传</h4><p>当 haproxy 工作在七层的时候，也可以透传客户端真实 IP 至后端服务器</p>
 <p><strong>HAProxy 配置：</strong></p>
 <p>在由 haproxy 发往后端主机的请求报文中添加“X-Forwarded-For”首部</p>
-<pre class="language-http" data-language="http"><code class="language-http">option forwardfor [ except &lt;network> ] [ header &lt;name> ] [ if-none ]
-
-[ except &lt;network> ]：请求报请来自此处指定的网络时不予添加此首部，如haproxy自身所在网络
-[ header &lt;name> ]：使用自定义的首部名称，而非“X-Forwarded-For"，示例：X-client
-[ if-none ] 如果没有首部才添加首部，如果有使用默认值</code></pre>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">option forwardfor [ except &lt;network&gt; ] [ header &lt;name&gt; ] [ if-none ]</span><br><span class="line"></span><br><span class="line">[ except &lt;network&gt; ]：请求报请来自此处指定的网络时不予添加此首部，如haproxy自身所在网络</span><br><span class="line">[ header &lt;name&gt; ]：使用自定义的首部名称，而非“X-Forwarded-For&quot;，示例：X-client</span><br><span class="line">[ if-none ] 如果没有首部才添加首部，如果有使用默认值</span><br></pre></td></tr></table></figure>
 
 <p>示例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">defaults
-    option forwardfor	<span class="token comment"># 此为默认值,首部字段默认为：X-Forwarded-For</span>
-    <span class="token comment"># option forwardfor except 127.0.0.0/8 header X-client	# 或者自定义首部,如:X-client</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">defaults</span><br><span class="line">    option forwardfor	<span class="comment"># 此为默认值,首部字段默认为：X-Forwarded-For</span></span><br><span class="line">    <span class="comment"># option forwardfor except 127.0.0.0/8 header X-client	# 或者自定义首部,如:X-client</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>web 服务器日志格式配置：</strong></p>
 <p>配置 web 服务器，记录负载均衡透传的客户端 IP 地址</p>
 <p>示例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># apache</span>
-LogFormat <span class="token string">"%&#123;X-Forwarded-For&#125;i %a %l %u %t <span class="token entity" title="\&quot;">\"</span>%r<span class="token entity" title="\&quot;">\"</span> %>s %b <span class="token entity" title="\&quot;">\"</span>%&#123;Referer&#125;i<span class="token entity" title="\&quot;">\"</span> <span class="token entity" title="\&quot;">\"</span>%&#123;User-Agent&#125;i<span class="token entity" title="\&quot;">\"</span>"</span> combined
-
-<span class="token comment"># nginx</span>
-<span class="token variable">$proxy_add_x_forwarded_for</span>：包括客户端IP和中间经过的所有代理的IP
-<span class="token variable">$http_x_forwarded_For</span>：只有客户端IP
-
-<span class="token comment"># tomcat</span>
-<span class="token operator">&lt;</span>Valve <span class="token assign-left variable">className</span><span class="token operator">=</span><span class="token string">"org.apache.catalina.valves.AccessLogValve"</span> <span class="token assign-left variable">directory</span><span class="token operator">=</span><span class="token string">"logs"</span> <span class="token assign-left variable">prefix</span><span class="token operator">=</span><span class="token string">"localhost_access_log"</span> <span class="token assign-left variable">suffix</span><span class="token operator">=</span><span class="token string">".txt"</span> <span class="token assign-left variable">pattern</span><span class="token operator">=</span><span class="token string">"%&#123;X-Forwarded-For&#125;i %h %l %u %t &amp;quot;%r&amp;quot; %s %b"</span> /<span class="token operator">></span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># apache</span></span><br><span class="line">LogFormat <span class="string">&quot;%&#123;X-Forwarded-For&#125;i %a %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot;&quot;</span> combined</span><br><span class="line"></span><br><span class="line"><span class="comment"># nginx</span></span><br><span class="line"><span class="variable">$proxy_add_x_forwarded_for</span>：包括客户端IP和中间经过的所有代理的IP</span><br><span class="line"><span class="variable">$http_x_forwarded_For</span>：只有客户端IP</span><br><span class="line"></span><br><span class="line"><span class="comment"># tomcat</span></span><br><span class="line">&lt;Valve className=<span class="string">&quot;org.apache.catalina.valves.AccessLogValve&quot;</span> directory=<span class="string">&quot;logs&quot;</span> prefix=<span class="string">&quot;localhost_access_log&quot;</span> suffix=<span class="string">&quot;.txt&quot;</span> pattern=<span class="string">&quot;%&#123;X-Forwarded-For&#125;i %h %l %u %t &amp;quot;%r&amp;quot; %s %b&quot;</span> /&gt;</span><br></pre></td></tr></table></figure>
 
 <h3 id="报文修改"><a href="#报文修改" class="headerlink" title="报文修改"></a>报文修改</h3><p>在 http 模式下，基于实际需求修改客户端的请求报文与响应报文</p>
 <p>官方文档：<a target="_blank" rel="noopener" href="http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#4-http-request">http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#4-http-request</a></p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 请求头添加字段</span>
-http-request add-header <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token operator">&lt;</span>fmt<span class="token operator">></span> <span class="token punctuation">[</span> <span class="token punctuation">&#123;</span> <span class="token keyword">if</span> <span class="token operator">|</span> unless <span class="token punctuation">&#125;</span> <span class="token operator">&lt;</span>condition<span class="token operator">></span> <span class="token punctuation">]</span>
-<span class="token comment"># 请求头修改字段</span>
-http-request set-header <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token operator">&lt;</span>fmt<span class="token operator">></span> <span class="token punctuation">[</span> <span class="token punctuation">&#123;</span> <span class="token keyword">if</span> <span class="token operator">|</span> unless <span class="token punctuation">&#125;</span> <span class="token operator">&lt;</span>condition<span class="token operator">></span> <span class="token punctuation">]</span>
-<span class="token comment"># 请求头删除字段</span>
-http-request del-header <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span> <span class="token punctuation">&#123;</span> <span class="token keyword">if</span> <span class="token operator">|</span> unless <span class="token punctuation">&#125;</span> <span class="token operator">&lt;</span>condition<span class="token operator">></span> <span class="token punctuation">]</span>
-<span class="token comment"># 响应头添加字段</span>
-http-response add-header <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token operator">&lt;</span>fmt<span class="token operator">></span> <span class="token punctuation">[</span> <span class="token punctuation">&#123;</span> <span class="token keyword">if</span> <span class="token operator">|</span> unless <span class="token punctuation">&#125;</span> <span class="token operator">&lt;</span>condition<span class="token operator">></span> <span class="token punctuation">]</span>
-<span class="token comment"># 响应头删除字段</span>
-http-response del-header <span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span> <span class="token punctuation">&#123;</span> <span class="token keyword">if</span> <span class="token operator">|</span> unless <span class="token punctuation">&#125;</span> <span class="token operator">&lt;</span>condition<span class="token operator">></span> <span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 请求头添加字段</span></span><br><span class="line">http-request add-header &lt;name&gt; &lt;<span class="built_in">fmt</span>&gt; [ &#123; <span class="keyword">if</span> | unless &#125; &lt;condition&gt; ]</span><br><span class="line"><span class="comment"># 请求头修改字段</span></span><br><span class="line">http-request set-header &lt;name&gt; &lt;<span class="built_in">fmt</span>&gt; [ &#123; <span class="keyword">if</span> | unless &#125; &lt;condition&gt; ]</span><br><span class="line"><span class="comment"># 请求头删除字段</span></span><br><span class="line">http-request del-header &lt;name&gt; [ &#123; <span class="keyword">if</span> | unless &#125; &lt;condition&gt; ]</span><br><span class="line"><span class="comment"># 响应头添加字段</span></span><br><span class="line">http-response add-header &lt;name&gt; &lt;<span class="built_in">fmt</span>&gt; [ &#123; <span class="keyword">if</span> | unless &#125; &lt;condition&gt; ]</span><br><span class="line"><span class="comment"># 响应头删除字段</span></span><br><span class="line">http-response del-header &lt;name&gt; [ &#123; <span class="keyword">if</span> | unless &#125; &lt;condition&gt; ]</span><br></pre></td></tr></table></figure>
 
 <p>fmt：<a target="_blank" rel="noopener" href="http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#8.2.4">http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#8.2.4</a></p>
 <p>注意：以上指令适用于 2.1 版本以上，2.1 版本以下的指令是 reqadd、reqdel 等</p>
-<h3 id="自定义日志格式"><a href="#自定义日志格式" class="headerlink" title="自定义日志格式"></a>自定义日志格式</h3><pre class="language-bash" data-language="bash"><code class="language-bash">log global 			<span class="token comment"># 开启记录日志,默认不开启</span>
-option httplog 		<span class="token comment"># 开启记录httplog日志格式选项，一般不建议开启，加重HAProxy负载</span>
-capture cookie <span class="token operator">&lt;</span>name<span class="token operator">></span> len <span class="token operator">&lt;</span>length<span class="token operator">></span>	 <span class="token comment"># 捕获请求和响应报文中的 cookie及值的长度,将之记录到日志</span>
-capture request header <span class="token operator">&lt;</span>name<span class="token operator">></span> len <span class="token operator">&lt;</span>length<span class="token operator">></span> 	<span class="token comment"># 捕获请求报文中指定的首部内容和长度并记录日志</span>
-capture response header <span class="token operator">&lt;</span>name<span class="token operator">></span> len <span class="token operator">&lt;</span>length<span class="token operator">></span> <span class="token comment"># 捕获响应报文中指定的内容和长度首部并记录日志</span>
-
-<span class="token comment"># 示例</span>
-log global
-option httplog
-capture request header Host len <span class="token number">256</span>
-capture request header User-Agent len <span class="token number">512</span>
-capture request header Referer len <span class="token number">15</span>
-capture request header X-Forwarded-For len <span class="token number">15</span></code></pre>
+<h3 id="自定义日志格式"><a href="#自定义日志格式" class="headerlink" title="自定义日志格式"></a>自定义日志格式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">log</span> global 			<span class="comment"># 开启记录日志,默认不开启</span></span><br><span class="line">option httplog 		<span class="comment"># 开启记录httplog日志格式选项，一般不建议开启，加重HAProxy负载</span></span><br><span class="line">capture cookie &lt;name&gt; len &lt;length&gt;	 <span class="comment"># 捕获请求和响应报文中的 cookie及值的长度,将之记录到日志</span></span><br><span class="line">capture request header &lt;name&gt; len &lt;length&gt; 	<span class="comment"># 捕获请求报文中指定的首部内容和长度并记录日志</span></span><br><span class="line">capture response header &lt;name&gt; len &lt;length&gt; <span class="comment"># 捕获响应报文中指定的内容和长度首部并记录日志</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例</span></span><br><span class="line"><span class="built_in">log</span> global</span><br><span class="line">option httplog</span><br><span class="line">capture request header Host len 256</span><br><span class="line">capture request header User-Agent len 512</span><br><span class="line">capture request header Referer len 15</span><br><span class="line">capture request header X-Forwarded-For len 15</span><br></pre></td></tr></table></figure>
 
 <h3 id="压缩功能"><a href="#压缩功能" class="headerlink" title="压缩功能"></a>压缩功能</h3><p>对响应给客户端的报文进行压缩，以节省网络带宽，但是会占用部分 CPU 性能</p>
 <p>建议在后端服务器开启压缩功能，而非在 HAProxy 上开启压缩</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">compression algo <span class="token operator">&lt;</span>algorithm<span class="token operator">></span> <span class="token punctuation">..</span>.	<span class="token comment"># 启用http协议中的压缩机制</span>
-compression <span class="token builtin class-name">type</span> <span class="token operator">&lt;</span>mime type<span class="token operator">></span> <span class="token punctuation">..</span>. 	<span class="token comment"># 要压缩的文件类型</span>
-
-<span class="token comment"># 压缩算法&lt;algorithm>支持下面类型</span>
-	identity						<span class="token comment"># debug调试使用的压缩方式</span>
-	<span class="token function">gzip</span>							<span class="token comment"># 常用的压缩方式，与各浏览器兼容较好</span>
-	deflate							<span class="token comment"># 有些浏览器不支持</span>
-	raw-deflate						<span class="token comment"># 新式的压缩方式</span>
-
-<span class="token comment"># 示例</span>
-compression algo <span class="token function">gzip</span> deflate
-compression <span class="token builtin class-name">type</span> text/html text/css text/plain</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">compression algo &lt;algorithm&gt; ...	<span class="comment"># 启用http协议中的压缩机制</span></span><br><span class="line">compression <span class="built_in">type</span> &lt;mime <span class="built_in">type</span>&gt; ... 	<span class="comment"># 要压缩的文件类型</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 压缩算法&lt;algorithm&gt;支持下面类型</span></span><br><span class="line">	identity						<span class="comment"># debug调试使用的压缩方式</span></span><br><span class="line">	gzip							<span class="comment"># 常用的压缩方式，与各浏览器兼容较好</span></span><br><span class="line">	deflate							<span class="comment"># 有些浏览器不支持</span></span><br><span class="line">	raw-deflate						<span class="comment"># 新式的压缩方式</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例</span></span><br><span class="line">compression algo gzip deflate</span><br><span class="line">compression <span class="built_in">type</span> text/html text/css text/plain</span><br></pre></td></tr></table></figure>
 
 <h3 id="web-服务器状态监测"><a href="#web-服务器状态监测" class="headerlink" title="web 服务器状态监测"></a>web 服务器状态监测</h3><ul>
 <li><p>四层：传输端口做状态监测，此为默认方式</p>
@@ -756,301 +457,44 @@ compression <span class="token builtin class-name">type</span> text/html text/cs
 </li>
 </ul>
 <p>四层监测节省系统资源，但是不够准确，可能发生监测通过，但是网站打不开的情况，工作中更推荐使用七层监测</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">option httpchk	<span class="token comment"># 启用七层健康性检测，对tcp和 http模式都支持</span>
-option httpchk <span class="token operator">&lt;</span>uri<span class="token operator">></span>	<span class="token comment"># uri默认"/"</span>
-option httpchk <span class="token operator">&lt;</span>method<span class="token operator">></span> <span class="token operator">&lt;</span>uri<span class="token operator">></span>	<span class="token comment"># method默认options，推荐设置为HEAD，节省网络流量</span>
-option httpchk <span class="token operator">&lt;</span>method<span class="token operator">></span> <span class="token operator">&lt;</span>uri<span class="token operator">></span> <span class="token operator">&lt;</span>version<span class="token operator">></span>	<span class="token comment"># version默认HTTP/1.0，注意HTTP/1.1必须有Host字段</span>
-
-http-check <span class="token function">expect</span> <span class="token punctuation">[</span><span class="token operator">!</span><span class="token punctuation">]</span> <span class="token operator">&lt;</span>match<span class="token operator">></span> <span class="token operator">&lt;</span>pattern<span class="token operator">></span>	<span class="token comment"># 期望以上检查得到的响应码</span>
-
-
-<span class="token comment"># 示例</span>
-option httpchk HEAD /monitor/check.html HTTP/1.1<span class="token punctuation">\</span>r<span class="token punctuation">\</span>nHost:<span class="token punctuation">\</span> <span class="token number">10.0</span>.0.7
-http-check <span class="token function">expect</span> status <span class="token number">200</span>
-http-check <span class="token function">expect</span> <span class="token operator">!</span> rstatus ^5 	<span class="token comment"># 支持正则表达式，响应码不以5开头</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">option httpchk	<span class="comment"># 启用七层健康性检测，对tcp和 http模式都支持</span></span><br><span class="line">option httpchk &lt;uri&gt;	<span class="comment"># uri默认&quot;/&quot;</span></span><br><span class="line">option httpchk &lt;method&gt; &lt;uri&gt;	<span class="comment"># method默认options，推荐设置为HEAD，节省网络流量</span></span><br><span class="line">option httpchk &lt;method&gt; &lt;uri&gt; &lt;version&gt;	<span class="comment"># version默认HTTP/1.0，注意HTTP/1.1必须有Host字段</span></span><br><span class="line"></span><br><span class="line">http-check expect [!] &lt;match&gt; &lt;pattern&gt;	<span class="comment"># 期望以上检查得到的响应码</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例</span></span><br><span class="line">option httpchk HEAD /monitor/check.html HTTP/1.1\r\nHost:\ 10.0.0.7</span><br><span class="line">http-check expect status 200</span><br><span class="line">http-check expect ! rstatus ^5 	<span class="comment"># 支持正则表达式，响应码不以5开头</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="ACL-★★★"><a href="#ACL-★★★" class="headerlink" title="ACL ★★★"></a>ACL ★★★</h3><p>访问控制列表（ACL，Access Control Lists），特定过滤条件的集合</p>
 <p>首先定义 ACL，然后调用 ACL</p>
 <p>官方文档：<a target="_blank" rel="noopener" href="http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#7">http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#7</a></p>
-<h4 id="ACL-配置选项"><a href="#ACL-配置选项" class="headerlink" title="ACL 配置选项"></a>ACL 配置选项</h4><pre class="language-bash" data-language="bash"><code class="language-bash">acl  <span class="token operator">&lt;</span>aclname<span class="token operator">></span>  <span class="token operator">&lt;</span>criterion<span class="token operator">></span>  <span class="token punctuation">[</span>flags<span class="token punctuation">]</span>  <span class="token punctuation">[</span>operator<span class="token punctuation">]</span>  <span class="token punctuation">[</span><span class="token operator">&lt;</span>value<span class="token operator">></span><span class="token punctuation">]</span> <span class="token punctuation">..</span>.
-acl		名称 		匹配规范 	  匹配模式 	 具体操作符   操作对象类型</code></pre>
+<h4 id="ACL-配置选项"><a href="#ACL-配置选项" class="headerlink" title="ACL 配置选项"></a>ACL 配置选项</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">acl  &lt;aclname&gt;  &lt;criterion&gt;  [flags]  [operator]  [&lt;value&gt;] ...</span><br><span class="line">acl		名称 		匹配规范 	  匹配模式 	 具体操作符   操作对象类型</span><br></pre></td></tr></table></figure>
 
 <h5 id="aclname"><a href="#aclname" class="headerlink" title="aclname"></a>aclname</h5><p>ACL 名称，严格区分大小写</p>
 <h5 id="criterion"><a href="#criterion" class="headerlink" title="criterion"></a>criterion</h5><p>定义 ACL 匹配规范，即：判断条件，以下列举的只是一部分：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">hdr string  <span class="token comment"># 提取在一个HTTP请求报文的首部</span>
-    hdr<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span>	<span class="token comment"># 完全匹配字符串,header的指定信息，&lt;occ> 表示在多值中使用的值的出现次数</span>
-    hdr_beg <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># 前缀匹配，header中指定匹配内容的begin</span>
-    hdr_end <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># 后缀匹配，header中指定匹配内容end</span>
-    hdr_dom <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># 域匹配，header中的domain name</span>
-    hdr_dir <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># 路径匹配，header的uri路径</span>
-    hdr_len <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># 长度匹配，header的长度匹配</span>
-    hdr_reg <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># 正则表达式匹配，自定义表达式(regex)模糊匹配</span>
-    hdr_sub <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&lt;</span>name<span class="token operator">></span> <span class="token punctuation">[</span>，<span class="token operator">&lt;</span>occ<span class="token operator">></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># 子串匹配，header中的uri模糊匹配</span>
-base <span class="token builtin class-name">:</span> string
-	base <span class="token builtin class-name">:</span> exact string match
-    base_beg <span class="token builtin class-name">:</span> prefix match
-    base_dir <span class="token builtin class-name">:</span> subdir match
-    base_dom <span class="token builtin class-name">:</span> domain match
-    base_end <span class="token builtin class-name">:</span> suffix match
-    base_len <span class="token builtin class-name">:</span> length match
-    base_reg <span class="token builtin class-name">:</span> regex match
-    base_sub <span class="token builtin class-name">:</span> substring match
-path <span class="token builtin class-name">:</span> string
-	path <span class="token builtin class-name">:</span> exact string match
-    path_beg <span class="token builtin class-name">:</span> prefix match <span class="token comment"># 请求的URL开头，如/static、/images、/img、/css</span>
-    path_end <span class="token builtin class-name">:</span> suffix match	<span class="token comment"># 请求的URL中资源的结尾，如 .gif .png .css .js .jpg .jpeg</span>
-    path_dom <span class="token builtin class-name">:</span> domain match
-    path_dir <span class="token builtin class-name">:</span> subdir match
-    path_len <span class="token builtin class-name">:</span> length match
-    path_reg <span class="token builtin class-name">:</span> regex match
-    path_sub <span class="token builtin class-name">:</span> substring match
-url <span class="token builtin class-name">:</span> string
-	url ：exact string match
-    url_beg <span class="token builtin class-name">:</span> prefix match
-    url_dir <span class="token builtin class-name">:</span> subdir match
-    url_dom <span class="token builtin class-name">:</span> domain match
-    url_end <span class="token builtin class-name">:</span> suffix match
-    url_len <span class="token builtin class-name">:</span> length match
-    url_reg <span class="token builtin class-name">:</span> regex match
-    url_sub <span class="token builtin class-name">:</span> substring match
-dst			<span class="token comment"># 目标ip</span>
-dst_port	<span class="token comment"># 目标port</span>
-src 		<span class="token comment"># 源IP</span>
-src_port 	<span class="token comment"># 源PORT</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">hdr string  <span class="comment"># 提取在一个HTTP请求报文的首部</span></span><br><span class="line">    hdr([&lt;name&gt; [，&lt;occ&gt;]])	<span class="comment"># 完全匹配字符串,header的指定信息，&lt;occ&gt; 表示在多值中使用的值的出现次数</span></span><br><span class="line">    hdr_beg ([&lt;name&gt; [，&lt;occ&gt;]]) <span class="comment"># 前缀匹配，header中指定匹配内容的begin</span></span><br><span class="line">    hdr_end ([&lt;name&gt; [，&lt;occ&gt;]]) <span class="comment"># 后缀匹配，header中指定匹配内容end</span></span><br><span class="line">    hdr_dom ([&lt;name&gt; [，&lt;occ&gt;]]) <span class="comment"># 域匹配，header中的domain name</span></span><br><span class="line">    hdr_dir ([&lt;name&gt; [，&lt;occ&gt;]]) <span class="comment"># 路径匹配，header的uri路径</span></span><br><span class="line">    hdr_len ([&lt;name&gt; [，&lt;occ&gt;]]) <span class="comment"># 长度匹配，header的长度匹配</span></span><br><span class="line">    hdr_reg ([&lt;name&gt; [，&lt;occ&gt;]]) <span class="comment"># 正则表达式匹配，自定义表达式(regex)模糊匹配</span></span><br><span class="line">    hdr_sub ([&lt;name&gt; [，&lt;occ&gt;]]) <span class="comment"># 子串匹配，header中的uri模糊匹配</span></span><br><span class="line">base : string</span><br><span class="line">	base : exact string match</span><br><span class="line">    base_beg : prefix match</span><br><span class="line">    base_dir : subdir match</span><br><span class="line">    base_dom : domain match</span><br><span class="line">    base_end : suffix match</span><br><span class="line">    base_len : length match</span><br><span class="line">    base_reg : regex match</span><br><span class="line">    base_sub : substring match</span><br><span class="line">path : string</span><br><span class="line">	path : exact string match</span><br><span class="line">    path_beg : prefix match <span class="comment"># 请求的URL开头，如/static、/images、/img、/css</span></span><br><span class="line">    path_end : suffix match	<span class="comment"># 请求的URL中资源的结尾，如 .gif .png .css .js .jpg .jpeg</span></span><br><span class="line">    path_dom : domain match</span><br><span class="line">    path_dir : subdir match</span><br><span class="line">    path_len : length match</span><br><span class="line">    path_reg : regex match</span><br><span class="line">    path_sub : substring match</span><br><span class="line">url : string</span><br><span class="line">	url ：exact string match</span><br><span class="line">    url_beg : prefix match</span><br><span class="line">    url_dir : subdir match</span><br><span class="line">    url_dom : domain match</span><br><span class="line">    url_end : suffix match</span><br><span class="line">    url_len : length match</span><br><span class="line">    url_reg : regex match</span><br><span class="line">    url_sub : substring match</span><br><span class="line">dst			<span class="comment"># 目标ip</span></span><br><span class="line">dst_port	<span class="comment"># 目标port</span></span><br><span class="line">src 		<span class="comment"># 源IP</span></span><br><span class="line">src_port 	<span class="comment"># 源PORT</span></span><br></pre></td></tr></table></figure>
 
-<h5 id="flags"><a href="#flags" class="headerlink" title="flags"></a>flags</h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">-i</span> <span class="token builtin class-name">:</span> 不区分大小写
-<span class="token parameter variable">-f</span> <span class="token builtin class-name">:</span> 从文件中加载pattern匹配方法
-<span class="token parameter variable">-m</span> <span class="token builtin class-name">:</span> 使用指定的pattern匹配方法
-<span class="token parameter variable">-n</span> <span class="token builtin class-name">:</span> 不做DNS解析
-<span class="token parameter variable">-M</span> <span class="token builtin class-name">:</span> load the <span class="token function">file</span> pointed by <span class="token parameter variable">-f</span> like a map file.
-<span class="token parameter variable">-u</span> <span class="token builtin class-name">:</span> 禁止acl重名，否则多个同名ACL匹配或关系
--- <span class="token builtin class-name">:</span> force end of flags. Useful when a string looks like one of the flags.</code></pre>
+<h5 id="flags"><a href="#flags" class="headerlink" title="flags"></a>flags</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-i : 不区分大小写</span><br><span class="line">-f : 从文件中加载pattern匹配方法</span><br><span class="line">-m : 使用指定的pattern匹配方法</span><br><span class="line">-n : 不做DNS解析</span><br><span class="line">-M : load the file pointed by -f like a map file.</span><br><span class="line">-u : 禁止acl重名，否则多个同名ACL匹配或关系</span><br><span class="line">-- : force end of flags. Useful when a string looks like one of the flags.</span><br></pre></td></tr></table></figure>
 
 <p>-f、-m 可选的 pattern 匹配方法：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">- <span class="token string">"found"</span> <span class="token builtin class-name">:</span> only check <span class="token keyword">if</span> the requested sample could be found <span class="token keyword">in</span> the stream,
-            but <span class="token keyword">do</span> not compare it against any pattern. It is recommended not
-            to pass any pattern to avoid confusion. This matching method is
-            particularly useful to detect presence of certain contents such
-            as headers, cookies, etc<span class="token punctuation">..</span>. even <span class="token keyword">if</span> they are empty and without
-            comparing them to anything nor counting them.
-
-- <span class="token string">"bool"</span>  <span class="token builtin class-name">:</span> check the value as a boolean. It can only be applied to fetches
-            <span class="token function">which</span> <span class="token builtin class-name">return</span> a boolean or integer value, and takes no pattern.
-            Value zero or <span class="token boolean">false</span> does not match, all other values <span class="token keyword">do</span> match.
-
-- <span class="token string">"int"</span>   <span class="token builtin class-name">:</span> match the value as an integer. It can be used with integer and
-            boolean samples. Boolean <span class="token boolean">false</span> is integer <span class="token number">0</span>, <span class="token boolean">true</span> is integer <span class="token number">1</span>.
-
-- <span class="token string">"ip"</span>    <span class="token builtin class-name">:</span> match the value as an IPv4 or IPv6 address. It is compatible
-            with IP address samples only, so it is implied and never needed.
-
-- <span class="token string">"bin"</span>   <span class="token builtin class-name">:</span> match the contents against a hexadecimal string representing a
-            binary sequence. This may be used with binary or string samples.
-
-- <span class="token string">"len"</span>   <span class="token builtin class-name">:</span> match the sample's length as an integer. This may be used with
-            binary or string samples.
-
-- <span class="token string">"str"</span>   <span class="token builtin class-name">:</span> exact match <span class="token builtin class-name">:</span> match the contents against a string. This may be
-            used with binary or string samples.
-
-- <span class="token string">"sub"</span>   <span class="token builtin class-name">:</span> substring match <span class="token builtin class-name">:</span> check that the contents contain at least one of
-            the provided string patterns. This may be used with binary or
-            string samples.
-
-- <span class="token string">"reg"</span>   <span class="token builtin class-name">:</span> regex match <span class="token builtin class-name">:</span> match the contents against a list of regular
-            expressions. This may be used with binary or string samples.
-
-- <span class="token string">"beg"</span>   <span class="token builtin class-name">:</span> prefix match <span class="token builtin class-name">:</span> check that the contents begin like the provided
-            string patterns. This may be used with binary or string samples.
-
-- <span class="token string">"end"</span>   <span class="token builtin class-name">:</span> suffix match <span class="token builtin class-name">:</span> check that the contents end like the provided
-            string patterns. This may be used with binary or string samples.
-
-- <span class="token string">"dir"</span>   <span class="token builtin class-name">:</span> subdir match <span class="token builtin class-name">:</span> check that a slash-delimited portion of the
-            contents exactly matches one of the provided string patterns.
-            This may be used with binary or string samples.
-
-- <span class="token string">"dom"</span>   <span class="token builtin class-name">:</span> domain match <span class="token builtin class-name">:</span> check that a dot-delimited portion of the contents
-            exactly match one of the provided string patterns. This may be
-            used with binary or string samples.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">- <span class="string">&quot;found&quot;</span> : only check <span class="keyword">if</span> the requested sample could be found <span class="keyword">in</span> the stream,</span><br><span class="line">            but <span class="keyword">do</span> not compare it against any pattern. It is recommended not</span><br><span class="line">            to pass any pattern to avoid confusion. This matching method is</span><br><span class="line">            particularly useful to detect presence of certain contents such</span><br><span class="line">            as headers, cookies, etc... even <span class="keyword">if</span> they are empty and without</span><br><span class="line">            comparing them to anything nor counting them.</span><br><span class="line"></span><br><span class="line">- <span class="string">&quot;bool&quot;</span>  : check the value as a boolean. It can only be applied to fetches</span><br><span class="line">            <span class="built_in">which</span> <span class="built_in">return</span> a boolean or <span class="built_in">integer</span> value, and takes no pattern.</span><br><span class="line">            Value zero or <span class="literal">false</span> does not match, all other values <span class="keyword">do</span> match.</span><br><span class="line"></span><br><span class="line">- <span class="string">&quot;int&quot;</span>   : match the value as an <span class="built_in">integer</span>. It can be used with <span class="built_in">integer</span> and</span><br><span class="line">            boolean samples. Boolean <span class="literal">false</span> is <span class="built_in">integer</span> 0, <span class="literal">true</span> is <span class="built_in">integer</span> 1.</span><br><span class="line"></span><br><span class="line">- <span class="string">&quot;ip&quot;</span>    : match the value as an IPv4 or IPv6 address. It is compatible</span><br><span class="line">            with IP address samples only, so it is implied and never needed.</span><br><span class="line"></span><br><span class="line">- <span class="string">&quot;bin&quot;</span>   : match the contents against a hexadecimal string representing a</span><br><span class="line">            binary sequence. This may be used with binary or string samples.</span><br><span class="line"></span><br><span class="line">- <span class="string">&quot;len&quot;</span>   : match the sample<span class="string">&#x27;s length as an integer. This may be used with</span></span><br><span class="line"><span class="string">            binary or string samples.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">- &quot;str&quot;   : exact match : match the contents against a string. This may be</span></span><br><span class="line"><span class="string">            used with binary or string samples.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">- &quot;sub&quot;   : substring match : check that the contents contain at least one of</span></span><br><span class="line"><span class="string">            the provided string patterns. This may be used with binary or</span></span><br><span class="line"><span class="string">            string samples.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">- &quot;reg&quot;   : regex match : match the contents against a list of regular</span></span><br><span class="line"><span class="string">            expressions. This may be used with binary or string samples.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">- &quot;beg&quot;   : prefix match : check that the contents begin like the provided</span></span><br><span class="line"><span class="string">            string patterns. This may be used with binary or string samples.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">- &quot;end&quot;   : suffix match : check that the contents end like the provided</span></span><br><span class="line"><span class="string">            string patterns. This may be used with binary or string samples.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">- &quot;dir&quot;   : subdir match : check that a slash-delimited portion of the</span></span><br><span class="line"><span class="string">            contents exactly matches one of the provided string patterns.</span></span><br><span class="line"><span class="string">            This may be used with binary or string samples.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">- &quot;dom&quot;   : domain match : check that a dot-delimited portion of the contents</span></span><br><span class="line"><span class="string">            exactly match one of the provided string patterns. This may be</span></span><br><span class="line"><span class="string">            used with binary or string samples.</span></span><br></pre></td></tr></table></figure>
 
 <h5 id="operator"><a href="#operator" class="headerlink" title="operator"></a>operator</h5><p>ACL 操作符</p>
 <p>整数比较：eq、ge、gt、le、lt</p>
 <p>字符比较：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">- exact match <span class="token punctuation">(</span>-m str<span class="token punctuation">)</span> 		<span class="token comment"># 字符串必须完全匹配模式</span>
-- substring match <span class="token punctuation">(</span>-m sub<span class="token punctuation">)</span> 	<span class="token comment"># 在提取的字符串中查找模式，如果其中任何一个被发现，ACL将匹配</span>
-- prefix match <span class="token punctuation">(</span>-m beg<span class="token punctuation">)</span> 	<span class="token comment"># 在提取的字符串首部中查找模式，如果其中任何一个被发现，ACL将匹配</span>
-- suffix match <span class="token punctuation">(</span>-m end<span class="token punctuation">)</span> 	<span class="token comment"># 将模式与提取字符串的尾部进行比较，如果其中任何一个匹配，则ACL进行匹配</span>
-- subdir match <span class="token punctuation">(</span>-m <span class="token function">dir</span><span class="token punctuation">)</span> 	<span class="token comment"># 查看提取出来的用斜线分隔（“/"）的字符串，如其中任一个匹配，则ACL进行匹配</span>
-- domain match <span class="token punctuation">(</span>-m dom<span class="token punctuation">)</span> 	<span class="token comment"># 查找提取的用点（“."）分隔字符串，如果其中任何一个匹配，则ACL进行匹配</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- exact match (-m str) 		<span class="comment"># 字符串必须完全匹配模式</span></span><br><span class="line">- substring match (-m sub) 	<span class="comment"># 在提取的字符串中查找模式，如果其中任何一个被发现，ACL将匹配</span></span><br><span class="line">- prefix match (-m beg) 	<span class="comment"># 在提取的字符串首部中查找模式，如果其中任何一个被发现，ACL将匹配</span></span><br><span class="line">- suffix match (-m end) 	<span class="comment"># 将模式与提取字符串的尾部进行比较，如果其中任何一个匹配，则ACL进行匹配</span></span><br><span class="line">- subdir match (-m <span class="built_in">dir</span>) 	<span class="comment"># 查看提取出来的用斜线分隔（“/&quot;）的字符串，如其中任一个匹配，则ACL进行匹配</span></span><br><span class="line">- domain match (-m dom) 	<span class="comment"># 查找提取的用点（“.&quot;）分隔字符串，如果其中任何一个匹配，则ACL进行匹配</span></span><br></pre></td></tr></table></figure>
 
 <h5 id="value"><a href="#value" class="headerlink" title="value"></a>value</h5><p>value 类型</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">- Boolean 						<span class="token comment"># 布尔值</span>
-- integer or integer range 		<span class="token comment"># 整数或整数范围，比如用于匹配端口范围</span>
-- IP address / network 			<span class="token comment"># IP地址或IP范围, 192.168.0.1 ,192.168.0.1/24</span>
-- string--<span class="token operator">></span> www.magedu.com
-    exact 		<span class="token comment"># 精确比较</span>
-    substring 	<span class="token comment"># 子串</span>
-    suffix		<span class="token comment"># 后缀比较</span>
-    prefix		<span class="token comment"># 前缀比较</span>
-    subdir		<span class="token comment"># 路径， /wp-includes/js/jquery/jquery.js</span>
-    domain		<span class="token comment"># 域名，www.magedu.com</span>
-- regular expression 			<span class="token comment"># 正则表达式</span>
-- hex block 					<span class="token comment"># 16进制</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">- Boolean 						<span class="comment"># 布尔值</span></span><br><span class="line">- <span class="built_in">integer</span> or <span class="built_in">integer</span> range 		<span class="comment"># 整数或整数范围，比如用于匹配端口范围</span></span><br><span class="line">- IP address / network 			<span class="comment"># IP地址或IP范围, 192.168.0.1 ,192.168.0.1/24</span></span><br><span class="line">- string--&gt; www.magedu.com</span><br><span class="line">    exact 		<span class="comment"># 精确比较</span></span><br><span class="line">    substring 	<span class="comment"># 子串</span></span><br><span class="line">    suffix		<span class="comment"># 后缀比较</span></span><br><span class="line">    prefix		<span class="comment"># 前缀比较</span></span><br><span class="line">    subdir		<span class="comment"># 路径， /wp-includes/js/jquery/jquery.js</span></span><br><span class="line">    domain		<span class="comment"># 域名，www.magedu.com</span></span><br><span class="line">- regular expression 			<span class="comment"># 正则表达式</span></span><br><span class="line">- hex block 					<span class="comment"># 16进制</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="多个-ACL-的组合调用方式"><a href="#多个-ACL-的组合调用方式" class="headerlink" title="多个 ACL 的组合调用方式"></a>多个 ACL 的组合调用方式</h4><p>多个 ACL 的逻辑处理关系：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">与		<span class="token comment"># 默认</span>
-或		<span class="token comment"># or 或 ||</span>
-否定		<span class="token comment"># !</span>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">与		<span class="comment"># 默认</span></span><br><span class="line">或		<span class="comment"># or 或 ||</span></span><br><span class="line">否定		<span class="comment"># !</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例</span></span><br><span class="line"><span class="keyword">if</span> valid_src valid_port 		<span class="comment"># 与，ACL中A和B都要满足为true</span></span><br><span class="line"><span class="keyword">if</span> invalid_src || invalid_port 	<span class="comment"># 或，ACL中A或者B满足一个为true</span></span><br><span class="line"><span class="keyword">if</span> ! invalid_src</span><br></pre></td></tr></table></figure>
 
-<span class="token comment"># 示例</span>
-<span class="token keyword">if</span> valid_src valid_port 		<span class="token comment"># 与，ACL中A和B都要满足为true</span>
-<span class="token keyword">if</span> invalid_src <span class="token operator">||</span> invalid_port 	<span class="token comment"># 或，ACL中A或者B满足一个为true</span>
-<span class="token keyword">if</span> <span class="token operator">!</span> invalid_src</code></pre>
+<h4 id="ACL-示例-域名匹配"><a href="#ACL-示例-域名匹配" class="headerlink" title="ACL 示例-域名匹配"></a>ACL 示例-域名匹配</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/haproxy/conf.d/test.cfg</span></span><br><span class="line">frontend magedu_http_port</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option httplog</span><br><span class="line">    <span class="comment">###################### acl setting ###############################</span></span><br><span class="line">    acl pc_domain hdr_dom(host) -i www.magedu.org</span><br><span class="line">    acl mobile_domain hdr_dom(host) -i mobile.magedu.org</span><br><span class="line">    <span class="comment">###################### acl hosts #################################</span></span><br><span class="line">    use_backend pc_hosts <span class="keyword">if</span> pc_domain	<span class="comment"># use_backend 调用后端服务器组</span></span><br><span class="line">    use_backend mobile_hosts <span class="keyword">if</span> mobile_domain</span><br><span class="line">    default_backend pc_hosts 	<span class="comment"># 所有ACL都不匹配,则使用的默认backend</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###################### backend hosts #############################</span></span><br><span class="line">backend mobile_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web1 10.0.0.17 check inter 2000 fall 3 rise 5</span><br><span class="line">backend pc_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web2 10.0.0.27:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
 
-<h4 id="ACL-示例-域名匹配"><a href="#ACL-示例-域名匹配" class="headerlink" title="ACL 示例-域名匹配"></a>ACL 示例-域名匹配</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cat /etc/haproxy/conf.d/test.cfg</span>
-frontend magedu_http_port
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80
-    mode http
-    balance roundrobin
-    log global
-    option httplog
-    <span class="token comment">###################### acl setting ###############################</span>
-    acl pc_domain hdr_dom<span class="token punctuation">(</span>host<span class="token punctuation">)</span> <span class="token parameter variable">-i</span> www.magedu.org
-    acl mobile_domain hdr_dom<span class="token punctuation">(</span>host<span class="token punctuation">)</span> <span class="token parameter variable">-i</span> mobile.magedu.org
-    <span class="token comment">###################### acl hosts #################################</span>
-    use_backend pc_hosts <span class="token keyword">if</span> pc_domain	<span class="token comment"># use_backend 调用后端服务器组</span>
-    use_backend mobile_hosts <span class="token keyword">if</span> mobile_domain
-    default_backend pc_hosts 	<span class="token comment"># 所有ACL都不匹配,则使用的默认backend</span>
+<h4 id="ACL-示例-基于源-IP-或子网调度访问"><a href="#ACL-示例-基于源-IP-或子网调度访问" class="headerlink" title="ACL 示例-基于源 IP 或子网调度访问"></a>ACL 示例-基于源 IP 或子网调度访问</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/haproxy/conf.d/test.cfg</span></span><br><span class="line">frontend magedu_http_port</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option httplog</span><br><span class="line">    <span class="comment">###################### acl setting ###############################</span></span><br><span class="line">    acl pc_domain hdr_dom(host) -i www.magedu.org</span><br><span class="line">    acl mobile_domain hdr_dom(host) -i mobile.magedu.org</span><br><span class="line">    acl ip_range_test src 172.18.0.0/16 10.0.0.6 	<span class="comment"># 基于源地址的ACL,定义多个ACL的顺序无关</span></span><br><span class="line">    acl ip_range_test2 src 172.18.0.200</span><br><span class="line">    <span class="comment">###################### acl hosts #################################</span></span><br><span class="line">    use_backend pc_hosts <span class="keyword">if</span> ip_range_test <span class="comment">#放在前面的ACL规则优先生效,引用ACL时,严格的ACL应放在前面</span></span><br><span class="line">    use_backend pc_hosts <span class="keyword">if</span> pc_domain</span><br><span class="line">    use_backend mobile_hosts <span class="keyword">if</span> mobile_domain</span><br><span class="line">    default_backend pc_hosts</span><br><span class="line"></span><br><span class="line"><span class="comment">###################### backend hosts #############################</span></span><br><span class="line">backend mobile_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web1 10.0.0.17 check inter 2000 fall 3 rise 5</span><br><span class="line">backend pc_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web2 10.0.0.27:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
 
-<span class="token comment">###################### backend hosts #############################</span>
-backend mobile_hosts
-    mode http
-    server web1 <span class="token number">10.0</span>.0.17 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>
-backend pc_hosts
-    mode http
-    server web2 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span></code></pre>
+<h4 id="ACL-示例-基于源地址的访问控制"><a href="#ACL-示例-基于源地址的访问控制" class="headerlink" title="ACL 示例-基于源地址的访问控制"></a>ACL 示例-基于源地址的访问控制</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">listen web_host</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option httplog</span><br><span class="line">    <span class="comment">###################### acl setting ###############################</span></span><br><span class="line">    acl acl_deny_src src 10.0.0.6 192.168.0.0/24</span><br><span class="line">    <span class="comment">###################### acl hosts #################################</span></span><br><span class="line">    http-request deny <span class="keyword">if</span> acl_deny_src 	<span class="comment"># http-request deny 拒绝请求，返回403</span></span><br><span class="line">    <span class="comment">#block if acl_deny_src	#2.1版本后，不再支持block</span></span><br><span class="line">    <span class="comment">#http-request allow</span></span><br><span class="line">    default_backend default_web</span><br><span class="line"></span><br><span class="line"><span class="comment">###################### backend hosts #############################</span></span><br><span class="line">backend magedu_host</span><br><span class="line">    mode http</span><br><span class="line">    server web1 10.0.0.17 check inter 2000 fall 3 rise 5</span><br><span class="line">backend default_web</span><br><span class="line">    mode http</span><br><span class="line">    server web1 10.0.0.27:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
 
-<h4 id="ACL-示例-基于源-IP-或子网调度访问"><a href="#ACL-示例-基于源-IP-或子网调度访问" class="headerlink" title="ACL 示例-基于源 IP 或子网调度访问"></a>ACL 示例-基于源 IP 或子网调度访问</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cat /etc/haproxy/conf.d/test.cfg</span>
-frontend magedu_http_port
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80
-    mode http
-    balance roundrobin
-    log global
-    option httplog
-    <span class="token comment">###################### acl setting ###############################</span>
-    acl pc_domain hdr_dom<span class="token punctuation">(</span>host<span class="token punctuation">)</span> <span class="token parameter variable">-i</span> www.magedu.org
-    acl mobile_domain hdr_dom<span class="token punctuation">(</span>host<span class="token punctuation">)</span> <span class="token parameter variable">-i</span> mobile.magedu.org
-    acl ip_range_test src <span class="token number">172.18</span>.0.0/16 <span class="token number">10.0</span>.0.6 	<span class="token comment"># 基于源地址的ACL,定义多个ACL的顺序无关</span>
-    acl ip_range_test2 src <span class="token number">172.18</span>.0.200
-    <span class="token comment">###################### acl hosts #################################</span>
-    use_backend pc_hosts <span class="token keyword">if</span> ip_range_test <span class="token comment">#放在前面的ACL规则优先生效,引用ACL时,严格的ACL应放在前面</span>
-    use_backend pc_hosts <span class="token keyword">if</span> pc_domain
-    use_backend mobile_hosts <span class="token keyword">if</span> mobile_domain
-    default_backend pc_hosts
+<h4 id="ACL-示例-匹配浏览器类型"><a href="#ACL-示例-匹配浏览器类型" class="headerlink" title="ACL 示例-匹配浏览器类型"></a>ACL 示例-匹配浏览器类型</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/haproxy/conf.d/test.cfg</span></span><br><span class="line">frontend magedu_http_port</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option httplog</span><br><span class="line">    <span class="comment">###################### acl setting ###############################</span></span><br><span class="line">    acl acl_user_agent hdr_sub(User-Agent) -i curl wget 	<span class="comment"># 浏览器是curl和wget</span></span><br><span class="line">    acl acl_user_agent_ab hdr_sub(User-Agent) -i ApacheBench	<span class="comment"># 浏览器是ApacheBench</span></span><br><span class="line">    <span class="comment">###################### acl hosts #################################</span></span><br><span class="line">    redirect prefix http://www.baidu.com <span class="keyword">if</span> acl_user_agent 	<span class="comment"># 302 临时重定向至新URL</span></span><br><span class="line">    http-request deny <span class="keyword">if</span> acl_user_agent_ab 	<span class="comment"># 拒绝ab</span></span><br><span class="line">    default_backend pc_hosts</span><br><span class="line"></span><br><span class="line"><span class="comment">###################### backend hosts #############################</span></span><br><span class="line">backend mobile_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web1 10.0.0.17 check inter 2000 fall 3 rise 5</span><br><span class="line">backend pc_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web2 10.0.0.27:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
 
-<span class="token comment">###################### backend hosts #############################</span>
-backend mobile_hosts
-    mode http
-    server web1 <span class="token number">10.0</span>.0.17 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>
-backend pc_hosts
-    mode http
-    server web2 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span></code></pre>
+<h4 id="ACL-示例-基于文件后缀名实现动静分离"><a href="#ACL-示例-基于文件后缀名实现动静分离" class="headerlink" title="ACL 示例-基于文件后缀名实现动静分离"></a>ACL 示例-基于文件后缀名实现动静分离</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/haproxy/conf.d/test.cfg</span></span><br><span class="line">frontend magedu_http_port</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option httplog</span><br><span class="line">    <span class="comment">###################### acl setting ###############################</span></span><br><span class="line">    acl acl_static path_end -i .jpg .jpeg .png .gif .css .js .html 	<span class="comment"># 静</span></span><br><span class="line">    acl acl_php path_end -i .php	<span class="comment"># 动</span></span><br><span class="line">    <span class="comment">###################### acl hosts #################################</span></span><br><span class="line">    use_backend mobile_hosts <span class="keyword">if</span> acl_static</span><br><span class="line">    use_backend app_hosts <span class="keyword">if</span> acl_php</span><br><span class="line">    default_backend pc_hosts</span><br><span class="line"></span><br><span class="line"><span class="comment">###################### backend hosts #############################</span></span><br><span class="line">backend mobile_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web1 10.0.0.17 check inter 2000 fall 3 rise 5</span><br><span class="line">backend pc_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web2 10.0.0.27:80 check inter 2000 fall 3 rise 5</span><br><span class="line">backend app_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web2 10.0.0.27:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
 
-<h4 id="ACL-示例-基于源地址的访问控制"><a href="#ACL-示例-基于源地址的访问控制" class="headerlink" title="ACL 示例-基于源地址的访问控制"></a>ACL 示例-基于源地址的访问控制</h4><pre class="language-bash" data-language="bash"><code class="language-bash">listen web_host
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80
-    mode http
-    balance roundrobin
-    log global
-    option httplog
-    <span class="token comment">###################### acl setting ###############################</span>
-    acl acl_deny_src src <span class="token number">10.0</span>.0.6 <span class="token number">192.168</span>.0.0/24
-    <span class="token comment">###################### acl hosts #################################</span>
-    http-request deny <span class="token keyword">if</span> acl_deny_src 	<span class="token comment"># http-request deny 拒绝请求，返回403</span>
-    <span class="token comment">#block if acl_deny_src	#2.1版本后，不再支持block</span>
-    <span class="token comment">#http-request allow</span>
-    default_backend default_web
-
-<span class="token comment">###################### backend hosts #############################</span>
-backend magedu_host
-    mode http
-    server web1 <span class="token number">10.0</span>.0.17 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>
-backend default_web
-    mode http
-    server web1 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span></code></pre>
-
-<h4 id="ACL-示例-匹配浏览器类型"><a href="#ACL-示例-匹配浏览器类型" class="headerlink" title="ACL 示例-匹配浏览器类型"></a>ACL 示例-匹配浏览器类型</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cat /etc/haproxy/conf.d/test.cfg</span>
-frontend magedu_http_port
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80
-    mode http
-    balance roundrobin
-    log global
-    option httplog
-    <span class="token comment">###################### acl setting ###############################</span>
-    acl acl_user_agent hdr_sub<span class="token punctuation">(</span>User-Agent<span class="token punctuation">)</span> <span class="token parameter variable">-i</span> <span class="token function">curl</span> <span class="token function">wget</span> 	<span class="token comment"># 浏览器是curl和wget</span>
-    acl acl_user_agent_ab hdr_sub<span class="token punctuation">(</span>User-Agent<span class="token punctuation">)</span> <span class="token parameter variable">-i</span> ApacheBench	<span class="token comment"># 浏览器是ApacheBench</span>
-    <span class="token comment">###################### acl hosts #################################</span>
-    redirect prefix http://www.baidu.com <span class="token keyword">if</span> acl_user_agent 	<span class="token comment"># 302 临时重定向至新URL</span>
-    http-request deny <span class="token keyword">if</span> acl_user_agent_ab 	<span class="token comment"># 拒绝ab</span>
-    default_backend pc_hosts
-
-<span class="token comment">###################### backend hosts #############################</span>
-backend mobile_hosts
-    mode http
-    server web1 <span class="token number">10.0</span>.0.17 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>
-backend pc_hosts
-    mode http
-    server web2 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span></code></pre>
-
-<h4 id="ACL-示例-基于文件后缀名实现动静分离"><a href="#ACL-示例-基于文件后缀名实现动静分离" class="headerlink" title="ACL 示例-基于文件后缀名实现动静分离"></a>ACL 示例-基于文件后缀名实现动静分离</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cat /etc/haproxy/conf.d/test.cfg</span>
-frontend magedu_http_port
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80
-    mode http
-    balance roundrobin
-    log global
-    option httplog
-    <span class="token comment">###################### acl setting ###############################</span>
-    acl acl_static path_end <span class="token parameter variable">-i</span> .jpg .jpeg .png .gif .css .js .html 	<span class="token comment"># 静</span>
-    acl acl_php path_end <span class="token parameter variable">-i</span> .php	<span class="token comment"># 动</span>
-    <span class="token comment">###################### acl hosts #################################</span>
-    use_backend mobile_hosts <span class="token keyword">if</span> acl_static
-    use_backend app_hosts <span class="token keyword">if</span> acl_php
-    default_backend pc_hosts
-
-<span class="token comment">###################### backend hosts #############################</span>
-backend mobile_hosts
-    mode http
-    server web1 <span class="token number">10.0</span>.0.17 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>
-backend pc_hosts
-    mode http
-    server web2 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>
-backend app_hosts
-    mode http
-    server web2 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span></code></pre>
-
-<h4 id="ACL-示例-匹配访问路径实现动静分离"><a href="#ACL-示例-匹配访问路径实现动静分离" class="headerlink" title="ACL 示例-匹配访问路径实现动静分离"></a>ACL 示例-匹配访问路径实现动静分离</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cat /etc/haproxy/conf.d/test.cfg</span>
-frontend magedu_http_port
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:80
-    mode http
-    balance roundrobin
-    log global
-    option httplog
-    <span class="token comment">###################### acl setting ###############################</span>
-    acl acl_static path_beg <span class="token parameter variable">-i</span> /static /images /javascript 	<span class="token comment"># 路径起始</span>
-    acl acl_static path_end <span class="token parameter variable">-i</span> .jpg .jpeg .png .gif .css .js .html .htm <span class="token comment"># 路径结尾</span>
-    acl acl_app path_beg <span class="token parameter variable">-i</span> /api
-    <span class="token comment">###################### acl hosts #################################</span>
-    use_backend static_hosts <span class="token keyword">if</span> acl_static
-    use_backend app_hosts <span class="token keyword">if</span> acl_app
-    default_backend app_hosts
-
-<span class="token comment">###################### backend hosts #############################</span>
-backend static_hosts
-    mode http
-    server web1 <span class="token number">10.0</span>.0.17 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span>
-backend app_hosts
-    mode http
-    server web2 <span class="token number">10.0</span>.0.27:80 check inter <span class="token number">2000</span> fall <span class="token number">3</span> rise <span class="token number">5</span></code></pre>
+<h4 id="ACL-示例-匹配访问路径实现动静分离"><a href="#ACL-示例-匹配访问路径实现动静分离" class="headerlink" title="ACL 示例-匹配访问路径实现动静分离"></a>ACL 示例-匹配访问路径实现动静分离</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat /etc/haproxy/conf.d/test.cfg</span></span><br><span class="line">frontend magedu_http_port</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:80</span><br><span class="line">    mode http</span><br><span class="line">    balance roundrobin</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    option httplog</span><br><span class="line">    <span class="comment">###################### acl setting ###############################</span></span><br><span class="line">    acl acl_static path_beg -i /static /images /javascript 	<span class="comment"># 路径起始</span></span><br><span class="line">    acl acl_static path_end -i .jpg .jpeg .png .gif .css .js .html .htm <span class="comment"># 路径结尾</span></span><br><span class="line">    acl acl_app path_beg -i /api</span><br><span class="line">    <span class="comment">###################### acl hosts #################################</span></span><br><span class="line">    use_backend static_hosts <span class="keyword">if</span> acl_static</span><br><span class="line">    use_backend app_hosts <span class="keyword">if</span> acl_app</span><br><span class="line">    default_backend app_hosts</span><br><span class="line"></span><br><span class="line"><span class="comment">###################### backend hosts #############################</span></span><br><span class="line">backend static_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web1 10.0.0.17 check inter 2000 fall 3 rise 5</span><br><span class="line">backend app_hosts</span><br><span class="line">    mode http</span><br><span class="line">    server web2 10.0.0.27:80 check inter 2000 fall 3 rise 5</span><br></pre></td></tr></table></figure>
 
 <h4 id="ACL-示例-预定义-ACL-使用"><a href="#ACL-示例-预定义-ACL-使用" class="headerlink" title="ACL 示例-预定义 ACL 使用"></a>ACL 示例-预定义 ACL 使用</h4><p>官方文档：<a target="_blank" rel="noopener" href="http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#7.4">http://cbonte.github.io/haproxy-dconv/2.2/configuration.html#7.4</a></p>
 <table>
@@ -1168,49 +612,21 @@ backend app_hosts
 </tr>
 </tbody></table>
 <p>示例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">http-request deny <span class="token keyword">if</span> METH_TRACE HTTP_1.1 	<span class="token comment"># 引用预定义的ACL，多个ACL默认为与关系</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http-request deny <span class="keyword">if</span> METH_TRACE HTTP_1.1 	<span class="comment"># 引用预定义的ACL，多个ACL默认为与关系</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="自定义-HAProxy-错误界面"><a href="#自定义-HAProxy-错误界面" class="headerlink" title="自定义 HAProxy 错误界面"></a>自定义 HAProxy 错误界面</h3><p>：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">errorfile <span class="token operator">&lt;</span>code<span class="token operator">></span> <span class="token operator">&lt;</span>file<span class="token operator">></span>		<span class="token comment"># 自定义错误页</span>
-    <span class="token operator">&lt;</span>code<span class="token operator">></span> 	<span class="token comment"># HTTP status code.支持200, 400, 403, 405, 408, 425, 429, 500, 502，503,504</span>
-    <span class="token operator">&lt;</span>file<span class="token operator">></span> 	<span class="token comment"># 包含完整HTTP响应头的错误页文件的绝对路径。 建议后缀".http"，以和一般的html文件相区分</span>
-
-errorloc <span class="token operator">&lt;</span>code<span class="token operator">></span> <span class="token operator">&lt;</span>url<span class="token operator">></span>		<span class="token comment"># 错误页面重定向</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">errorfile &lt;code&gt; &lt;file&gt;		<span class="comment"># 自定义错误页</span></span><br><span class="line">    &lt;code&gt; 	<span class="comment"># HTTP status code.支持200, 400, 403, 405, 408, 425, 429, 500, 502，503,504</span></span><br><span class="line">    &lt;file&gt; 	<span class="comment"># 包含完整HTTP响应头的错误页文件的绝对路径。 建议后缀&quot;.http&quot;，以和一般的html文件相区分</span></span><br><span class="line"></span><br><span class="line">errorloc &lt;code&gt; &lt;url&gt;		<span class="comment"># 错误页面重定向</span></span><br></pre></td></tr></table></figure>
 
 <p>示例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">defaults
-	<span class="token punctuation">..</span>.
-    errorfile <span class="token number">400</span> /etc/haproxy/errorfiles/400badreq.http
-    errorfile <span class="token number">403</span> /etc/haproxy/errorfiles/403forbid.http
-    <span class="token comment"># errorfile 503 /etc/haproxy/errorfiles/503sorry.http</span>
-    errorloc <span class="token number">503</span> http://www.magedu.com/error_pages/503.html		<span class="token comment"># 重定向</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">defaults</span><br><span class="line">	...</span><br><span class="line">    errorfile 400 /etc/haproxy/errorfiles/400badreq.http</span><br><span class="line">    errorfile 403 /etc/haproxy/errorfiles/403forbid.http</span><br><span class="line">    <span class="comment"># errorfile 503 /etc/haproxy/errorfiles/503sorry.http</span></span><br><span class="line">    errorloc 503 http://www.magedu.com/error_pages/503.html		<span class="comment"># 重定向</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="HAProxy-四层负载"><a href="#HAProxy-四层负载" class="headerlink" title="HAProxy 四层负载"></a>HAProxy 四层负载</h3><p>问题: 后端服务器和 haproxy 还是和客户端建立三次握手?</p>
 <p>答：HAProxy，因为 HAProxy 是伪四层，LVS 是真四层，不过，即使是伪四层，四层负载也比七层代理性能要高</p>
 <p><strong>四层负载示例：</strong></p>
 <p>注意：如果使用 frontend 和 backend，一定在 frontend 和 backend 段中都指定 mode tcp</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 对MySQL服务实现四层负载</span>
-listen magedu_mysql
-    <span class="token builtin class-name">bind</span> <span class="token number">10.0</span>.0.7:3306
-    mode tcp
-    balance leastconn
-    server mysql1 <span class="token number">10.0</span>.0.17:3306 check
-    server mysql2 <span class="token number">10.0</span>.0.27:3306 check 		<span class="token comment"># 如果不写端口号，可以转发，但无法check状态</span>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 对MySQL服务实现四层负载</span></span><br><span class="line">listen magedu_mysql</span><br><span class="line">    <span class="built_in">bind</span> 10.0.0.7:3306</span><br><span class="line">    mode tcp</span><br><span class="line">    balance leastconn</span><br><span class="line">    server mysql1 10.0.0.17:3306 check</span><br><span class="line">    server mysql2 10.0.0.27:3306 check 		<span class="comment"># 如果不写端口号，可以转发，但无法check状态</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用frontend和backend实现</span></span><br><span class="line">frontend mysql</span><br><span class="line">    <span class="built_in">bind</span> :3306</span><br><span class="line">    mode tcp 		<span class="comment"># 必须指定tcp模式</span></span><br><span class="line">    default_backend mysqlsrvs</span><br><span class="line">backend mysqlsrvs</span><br><span class="line">    mode tcp 		<span class="comment"># 必须指定tcp模式</span></span><br><span class="line">    balance leastconn</span><br><span class="line">    server mysql1 10.0.0.17:3306</span><br><span class="line">    server mysql2 10.0.0.27:3306</span><br></pre></td></tr></table></figure>
 
-<span class="token comment"># 或者使用frontend和backend实现</span>
-frontend mysql
-    <span class="token builtin class-name">bind</span> :3306
-    mode tcp 		<span class="token comment"># 必须指定tcp模式</span>
-    default_backend mysqlsrvs
-backend mysqlsrvs
-    mode tcp 		<span class="token comment"># 必须指定tcp模式</span>
-    balance leastconn
-    server mysql1 <span class="token number">10.0</span>.0.17:3306
-    server mysql2 <span class="token number">10.0</span>.0.27:3306</code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># ACL示例-四层访问控制</span>
-acl invalid_src src <span class="token number">192.168</span>.1.0/24 <span class="token number">10.0</span>.0.8		<span class="token comment"># 定义acl</span>
-tcp-request connection reject <span class="token keyword">if</span> invalid_src 	<span class="token comment"># tcp-request，走的是四层的拒绝</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ACL示例-四层访问控制</span></span><br><span class="line">acl invalid_src src 192.168.1.0/24 10.0.0.8		<span class="comment"># 定义acl</span></span><br><span class="line">tcp-request connection reject <span class="keyword">if</span> invalid_src 	<span class="comment"># tcp-request，走的是四层的拒绝</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="HAProxy-https-实现"><a href="#HAProxy-https-实现" class="headerlink" title="HAProxy https 实现"></a>HAProxy https 实现</h3><p>haproxy 可以实现 https 的证书安全，但基于性能考虑，生产中证书都是在后端服务器比如 nginx 上实现，在 HAProxy 上采用四层负载，监听 ip:443，然后直接转发，让后端服务器去处理 https 证书</p>
 <h2 id="本章重点总结"><a href="#本章重点总结" class="headerlink" title="本章重点总结"></a>本章重点总结</h2><ul>

@@ -18,12 +18,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"blog.lujinkai.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.16.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":10},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"KN3H1V8A6V","apiKey":"c5d73d0dde2dd770ce49b505f938553d","indexName":"hexo","hits":{"per_page":20,"labels":{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}}}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="docker 网络支持 5 种网络模式：none、bridge、host、container、network-net  创建新容器时，docker run命令可以指定网络模式： docker run --network &lt;mode&gt;  # mode：默认是bridge none bridge host container:容器名或容器ID 自定义网络名称  bridge 模式 默认模式，容器">
+    <meta name="description" content="docker 网络支持 5 种网络模式：none、bridge、host、container、network-net  创建新容器时，docker run命令可以指定网络模式： 12345678docker run --network &lt;mode&gt;# mode：默认是bridgenonebridgehostcontainer:容器名或容器ID自定义网络名称  bridge 模式 默认模">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker网络管理">
 <meta property="og:url" content="http://blog.lujinkai.cn/%E8%BF%90%E7%BB%B4/Docker/4.docker%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86/index.html">
 <meta property="og:site_name" content="LJKのBlog">
-<meta property="og:description" content="docker 网络支持 5 种网络模式：none、bridge、host、container、network-net  创建新容器时，docker run命令可以指定网络模式： docker run --network &lt;mode&gt;  # mode：默认是bridge none bridge host container:容器名或容器ID 自定义网络名称  bridge 模式 默认模式，容器">
+<meta property="og:description" content="docker 网络支持 5 种网络模式：none、bridge、host、container、network-net  创建新容器时，docker run命令可以指定网络模式： 12345678docker run --network &lt;mode&gt;# mode：默认是bridgenonebridgehostcontainer:容器名或容器ID自定义网络名称  bridge 模式 默认模">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://img.to2b.cn/blog/ljk/1606097620697.png">
 <meta property="og:image" content="http://img.to2b.cn/blog/ljk/1606098112832.png">
@@ -265,14 +265,7 @@
     <div class="post-body" itemprop="articleBody"><p>docker 网络支持 5 种网络模式：none、bridge、host、container、network-net</p>
 <p><img data-src="//img.to2b.cn/blog/ljk/1606097620697.png"></p>
 <p>创建新容器时，<code>docker run</code>命令可以指定网络模式：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">--network</span> <span class="token operator">&lt;</span>mode<span class="token operator">></span>
-
-<span class="token comment"># mode：默认是bridge</span>
-none
-bridge
-<span class="token function">host</span>
-container:容器名或容器ID
-自定义网络名称</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker run --network &lt;mode&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># mode：默认是bridge</span></span><br><span class="line">none</span><br><span class="line">bridge</span><br><span class="line">host</span><br><span class="line">container:容器名或容器ID</span><br><span class="line">自定义网络名称</span><br></pre></td></tr></table></figure>
 
 <h2 id="bridge-模式"><a href="#bridge-模式" class="headerlink" title="bridge 模式"></a>bridge 模式</h2><p><img data-src="//img.to2b.cn/blog/ljk/1606098112832.png"></p>
 <p>默认模式，容器连接到一个虚拟网桥与外界通信，通过 SNAT 访问外网，通过 DNAT 可以让容器被外部主机访问，所以此模式也称为 NAT 模式</p>
@@ -285,23 +278,10 @@ container:容器名或容器ID
 </ul>
 <p>修改默认的 bridge 模式网络配置：</p>
 <p>方法一：修改 docker.service</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker0默认ip为172.17.0.1/16，修改为10.100.0.1/24</span>
-root@Z510:~<span class="token comment"># vim /usr/lib/systemd/system/docker.service</span>
-<span class="token punctuation">..</span>.
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/bin/dockerd <span class="token parameter variable">-H</span> fd:// <span class="token parameter variable">--containerd</span><span class="token operator">=</span>/run/containerd/containerd.sock <span class="token parameter variable">--bip</span><span class="token operator">=</span><span class="token number">10.100</span>.0.1/24
-<span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker0默认ip为172.17.0.1/16，修改为10.100.0.1/24</span></span><br><span class="line">root@Z510:~<span class="comment"># vim /usr/lib/systemd/system/docker.service</span></span><br><span class="line">...</span><br><span class="line">ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --bip=10.100.0.1/24</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <p>方法二：<a target="_blank" rel="noopener" href="https://blog.whsir.com/post-5195.html">修改 daemon.json</a>，推荐这种方法</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">root@Z510:~<span class="token comment"># vim /etc/docker/daemon.json</span>
-<span class="token comment"># hosts 指定docker守护进程侦听的地址，默认/var/run/docker.sock</span>
-<span class="token string">"hosts"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token string">"tcp://0.0.0.0:2375"</span>, <span class="token string">"fd://"</span><span class="token punctuation">]</span>,
-<span class="token string">"bip"</span><span class="token builtin class-name">:</span> <span class="token string">"192.168.100.100/24"</span>,	<span class="token comment"># docker0网卡的IP</span>
-<span class="token string">"fixed-cidr"</span><span class="token builtin class-name">:</span> <span class="token string">"192.168.100.128/26"</span>,	<span class="token comment"># 分配给容器的IP范围</span>
-<span class="token string">"fixed-cidr-v6"</span><span class="token builtin class-name">:</span> <span class="token string">"2001:db8::/64"</span>,
-<span class="token string">"mtu"</span><span class="token builtin class-name">:</span> <span class="token number">1500</span>,
-<span class="token string">"default-gateway"</span><span class="token builtin class-name">:</span> <span class="token string">"192.168.100.200"</span>,	<span class="token comment"># 网关必须和bip在同一个网段</span>
-<span class="token string">"default-gateway-v6"</span><span class="token builtin class-name">:</span> <span class="token string">"2001:db8:abcd::89"</span>,
-<span class="token string">"dns"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span> <span class="token string">"1.1.1.1"</span>, <span class="token string">"8.8.8.8"</span><span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">root@Z510:~<span class="comment"># vim /etc/docker/daemon.json</span></span><br><span class="line"><span class="comment"># hosts 指定docker守护进程侦听的地址，默认/var/run/docker.sock</span></span><br><span class="line"><span class="string">&quot;hosts&quot;</span>: [<span class="string">&quot;tcp://0.0.0.0:2375&quot;</span>, <span class="string">&quot;fd://&quot;</span>],</span><br><span class="line"><span class="string">&quot;bip&quot;</span>: <span class="string">&quot;192.168.100.100/24&quot;</span>,	<span class="comment"># docker0网卡的IP</span></span><br><span class="line"><span class="string">&quot;fixed-cidr&quot;</span>: <span class="string">&quot;192.168.100.128/26&quot;</span>,	<span class="comment"># 分配给容器的IP范围</span></span><br><span class="line"><span class="string">&quot;fixed-cidr-v6&quot;</span>: <span class="string">&quot;2001:db8::/64&quot;</span>,</span><br><span class="line"><span class="string">&quot;mtu&quot;</span>: 1500,</span><br><span class="line"><span class="string">&quot;default-gateway&quot;</span>: <span class="string">&quot;192.168.100.200&quot;</span>,	<span class="comment"># 网关必须和bip在同一个网段</span></span><br><span class="line"><span class="string">&quot;default-gateway-v6&quot;</span>: <span class="string">&quot;2001:db8:abcd::89&quot;</span>,</span><br><span class="line"><span class="string">&quot;dns&quot;</span>: [ <span class="string">&quot;1.1.1.1&quot;</span>, <span class="string">&quot;8.8.8.8&quot;</span>]</span><br></pre></td></tr></table></figure>
 
 <h2 id="host-模式"><a href="#host-模式" class="headerlink" title="host 模式"></a>host 模式</h2><p>容器和宿主机之间网络不隔离（其他资源隔离），容器不创建自己的虚拟网卡，而是使用宿主机的网卡和 IP 地址，因此在容器里面查看到的 IP 信息就是宿主机的信息，访问容器的时候直接使用宿主机 IP+容器端口即可</p>
 <p>此模式由于直接使用宿主机的网络无需转换，网络性能最高，但是各容器内使用的端口不能相同，适用于运行容器端口比较固定的业务</p>
@@ -316,105 +296,36 @@ root@Z510:~<span class="token comment"># vim /usr/lib/systemd/system/docker.serv
 <li>不支持端口映射</li>
 </ul>
 <p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--network</span> <span class="token function">host</span> <span class="token parameter variable">--name</span> web1 nginx-centos7-base:1.6.1</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --network host --name web1 nginx-centos7-base:1.6.1</span><br></pre></td></tr></table></figure>
 
 <h2 id="none-模式"><a href="#none-模式" class="headerlink" title="none 模式"></a>none 模式</h2><p>容器不会进行任何网络配置，没有网卡、没有 IP 也没有路由，因此默认无法与外界通信，需要手动添加网卡配置 IP 等，所以极少使用</p>
 <h2 id="containter-模式"><a href="#containter-模式" class="headerlink" title="containter 模式"></a>containter 模式</h2><p>指定一个已经存在的容器（选择与其通信频繁的容器），共享其网络，因此这个容器的端口不能和被指定容器的端口冲突</p>
 <p>这种模式也较少使用</p>
-<h2 id="自定义网络模式"><a href="#自定义网络模式" class="headerlink" title="自定义网络模式"></a>自定义网络模式</h2><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker network --help</span>
-Usage:	<span class="token function">docker</span> network COMMAND
-
-Commands:
-  connect     Connect a container to a network
-  create      Create a network
-  disconnect  Disconnect a container from a network
-  inspect     Display detailed information on one or <span class="token function">more</span> networks
-  <span class="token function">ls</span>          List networks
-  prune       Remove all unused networks
-  <span class="token function">rm</span>          Remove one or <span class="token function">more</span> networks</code></pre>
+<h2 id="自定义网络模式"><a href="#自定义网络模式" class="headerlink" title="自定义网络模式"></a>自定义网络模式</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker network --help</span></span><br><span class="line">Usage:	docker network COMMAND</span><br><span class="line"></span><br><span class="line">Commands:</span><br><span class="line">  connect     Connect a container to a network</span><br><span class="line">  create      Create a network</span><br><span class="line">  disconnect  Disconnect a container from a network</span><br><span class="line">  inspect     Display detailed information on one or more networks</span><br><span class="line">  <span class="built_in">ls</span>          List networks</span><br><span class="line">  prune       Remove all unused networks</span><br><span class="line">  <span class="built_in">rm</span>          Remove one or more networks</span><br></pre></td></tr></table></figure>
 
 <p><font color=red>自定义网络内的容器可以直接通过容器进行相互的访问</font></p>
 <p>可以使用自定义网络模式，实现不同集群应用的独立网络管理，而互补影响，而且在一个网络内，可以直接利用容器名称相互访问，非常便利</p>
 <p>创建自定义网络：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker network create --help</span>
-Usage:	<span class="token function">docker</span> network create <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> NETWORK
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker network create --help</span></span><br><span class="line">Usage:	docker network create [OPTIONS] NETWORK</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">      --attachable           Enable manual container attachment</span><br><span class="line">      --aux-address map      Auxiliary IPv4 or IPv6 addresses used by Network driver (default map[])</span><br><span class="line">      --config-from string   The network from <span class="built_in">which</span> copying the configuration</span><br><span class="line">      --config-only          Create a configuration only network</span><br><span class="line">  -d, --driver string        Driver to manage the Network (default <span class="string">&quot;bridge&quot;</span>)</span><br><span class="line">      --gateway strings      IPv4 or IPv6 Gateway <span class="keyword">for</span> the master subnet</span><br><span class="line">      --ingress              Create swarm routing-mesh network</span><br><span class="line">      --internal             Restrict external access to the network</span><br><span class="line">      --ip-range strings     Allocate container ip from a sub-range</span><br><span class="line">      --ipam-driver string   IP Address Management Driver (default <span class="string">&quot;default&quot;</span>)</span><br><span class="line">      --ipam-opt map         Set IPAM driver specific options (default map[])</span><br><span class="line">      --ipv6                 Enable IPv6 networking</span><br><span class="line">      --label list           Set metadata on a network</span><br><span class="line">  -o, --opt map              Set driver specific options (default map[])</span><br><span class="line">      --scope string         Control the network<span class="string">&#x27;s scope</span></span><br><span class="line"><span class="string">      --subnet strings       Subnet in CIDR format that represents a network segment</span></span><br></pre></td></tr></table></figure>
 
-Options:
-      <span class="token parameter variable">--attachable</span>           Enable manual container attachment
-      --aux-address map      Auxiliary IPv4 or IPv6 addresses used by Network driver <span class="token punctuation">(</span>default map<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-      --config-from string   The network from <span class="token function">which</span> copying the configuration
-      --config-only          Create a configuration only network
-  -d, <span class="token parameter variable">--driver</span> string        Driver to manage the Network <span class="token punctuation">(</span>default <span class="token string">"bridge"</span><span class="token punctuation">)</span>
-      <span class="token parameter variable">--gateway</span> strings      IPv4 or IPv6 Gateway <span class="token keyword">for</span> the master subnet
-      <span class="token parameter variable">--ingress</span>              Create swarm routing-mesh network
-      <span class="token parameter variable">--internal</span>             Restrict external access to the network
-      --ip-range strings     Allocate container <span class="token function">ip</span> from a sub-range
-      --ipam-driver string   IP Address Management Driver <span class="token punctuation">(</span>default <span class="token string">"default"</span><span class="token punctuation">)</span>
-      --ipam-opt map         Set IPAM driver specific options <span class="token punctuation">(</span>default map<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-      <span class="token parameter variable">--ipv6</span>                 Enable IPv6 networking
-      <span class="token parameter variable">--label</span> list           Set metadata on a network
-  -o, <span class="token parameter variable">--opt</span> map              Set driver specific options <span class="token punctuation">(</span>default map<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-      <span class="token parameter variable">--scope</span> string         Control the network's scope
-      <span class="token parameter variable">--subnet</span> strings       Subnet <span class="token keyword">in</span> CIDR <span class="token function">format</span> that represents a network segment</code></pre>
-
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> network create <span class="token parameter variable">-d</span> <span class="token operator">&lt;</span>mode<span class="token operator">></span> <span class="token parameter variable">--subnet</span> <span class="token operator">&lt;</span>CIDR<span class="token operator">></span> <span class="token parameter variable">--gateway</span> <span class="token operator">&lt;</span>网关<span class="token operator">></span> <span class="token operator">&lt;</span>自定义网络名称<span class="token operator">></span>
-
-<span class="token comment">#注意mode不支持host和none</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d &lt;mode&gt; --subnet &lt;CIDR&gt; --gateway &lt;网关&gt; &lt;自定义网络名称&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#注意mode不支持host和none</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="容器间通信"><a href="#容器间通信" class="headerlink" title="容器间通信"></a>容器间通信</h3><h2 id="禁止同宿主机的不同容器间通信"><a href="#禁止同宿主机的不同容器间通信" class="headerlink" title="禁止同宿主机的不同容器间通信"></a>禁止同宿主机的不同容器间通信</h2><p>docker.service</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/bin/dockerd <span class="token parameter variable">-H</span> fd:// <span class="token parameter variable">--containerd</span><span class="token operator">=</span>/run/containerd/containerd.sock <span class="token parameter variable">--icc</span><span class="token operator">=</span>false</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --icc=<span class="literal">false</span></span><br></pre></td></tr></table></figure>
 
 <p>daemon.json</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token string">"icc"</span><span class="token builtin class-name">:</span> <span class="token boolean">false</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;icc&quot;</span>: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="容器名称互联"><a href="#容器名称互联" class="headerlink" title="容器名称互联"></a>容器名称互联</h2><p>前文中，自定义网络模式，可以实现容器名称互联，如果是默认模式，想要实现这个功能，需要在创建容器时，使用–link 选项</p>
 <p>范例：实现 a1 和 a2 容器名称互联</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 创建容器a1</span>
-root@Z510:~<span class="token comment"># docker container run -it --name a1  alpine:latest</span>
-/ <span class="token comment"># hostname -i</span>
-<span class="token number">172.17</span>.0.2
-<span class="token comment"># 2. 创建容器a2</span>
-root@Z510:~<span class="token comment"># docker container run -it --name a2 --link a1 alpine:latest</span>
-/ <span class="token comment"># hostname -i</span>
-<span class="token number">172.17</span>.0.3
-/ <span class="token comment"># cat /etc/hosts</span>
-<span class="token punctuation">..</span>.
-<span class="token number">172.17</span>.0.2	a1 6079167b0ed1
-<span class="token number">172.17</span>.0.3	b4e8abef6893
-/ <span class="token comment"># ping a1								# a2可以ping通a1</span>
-PING a1 <span class="token punctuation">(</span><span class="token number">172.17</span>.0.2<span class="token punctuation">)</span>: <span class="token number">56</span> data bytes
-<span class="token number">64</span> bytes from <span class="token number">172.17</span>.0.2: <span class="token assign-left variable">seq</span><span class="token operator">=</span><span class="token number">0</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.191</span> ms
-<span class="token punctuation">..</span>.
-<span class="token comment"># 3. 修改容器a1的hosts</span>
-/ <span class="token comment"># vi /etc/hosts</span>
-<span class="token comment"># 添加如下行</span>
-<span class="token number">172.17</span>.0.3      a2 b4e8abef6893
-/ <span class="token comment"># ping a2								# a1可以ping通a2</span>
-PING a2 <span class="token punctuation">(</span><span class="token number">172.17</span>.0.3<span class="token punctuation">)</span>: <span class="token number">56</span> data bytes
-<span class="token number">64</span> bytes from <span class="token number">172.17</span>.0.3: <span class="token assign-left variable">seq</span><span class="token operator">=</span><span class="token number">0</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.135</span> ms
-<span class="token punctuation">..</span>.</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 创建容器a1</span></span><br><span class="line">root@Z510:~<span class="comment"># docker container run -it --name a1  alpine:latest</span></span><br><span class="line">/ <span class="comment"># hostname -i</span></span><br><span class="line">172.17.0.2</span><br><span class="line"><span class="comment"># 2. 创建容器a2</span></span><br><span class="line">root@Z510:~<span class="comment"># docker container run -it --name a2 --link a1 alpine:latest</span></span><br><span class="line">/ <span class="comment"># hostname -i</span></span><br><span class="line">172.17.0.3</span><br><span class="line">/ <span class="comment"># cat /etc/hosts</span></span><br><span class="line">...</span><br><span class="line">172.17.0.2	a1 6079167b0ed1</span><br><span class="line">172.17.0.3	b4e8abef6893</span><br><span class="line">/ <span class="comment"># ping a1								# a2可以ping通a1</span></span><br><span class="line">PING a1 (172.17.0.2): 56 data bytes</span><br><span class="line">64 bytes from 172.17.0.2: <span class="built_in">seq</span>=0 ttl=64 time=0.191 ms</span><br><span class="line">...</span><br><span class="line"><span class="comment"># 3. 修改容器a1的hosts</span></span><br><span class="line">/ <span class="comment"># vi /etc/hosts</span></span><br><span class="line"><span class="comment"># 添加如下行</span></span><br><span class="line">172.17.0.3      a2 b4e8abef6893</span><br><span class="line">/ <span class="comment"># ping a2								# a1可以ping通a2</span></span><br><span class="line">PING a2 (172.17.0.3): 56 data bytes</span><br><span class="line">64 bytes from 172.17.0.3: <span class="built_in">seq</span>=0 ttl=64 time=0.135 ms</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <h2 id="同宿主机之间不同网络的容器通信"><a href="#同宿主机之间不同网络的容器通信" class="headerlink" title="同宿主机之间不同网络的容器通信"></a>同宿主机之间不同网络的容器通信</h2><p>同一个宿主机，创建两个容器，一个使用自定义网络，一个使用默认的 bridge 模式，默认这两个容器是无法通信的，如果想要实现通信，有两种方式：修改 iptables 规则 和 通过<code>docker network connect</code>实现</p>
 <p>本笔记只记录第二种方式：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># docker network connect --help</span>
-Usage:	<span class="token function">docker</span> network connect <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> NETWORK CONTAINER
-
-Options:
-      <span class="token parameter variable">--alias</span> strings           Add network-scoped <span class="token builtin class-name">alias</span> <span class="token keyword">for</span> the container
-      --driver-opt strings      driver options <span class="token keyword">for</span> the network
-      <span class="token parameter variable">--ip</span> string               IPv4 address <span class="token punctuation">(</span>e.g., <span class="token number">172.30</span>.100.104<span class="token punctuation">)</span>
-      <span class="token parameter variable">--ip6</span> string              IPv6 address <span class="token punctuation">(</span>e.g., <span class="token number">2001</span>:db8::33<span class="token punctuation">)</span>
-      <span class="token parameter variable">--link</span> list               Add <span class="token function">link</span> to another container
-      --link-local-ip strings   Add a link-local address <span class="token keyword">for</span> the container</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker network connect --help</span></span><br><span class="line">Usage:	docker network connect [OPTIONS] NETWORK CONTAINER</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">      --<span class="built_in">alias</span> strings           Add network-scoped <span class="built_in">alias</span> <span class="keyword">for</span> the container</span><br><span class="line">      --driver-opt strings      driver options <span class="keyword">for</span> the network</span><br><span class="line">      --ip string               IPv4 address (e.g., 172.30.100.104)</span><br><span class="line">      --ip6 string              IPv6 address (e.g., 2001:db8::33)</span><br><span class="line">      --<span class="built_in">link</span> list               Add <span class="built_in">link</span> to another container</span><br><span class="line">      --link-local-ip strings   Add a link-local address <span class="keyword">for</span> the container</span><br></pre></td></tr></table></figure>
 
 <p>范例：默认 docker0 中的容器为 test1，自定义网络 test-net 中的容器为 test2</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 创建网络和容器，过程略...</span>
-<span class="token comment"># 2. 让默认网络中容器test1可以连通自定义网络test-net的容器test2</span>
-<span class="token function">docker</span> network connect test-net test1
-<span class="token function">ip</span> a	<span class="token comment"># 可以看到新增一个网卡，ip和test-net同网段</span>
-<span class="token comment"># 3. 让自定义网络中容器test2可以连通默认网络的容器test1</span>
-<span class="token function">docker</span> network connect bridge test2
-<span class="token function">ip</span> a	<span class="token comment"># 可以看到新增一个网卡，ip和docker0同网段</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 创建网络和容器，过程略...</span></span><br><span class="line"><span class="comment"># 2. 让默认网络中容器test1可以连通自定义网络test-net的容器test2</span></span><br><span class="line">docker network connect test-net test1</span><br><span class="line">ip a	<span class="comment"># 可以看到新增一个网卡，ip和test-net同网段</span></span><br><span class="line"><span class="comment"># 3. 让自定义网络中容器test2可以连通默认网络的容器test1</span></span><br><span class="line">docker network connect bridge test2</span><br><span class="line">ip a	<span class="comment"># 可以看到新增一个网卡，ip和docker0同网段</span></span><br></pre></td></tr></table></figure>
 
 <p>docker 容器创建后，必不可少的要和其它主机或容器进行网络通信</p>
 <p>docker 的网络模式和 KVM 很相似</p>

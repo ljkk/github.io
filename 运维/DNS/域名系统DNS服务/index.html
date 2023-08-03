@@ -270,7 +270,7 @@
 <li>迭代查询：一般情况下(有例外)本地的 DNS 服务器向其它 DNS 服务器的查询属于迭代查询。如果其他 DNS 服务器也不能解析，则本地 DNS 服务器再向下一个 DNS 服务器发出查询请求。</li>
 </ul>
 <h3 id="名称服务器"><a href="#名称服务器" class="headerlink" title="名称服务器"></a>名称服务器</h3><p>Name Server：域内负责解析本域内的名称的 DNS 服务器</p>
-<h3 id="完整的查询请求经过的流程"><a href="#完整的查询请求经过的流程" class="headerlink" title="完整的查询请求经过的流程"></a>完整的查询请求经过的流程</h3><pre class="language-latex" data-language="latex"><code class="language-latex">Client -->hosts文件 --> Client DNS Service Local Cache --> DNS Server (递归) --> DNS Server Cache -->DNS iteration(迭代) --> 根--> 顶级域名DNS-->二级域名DNS…</code></pre>
+<h3 id="完整的查询请求经过的流程"><a href="#完整的查询请求经过的流程" class="headerlink" title="完整的查询请求经过的流程"></a>完整的查询请求经过的流程</h3><figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Client --&gt;hosts文件 --&gt; Client DNS Service Local Cache --&gt; DNS Server (递归) --&gt; DNS Server Cache --&gt;DNS iteration(迭代) --&gt; 根--&gt; 顶级域名DNS--&gt;二级域名DNS…</span><br></pre></td></tr></table></figure>
 
 <h3 id="DNS-服务器类型"><a href="#DNS-服务器类型" class="headerlink" title="DNS 服务器类型"></a>DNS 服务器类型</h3><ul>
 <li><p>主 DNS 服务器</p>
@@ -308,7 +308,7 @@
 <li>权威答案：直接由存有此查询结果的 DNS 服务器（权威服务器）返回的答案</li>
 <li>非权威答案：由其它非权威服务器返回的查询答案</li>
 </ul>
-<h3 id="资源记录定义格式"><a href="#资源记录定义格式" class="headerlink" title="资源记录定义格式"></a>资源记录定义格式</h3><pre class="language-ini" data-language="ini"><code class="language-ini">name [TTL] IN rr_type value</code></pre>
+<h3 id="资源记录定义格式"><a href="#资源记录定义格式" class="headerlink" title="资源记录定义格式"></a>资源记录定义格式</h3><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name <span class="section">[TTL]</span> IN rr_type value</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>name：zone 的名称，是一个 FQDN，通常使用@来表示；zone 的名称可以定义变量$ORIGIN来表示，优先继承$ORIGIN</li>
@@ -323,19 +323,7 @@
 <p>区域解析库：由众多资源记录 RR（Resource Record）组成</p>
 <h4 id="SOA"><a href="#SOA" class="headerlink" title="SOA"></a>SOA</h4><p>Start Of Authority：起始授权记录，一个区域解析库有且仅能有一个 SOA 记录，必须位于解析库的第一条记录</p>
 <p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">;</span> zone <span class="token function">file</span> fragment <span class="token keyword">for</span> mytest.cn
-    <span class="token punctuation">;</span><span class="token variable">$TTL</span> <span class="token number">600</span>
-    <span class="token variable">$ORIGIN</span> mytest.cn.
-    <span class="token punctuation">;</span> SOA record
-    <span class="token punctuation">;</span> owner-name ttl class rr      name-server      email-addr  <span class="token punctuation">(</span>sn ref ret ex min<span class="token punctuation">)</span>
-    @                 IN   SOA     ns1.mytest.cn.   root.mytest.cn. <span class="token punctuation">(</span>
-                                                                    <span class="token number">0</span>	<span class="token punctuation">;</span> serial
-                                                                    1D	<span class="token punctuation">;</span> refresh
-                                                                    1H	<span class="token punctuation">;</span> retry
-                                                                    1W	<span class="token punctuation">;</span> expire
-                                                                    3H <span class="token punctuation">)</span>	<span class="token punctuation">;</span> minimum
-
-<span class="token comment"># M：分钟；H：小时；D：天；W：周</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">; zone file fragment <span class="keyword">for</span> mytest.cn</span><br><span class="line">    ;<span class="variable">$TTL</span> 600</span><br><span class="line">    <span class="variable">$ORIGIN</span> mytest.cn.</span><br><span class="line">    ; SOA record</span><br><span class="line">    ; owner-name ttl class rr      name-server      email-addr  (sn ref ret ex min)</span><br><span class="line">    @                 IN   SOA     ns1.mytest.cn.   root.mytest.cn. (</span><br><span class="line">                                                                    0	; serial</span><br><span class="line">                                                                    1D	; refresh</span><br><span class="line">                                                                    1H	; retry</span><br><span class="line">                                                                    1W	; expire</span><br><span class="line">                                                                    3H )	; minimum</span><br><span class="line"></span><br><span class="line"><span class="comment"># M：分钟；H：小时；D：天；W：周</span></span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><p>owner-name：当前域的名称，通常用 @ 来表示，优先继承$ORIGIN</p>
@@ -359,11 +347,7 @@
 </li>
 </ul>
 <h4 id="NS"><a href="#NS" class="headerlink" title="NS"></a>NS</h4><p>Name Server，专用于标明当前区域的 DNS 服务器，范例：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name [TTL] IN rr_type value</span>
-<span class="token comment"># name: 当前区域的名字</span>
-<span class="token comment"># value: 当前区域的某DNS服务器的名字，例如ns.magedu.org</span>
-magedu.org.   IN  NS  ns1.magedu.org.
-magedu.org.   IN  NS  ns2.magedu.org.</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name [TTL] IN rr_type value</span></span><br><span class="line"><span class="comment"># name: 当前区域的名字</span></span><br><span class="line"><span class="comment"># value: 当前区域的某DNS服务器的名字，例如ns.magedu.org</span></span><br><span class="line">magedu.org.   IN  NS  ns1.magedu.org.</span><br><span class="line">magedu.org.   IN  NS  ns2.magedu.org.</span><br></pre></td></tr></table></figure>
 
 <p>注意：</p>
 <ol>
@@ -372,13 +356,7 @@ magedu.org.   IN  NS  ns2.magedu.org.</code></pre>
 <li>一个区域可以有多个 NS 记录</li>
 </ol>
 <h4 id="MX"><a href="#MX" class="headerlink" title="MX"></a>MX</h4><p>Mail eXchanger，邮件交换器，范例：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name [TTL] IN rr_type value</span>
-<span class="token comment"># name: 当前区域的名字</span>
-<span class="token comment"># value: 当前区域的某邮件服务器(smtp服务器)的主机名</span>
-magedu.org.   IN  MX  10  mx1.magedu.org.
-              IN  MX  20  mx2.magedu.org.
-mx1               A 10.0.0.100
-mx2               A 10.0.0.200</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name [TTL] IN rr_type value</span></span><br><span class="line"><span class="comment"># name: 当前区域的名字</span></span><br><span class="line"><span class="comment"># value: 当前区域的某邮件服务器(smtp服务器)的主机名</span></span><br><span class="line">magedu.org.   IN  MX  10  mx1.magedu.org.</span><br><span class="line">              IN  MX  20  mx2.magedu.org.</span><br><span class="line">mx1               A 10.0.0.100</span><br><span class="line">mx2               A 10.0.0.200</span><br></pre></td></tr></table></figure>
 
 <p>注意：</p>
 <ol>
@@ -386,43 +364,24 @@ mx2               A 10.0.0.200</code></pre>
 <li>对 MX 记录而言，任何一个 MX 记录后面的服务器名字，都应该在后续有一个 A 记录</li>
 </ol>
 <h4 id="A"><a href="#A" class="headerlink" title="A"></a>A</h4><p>internet Address，作用：FQDN –&gt; IP，范例：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: 某主机的FQDN，例如：www.magedu.org.</span>
-<span class="token comment"># value: 主机名对应主机的IP地址</span>
-<span class="token comment"># 避免用户写错名称时给错误答案，可通过泛域名解析进行解析至某特定地址</span>
-www.magedu.org.         IN  A   1.1.1.1
-www.magedu.org.         IN  A   2.2.2.2
-mx1.magedu.org.         IN  A   3.3.3.3
-mx2.magedu.org.         IN  A   4.4.4.4
-$GENERATE 1-254 HOST$   IN  A   1.2.3.$
-*.magedu.org.           IN  A   5.5.5.5
-magedu.org.             IN  A   6.6.6.6</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name: 某主机的FQDN，例如：www.magedu.org.</span></span><br><span class="line"><span class="comment"># value: 主机名对应主机的IP地址</span></span><br><span class="line"><span class="comment"># 避免用户写错名称时给错误答案，可通过泛域名解析进行解析至某特定地址</span></span><br><span class="line">www.magedu.org.         IN  A   1.1.1.1</span><br><span class="line">www.magedu.org.         IN  A   2.2.2.2</span><br><span class="line">mx1.magedu.org.         IN  A   3.3.3.3</span><br><span class="line">mx2.magedu.org.         IN  A   4.4.4.4</span><br><span class="line">$GENERATE 1-254 HOST$   IN  A   1.2.3.$</span><br><span class="line">*.magedu.org.           IN  A   5.5.5.5</span><br><span class="line">magedu.org.             IN  A   6.6.6.6</span><br></pre></td></tr></table></figure>
 
 <h4 id="AAAA"><a href="#AAAA" class="headerlink" title="AAAA"></a>AAAA</h4><p>FQDN –&gt; IPv6</p>
-<pre class="language-none"><code class="language-none">name: FQDN
-value: IPv6</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">name: FQDN</span><br><span class="line">value: IPv6</span><br></pre></td></tr></table></figure>
 
 <h4 id="PTR"><a href="#PTR" class="headerlink" title="PTR"></a>PTR</h4><p>PoinTeR，IP –&gt; FQDN，范例：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: IP，有特定格式，把IP地址反过来写，1.2.3.4，要写作4.3.2.1；而有特定后缀：in-addr.arpa.，所以完整写法为：4.3.2.1.in-addr.arpa.</span>
-<span class="token comment"># value: FQDN</span>
-4.3.2.1.in-addr.arpa. 	IN 	PTR 	www.magedu.org.
-<span class="token comment"># 网络地址及后缀可省略；主机地址依然需要反着写，如1.2.3为网络地址，可简写成：</span>
-4 						IN 	PTR 	www.magedu.org.</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name: IP，有特定格式，把IP地址反过来写，1.2.3.4，要写作4.3.2.1；而有特定后缀：in-addr.arpa.，所以完整写法为：4.3.2.1.in-addr.arpa.</span></span><br><span class="line"><span class="comment"># value: FQDN</span></span><br><span class="line">4.3.2.1.in-addr.arpa. 	IN 	PTR 	www.magedu.org.</span><br><span class="line"><span class="comment"># 网络地址及后缀可省略；主机地址依然需要反着写，如1.2.3为网络地址，可简写成：</span></span><br><span class="line">4 						IN 	PTR 	www.magedu.org.</span><br></pre></td></tr></table></figure>
 
 <h4 id="CNAME"><a href="#CNAME" class="headerlink" title="CNAME"></a>CNAME</h4><p>Canonical Name，别名记录，范例：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># name: 别名的FQDN</span>
-<span class="token comment"># value: 真正名字的FQDN</span>
-www.magedu.org. IN CNAME websrv.magedu.org.</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># name: 别名的FQDN</span></span><br><span class="line"><span class="comment"># value: 真正名字的FQDN</span></span><br><span class="line">www.magedu.org. IN CNAME websrv.magedu.org.</span><br></pre></td></tr></table></figure>
 
 <h4 id="TXT"><a href="#TXT" class="headerlink" title="TXT"></a>TXT</h4><p>对域名进行标识和说明的一种方式，一般做验证记录时会使用此项，如：SPF（反垃圾邮件）记录，https 验证等。范例：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini">_dnsauth TXT 2012011200000051qgs69bwoh4h6nht4n1h0lr038x</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_dnsauth TXT 2012011200000051qgs69bwoh4h6nht4n1h0lr038x</span><br></pre></td></tr></table></figure>
 
 <h3 id="子域授权"><a href="#子域授权" class="headerlink" title="子域授权"></a>子域授权</h3><p>每个域的名称服务器，都是通过其上级名称服务器在解析进行授权。</p>
 <p>glue record：粘合记录，父域授权子域的记录。</p>
 <p>范例：</p>
-<pre class="language-ini" data-language="ini"><code class="language-ini">.com. IN NS ns1.com.
-.com. IN NS ns2.com.
-ns1.com. IN A 2.2.2.1
-ns2.com. IN A 2.2.2.</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.com. IN NS ns1.com.</span><br><span class="line">.com. IN NS ns2.com.</span><br><span class="line">ns1.com. IN A 2.2.2.1</span><br><span class="line">ns2.com. IN A 2.2.2.</span><br></pre></td></tr></table></figure>
 
 <h3 id="互联网域名"><a href="#互联网域名" class="headerlink" title="互联网域名"></a>互联网域名</h3><p>注册，备案，解析。。。</p>
 <h2 id="DNS-软件-bind"><a href="#DNS-软件-bind" class="headerlink" title="DNS 软件 bind"></a>DNS 软件 bind</h2><p>DNS 服务器软件：bind、powerdns、dnsmasq、unbound、coredns</p>
@@ -432,7 +391,7 @@ ns2.com. IN A 2.2.2.</code></pre>
 <li>bind-utils：客户端</li>
 <li>bind-chroot：安全包，默认将 dns 相关文件放至&#x2F;var&#x2F;named&#x2F;chroot</li>
 </ul>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#dnf -y install bind bind-utils</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]<span class="comment">#dnf -y install bind bind-utils</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="bind-相关文件"><a href="#bind-相关文件" class="headerlink" title="bind 相关文件"></a>bind 相关文件</h3><ul>
 <li>bind 主程序：&#x2F;usr&#x2F;sbin&#x2F;named。bind 的主程序是 named，不同名，有点小奇怪</li>
@@ -452,7 +411,7 @@ ns2.com. IN A 2.2.2.</code></pre>
 <li><p>日志子系统配置：logging {}</p>
 </li>
 <li><p>区域配置：本机能够为哪些 zone 进行解析，就要被定义哪些 zone</p>
-<pre class="language-none"><code class="language-none">zone “ZONE_NAME” IN &#123;&#125;</code></pre></li>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zone “ZONE_NAME” IN &#123;&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <p>注意：</p>
 <ul>
@@ -461,15 +420,7 @@ ns2.com. IN A 2.2.2.</code></pre>
 <li>dnssec：建议关闭 dnssc，设为 no</li>
 </ul>
 <h2 id="实现-DNS-服务器"><a href="#实现-DNS-服务器" class="headerlink" title="实现 DNS 服务器"></a>实现 DNS 服务器</h2><h3 id="主-DNS-服务器配置"><a href="#主-DNS-服务器配置" class="headerlink" title="主 DNS 服务器配置"></a>主 DNS 服务器配置</h3><h4 id="1-定义区域"><a href="#1-定义区域" class="headerlink" title="1. 定义区域"></a>1. 定义区域</h4><p>主 DNS 服务器配置文件：&#x2F;etc&#x2F;named.conf，示例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#注释掉下面两行</span>
-// listen-on port <span class="token number">53</span> <span class="token punctuation">&#123;</span> <span class="token number">127.0</span>.0.1<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-// allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-
-<span class="token comment"># 添加区域</span>
-zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
-	<span class="token builtin class-name">type</span> <span class="token punctuation">&#123;</span>master<span class="token operator">|</span> slave <span class="token operator">|</span> hint <span class="token operator">|</span> forward<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-	<span class="token function">file</span> <span class="token string">"ZONE_NAME.zone"</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#注释掉下面两行</span></span><br><span class="line">// listen-on port 53 &#123; 127.0.0.1; &#125;;</span><br><span class="line">// allow-query &#123; localhost; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加区域</span></span><br><span class="line">zone <span class="string">&quot;ZONE_NAME&quot;</span> IN &#123;</span><br><span class="line">	<span class="built_in">type</span> &#123;master| slave | hint | forward&#125;;</span><br><span class="line">	file <span class="string">&quot;ZONE_NAME.zone&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>listen-on port：监听的地址和端口。注释掉和将<code>127.0.0.1;</code>修改为<code>localhost;</code>效果是一样的，设置<code>127.0.0.1</code>则只会监听地址 127.0.0.1，而注释掉或者设置为 localhost 则监听所有本机地址</li>
@@ -477,31 +428,13 @@ zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctua
 </ul>
 <h4 id="2-定义区域解析库文件"><a href="#2-定义区域解析库文件" class="headerlink" title="2. 定义区域解析库文件"></a>2. 定义区域解析库文件</h4><p>默认位置：&#x2F;var&#x2F;named&#x2F;目录下；</p>
 <p>内容包括两部分：宏定义 和 资源记录，范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$TTL</span> <span class="token number">86400</span>
-<span class="token variable">$ORIGIN</span> magedu.org.
-@ 		IN 	SOA 	ns1.magedu.org. 	admin.magedu.org <span class="token punctuation">(</span>
-														<span class="token number">2015042201</span>
-														1H
-														5M
-														7D
-														1D <span class="token punctuation">)</span>
-		IN 	NS	 	ns1
-		IN 	NS	 	ns2
-		IN 	MX	 	<span class="token number">10</span> 					mx1
-		IN 	MX	 	<span class="token number">20</span> 					mx2
-ns1 	IN 	A 		<span class="token number">172.16</span>.100.11
-ns2 	IN 	A 		<span class="token number">172.16</span>.100.12
-mx1 	IN 	A 		<span class="token number">172.16</span>.100.13
-mx2 	IN 	A 		<span class="token number">172.16</span>.100.14
-websrv 	IN 	A 		<span class="token number">172.16</span>.100.11
-websrv 	IN 	A 		<span class="token number">172.16</span>.100.12
-www 	IN 	CNAME 	websrv</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$TTL</span> 86400</span><br><span class="line"><span class="variable">$ORIGIN</span> magedu.org.</span><br><span class="line">@ 		IN 	SOA 	ns1.magedu.org. 	admin.magedu.org (</span><br><span class="line">														2015042201</span><br><span class="line">														1H</span><br><span class="line">														5M</span><br><span class="line">														7D</span><br><span class="line">														1D )</span><br><span class="line">		IN 	NS	 	ns1</span><br><span class="line">		IN 	NS	 	ns2</span><br><span class="line">		IN 	MX	 	10 					mx1</span><br><span class="line">		IN 	MX	 	20 					mx2</span><br><span class="line">ns1 	IN 	A 		172.16.100.11</span><br><span class="line">ns2 	IN 	A 		172.16.100.12</span><br><span class="line">mx1 	IN 	A 		172.16.100.13</span><br><span class="line">mx2 	IN 	A 		172.16.100.14</span><br><span class="line">websrv 	IN 	A 		172.16.100.11</span><br><span class="line">websrv 	IN 	A 		172.16.100.12</span><br><span class="line">www 	IN 	CNAME 	websrv</span><br></pre></td></tr></table></figure>
 
-<h4 id="3-主配置文件语法检查"><a href="#3-主配置文件语法检查" class="headerlink" title="3. 主配置文件语法检查"></a>3. 主配置文件语法检查</h4><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$named</span>-checkconf</code></pre>
+<h4 id="3-主配置文件语法检查"><a href="#3-主配置文件语法检查" class="headerlink" title="3. 主配置文件语法检查"></a>3. 主配置文件语法检查</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]<span class="variable">$named</span>-checkconf</span><br></pre></td></tr></table></figure>
 
-<h4 id="4-主配置文件语法检查"><a href="#4-主配置文件语法检查" class="headerlink" title="4. 主配置文件语法检查"></a>4. 主配置文件语法检查</h4><pre class="language-bash" data-language="bash"><code class="language-bash">named-checkzone <span class="token punctuation">[</span>options<span class="token punctuation">]</span> zonename filename</code></pre>
+<h4 id="4-主配置文件语法检查"><a href="#4-主配置文件语法检查" class="headerlink" title="4. 主配置文件语法检查"></a>4. 主配置文件语法检查</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">named-checkzone [options] zonename filename</span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$named</span>-checkzone <span class="token string">"magedu.org"</span> /var/named/magedu.org.zone</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]<span class="variable">$named</span>-checkzone <span class="string">&quot;magedu.org&quot;</span> /var/named/magedu.org.zone</span><br></pre></td></tr></table></figure>
 
 <h4 id="5-配置生效"><a href="#5-配置生效" class="headerlink" title="5. 配置生效"></a>5. 配置生效</h4><p>三种方式：</p>
 <ul>
@@ -509,10 +442,10 @@ www 	IN 	CNAME 	websrv</code></pre>
 <li><code>systemctl reload named</code></li>
 <li><code>service named reload</code></li>
 </ul>
-<h4 id="测试和管理工具"><a href="#测试和管理工具" class="headerlink" title="测试和管理工具"></a>测试和管理工具</h4><h5 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h5><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> bind-utils</code></pre>
+<h4 id="测试和管理工具"><a href="#测试和管理工具" class="headerlink" title="测试和管理工具"></a>测试和管理工具</h4><h5 id="dig"><a href="#dig" class="headerlink" title="dig"></a>dig</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install bind-utils</span><br></pre></td></tr></table></figure>
 
 <p>dig 只用于测试 dns 系统，不会查询 hosts 文件进行解析</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">dig</span> <span class="token punctuation">[</span>-t type<span class="token punctuation">]</span> name <span class="token punctuation">[</span>@SERVER<span class="token punctuation">]</span> <span class="token punctuation">[</span>query options<span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig [-t <span class="built_in">type</span>] name [@SERVER] [query options]</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><p>-t：要查询的资源记录类型。默认 A，除了 AAAA、NS 这一类，还可以是 axfr（全区域传输） 和 ixfr（增量区域传输）。</p>
@@ -521,28 +454,21 @@ www 	IN 	CNAME 	websrv</code></pre>
 <p>+[no]trace：跟踪解析过程 : <code>dig +trace magedu.org</code> +[no]recurse：进行递归解析</p>
 </li>
 </ul>
-<h5 id="host"><a href="#host" class="headerlink" title="host"></a>host</h5><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">host</span> <span class="token punctuation">[</span>-t type<span class="token punctuation">]</span> name <span class="token punctuation">[</span>SERVER<span class="token punctuation">]</span></code></pre>
+<h5 id="host"><a href="#host" class="headerlink" title="host"></a>host</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">host [-t <span class="built_in">type</span>] name [SERVER]</span><br></pre></td></tr></table></figure>
 
 <p>范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">host</span> <span class="token parameter variable">-t</span> NS magedu.org <span class="token number">172.16</span>.0.1
-<span class="token function">host</span> <span class="token parameter variable">-t</span> soa magedu.org
-<span class="token function">host</span> <span class="token parameter variable">-t</span> mx magedu.org
-<span class="token function">host</span> <span class="token parameter variable">-t</span> axfr magedu.org
-<span class="token function">host</span> <span class="token number">1.2</span>.3.4</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">host -t NS magedu.org 172.16.0.1</span><br><span class="line">host -t soa magedu.org</span><br><span class="line">host -t mx magedu.org</span><br><span class="line">host -t axfr magedu.org</span><br><span class="line">host 1.2.3.4</span><br></pre></td></tr></table></figure>
 
-<h5 id="nslookup"><a href="#nslookup" class="headerlink" title="nslookup"></a>nslookup</h5><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> bind-utils</code></pre>
+<h5 id="nslookup"><a href="#nslookup" class="headerlink" title="nslookup"></a>nslookup</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install bind-utils</span><br></pre></td></tr></table></figure>
 
 <p>nslookup 可以支持交互和非交互式两种方式执行</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">nslookup</span> <span class="token punctuation">[</span>-option<span class="token punctuation">]</span> <span class="token punctuation">[</span>name <span class="token operator">|</span> -<span class="token punctuation">]</span> <span class="token punctuation">[</span>server<span class="token punctuation">]</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nslookup [-option] [name | -] [server]</span><br></pre></td></tr></table></figure>
 
 <p>交互模式：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">nslookup<span class="token operator">></span>
-	server IP: 指明使用哪个DNS server进行查询
-	<span class="token builtin class-name">set</span> <span class="token assign-left variable">q</span><span class="token operator">=</span>RR_TYPE: 指明查询的资源记录类型
-	NAME: 要查询的名称</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">nslookup&gt;</span><br><span class="line">	server IP: 指明使用哪个DNS server进行查询</span><br><span class="line">	<span class="built_in">set</span> q=RR_TYPE: 指明查询的资源记录类型</span><br><span class="line">	NAME: 要查询的名称</span><br></pre></td></tr></table></figure>
 
 <h5 id="rndc"><a href="#rndc" class="headerlink" title="rndc"></a>rndc</h5><p>利用 rndc 工具可以实现管理 DNS 功能，rndc 监听端口: 953&#x2F;tcp</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">rndc COMMAND</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rndc COMMAND</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>status: 查看状态</li>
@@ -559,7 +485,7 @@ www 	IN 	CNAME 	websrv</code></pre>
 </ul>
 <h4 id="实战案例：实现-DNS-正向服务器"><a href="#实战案例：实现-DNS-正向服务器" class="headerlink" title="实战案例：实现 DNS 正向服务器"></a><a href="%E5%AE%9E%E9%AA%8C1%EF%BC%9ADNS%E6%AD%A3%E5%90%91%E6%9C%8D%E5%8A%A1%E5%99%A8.md">实战案例：实现 DNS 正向服务器</a></h4><h4 id="允许动态更新"><a href="#允许动态更新" class="headerlink" title="允许动态更新"></a>允许动态更新</h4><p>动态更新：可以通过远程更新区域数据库的资源记录，例如添加删除解析记录</p>
 <p>实现动态更新，需要在指定的 zone 语句块中添加以下指令：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">Allow-update <span class="token punctuation">&#123;</span>any<span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Allow-update &#123;any;&#125;;</span><br></pre></td></tr></table></figure>
 
 <h2 id="实现反向解析区域"><a href="#实现反向解析区域" class="headerlink" title="实现反向解析区域"></a>实现反向解析区域</h2><h2 id="实现从服务器"><a href="#实现从服务器" class="headerlink" title="实现从服务器"></a>实现从服务器</h2><p>只有一台主 DNS 服务器，存在单点失败的问题，可以建立主 DNS 服务器的备份服务器，即从服务器来实现 DNS 服务的容错机制。从服务器可以自动和主服务器进行单向的数据同步，从而和主 DNS 服务器一样，也可以对外提供查询服务，但从服务器不提供数据更新服务。</p>
 <h3 id="DNS-从服务器"><a href="#DNS-从服务器" class="headerlink" title="DNS 从服务器"></a>DNS 从服务器</h3><ol>
@@ -571,46 +497,20 @@ www 	IN 	CNAME 	websrv</code></pre>
 <li>bind 程序的版本应该保持一致；否则，应该从高，主低</li>
 </ol>
 <h3 id="定义从区域"><a href="#定义从区域" class="headerlink" title="定义从区域"></a>定义从区域</h3><p>格式：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
-    <span class="token builtin class-name">type</span> slave<span class="token punctuation">;</span>
-    masters <span class="token punctuation">&#123;</span> MASTER_IP<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-    <span class="token function">file</span> <span class="token string">"slaves/ZONE_NAME.zone"</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">&quot;ZONE_NAME&quot;</span> IN &#123;</span><br><span class="line">    <span class="built_in">type</span> slave;</span><br><span class="line">    masters &#123; MASTER_IP; &#125;;</span><br><span class="line">    file <span class="string">&quot;slaves/ZONE_NAME.zone&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <h3 id="实战案例：实现-DNS-从服务器"><a href="#实战案例：实现-DNS-从服务器" class="headerlink" title="实战案例：实现 DNS 从服务器"></a><a href="%E5%AE%9E%E9%AA%8C2%EF%BC%9ADNS%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8.md">实战案例：实现 DNS 从服务器</a></h3><h2 id="实现子域"><a href="#实现子域" class="headerlink" title="实现子域"></a>实现子域</h2><p>将子域委派给其他主机管理，实现分布 DNS 数据库</p>
 <p>正向解析 DNS 区域子域方法，很简单，只需要配置两条资源记录，一条 NS，一条 A，范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">shanghai.magedu.local. 	      IN  NS  ns1.shanghai.magedu.local.
-shanghai.magedu.local. 	      IN  NS  ns2.shanghai.magedu.local.
-zhengzhou.magedu.local.       IN  NS  ns1.zhengzhou.magedu.local.
-zhengzhou.magedu.local.       IN  NS  ns2.zhengzhou.magedu.local.
-ns1.shanghai.magedu.local.    IN  A   <span class="token number">1.1</span>.1.1
-ns2.shanghai.magedu.local.    IN  A   <span class="token number">1.1</span>.1.2
-ns1.zhengzhou.magedu.local.   IN  A   <span class="token number">1.1</span>.1.3
-ns2.zhengzhou.magedu.local.   IN  A   <span class="token number">1.1</span>.1.4</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">shanghai.magedu.local. 	      IN  NS  ns1.shanghai.magedu.local.</span><br><span class="line">shanghai.magedu.local. 	      IN  NS  ns2.shanghai.magedu.local.</span><br><span class="line">zhengzhou.magedu.local.       IN  NS  ns1.zhengzhou.magedu.local.</span><br><span class="line">zhengzhou.magedu.local.       IN  NS  ns2.zhengzhou.magedu.local.</span><br><span class="line">ns1.shanghai.magedu.local.    IN  A   1.1.1.1</span><br><span class="line">ns2.shanghai.magedu.local.    IN  A   1.1.1.2</span><br><span class="line">ns1.zhengzhou.magedu.local.   IN  A   1.1.1.3</span><br><span class="line">ns2.zhengzhou.magedu.local.   IN  A   1.1.1.4</span><br></pre></td></tr></table></figure>
 
 <h3 id="范例：实现-DNS-父域和子域服务"><a href="#范例：实现-DNS-父域和子域服务" class="headerlink" title="范例：实现 DNS 父域和子域服务"></a><a href="%E5%AE%9E%E9%AA%8C3%EF%BC%9ADNS%E5%AD%90%E5%9F%9F%E6%9C%8D%E5%8A%A1%E5%99%A8.md">范例：实现 DNS 父域和子域服务</a></h3><h2 id="实现-DNS-转发（缓存）服务器"><a href="#实现-DNS-转发（缓存）服务器" class="headerlink" title="实现 DNS 转发（缓存）服务器"></a>实现 DNS 转发（缓存）服务器</h2><p>利用 DNS 转发，可以将用户的 DNS 请求，转发至指定的 DNS 服务器，而非默认的根 DNS 服务器，并将指定服务器查询的返回结果进行缓存，提高效率</p>
 <p>注意：被转发的服务器需要能够为请求者做递归，否则转发请求不予执行</p>
 <p>转发方式有两种：全局转发 和 特定区域转发</p>
 <p>全局转发：对非本机所负责解析区域的请求，全转发给指定的服务器</p>
 <p>特定区域转发：仅转发对特定的区域的请求，比全局转发优先级高</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 无论全局转发还是特定区域转发，都需要关闭dnssec功能</span>
-options <span class="token punctuation">&#123;</span>
-    dnssec-enable no<span class="token punctuation">;</span>
-    dnssec-validation no<span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 无论全局转发还是特定区域转发，都需要关闭dnssec功能</span></span><br><span class="line">options &#123;</span><br><span class="line">    dnssec-enable no;</span><br><span class="line">    dnssec-validation no;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 全局转发</span>
-options <span class="token punctuation">&#123;</span>
-    forward first<span class="token operator">|</span>only<span class="token punctuation">;</span>
-    forwarders <span class="token punctuation">&#123;</span> <span class="token function">ip</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-
-<span class="token comment"># 特定区域转发</span>
-zone <span class="token string">"ZONE_NAME"</span> IN <span class="token punctuation">&#123;</span>
-<span class="token builtin class-name">type</span> forward<span class="token punctuation">;</span>
-forward first<span class="token operator">|</span>only<span class="token punctuation">;</span>
-forwarders <span class="token punctuation">&#123;</span> <span class="token function">ip</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全局转发</span></span><br><span class="line">options &#123;</span><br><span class="line">    forward first|only;</span><br><span class="line">    forwarders &#123; ip;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 特定区域转发</span></span><br><span class="line">zone <span class="string">&quot;ZONE_NAME&quot;</span> IN &#123;</span><br><span class="line"><span class="built_in">type</span> forward;</span><br><span class="line">forward first|only;</span><br><span class="line">forwarders &#123; ip;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>first：先转发至指定 DNS 服务器，如果无法解析查询请求，则本服务器再去根服务器查询</li>
@@ -620,14 +520,7 @@ forwarders <span class="token punctuation">&#123;</span> <span class="token func
 <h2 id="智能-DNS"><a href="#智能-DNS" class="headerlink" title="智能 DNS"></a>智能 DNS</h2><h3 id="智能-DNS-相关技术"><a href="#智能-DNS-相关技术" class="headerlink" title="智能 DNS 相关技术"></a>智能 DNS 相关技术</h3><h4 id="ACL"><a href="#ACL" class="headerlink" title="ACL"></a>ACL</h4><p>ACL：把一个或多个地址归并为一个集合，并通过一个统一的名称调用，简单说就是对发起 dns 解析请求的客户端的 ip 进行分类，通常会根据省市地区进行分类</p>
 <p>注意：只能先定义后使用；因此需要定义在 options 前面</p>
 <p>格式：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">acl acl_name <span class="token punctuation">&#123;</span>
-	<span class="token comment"># 可以是具体ip，也可以网段</span>
-    <span class="token function">ip</span><span class="token punctuation">;</span>
-    net/prelen<span class="token punctuation">;</span>
-    <span class="token punctuation">..</span>.
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-<span class="token punctuation">..</span>.
-options <span class="token punctuation">&#123;</span><span class="token punctuation">..</span>.<span class="token punctuation">&#125;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">acl acl_name &#123;</span><br><span class="line">	<span class="comment"># 可以是具体ip，也可以网段</span></span><br><span class="line">    ip;</span><br><span class="line">    net/prelen;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line">...</span><br><span class="line">options &#123;...&#125;</span><br></pre></td></tr></table></figure>
 
 <p>bind 内置 4 个 acl：none、any、localhost、localnet</p>
 <ul>
@@ -643,31 +536,11 @@ options <span class="token punctuation">&#123;</span><span class="token punctuat
 <li>allow-update {}: 允许更新区域数据库中的内容</li>
 </ul>
 <p>{}中填入的就是 acl，范例：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash">allow-query <span class="token punctuation">&#123;</span> localhost<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>		<span class="token comment"># 只处理来自本机的dns解析请求</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">allow-query &#123; localhost; &#125;;		<span class="comment"># 只处理来自本机的dns解析请求</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="view"><a href="#view" class="headerlink" title="view"></a>view</h4><p>视图，将 ACL 和区域数据库实现对应关系，以实现智能 DNS</p>
 <p>view 格式：</p>
-<pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 一个bind服务器可定义多个view，每个view只能匹配一个acl</span>
-<span class="token comment"># 客户端请求到达时，自上而下检查view中的acl</span>
-<span class="token comment"># 当请求者的ip能被acl匹配到，则使用所在view中的zone数据库，处理其dns解析请求</span>
-view VIEW_NAME <span class="token punctuation">&#123;</span>
-	match-clients <span class="token punctuation">&#123;</span> acl_name<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>	<span class="token comment"># match-clients 只能匹配一个acl</span>
-	zone <span class="token string">"ZONE_NAME"</span> <span class="token punctuation">&#123;</span>
-		<span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
-		<span class="token function">file</span> <span class="token string">"ZONE_FILE"</span><span class="token punctuation">;</span>
-	<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-	include <span class="token string">"/etc/named.rfc1912.zones"</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-
-<span class="token comment"># 来自上海的ip，则匹配到对应的zone数据库</span>
-view VIEW_NAME <span class="token punctuation">&#123;</span>
-	match-clients <span class="token punctuation">&#123;</span> shanghainet<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>		<span class="token comment"># shanghainet是已经定义的acl</span>
-	zone <span class="token string">"magedu.local"</span> <span class="token punctuation">&#123;</span>
-		<span class="token builtin class-name">type</span> master<span class="token punctuation">;</span>
-		<span class="token function">file</span> <span class="token string">"magedu.local.zone.sh"</span><span class="token punctuation">;</span>
-	<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-	include <span class="token string">"/etc/named.rfc1912.zones"</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一个bind服务器可定义多个view，每个view只能匹配一个acl</span></span><br><span class="line"><span class="comment"># 客户端请求到达时，自上而下检查view中的acl</span></span><br><span class="line"><span class="comment"># 当请求者的ip能被acl匹配到，则使用所在view中的zone数据库，处理其dns解析请求</span></span><br><span class="line">view VIEW_NAME &#123;</span><br><span class="line">	match-clients &#123; acl_name; &#125;;	<span class="comment"># match-clients 只能匹配一个acl</span></span><br><span class="line">	zone <span class="string">&quot;ZONE_NAME&quot;</span> &#123;</span><br><span class="line">		<span class="built_in">type</span> master;</span><br><span class="line">		file <span class="string">&quot;ZONE_FILE&quot;</span>;</span><br><span class="line">	&#125;;</span><br><span class="line">	include <span class="string">&quot;/etc/named.rfc1912.zones&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 来自上海的ip，则匹配到对应的zone数据库</span></span><br><span class="line">view VIEW_NAME &#123;</span><br><span class="line">	match-clients &#123; shanghainet; &#125;;		<span class="comment"># shanghainet是已经定义的acl</span></span><br><span class="line">	zone <span class="string">&quot;magedu.local&quot;</span> &#123;</span><br><span class="line">		<span class="built_in">type</span> master;</span><br><span class="line">		file <span class="string">&quot;magedu.local.zone.sh&quot;</span>;</span><br><span class="line">	&#125;;</span><br><span class="line">	include <span class="string">&quot;/etc/named.rfc1912.zones&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>ACL 定义在 options 之前，view 定义在 options 之后</li>
@@ -692,14 +565,11 @@ view VIEW_NAME <span class="token punctuation">&#123;</span>
 <li><p>请求结果发给用户</p>
 </li>
 </ol>
-<h2 id="DNS-排错"><a href="#DNS-排错" class="headerlink" title="DNS 排错"></a>DNS 排错</h2><pre class="language-bash" data-language="bash"><code class="language-bash">SERVFAIL:The nameserver encountered a problem <span class="token keyword">while</span> processing the query.
-<span class="token comment"># 可使用dig +trace排错，可能是网络和防火墙导致</span></code></pre>
+<h2 id="DNS-排错"><a href="#DNS-排错" class="headerlink" title="DNS 排错"></a>DNS 排错</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SERVFAIL:The nameserver encountered a problem <span class="keyword">while</span> processing the query.</span><br><span class="line"><span class="comment"># 可使用dig +trace排错，可能是网络和防火墙导致</span></span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash">NXDOMAIN：The queried name does not exist <span class="token keyword">in</span> the zone.
-<span class="token comment"># 可能是CNAME对应的A记录不存在导致</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NXDOMAIN：The queried name does not exist <span class="keyword">in</span> the zone.</span><br><span class="line"><span class="comment"># 可能是CNAME对应的A记录不存在导致</span></span><br></pre></td></tr></table></figure>
 
-<pre class="language-bash" data-language="bash"><code class="language-bash">REFUSED：The nameserver refused the client's DNS request due to policy restrictions.
-<span class="token comment"># 可能是DNS策略导致</span></code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">REFUSED：The nameserver refused the client<span class="string">&#x27;s DNS request due to policy restrictions.</span></span><br><span class="line"><span class="string"># 可能是DNS策略导致</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="实战案例"><a href="#实战案例" class="headerlink" title="实战案例"></a><a href="%E7%BB%BC%E5%90%88%E5%AE%9E%E9%AA%8C.md">实战案例</a></h2><p>综合案例：实现 inertnet 的 DNS 服务架构</p>
 
